@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         String   @default("customer") // "customer", "admin"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
+}
+
+model Product {
+  id             String           @id @default(uuid())
+  name           String
+  description    String?
+  price          Decimal
+  compareAtPrice Decimal?         // To show discount (e.g. 1200 EGP was 1500 EGP)
+  status         String           @default("active") // "active", "draft"
+  category       String
+  images         String[]         // Array of image URLs
+  variants       ProductVariant[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  orderItems     OrderItem[]
+}
+
+model ProductVariant {
+  id        String      @id @default(uuid())
+  productId String
+  product   Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size      String      // Shoe size, e.g., "37", "38", "39", "40", "41"
+  color     String      // Shoe color, e.g., "Black", "White", "Beige"
+  stock     Int         @default(0)
+  sku       String      @unique
+  orderItems OrderItem[]
+}
+
+model Order {
+  id             String      @id @default(uuid())
+  orderNumber    String      @unique // E.g., DR-1001
+  customerName   String
+  customerPhone  String
+  customerPhone2 String?     // Secondary contact
+  governorate    String      // Shipping destination (e.g. Cairo)
+  city           String
+  address        String
+  notes          String?
+  totalPrice     Decimal
+  shippingCost   Decimal
+  status         String      @default("pending") // "pending", "shipped", "delivered", "cancelled"
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  userId         String?
+  user           User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items          OrderItem[]
+}
+
+model OrderItem {
+  id          String         @id @default(uuid())
+  orderId     String
+  order       Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product        @relation(fields: [productId], references: [id])
+  variantId   String
+  variant     ProductVariant @relation(fields: [variantId], references: [id])
+  productName String
+  size        String
+  color       String
+  quantity    Int
+  price       Decimal
+}
