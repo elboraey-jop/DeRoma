@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getActiveProducts } from "@/lib/products";
 import ShopClient from "@/components/ShopClient";
 
@@ -8,7 +9,13 @@ export default async function ShopPage() {
 
   return (
     <main className="flex-1 bg-[#FFF9EB] min-h-screen">
-      <ShopClient initialProducts={products} />
+      <Suspense fallback={
+        <div className="flex items-center justify-center min-h-[50vh] text-stone-500 font-sans text-xs">
+          Loading boutique...
+        </div>
+      }>
+        <ShopClient initialProducts={products} />
+      </Suspense>
     </main>
   );
 }
