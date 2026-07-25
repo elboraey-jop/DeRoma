@@ -10,8 +10,8 @@ const prisma = new PrismaClient({
 
 const mockProducts = [
   {
-    name: 'سنيكرز أديداس كاجوال',
-    description: 'حذاء رياضي كاجوال مريح جداً ومناسب للمشاوير اليومية والعمل، بتصميم عصري وألوان محايدة سهلة التنسيق.',
+    name: 'Adidas Casual Sneakers',
+    description: 'Extremely comfortable casual sneakers perfect for daily commuting and work, with a modern design and easy-to-match neutral colors.',
     price: 1200,
     compareAtPrice: 1500,
     category: 'sneakers',
@@ -20,20 +20,20 @@ const mockProducts = [
       'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600&auto=format&fit=crop&q=80', // Beige/Brown
     ],
     variants: [
-      { size: '37', color: 'أبيض', stock: 12 },
-      { size: '38', color: 'أبيض', stock: 15 },
-      { size: '39', color: 'أبيض', stock: 8 },
-      { size: '40', color: 'أبيض', stock: 2 },
-      { size: '41', color: 'أبيض', stock: 0 }, // Out of stock
-      { size: '37', color: 'بيج', stock: 5 },
-      { size: '38', color: 'بيج', stock: 10 },
-      { size: '39', color: 'بيج', stock: 9 },
-      { size: '40', color: 'بيج', stock: 4 },
+      { size: '37', color: 'White', stock: 12 },
+      { size: '38', color: 'White', stock: 15 },
+      { size: '39', color: 'White', stock: 8 },
+      { size: '40', color: 'White', stock: 2 },
+      { size: '41', color: 'White', stock: 0 }, // Out of stock
+      { size: '37', color: 'Beige', stock: 5 },
+      { size: '38', color: 'Beige', stock: 10 },
+      { size: '39', color: 'Beige', stock: 9 },
+      { size: '40', color: 'Beige', stock: 4 },
     ]
   },
   {
-    name: 'حذاء كعب ستان كلاسيك',
-    description: 'حذاء كعب عالي بتصميم مدبب أنيق مغطى بالستان الناعم المفعم بالأنوثة، مريح للارتداء لساعات طويلة في السهرات والاحتفالات.',
+    name: 'Classic Satin Heels',
+    description: 'High heel shoes with an elegant pointed design covered in soft feminine satin, comfortable for long wear at evening events and parties.',
     price: 1800,
     compareAtPrice: 2200,
     category: 'heels',
@@ -42,19 +42,19 @@ const mockProducts = [
       'https://images.unsplash.com/photo-1596702990264-b6c89115d970?w=600&auto=format&fit=crop&q=80', // Red Velvet
     ],
     variants: [
-      { size: '37', color: 'أسود', stock: 5 },
-      { size: '38', color: 'أسود', stock: 8 },
-      { size: '39', color: 'أسود', stock: 10 },
-      { size: '40', color: 'أسود', stock: 3 },
-      { size: '37', color: 'أحمر', stock: 4 },
-      { size: '38', color: 'أحمر', stock: 6 },
-      { size: '39', color: 'أحمر', stock: 3 },
-      { size: '40', color: 'أحمر', stock: 0 }, // Out of stock
+      { size: '37', color: 'Black', stock: 5 },
+      { size: '38', color: 'Black', stock: 8 },
+      { size: '39', color: 'Black', stock: 10 },
+      { size: '40', color: 'Black', stock: 3 },
+      { size: '37', color: 'Red', stock: 4 },
+      { size: '38', color: 'Red', stock: 6 },
+      { size: '39', color: 'Red', stock: 3 },
+      { size: '40', color: 'Red', stock: 0 }, // Out of stock
     ]
   },
   {
-    name: 'صندل صيفي بنعل مرن',
-    description: 'صندل صيفي خفيف ومريح للغاية بنعل مرن ومقاوم للانزلاق، حزام خلفي قابل للتعديل لمقاس مثالي.',
+    name: 'Flexible Sole Summer Sandals',
+    description: 'Lightweight and comfortable summer sandals with a flexible slip-resistant sole, featuring an adjustable back strap for a perfect fit.',
     price: 750,
     compareAtPrice: 950,
     category: 'sandals',
@@ -63,19 +63,19 @@ const mockProducts = [
       'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=600&auto=format&fit=crop&q=80', // Beige
     ],
     variants: [
-      { size: '37', color: 'ذهبي', stock: 6 },
-      { size: '38', color: 'ذهبي', stock: 12 },
-      { size: '39', color: 'ذهبي', stock: 15 },
-      { size: '40', color: 'ذهبي', stock: 4 },
-      { size: '37', color: 'بيج', stock: 8 },
-      { size: '38', color: 'بيج', stock: 8 },
-      { size: '39', color: 'بيج', stock: 10 },
-      { size: '40', color: 'بيج', stock: 5 },
+      { size: '37', color: 'Gold', stock: 6 },
+      { size: '38', color: 'Gold', stock: 12 },
+      { size: '39', color: 'Gold', stock: 15 },
+      { size: '40', color: 'Gold', stock: 4 },
+      { size: '37', color: 'Beige', stock: 8 },
+      { size: '38', color: 'Beige', stock: 8 },
+      { size: '39', color: 'Beige', stock: 10 },
+      { size: '40', color: 'Beige', stock: 5 },
     ]
   },
   {
-    name: 'حذاء فلات جلد طبيعي',
-    description: 'حذاء فلات أنيق وراقٍ مصنوع يدوياً من الجلد الطبيعي الممتاز، يحتوي على نعل داخلي مبطن بالكامل للراحة القصوى والارتداء اليومي.',
+    name: 'Genuine Leather Flats',
+    description: 'Elegant and sophisticated flats handcrafted from premium genuine leather, featuring a fully cushioned insole for ultimate comfort and daily wear.',
     price: 950,
     compareAtPrice: null,
     category: 'flats',
@@ -84,20 +84,20 @@ const mockProducts = [
       'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=600&auto=format&fit=crop&q=80', // Beige/Brown leather
     ],
     variants: [
-      { size: '37', color: 'أسود', stock: 10 },
-      { size: '38', color: 'أسود', stock: 14 },
-      { size: '39', color: 'أسود', stock: 9 },
-      { size: '40', color: 'أسود', stock: 6 },
-      { size: '41', color: 'أسود', stock: 3 },
-      { size: '37', color: 'بيج', stock: 8 },
-      { size: '38', color: 'بيج', stock: 12 },
-      { size: '39', color: 'بيج', stock: 11 },
-      { size: '40', color: 'بيج', stock: 4 },
+      { size: '37', color: 'Black', stock: 10 },
+      { size: '38', color: 'Black', stock: 14 },
+      { size: '39', color: 'Black', stock: 9 },
+      { size: '40', color: 'Black', stock: 6 },
+      { size: '41', color: 'Black', stock: 3 },
+      { size: '37', color: 'Beige', stock: 8 },
+      { size: '38', color: 'Beige', stock: 12 },
+      { size: '39', color: 'Beige', stock: 11 },
+      { size: '40', color: 'Beige', stock: 4 },
     ]
   },
   {
-    name: 'بوت شتوي قطيفة هيلز',
-    description: 'بوت كاحل شتوي أنيق ذو كعب عريض ومريح ومتوسط الارتفاع، قماش قطيفة فاخر مقاوم للماء ومثالي لإكمال إطلالتك في الشتاء.',
+    name: 'Velvet Winter Heeled Boots',
+    description: 'Elegant winter ankle boots with a comfortable block mid-heel, crafted from premium water-resistant velvet fabric to perfect your winter look.',
     price: 2100,
     compareAtPrice: 2500,
     category: 'boots',
@@ -106,19 +106,19 @@ const mockProducts = [
       'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=600&auto=format&fit=crop&q=80', // Brown
     ],
     variants: [
-      { size: '38', color: 'أسود', stock: 8 },
-      { size: '39', color: 'أسود', stock: 10 },
-      { size: '40', color: 'أسود', stock: 5 },
-      { size: '41', color: 'أسود', stock: 2 },
-      { size: '38', color: 'بني', stock: 4 },
-      { size: '39', color: 'بني', stock: 6 },
-      { size: '40', color: 'بني', stock: 5 },
-      { size: '41', color: 'بني', stock: 1 },
+      { size: '38', color: 'Black', stock: 8 },
+      { size: '39', color: 'Black', stock: 10 },
+      { size: '40', color: 'Black', stock: 5 },
+      { size: '41', color: 'Black', stock: 2 },
+      { size: '38', color: 'Brown', stock: 4 },
+      { size: '39', color: 'Brown', stock: 6 },
+      { size: '40', color: 'Brown', stock: 5 },
+      { size: '41', color: 'Brown', stock: 1 },
     ]
   },
   {
-    name: 'سنيكرز رياضي مرن وخفيف',
-    description: 'حذاء سنيكرز للجري والأنشطة الرياضية خفيف الوزن، يوفر تهوية ممتازة وامتصاص عالي للصدمات أثناء الحركة والوقوف الطويل.',
+    name: 'Light & Flexible Sporty Sneakers',
+    description: 'Lightweight running and athletic sneakers, offering excellent breathability and high shock absorption for active movement and long standing.',
     price: 1400,
     compareAtPrice: 1700,
     category: 'sneakers',
@@ -127,15 +127,15 @@ const mockProducts = [
       'https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=600&auto=format&fit=crop&q=80', // Blue/Pink details
     ],
     variants: [
-      { size: '37', color: 'أبيض', stock: 10 },
-      { size: '38', color: 'أبيض', stock: 15 },
-      { size: '39', color: 'أبيض', stock: 8 },
-      { size: '40', color: 'أبيض', stock: 4 },
-      { size: '41', color: 'أبيض', stock: 2 },
-      { size: '37', color: 'وردي', stock: 6 },
-      { size: '38', color: 'وردي', stock: 10 },
-      { size: '39', color: 'وردي', stock: 5 },
-      { size: '40', color: 'وردي', stock: 1 },
+      { size: '37', color: 'White', stock: 10 },
+      { size: '38', color: 'White', stock: 15 },
+      { size: '39', color: 'White', stock: 8 },
+      { size: '40', color: 'White', stock: 4 },
+      { size: '41', color: 'White', stock: 2 },
+      { size: '37', color: 'Pink', stock: 6 },
+      { size: '38', color: 'Pink', stock: 10 },
+      { size: '39', color: 'Pink', stock: 5 },
+      { size: '40', color: 'Pink', stock: 1 },
     ]
   }
 ];

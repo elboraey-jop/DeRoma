@@ -266,7 +266,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                     style={{ backgroundColor: hex }}
                     title={color}
                   >
-                    {isSelected && <Check className={`h-3.5 w-3.5 ${color === "أبيض" ? "text-[#005F6B]" : "text-white"}`} />}
+                    {isSelected && <Check className={`h-3.5 w-3.5 ${color === "أبيض" || color === "White" ? "text-[#005F6B]" : "text-white"}`} />}
                   </button>
                 );
               })}
