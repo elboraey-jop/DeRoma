@@ -33,7 +33,7 @@ export default function AboutPage() {
           </div>
           <div className="relative h-64 sm:h-80 rounded-2xl overflow-hidden border border-[#942E3A]/40 shadow-md">
             <Image
-              src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&auto=format&fit=crop&q=80"
+              src="/products/deroma-new-balance-9060-pastel-pink.png"
               alt="Handcrafted sneakers design"
               fill
               className="object-cover"
