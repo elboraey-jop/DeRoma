@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ShoppingBag, Search, Heart, Menu, X, User } from "lucide-react";
+import { ShoppingBag, Search, Heart, Menu, X, User, Home, Store, Info, ShieldCheck, PackageSearch, Tags } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,6 +19,8 @@ export default function Navbar() {
   const { setCartOpen, cartCount } = useCart();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,15 +56,50 @@ export default function Navbar() {
     };
   }, []);
 
-  const navLinks: { label: string; href: string; highlight?: boolean }[] = [
-    { label: "Home", href: "/" },
-    { label: "Shop", href: "/shop" },
-    { label: "About Us", href: "/about" },
-    { label: "Our Privacy", href: "/privacy" },
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // On mobile/tablet screens only (viewport < 1024px)
+      if (window.innerWidth < 1024 && !isOpen) {
+        if (currentScrollY > lastScrollY && currentScrollY > 60) {
+          // Scrolling down: hide navbar
+          setIsVisible(false);
+        } else {
+          // Scrolling up: show navbar
+          setIsVisible(true);
+        }
+      } else {
+        // Desktop: always show navbar
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastScrollY, isOpen]);
+
+  const navLinks: { label: string; href: string; icon: typeof Home; highlight?: boolean }[] = [
+    { label: "Home", href: "/", icon: Home },
+    { label: "Shop", href: "/shop", icon: Store },
+    { label: "About Us", href: "/about", icon: Info },
+    { label: "Our Privacy", href: "/privacy", icon: ShieldCheck },
   ];
 
+  const brands = ["New Balance", "Adidas", "Nike", "ASICS"];
+
   return (
-    <div className="sticky top-0 z-50 w-full px-3 pt-3 sm:px-4 lg:px-6 pointer-events-none mb-4 sm:mb-6" dir="ltr">
+    <div 
+      className={cn(
+        "sticky top-0 z-50 w-full px-3 pt-3 sm:px-4 lg:px-6 pointer-events-none mb-4 sm:mb-6 transition-transform duration-300 ease-in-out",
+        isVisible ? "translate-y-0" : "-translate-y-[120%] lg:translate-y-0"
+      )}
+      dir="ltr"
+    >
       <div className="mx-auto flex w-full max-w-[1320px] items-center justify-between gap-2 sm:gap-3">
         
         {/* ELEMENT 1: Main Compact Floating Pill Card */}
@@ -271,21 +308,21 @@ export default function Navbar() {
               </div>
 
               {/* Search Box in drawer */}
-              <div className="px-5 pt-1.5 pb-3">
+              <div className="px-5 pt-1 pb-2">
                 <form onSubmit={(e) => {
                   e.preventDefault();
                   if (searchQuery.trim()) {
                     router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
                     setIsOpen(false);
                   }
-                }} className="relative flex items-center bg-white/10 border border-white/15 rounded-full px-3 py-1.5">
-                  <Search className="w-4 h-4 text-[#D8B46A] mr-2 shrink-0" />
+                }} className="relative flex h-8 items-center bg-white/10 border border-white/15 rounded-full px-2.5">
+                  <Search className="w-3.5 h-3.5 text-[#D8B46A] mr-1.5 shrink-0" />
                   <input
                     type="text"
                     placeholder="Search footwear..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full text-xs bg-transparent focus:outline-none text-white placeholder-stone-300 border-0 p-0"
+                    className="w-full text-[11px] bg-transparent focus:outline-none text-white placeholder-stone-300 border-0 p-0"
                   />
                   {searchQuery && (
                     <button
@@ -305,23 +342,48 @@ export default function Navbar() {
                 {navLinks.map((link) => {
                   const isActive = pathname === link.href;
                   return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className={cn(
-                        "text-xs font-semibold py-2 px-3 rounded-xl transition-all flex justify-between items-center",
-                        isActive
-                          ? "bg-[#FFF9EB] text-[#942E3A] font-bold shadow-xs"
-                          : "text-stone-200 hover:text-[#FFF9EB] hover:bg-white/10"
+                    <Fragment key={link.href}>
+                      <Link
+                        href={link.href}
+                        onClick={() => setIsOpen(false)}
+                        className={cn(
+                          "text-xs font-semibold py-2 px-3 rounded-xl transition-all flex justify-between items-center",
+                          isActive
+                            ? "bg-[#FFF9EB] text-[#942E3A] font-bold shadow-xs"
+                            : "text-stone-200 hover:text-[#FFF9EB] hover:bg-white/10"
+                        )}
+                      >
+                        <span className="flex items-center gap-2">
+                          <link.icon className={cn("h-3.5 w-3.5", isActive ? "text-[#942E3A]" : "text-[#D8B46A]")} />
+                          <span>{link.label}</span>
+                        </span>
+                        <span className={cn(
+                          "text-[10px]",
+                          isActive ? "text-[#942E3A]" : "text-stone-400"
+                        )}>&rarr;</span>
+                      </Link>
+
+                      {link.label === "Shop" && (
+                        <div className="mb-2 ml-8 border-l border-white/15 pl-3">
+                          <p className="mb-2 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-[#D8B46A]">
+                            <Tags className="h-3 w-3" />
+                            Brands
+                          </p>
+                          <div className="flex flex-col gap-0.5">
+                            {brands.map((brand) => (
+                              <Link
+                                key={brand}
+                                href={`/shop?brand=${encodeURIComponent(brand)}`}
+                                onClick={() => setIsOpen(false)}
+                                className="block px-1 py-1 text-[10px] font-semibold text-stone-300 transition-colors hover:text-[#FFF9EB]"
+                              >
+                                {brand}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
                       )}
-                    >
-                      <span>{link.label}</span>
-                      <span className={cn(
-                        "text-[10px]",
-                        isActive ? "text-[#942E3A]" : "text-stone-400"
-                      )}>&rarr;</span>
-                    </Link>
+                    </Fragment>
                   );
                 })}
 
@@ -340,7 +402,10 @@ export default function Navbar() {
                         : "text-stone-200 hover:text-[#FFF9EB] hover:bg-white/10"
                     )}
                   >
-                    <span>Track Order</span>
+                    <span className="flex items-center gap-2">
+                      <PackageSearch className="h-3.5 w-3.5 text-[#D8B46A]" />
+                      <span>Track Order</span>
+                    </span>
                     <span className="text-[10px] text-stone-400">&rarr;</span>
                   </Link>
 
@@ -357,6 +422,7 @@ export default function Navbar() {
                     <span className="text-[10px] text-stone-400">&rarr;</span>
                   </Link>
                 </div>
+
               </nav>
 
               {/* Profile / Account section at the bottom */}
