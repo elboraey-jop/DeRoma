@@ -63,14 +63,14 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FFF9EB] text-[#005F6B] font-outfit py-12 px-4 sm:px-6 lg:px-8" dir="ltr">
+    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit py-12 px-4 sm:px-6 lg:px-8" dir="ltr">
       <div className="max-w-[1000px] mx-auto space-y-10">
         
         {/* Navigation & Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <Link 
             href="/" 
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#F88379] hover:text-[#005F6B] transition-colors w-fit"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#942E3A] hover:text-[#942E3A] transition-colors w-fit"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Store</span>
@@ -78,7 +78,7 @@ export default function ProfilePage() {
 
           <button
             onClick={handleLogout}
-            className="inline-flex items-center gap-2 rounded-full border border-[#F88379]/40 hover:bg-[#F2D4D7]/40 px-4 py-2 text-xs font-bold text-[#F88379] hover:text-[#005F6B] transition-all w-fit"
+            className="inline-flex items-center gap-2 rounded-full border border-[#942E3A]/40 hover:bg-[#FFF9EB]/40 px-4 py-2 text-xs font-bold text-[#942E3A] hover:text-[#942E3A] transition-all w-fit"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Log Out</span>
@@ -87,8 +87,8 @@ export default function ProfilePage() {
 
         {/* Heading */}
         <section className="space-y-1">
-          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F88379]">My Dashboard</span>
-          <h1 className="text-3xl sm:text-4xl font-black font-playfair tracking-tight text-[#005F6B]">
+          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#942E3A]">My Dashboard</span>
+          <h1 className="text-3xl sm:text-4xl font-black font-playfair tracking-tight text-[#942E3A]">
             Welcome back, {name.split(" ")[0]}!
           </h1>
         </section>
@@ -98,16 +98,16 @@ export default function ProfilePage() {
           
           {/* Left Column: Account details */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-[#F2D4D7]/20 border border-[#F88379]/30 rounded-3xl p-6 shadow-xs space-y-5">
-              <h2 className="text-lg font-bold font-playfair border-b border-[#F88379]/20 pb-3 flex items-center gap-2">
-                <User className="w-4.5 h-4.5 text-[#F88379]" />
+            <div className="bg-[#FFF9EB]/20 border border-[#942E3A]/30 rounded-3xl p-6 shadow-xs space-y-5">
+              <h2 className="text-lg font-bold font-playfair border-b border-[#942E3A]/20 pb-3 flex items-center gap-2">
+                <User className="w-4.5 h-4.5 text-[#942E3A]" />
                 <span>Account Info</span>
               </h2>
 
               <div className="space-y-4 text-xs">
                 
                 <div className="flex items-start gap-3">
-                  <User className="w-4 h-4 text-[#F88379] shrink-0 mt-0.5" />
+                  <User className="w-4 h-4 text-[#942E3A] shrink-0 mt-0.5" />
                   <div>
                     <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">Full Name</p>
                     <p className="font-semibold text-sm mt-0.5">{name}</p>
@@ -115,7 +115,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Mail className="w-4 h-4 text-[#F88379] shrink-0 mt-0.5" />
+                  <Mail className="w-4 h-4 text-[#942E3A] shrink-0 mt-0.5" />
                   <div>
                     <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">Email Address</p>
                     <p className="font-semibold text-sm mt-0.5">{email}</p>
@@ -123,7 +123,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Phone className="w-4 h-4 text-[#F88379] shrink-0 mt-0.5" />
+                  <Phone className="w-4 h-4 text-[#942E3A] shrink-0 mt-0.5" />
                   <div>
                     <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">Contact Phone</p>
                     <p className="font-semibold text-sm mt-0.5">+20 102 345 6789</p>
@@ -131,7 +131,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-[#F88379] shrink-0 mt-0.5" />
+                  <MapPin className="w-4 h-4 text-[#942E3A] shrink-0 mt-0.5" />
                   <div>
                     <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">Default Shipping Address</p>
                     <p className="font-semibold leading-relaxed mt-0.5">12 El-Galaa St, Mansoura, Egypt</p>
@@ -144,9 +144,9 @@ export default function ProfilePage() {
 
           {/* Right Column: Order History */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#F2D4D7]/20 border border-[#F88379]/30 rounded-3xl p-6 shadow-xs space-y-5">
-              <h2 className="text-lg font-bold font-playfair border-b border-[#F88379]/20 pb-3 flex items-center gap-2">
-                <Package className="w-4.5 h-4.5 text-[#F88379]" />
+            <div className="bg-[#FFF9EB]/20 border border-[#942E3A]/30 rounded-3xl p-6 shadow-xs space-y-5">
+              <h2 className="text-lg font-bold font-playfair border-b border-[#942E3A]/20 pb-3 flex items-center gap-2">
+                <Package className="w-4.5 h-4.5 text-[#942E3A]" />
                 <span>My Orders</span>
               </h2>
 
@@ -154,14 +154,14 @@ export default function ProfilePage() {
                 {mockOrders.map((order) => (
                   <div 
                     key={order.id}
-                    className="bg-white border border-[#F88379]/20 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                    className="bg-white border border-[#942E3A]/20 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-black text-[#005F6B]">{order.product}</span>
+                        <span className="text-xs font-black text-[#942E3A]">{order.product}</span>
                         <span className="text-[10px] font-bold text-stone-500 uppercase">({order.category})</span>
                       </div>
-                      <div className="text-[11px] text-[#003E45]/80 space-x-3">
+                      <div className="text-[11px] text-[#6B1F2A]/80 space-x-3">
                         <span><strong>Size:</strong> {order.size}</span>
                         <span>•</span>
                         <span><strong>Color:</strong> {order.color}</span>
@@ -183,7 +183,7 @@ export default function ProfilePage() {
                       {order.status === "In Transit" && (
                         <Link
                           href={`/track?order=${order.id}`}
-                          className="text-[10px] font-bold text-[#F88379] hover:underline"
+                          className="text-[10px] font-bold text-[#942E3A] hover:underline"
                         >
                           Track Shipment &rarr;
                         </Link>

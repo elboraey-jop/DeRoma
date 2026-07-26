@@ -20,10 +20,22 @@ function getColorHex(colorName: string): string {
       return "#E8D9C5";
     case "أسود":
     case "Black":
-      return "#005F6B";
+      return "#111111";
     case "أحمر":
     case "Red":
-      return "#005F6B";
+      return "#942E3A";
+    case "Burgundy":
+      return "#6F1F2D";
+    case "Cream Burgundy":
+      return "#E7DDC7";
+    case "Grey":
+      return "#8E8E86";
+    case "Navy":
+      return "#1F365D";
+    case "Pastel Pink":
+      return "#F0B8B8";
+    case "Silver":
+      return "#C4C8CE";
     case "ذهبي":
     case "Gold":
       return "#D4AF37";
@@ -57,14 +69,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     setActiveCategory(cat);
   }, [searchParams]);
 
-  const categories = [
-    { id: "all", name: "All Shoes" },
-    { id: "heels", name: "Heels & Pumps" },
-    { id: "flats", name: "Flats & Mules" },
-    { id: "sandals", name: "Sandals" },
-    { id: "boots", name: "Luxury Boots" },
-    { id: "sneakers", name: "Chic Sneakers" },
-  ];
+  const brands = ["New Balance", "Adidas", "Nike", "ASICS"];
 
   const allSizes = useMemo(() => {
     const sizes = new Set<string>();
@@ -139,30 +144,25 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     selectedSizes.length > 0 || selectedColors.length > 0 || search !== "" || activeCategory !== "all";
 
   return (
-    <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] px-2 sm:px-4 lg:px-6 py-6 bg-[#FFF9EB] text-[#005F6B]" dir="ltr">
-      {/* Page Title */}
-      <div className="mb-4 text-left space-y-0.5">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-[#F88379]">FOR HER</span>
-        <h1 className="text-2xl font-extrabold text-[#005F6B] font-playfair">Women's Footwear Boutique</h1>
-        <p className="text-xs text-[#F88379]">Explore our curated collection of luxury handcrafted women's shoes.</p>
-      </div>
+    <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] px-2 sm:px-4 lg:px-6 py-6 bg-[#FFF9EB] text-[#942E3A]" dir="ltr">
+
 
       {/* Search & Sort Bar */}
       <div className="mb-6 flex flex-col sm:flex-row gap-3">
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#F88379]" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
           <input
             type="text"
             placeholder="Search for heels, flats, boots..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-full border border-[#F88379] bg-white py-3 pl-10 pr-4 text-xs text-[#005F6B] placeholder-[#F88379] outline-none focus:border-[#005F6B] transition-colors font-sans shadow-xs"
+            className="w-full rounded-full border border-[#D8B46A] bg-white py-3 pl-10 pr-4 text-xs text-[#942E3A] placeholder-[#D8B46A] outline-none focus:border-[#942E3A] transition-colors font-sans shadow-xs"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#F88379] hover:text-[#005F6B] rounded-full"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#D8B46A] hover:text-[#942E3A] rounded-full"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -174,22 +174,22 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
           {/* Mobile Filters Toggle */}
           <button
             onClick={() => setShowMobileFilters(true)}
-            className="flex sm:hidden items-center justify-center gap-x-2 rounded-full border border-[#F88379] bg-white px-5 py-3 text-xs font-bold text-[#005F6B] hover:bg-[#F2D4D7]"
+            className="flex md:hidden items-center justify-center gap-x-2 rounded-full border border-[#D8B46A] bg-white px-5 py-3 text-xs font-bold text-[#942E3A] hover:bg-[#F2E7D5]"
           >
             <SlidersHorizontal className="h-4 w-4" />
             <span>Filters</span>
             {hasActiveFilters && (
-              <span className="h-2 w-2 rounded-full bg-[#005F6B]" />
+              <span className="h-2 w-2 rounded-full bg-[#942E3A]" />
             )}
           </button>
 
           {/* Sort Dropdown */}
-          <div className="relative flex items-center rounded-full border border-[#F88379] bg-white px-4 py-2 text-xs text-[#005F6B]">
-            <ArrowUpDown className="h-4 w-4 mr-2 text-[#F88379]" />
+          <div className="relative flex items-center rounded-full border border-[#D8B46A] bg-white px-4 py-2 text-xs text-[#942E3A]">
+            <ArrowUpDown className="h-4 w-4 mr-2 text-[#D8B46A]" />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-transparent font-bold outline-none cursor-pointer text-[#005F6B] pr-4 pl-1 appearance-none text-xs"
+              className="bg-transparent font-bold outline-none cursor-pointer text-[#942E3A] pr-4 pl-1 appearance-none text-xs"
             >
               <option value="newest">Newest Arrivals</option>
               <option value="price-asc">Price: Low to High</option>
@@ -203,23 +203,26 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
       <div className="flex gap-x-8">
         {/* Desktop Sidebar Filters */}
         <aside className="hidden md:block w-64 flex-shrink-0 space-y-6">
-          {/* Categories */}
-          <div className="rounded-3xl border border-[#F88379]/40 bg-[#F2D4D7]/20 p-5 shadow-xs">
-            <h3 className="text-xs font-bold text-[#005F6B] mb-3 pb-2 border-b border-[#F88379]/30 font-playfair uppercase tracking-wider">Categories</h3>
+          {/* Brands */}
+          <div className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
+            <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">Brands</h3>
             <div className="flex flex-col gap-y-1">
-              {categories.map((cat) => {
-                const isActive = cat.id === activeCategory;
+              {brands.map((brand) => {
+                const isActive = search.toLowerCase() === brand.toLowerCase();
                 return (
                   <button
-                    key={cat.id}
-                    onClick={() => setActiveCategory(cat.id)}
+                    key={brand}
+                    onClick={() => {
+                      setSearch(brand);
+                      setActiveCategory("all");
+                    }}
                     className={`text-left text-xs py-2 px-3 rounded-xl font-bold transition-all ${
                       isActive
-                        ? "bg-[#F88379] text-[#FFF9EB] shadow-xs"
-                        : "text-[#005F6B] hover:bg-[#F2D4D7] hover:text-[#005F6B]"
+                        ? "bg-[#D8B46A] text-[#FFF9EB] shadow-xs"
+                        : "text-[#942E3A] hover:bg-[#F2E7D5] hover:text-[#942E3A]"
                     }`}
                   >
-                    {cat.name}
+                    {brand}
                   </button>
                 );
               })}
@@ -227,8 +230,8 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
           </div>
 
           {/* Sizes */}
-          <div className="rounded-3xl border border-[#F88379]/40 bg-[#F2D4D7]/20 p-5 shadow-xs">
-            <h3 className="text-xs font-bold text-[#005F6B] mb-3 pb-2 border-b border-[#F88379]/30 font-playfair uppercase tracking-wider">Women's Sizes</h3>
+          <div className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
+            <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">Women's Sizes</h3>
             <div className="grid grid-cols-4 gap-2">
               {allSizes.map((size) => {
                 const isSelected = selectedSizes.includes(size);
@@ -238,8 +241,8 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                     onClick={() => toggleSize(size)}
                     className={`rounded-xl py-2 text-xs font-bold transition-all border ${
                       isSelected
-                        ? "bg-[#F88379] border-[#F88379] text-[#FFF9EB] shadow-xs"
-                        : "bg-[#FFF9EB] border-[#F88379] text-[#005F6B] hover:bg-[#F2D4D7]"
+                        ? "bg-[#D8B46A] border-[#D8B46A] text-[#FFF9EB] shadow-xs"
+                        : "bg-[#FFF9EB] border-[#D8B46A] text-[#942E3A] hover:bg-[#F2E7D5]"
                     }`}
                   >
                     {size}
@@ -250,8 +253,8 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
           </div>
 
           {/* Colors */}
-          <div className="rounded-3xl border border-[#F88379]/40 bg-[#F2D4D7]/20 p-5 shadow-xs">
-            <h3 className="text-xs font-bold text-[#005F6B] mb-3 pb-2 border-b border-[#F88379]/30 font-playfair uppercase tracking-wider">Color Options</h3>
+          <div className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
+            <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">Color Options</h3>
             <div className="flex flex-wrap gap-2">
               {allColors.map((color) => {
                 const isSelected = selectedColors.includes(color);
@@ -261,12 +264,12 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                     key={color}
                     onClick={() => toggleColor(color)}
                     className={`h-8 w-8 rounded-full border-2 transition-all flex items-center justify-center ${
-                      isSelected ? "scale-110 border-[#F88379] ring-2 ring-[#F88379] ring-offset-2" : "border-stone-200"
+                      isSelected ? "scale-110 border-[#D8B46A] ring-2 ring-[#D8B46A] ring-offset-2" : "border-stone-200"
                     }`}
                     style={{ backgroundColor: hex }}
                     title={color}
                   >
-                    {isSelected && <Check className={`h-3.5 w-3.5 ${color === "أبيض" || color === "White" ? "text-[#005F6B]" : "text-white"}`} />}
+                    {isSelected && <Check className={`h-3.5 w-3.5 ${color === "أبيض" || color === "White" ? "text-[#942E3A]" : "text-white"}`} />}
                   </button>
                 );
               })}
@@ -276,7 +279,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="w-full text-center py-2 text-xs font-bold text-[#005F6B] hover:underline"
+              className="w-full text-center py-2 text-xs font-bold text-[#942E3A] hover:underline"
             >
               Clear All Filters
             </button>
@@ -286,19 +289,19 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
         {/* Product Cards Grid */}
         <div className="flex-1">
           {filteredProducts.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-[2rem] border border-[#F88379] p-8">
-              <Search className="h-10 w-10 text-[#F88379] mx-auto mb-3" />
-              <h3 className="text-base font-bold text-[#005F6B]">No shoes match your criteria</h3>
-              <p className="text-xs text-[#F88379] mt-1 mb-4">Try clearing some of your filters or searching for another term.</p>
+            <div className="text-center py-16 bg-white rounded-[2rem] border border-[#D8B46A] p-8">
+              <Search className="h-10 w-10 text-[#D8B46A] mx-auto mb-3" />
+              <h3 className="text-base font-bold text-[#942E3A]">No shoes match your criteria</h3>
+              <p className="text-xs text-[#D8B46A] mt-1 mb-4">Try clearing some of your filters or searching for another term.</p>
               <button
                 onClick={clearFilters}
-                className="px-6 py-2.5 rounded-full bg-[#005F6B] text-white text-xs font-bold"
+                className="px-6 py-2.5 rounded-full bg-[#942E3A] text-white text-xs font-bold"
               >
                 Clear Filters
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2 sm:gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-2 justify-items-center gap-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
               {filteredProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
@@ -306,6 +309,142 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
           )}
         </div>
       </div>
+
+      {/* Mobile Filters Drawer */}
+      <AnimatePresence>
+        {showMobileFilters && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMobileFilters(false)}
+              className="fixed inset-0 z-50 bg-black"
+            />
+
+            {/* Drawer Content */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.3 }}
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-[#FFF9EB] p-6 shadow-2xl flex flex-col text-[#942E3A]"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-[#D8B46A]/30 pb-4 mb-6">
+                <div className="flex items-center gap-x-2">
+                  <SlidersHorizontal className="h-5 w-5 text-[#942E3A]" />
+                  <h2 className="text-lg font-bold font-playfair uppercase tracking-wider">Filters</h2>
+                </div>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="p-1 rounded-full hover:bg-[#F2E7D5] transition-colors"
+                >
+                  <X className="h-6 w-6 text-[#942E3A]" />
+                </button>
+              </div>
+
+              {/* Scrollable Filters List */}
+              <div className="flex-1 overflow-y-auto space-y-6 pr-2 -mr-2 no-scrollbar">
+                {/* Brands */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">Brands</h3>
+                  <div className="flex flex-col gap-y-1">
+                    {brands.map((brand) => {
+                      const isActive = search.toLowerCase() === brand.toLowerCase();
+                      return (
+                        <button
+                          key={brand}
+                          onClick={() => {
+                            setSearch(brand);
+                            setActiveCategory("all");
+                          }}
+                          className={`text-left text-xs py-2.5 px-4 rounded-xl font-bold transition-all ${
+                            isActive
+                              ? "bg-[#D8B46A] text-[#FFF9EB] shadow-xs"
+                              : "text-[#942E3A] hover:bg-[#F2E7D5] bg-white border border-[#D8B46A]/20"
+                          }`}
+                        >
+                          {brand}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Sizes */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">Sizes</h3>
+                  <div className="grid grid-cols-4 gap-2">
+                    {allSizes.map((size) => {
+                      const isSelected = selectedSizes.includes(size);
+                      return (
+                        <button
+                          key={size}
+                          onClick={() => toggleSize(size)}
+                          className={`rounded-xl py-2.5 text-xs font-bold transition-all border ${
+                            isSelected
+                              ? "bg-[#D8B46A] border-[#D8B46A] text-[#FFF9EB] shadow-xs"
+                              : "bg-white border-[#D8B46A] text-[#942E3A] hover:bg-[#F2E7D5]"
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Colors */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">Colors</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {allColors.map((color) => {
+                      const isSelected = selectedColors.includes(color);
+                      const hex = getColorHex(color);
+                      return (
+                        <button
+                          key={color}
+                          onClick={() => toggleColor(color)}
+                          className={`h-9 w-9 rounded-full border-2 transition-all flex items-center justify-center ${
+                            isSelected ? "scale-110 border-[#D8B46A] ring-2 ring-[#D8B46A] ring-offset-2" : "border-stone-200"
+                          }`}
+                          style={{ backgroundColor: hex }}
+                          title={color}
+                        >
+                          {isSelected && <Check className={`h-4 w-4 ${color === "أبيض" || color === "White" ? "text-[#942E3A]" : "text-white"}`} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Buttons */}
+              <div className="border-t border-[#D8B46A]/30 pt-4 mt-6 flex gap-3">
+                {hasActiveFilters && (
+                  <button
+                    onClick={() => {
+                      clearFilters();
+                      setShowMobileFilters(false);
+                    }}
+                    className="flex-1 py-3 rounded-full border border-[#942E3A] text-xs font-bold text-[#942E3A] text-center hover:bg-[#F2E7D5] transition-colors"
+                  >
+                    Clear All
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="flex-1 py-3 rounded-full bg-[#942E3A] text-xs font-bold text-white text-center hover:bg-[#942E3A]/90 transition-colors"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

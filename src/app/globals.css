@@ -3,17 +3,17 @@
 @tailwind utilities;
 :root {
   /* These are defaults - they will be overridden by settings CSS vars injected in layout.tsx */
-  --bg-dark: #005F6B;
+  --bg-dark: #942E3A;
   --bg-light: #FFF9EB;
-  --surface-dark: #003E47;
+  --surface-dark: #942E3A;
   --surface-light: #ffffff;
-  --text-on-dark: #F2D4D7;
-  --text-on-light: #005F6B;
-  --text-muted-dark: #F88379;
-  --text-muted-light: #F88379;
-  --accent: var(--accent-color, #F88379);
-  --border-dark: #F88379;
-  --border-light: rgba(0, 135, 149, 0.08);
+  --text-on-dark: #FFF9EB;
+  --text-on-light: #942E3A;
+  --text-muted-dark: #D8B46A;
+  --text-muted-light: #D8B46A;
+  --accent: var(--accent-color, #D8B46A);
+  --border-dark: #D8B46A;
+  --border-light: rgba(216, 180, 106, 0.08);
   /* Removed as requested */
   /* Theme Defaults (Light by default) */
   --bg-default: var(--bg-light);
@@ -29,8 +29,8 @@
   --text-muted: var(--text-muted-default);
   --border: var(--border-default);
 
-  --primary: var(--primary-color, #005F6B);
-  --primary-hover: #004E57;
+  --primary: var(--primary-color, #942E3A);
+  --primary-hover: #802832;
   --shadow: 0 10px 30px rgba(93, 13, 24, 0.08);
   --radius: var(--border-radius, 4px);
   --radius-sm: 2px;
@@ -402,10 +402,90 @@ h6 {
   color: var(--text-on-dark);
   border-color: var(--bg-dark);
 }
-.grid {
+/*
+ * Legacy 12-column helper.
+ *
+ * Do not use Tailwind's generic `.grid` utility here: this stylesheet is
+ * loaded after Tailwind's utilities, so the old rule was overriding every
+ * responsive `grid-cols-*` class. On the product page that collapsed the
+ * gallery to a few pixels and left a large empty area on mobile.
+ */
+.legacy-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 24px
+}
+
+/* Product page: self-contained layout so legacy global styles cannot affect it. */
+.pdp-page {
+  overflow-x: clip;
+}
+
+.pdp-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  align-items: center;
+}
+
+.pdp-gallery,
+.pdp-details {
+  min-width: 0;
+  width: 100%;
+}
+
+.pdp-details {
+  text-align: center;
+  align-items: center;
+}
+
+.pdp-details > * {
+  width: 100%;
+}
+
+@media (max-width: 1023px) {
+  .pdp-details {
+    align-items: center;
+  }
+
+  .pdp-details > * {
+    max-width: 100%;
+  }
+}
+
+.pdp-main-image {
+  aspect-ratio: 1 / 1;
+  padding-top: 0 !important;
+  background: #fff;
+}
+
+.pdp-similar-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  justify-items: center;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .pdp-similar-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pdp-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+  }
+
+  .pdp-details {
+    text-align: left;
+    align-items: flex-start;
+  }
 }
 .feature-card {
   grid-column: span 4;
@@ -548,6 +628,7 @@ textarea {
   color: var(--text);
   border-radius: 10px
 }
+
 input::placeholder,
 textarea::placeholder {
   color: #6b7c90
@@ -840,7 +921,7 @@ select:disabled {
   }
 }
 @media (max-width: 768px) {
-  .grid {
+  .legacy-grid {
     grid-template-columns: repeat(6, 1fr);
   }
 
@@ -943,7 +1024,7 @@ select:disabled {
 }
 
 .flash-sales-container .section-title {
-  color: #F2D4D7 !important;
+  color: #FFF9EB !important;
   margin-bottom: 0 !important;
   line-height: 1.1;
 }
@@ -966,8 +1047,8 @@ select:disabled {
 }
 
 .flash-sales-container .view-all-link:hover {
-  color: #F2D4D7 !important;
-  border-color: #F2D4D7;
+  color: #FFF9EB !important;
+  border-color: #FFF9EB;
   transform: translateX(4px);
 }
 .collection-media {
@@ -4068,7 +4149,7 @@ select:disabled {
 .policy-section-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, var(--bg-dark), #1a5650);
+  background: linear-gradient(135deg, var(--bg-dark), #4A161D);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -4151,7 +4232,7 @@ select:disabled {
   inset-inline-start: 0;
   width: 24px;
   height: 24px;
-  background: linear-gradient(135deg, var(--bg-dark), #1a5650);
+  background: linear-gradient(135deg, var(--bg-dark), #4A161D);
   color: var(--text-on-dark);
   border-radius: 50%;
   font-size: 12px;
@@ -4173,7 +4254,7 @@ select:disabled {
 }
 
 .policy-table thead {
-  background: linear-gradient(135deg, var(--bg-dark), #1a5650);
+  background: linear-gradient(135deg, var(--bg-dark), #4A161D);
 }
 
 .policy-table th {
@@ -4213,7 +4294,7 @@ select:disabled {
 
 /* Policy Contact Box */
 .policy-contact-box {
-  background: linear-gradient(135deg, var(--bg-dark), #004E57);
+  background: linear-gradient(135deg, var(--bg-dark), #802832);
   border-radius: 16px;
   padding: 40px;
   text-align: center;

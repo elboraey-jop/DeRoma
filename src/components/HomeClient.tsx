@@ -151,19 +151,19 @@ export default function HomeClient({ products }: { products: ProductWithVariants
 
   const cardThemes = [
     {
-      bgColor: "bg-gradient-to-br from-[#003E47] via-[#004F5A] to-[#005F6B]",
-      textColor: "text-[#F2D4D7]",
-      accentBlur: "bg-[#F88379]/10"
+      bgColor: "bg-gradient-to-br from-[#942E3A] via-[#802832] to-[#942E3A]",
+      textColor: "text-[#FFF9EB]",
+      accentBlur: "bg-[#942E3A]/10"
     },
     {
-      bgColor: "bg-[#F88379]",
-      textColor: "text-[#005F6B]",
-      accentBlur: "bg-[#005F6B]/5"
+      bgColor: "bg-[#942E3A]",
+      textColor: "text-[#942E3A]",
+      accentBlur: "bg-[#942E3A]/5"
     },
     {
-      bgColor: "bg-[#F2D4D7]",
-      textColor: "text-[#005F6B]",
-      accentBlur: "bg-[#F88379]/15"
+      bgColor: "bg-[#FFF9EB]",
+      textColor: "text-[#942E3A]",
+      accentBlur: "bg-[#942E3A]/15"
     }
   ];
 
@@ -220,7 +220,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
   const repeatedProducts = Array(repeatCount).fill(filteredProducts).flat();
 
   return (
-    <div className="w-full flex flex-col space-y-8 pb-16 bg-[#FFF9EB] text-[#005F6B]" dir="ltr">
+    <div className="w-full flex flex-col space-y-8 pb-16 bg-[#FFF9EB] text-[#942E3A]" dir="ltr">
       
       {/* 1. HERO CAROUSEL - Sleek, Compact & Refined */}
       <section className="px-2 sm:px-4 lg:px-6 pt-0">
@@ -256,23 +256,23 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                       priority
                     />
                     {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#003E47]/95 via-[#003E47]/30 to-transparent z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#942E3A]/95 via-[#942E3A]/30 to-transparent z-10" />
 
                     {/* Content */}
                     <div className="relative z-20 flex flex-col space-y-2 pointer-events-auto max-w-md pb-6 text-left">
-                      <span className="text-[#F88379] tracking-[0.25em] text-[10px] sm:text-xs font-bold font-sans uppercase">
+                      <span className="text-[#D8B46A] tracking-[0.25em] text-[10px] sm:text-xs font-bold font-sans uppercase">
                         {currentCard.tag}
                       </span>
                       <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light font-playfair tracking-tight leading-tight text-white">
                         {currentCard.title}
                       </h1>
-                      <p className="text-xs sm:text-sm text-[#F2D4D7]/80 font-sans font-light max-w-sm">
+                      <p className="text-xs sm:text-sm text-[#FFF9EB]/80 font-sans font-light max-w-sm">
                         {currentCard.desc}
                       </p>
                       <div className="pt-2">
                         <Link
                           href={currentCard.href}
-                          className="group inline-flex items-center gap-2 text-xs font-semibold text-[#F88379] hover:text-white transition-colors font-sans border-b border-[#F88379]/30 pb-0.5 w-fit"
+                          className="group inline-flex items-center gap-2 text-xs font-semibold text-[#D8B46A] hover:text-white transition-colors font-sans border-b border-[#D8B46A]/40 pb-0.5 w-fit"
                         >
                           <span>Shop Retro Collection</span>
                           <ArrowRight className="h-3.5 w-3.5 translate-x-0 group-hover:translate-x-1.5 transition-transform" />
@@ -285,17 +285,17 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                 {currentIndex === 1 && (
                   <div className="w-full h-full p-5 sm:p-8 lg:p-10 grid grid-cols-1 lg:grid-cols-12 items-center gap-6 relative min-h-[420px] sm:min-h-[440px] lg:min-h-[460px] overflow-hidden text-left">
                     {/* Large outline text watermark behind everything */}
-                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[90px] sm:text-[130px] lg:text-[160px] font-black text-[#005F6B]/5 select-none uppercase tracking-widest font-sans pointer-events-none z-0">
+                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[90px] sm:text-[130px] lg:text-[160px] font-black text-[#942E3A]/5 select-none uppercase tracking-widest font-sans pointer-events-none z-0">
                       SNEAKERS
                     </div>
 
                     {/* Left Column: Floating Content Box */}
                     <div className="lg:col-span-6 z-20 flex flex-col justify-center pointer-events-auto">
-                      <div className="bg-[#005F6B] text-[#F2D4D7] p-5 sm:p-7 rounded-2xl max-w-sm shadow-xl flex flex-col space-y-3.5">
-                        <span className="text-[#F2D4D7]/60 text-[9px] font-bold uppercase tracking-widest font-sans">
+                      <div className="bg-[#942E3A] text-[#FFF9EB] p-5 sm:p-7 rounded-2xl max-w-sm shadow-xl flex flex-col space-y-3.5">
+                        <span className="text-[#FFF9EB]/60 text-[9px] font-bold uppercase tracking-widest font-sans">
                           {currentCard.tag}
                         </span>
-                        <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight uppercase font-sans text-[#F2D4D7]">
+                        <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight uppercase font-sans text-[#FFF9EB]">
                           {currentCard.title}
                         </h1>
                         <p className="text-[11px] sm:text-xs text-stone-200 font-light leading-relaxed">
@@ -303,7 +303,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                         </p>
                         <Link
                           href={currentCard.href}
-                          className="inline-flex items-center justify-center rounded-full bg-[#FFF9EB] text-[#005F6B] hover:bg-[#F2D4D7]/90 px-5 py-2 text-xs font-bold transition-all w-fit shadow-md"
+                          className="inline-flex items-center justify-center rounded-full bg-[#FFF9EB] text-[#942E3A] hover:bg-[#FFF9EB]/90 px-5 py-2 text-xs font-bold transition-all w-fit shadow-md"
                         >
                           <span>Shop Sneakers</span>
                           <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
@@ -315,10 +315,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                     <div className="lg:col-span-6 relative flex justify-center items-center pointer-events-auto z-10">
                       <div className="relative w-full max-w-[220px] sm:max-w-[280px] aspect-[4/3] flex items-center justify-center">
                         {/* Soft backing glow */}
-                        <div className="absolute w-[80%] h-[80%] rounded-full bg-[#005F6B]/10 blur-2xl z-0" />
+                        <div className="absolute w-[80%] h-[80%] rounded-full bg-[#942E3A]/10 blur-2xl z-0" />
                         
                         {/* Image wrapper */}
-                        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-md border border-[#005F6B]/5 z-10">
+                        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-md border border-[#942E3A]/5 z-10">
                           <Image
                             src={currentCard.image}
                             alt={currentCard.title}
@@ -335,7 +335,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                 {currentIndex === 2 && (
                   <div className="w-full h-full p-5 sm:p-8 lg:p-10 flex flex-col justify-center items-center text-center relative min-h-[420px] sm:min-h-[440px] lg:min-h-[460px]">
                     {/* Frame Portrait of Boots */}
-                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-[#F88379]/20 p-1.5 shadow-2xl flex items-center justify-center overflow-hidden mb-5">
+                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-[#942E3A]/20 p-1.5 shadow-2xl flex items-center justify-center overflow-hidden mb-5">
                       <div className="relative w-full h-full rounded-full overflow-hidden">
                         <Image
                           src={currentCard.image}
@@ -349,20 +349,20 @@ export default function HomeClient({ products }: { products: ProductWithVariants
 
                     {/* Typography */}
                     <div className="flex flex-col items-center space-y-2 max-w-md pointer-events-auto">
-                      <span className="text-[#F88379] text-[10px] sm:text-xs font-bold tracking-[0.25em] uppercase font-sans">
+                      <span className="text-[#D8B46A] text-[10px] sm:text-xs font-bold tracking-[0.25em] uppercase font-sans">
                         {currentCard.tag}
                       </span>
-                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif italic text-[#005F6B] tracking-tight leading-tight">
+                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif italic text-[#942E3A] tracking-tight leading-tight">
                         {currentCard.title}
                       </h1>
-                      <p className="text-xs sm:text-sm text-[#005F6B]/70 font-sans font-light max-w-sm leading-relaxed mt-1">
+                      <p className="text-xs sm:text-sm text-[#942E3A]/70 font-sans font-light max-w-sm leading-relaxed mt-1">
                         {currentCard.desc}
                       </p>
                       
                       <div className="pt-4">
                         <Link
                           href={currentCard.href}
-                          className="group inline-flex items-center gap-1.5 text-xs font-semibold text-[#005F6B] hover:text-[#005F6B]/80 transition-colors"
+                          className="group inline-flex items-center gap-1.5 text-xs font-semibold text-[#942E3A] hover:text-[#942E3A]/80 transition-colors"
                         >
                           <span>Explore Platforms</span>
                           <ArrowRight className="h-3.5 w-3.5 translate-x-0 group-hover:translate-x-1.5 transition-transform" />
@@ -385,8 +385,8 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                         }}
                         className={`h-2 rounded-full transition-all duration-500 ${
                           isActive
-                            ? `w-7 ${currentIndex !== 0 ? "bg-[#005F6B]" : "bg-white"} shadow-md`
-                            : `w-2 ${currentIndex !== 0 ? "bg-[#005F6B]/30 hover:bg-[#005F6B]/60" : "bg-white/40 hover:bg-white/70"}`
+                            ? `w-7 ${currentIndex !== 0 ? "bg-[#942E3A]" : "bg-white"} shadow-md`
+                            : `w-2 ${currentIndex !== 0 ? "bg-[#942E3A]/30 hover:bg-[#942E3A]/60" : "bg-white/40 hover:bg-white/70"}`
                         }`}
                         aria-label={`Go to card ${idx + 1}`}
                       />
@@ -406,7 +406,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       <section className="px-2 sm:px-4 lg:px-6">
         <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] space-y-3">
           <div className="flex items-center justify-center py-2">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#005F6B] font-playfair tracking-[0.2em] uppercase text-center">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#942E3A] font-playfair tracking-[0.2em] uppercase text-center">
               OUR COLLECTIONS
             </h2>
           </div>
@@ -418,10 +418,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
             <div className="flex-[1] min-w-0 shrink-0 flex flex-col">
               <Link
                 href="/shop?brand=New%20Balance"
-                className="group relative w-full h-full min-h-[115px] sm:min-h-[210px] lg:min-h-[268px] rounded-lg sm:rounded-2xl bg-transparent border border-[#005F6B]/15 hover:border-[#005F6B] hover:bg-black/[0.02] transition-all duration-300 flex flex-col items-center justify-center p-0.5 sm:p-3 lg:p-4 text-center overflow-hidden"
+                className="group relative w-full h-full min-h-[115px] sm:min-h-[210px] lg:min-h-[268px] rounded-lg sm:rounded-2xl bg-transparent border border-[#942E3A]/15 hover:border-[#942E3A] hover:bg-black/[0.02] transition-all duration-300 flex flex-col items-center justify-center p-0.5 sm:p-3 lg:p-4 text-center overflow-hidden"
               >
                 <div className="flex items-center justify-center w-full h-full p-1 transition-transform duration-300 group-hover:scale-105">
-                  <svg viewBox="0 0 24 24" className="w-14 sm:w-20 lg:w-24 h-auto max-h-[75%] fill-[#005F6B]">
+                  <svg viewBox="0 0 24 24" className="w-14 sm:w-20 lg:w-24 h-auto max-h-[75%] fill-[#942E3A]">
                     <path d="M12.169 10.306l1.111-1.937 3.774-.242.132-.236-3.488-.242.82-1.414h6.47c1.99 0 3.46.715 2.887 2.8-.17.638-.979 2.233-3.356 2.899.507.06 1.76.616 1.54 2.057-.384 2.558-3.69 3.774-5.533 3.774l-7.641.006-.38-1.48 4.005-.28.137-.237-4.346-.264-.467-1.755 6.178-.363.137-.231-11.096-.693.534-.925 11.948-.775.138-.231-3.504-.231m5 .385l1.1-.006c.738-.005 1.502-.34 1.783-1.018.259-.632-.088-1.171-.55-1.166h-1.067l-1.266 2.19zm-1.27 2.195l-1.326 2.305h1.265c.589 0 1.64-.292 1.964-1.128.302-.781-.253-1.177-.638-1.177h-1.266zM6.26 16.445l-.77 1.315L0 17.77l.534-.923 5.726-.402zm.385-10.216l4.417.006.336 1.248-5.276-.33.523-.924zm5 2.245l.484 1.832-7.542-.495.528-.92 6.53-.417zm-3.84 5.281l-.957 1.661-5.32-.302.534-.924 5.743-.435z" />
                   </svg>
                 </div>
@@ -436,10 +436,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                 {/* Wide Box: Asics */}
                 <Link
                   href="/shop?brand=Asics"
-                  className="group relative flex-[2] h-full rounded-lg sm:rounded-2xl bg-transparent border border-[#005F6B]/15 hover:border-[#005F6B] hover:bg-black/[0.02] transition-all duration-300 flex items-center justify-center p-0.5 sm:p-3 lg:p-4 text-center overflow-hidden"
+                  className="group relative flex-[2] h-full rounded-lg sm:rounded-2xl bg-transparent border border-[#942E3A]/15 hover:border-[#942E3A] hover:bg-black/[0.02] transition-all duration-300 flex items-center justify-center p-0.5 sm:p-3 lg:p-4 text-center overflow-hidden"
                 >
                   <div className="flex items-center justify-center w-full h-full p-1 transition-transform duration-300 group-hover:scale-105">
-                    <svg viewBox="0 0 250 88" className="w-16 sm:w-24 lg:w-28 h-auto max-h-[75%] fill-[#005F6B]">
+                    <svg viewBox="0 0 250 88" className="w-16 sm:w-24 lg:w-28 h-auto max-h-[75%] fill-[#942E3A]">
                       <g>
                         <path fill="currentColor" d="M29.219,60.303c-4.446,0-6.583-3.418-5.467-7.372c2.304-8.195,17.109-20.339,27.198-20.339 c7.357,0,6.797,6.583,2.484,12.198l-2.384,2.639C42.499,55.82,34.572,60.303,29.219,60.303 M65.279,5.041 c-12.876,0.005-27.055,7.882-35.96,15.342l0.703,1.019c13.822-9.689,33.001-15.989,38.288-6.539 c2.792,4.985-1.947,15.053-8.621,23.01c1.596-3.514,0.542-10.261-8.764-10.261C35.455,27.612,5,48.105,5,69.078 c0,8.401,5.828,13.882,15.428,13.882c25.696,0,60.544-42.12,60.544-63.275C80.972,12.212,76.673,5.041,65.279,5.041" />
                         <path fill="currentColor" d="M98.361,60.303c-1.496,0-2.741-0.522-3.52-1.475c-0.812-0.999-1.054-2.415-0.669-3.877 c0.855-3.172,4.274-5.664,7.79-5.664h8.27l-2.955,11.016H98.361z M122.129,27.279c-2.365-2.908-6.194-4.209-8.934-4.209H98.167 l-2.551,9.514h14.173l1.358,0.143c0.014,0,1.301,0.15,2.019,1.116c0.58,0.808,0.665,2.008,0.248,3.582l-0.67,2.504h-8.93 c-7.686,0-18.401,5.514-20.79,14.42c-1.188,4.441-0.147,8.288,2.161,11.115c2.29,2.806,6.612,4.355,11.281,4.355h8.27h-0.005 h10.511l4.93-18.411l3.629-13.533C125.226,32.554,123.682,29.174,122.129,27.279" />
@@ -455,10 +455,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                 {/* Small Box: Adidas */}
                 <Link
                   href="/shop?brand=Adidas"
-                  className="group relative flex-[1] h-full rounded-lg sm:rounded-2xl bg-transparent border border-[#005F6B]/15 hover:border-[#005F6B] hover:bg-black/[0.02] transition-all duration-300 flex items-center justify-center p-0.5 sm:p-2 lg:p-3 text-center overflow-hidden"
+                  className="group relative flex-[1] h-full rounded-lg sm:rounded-2xl bg-transparent border border-[#942E3A]/15 hover:border-[#942E3A] hover:bg-black/[0.02] transition-all duration-300 flex items-center justify-center p-0.5 sm:p-2 lg:p-3 text-center overflow-hidden"
                 >
                   <div className="flex items-center justify-center w-full h-full p-1 transition-transform duration-300 group-hover:scale-105">
-                    <svg viewBox="0 0 24 24" className="w-14 sm:w-20 lg:w-24 h-auto max-h-[75%] fill-[#005F6B]">
+                    <svg viewBox="0 0 24 24" className="w-14 sm:w-20 lg:w-24 h-auto max-h-[75%] fill-[#942E3A]">
                       <path d="M23.422 19.539h-4.885l-7.394-11.458h4.885l7.394 11.458zm-7.61 0h-4.885l-5.06-7.844h4.885l5.06 7.844zm-7.61 0H3.317l-2.727-4.229h4.885l2.727 4.229z" />
                     </svg>
                   </div>
@@ -470,10 +470,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                 {/* Small Box: Nike */}
                 <Link
                   href="/shop?brand=Nike"
-                  className="group relative flex-[1] h-full rounded-lg sm:rounded-2xl bg-transparent border border-[#005F6B]/15 hover:border-[#005F6B] hover:bg-black/[0.02] transition-all duration-300 flex items-center justify-center p-0.5 sm:p-2 lg:p-3 text-center overflow-hidden"
+                  className="group relative flex-[1] h-full rounded-lg sm:rounded-2xl bg-transparent border border-[#942E3A]/15 hover:border-[#942E3A] hover:bg-black/[0.02] transition-all duration-300 flex items-center justify-center p-0.5 sm:p-2 lg:p-3 text-center overflow-hidden"
                 >
                   <div className="flex items-center justify-center w-full h-full p-1 transition-transform duration-300 group-hover:scale-105">
-                    <svg viewBox="0 0 24 24" className="w-14 sm:w-20 lg:w-24 h-auto max-h-[75%] fill-[#005F6B]">
+                    <svg viewBox="0 0 24 24" className="w-14 sm:w-20 lg:w-24 h-auto max-h-[75%] fill-[#942E3A]">
                       <path d="M24 7.8L6.442 15.276c-1.456.616-2.679.925-3.668.925-1.12 0-1.933-.392-2.437-1.177-.317-.504-.41-1.143-.28-1.918.13-.775.476-1.6 1.036-2.478.467-.71 1.232-1.643 2.297-2.8a6.122 6.122 0 00-.784 1.848c-.28 1.195-.028 2.072.756 2.632.373.261.886.392 1.54.392.522 0 1.11-.084 1.764-.252L24 7.8z" />
                     </svg>
                   </div>
@@ -482,10 +482,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                 {/* Wide Box: Dior */}
                 <Link
                   href="/shop?brand=Dior"
-                  className="group relative flex-[2] h-full rounded-lg sm:rounded-2xl bg-transparent border border-[#005F6B]/15 hover:border-[#005F6B] hover:bg-black/[0.02] transition-all duration-300 flex items-center justify-center p-0.5 sm:p-3 lg:p-4 text-center overflow-hidden"
+                  className="group relative flex-[2] h-full rounded-lg sm:rounded-2xl bg-transparent border border-[#942E3A]/15 hover:border-[#942E3A] hover:bg-black/[0.02] transition-all duration-300 flex items-center justify-center p-0.5 sm:p-3 lg:p-4 text-center overflow-hidden"
                 >
                   <div className="flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                    <span className="font-serif font-black text-xs sm:text-xl lg:text-2xl tracking-[0.15em] sm:tracking-[0.25em] text-[#005F6B] uppercase">
+                    <span className="font-serif font-black text-xs sm:text-xl lg:text-2xl tracking-[0.15em] sm:tracking-[0.25em] text-[#942E3A] uppercase">
                       DIOR
                     </span>
                   </div>
@@ -498,10 +498,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
             <div className="flex-[1] min-w-0 shrink-0 flex flex-col">
               <Link
                 href="/shop?brand=Puma"
-                className="group relative w-full h-full min-h-[115px] sm:min-h-[210px] lg:min-h-[268px] rounded-lg sm:rounded-2xl bg-transparent border border-[#005F6B]/15 hover:border-[#005F6B] hover:bg-black/[0.02] transition-all duration-300 flex flex-col items-center justify-center p-0.5 sm:p-3 lg:p-4 text-center overflow-hidden"
+                className="group relative w-full h-full min-h-[115px] sm:min-h-[210px] lg:min-h-[268px] rounded-lg sm:rounded-2xl bg-transparent border border-[#942E3A]/15 hover:border-[#942E3A] hover:bg-black/[0.02] transition-all duration-300 flex flex-col items-center justify-center p-0.5 sm:p-3 lg:p-4 text-center overflow-hidden"
               >
                 <div className="flex items-center justify-center w-full h-full p-1 transition-transform duration-300 group-hover:scale-105">
-                  <svg viewBox="0 0 24 24" className="w-14 sm:w-20 lg:w-24 h-auto max-h-[75%] fill-[#005F6B]">
+                  <svg viewBox="0 0 24 24" className="w-14 sm:w-20 lg:w-24 h-auto max-h-[75%] fill-[#942E3A]">
                     <path d="M23.845 3.008c-.417-.533-1.146-.106-1.467.08-2.284 1.346-2.621 3.716-3.417 5.077-.626 1.09-1.652 1.89-2.58 1.952-.686.049-1.43-.084-2.168-.405-1.807-.781-2.78-1.792-3.017-1.97-.487-.37-4.23-4.015-7.28-4.164 0 0-.372-.75-.465-.763-.222-.025-.45.451-.616.501-.15.053-.413-.512-.565-.487-.153.02-.302.586-.6.877-.22.213-.486.2-.637.463-.052.096-.034.265-.093.42-.127.32-.551.354-.555.697 0 .381.357.454.669.72.248.212.265.362.554.461.258.088.632-.187.964-.088.277.081.543.14.602.423.054.256 0 .658-.34.613-.112-.015-.598-.174-1.198-.11-.725.077-1.553.309-1.634 1.11-.041.447.514.97 1.055.866.371-.071.196-.506.399-.716.267-.27 1.772.944 3.172.944.593 0 1.031-.15 1.467-.605.04-.029.093-.102.155-.11a.632.632 0 01.195.088c1.131.897 1.984 2.7 6.13 2.721.582.007 1.25.279 1.796.777.48.433.764 1.125 1.037 1.825.418 1.053 1.161 2.069 2.292 3.203.06.068.99.78 1.06.833.012.01.084.167.053.255-.02.69-.123 2.67 1.365 2.753.366.02.275-.231.275-.41-.005-.341-.065-.685.113-1.04.253-.478-.526-.709-.509-1.756.019-.784-.645-.651-.984-1.25-.19-.343-.368-.532-.35-.946.073-2.38-.517-3.948-.805-4.327-.227-.294-.423-.403-.207-.54 1.24-.815 1.525-1.574 1.525-1.574.66-1.541 1.256-2.945 2.075-3.57.166-.12.589-.44.852-.56.763-.362 1.173-.578 1.388-.788.356-.337.635-1.053.294-1.48z" />
                   </svg>
                 </div>
@@ -514,9 +514,9 @@ export default function HomeClient({ products }: { products: ProductWithVariants
 
       {/* 3. CATEGORY TITLE */}
       <section className="px-2 sm:px-4 lg:px-6">
-        <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] text-center border-b border-[#F88379] pb-4">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#F88379] block">FOR HER</span>
-          <h2 className="text-lg sm:text-xl font-extrabold text-[#005F6B] font-playfair tracking-tight mt-1">
+        <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] text-center border-b border-[#D8B46A]/40 pb-4">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">FOR HER</span>
+          <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair tracking-tight mt-1">
             BOUTIQUE HIGHLIGHTS
           </h2>
         </div>
@@ -526,10 +526,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       <section className="px-2 sm:px-4 lg:px-6">
         <div className="mx-auto max-w-[94vw] lg:max-w-[1320px]">
           {filteredProducts.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-2xl border border-[#F88379] p-6">
-              <ShoppingBag className="h-8 w-8 text-[#F88379] mx-auto mb-2" />
-              <h3 className="text-sm font-bold text-[#005F6B]">No shoes found</h3>
-              <p className="text-[11px] text-[#F88379] mt-1">Explore our full boutique collection to view all women's styles.</p>
+            <div className="text-center py-12 bg-white rounded-2xl border border-[#D8B46A] p-6">
+              <ShoppingBag className="h-8 w-8 text-[#D8B46A] mx-auto mb-2" />
+              <h3 className="text-sm font-bold text-[#942E3A]">No shoes found</h3>
+              <p className="text-[11px] text-[#D8B46A] mt-1">Explore our full boutique collection to view all women's styles.</p>
             </div>
           ) : (
             <>
@@ -564,45 +564,45 @@ export default function HomeClient({ products }: { products: ProductWithVariants
 
       {/* 8. TRUST FOOTNOTE BAR */}
       <section className="px-2 sm:px-4 lg:px-6">
-        <div className="w-full mx-auto max-w-[94vw] lg:max-w-[1320px] grid !grid-cols-4 gap-x-1.5 gap-y-0 sm:gap-y-6 sm:gap-x-4 bg-white border border-[#F88379] rounded-2xl p-3 sm:p-5 shadow-xs">
+        <div className="w-full mx-auto max-w-[94vw] lg:max-w-[1320px] grid !grid-cols-4 gap-x-1.5 gap-y-0 sm:gap-y-6 sm:gap-x-4 bg-white border border-[#D8B46A]/45 rounded-2xl p-3 sm:p-5 shadow-xs">
           
           <div className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
-            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#005F6B] shrink-0 sm:mb-1">
+            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
               <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div className="flex flex-col items-center w-full">
-              <p className="text-[9px] sm:text-xs font-bold text-[#005F6B] leading-tight">Quick Fitting</p>
-              <p className="text-[7px] sm:text-[9px] text-[#F88379] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Try on sizes at your door</p>
+              <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Quick Fitting</p>
+              <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Try on sizes at your door</p>
             </div>
           </div>
 
           <div className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
-            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#005F6B] shrink-0 sm:mb-1">
+            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
               <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div className="flex flex-col items-center w-full">
-              <p className="text-[9px] sm:text-xs font-bold text-[#005F6B] leading-tight">Mirror Quality</p>
-              <p className="text-[7px] sm:text-[9px] text-[#F88379] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Nike & New Balance sports</p>
+              <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Mirror Quality</p>
+              <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Nike & New Balance sports</p>
             </div>
           </div>
 
           <div className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
-            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#005F6B] shrink-0 sm:mb-1">
+            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
               <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div className="flex flex-col items-center w-full">
-              <p className="text-[9px] sm:text-xs font-bold text-[#005F6B] leading-tight">Sole Cushioning</p>
-              <p className="text-[7px] sm:text-[9px] text-[#F88379] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Perfect for running & gym</p>
+              <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Sole Cushioning</p>
+              <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Perfect for running & gym</p>
             </div>
           </div>
 
           <div className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
-            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#005F6B] shrink-0 sm:mb-1">
+            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
               <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div className="flex flex-col items-center w-full">
-              <p className="text-[9px] sm:text-xs font-bold text-[#005F6B] leading-tight">Easy Exchanges</p>
-              <p className="text-[7px] sm:text-[9px] text-[#F88379] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Fast swap for perfect fit</p>
+              <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Easy Exchanges</p>
+              <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Fast swap for perfect fit</p>
             </div>
           </div>
 
@@ -612,9 +612,9 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       {/* 4.5 BEST SELLERS SECTION */}
       <section className="px-2 sm:px-4 lg:px-6">
         <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] space-y-6">
-          <div className="text-center border-b border-[#F88379] pb-4">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#F88379] block">BEST SELLERS</span>
-            <h2 className="text-lg sm:text-xl font-extrabold text-[#005F6B] font-playfair tracking-tight mt-1">
+          <div className="text-center border-b border-[#D8B46A]/40 pb-4">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">BEST SELLERS</span>
+            <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair tracking-tight mt-1">
               BESTSELLER HIGHLIGHTS
             </h2>
           </div>

@@ -36,7 +36,7 @@ export default function RootLayout({
     <html lang="en" dir="ltr">
       <body className={`${playfair.variable} ${outfit.variable} ${fredoka.variable} font-outfit antialiased`}>
         <CartProvider>
-          <div className="min-h-screen flex flex-col bg-[#FFF9EB] text-[#005F6B]">
+          <div className="min-h-screen flex flex-col bg-[#FFF9EB] text-[#942E3A]">
             <Navbar />
             <main className="flex-1">
               {children}

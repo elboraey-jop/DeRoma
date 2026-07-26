@@ -166,7 +166,7 @@ export async function createOrder(input: CreateOrderInput) {
 
       const emailHtml = `
         <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-          <h2 style="color: #005F6B; border-bottom: 2px solid #005F6B; padding-bottom: 10px;">طلب جديد رقم ${orderNumber} ✨</h2>
+          <h2 style="color: #942E3A; border-bottom: 2px solid #942E3A; padding-bottom: 10px;">طلب جديد رقم ${orderNumber} ✨</h2>
           
           <h3 style="color: #333;">بيانات العميل:</h3>
           <p><strong>الاسم:</strong> ${input.customerName}</p>
@@ -196,7 +196,7 @@ export async function createOrder(input: CreateOrderInput) {
           <div style="margin-top: 20px; text-align: left; padding: 15px; background-color: #f2d4d7; border-radius: 8px;">
             <p style="margin: 5px 0;"><strong>الإجمالي الفرعي:</strong> ${subtotal} ج.م</p>
             <p style="margin: 5px 0;"><strong>تكلفة الشحن (${input.governorate}):</strong> ${shippingCost} ج.م</p>
-            <h3 style="margin: 10px 0 0 0; color: #005F6B;"><strong>الإجمالي الكلي:</strong> ${totalPrice} ج.م</h3>
+            <h3 style="margin: 10px 0 0 0; color: #942E3A;"><strong>الإجمالي الكلي:</strong> ${totalPrice} ج.م</h3>
           </div>
           
           <div style="margin-top: 30px; font-size: 11px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 15px;">

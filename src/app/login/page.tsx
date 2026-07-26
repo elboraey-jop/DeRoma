@@ -48,13 +48,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFF9EB] text-[#005F6B] font-outfit flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative" dir="ltr">
+    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative" dir="ltr">
       
       {/* Back button */}
       <div className="absolute top-6 left-6 z-10">
         <Link 
           href="/" 
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#F88379] hover:text-[#005F6B] transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#942E3A] hover:text-[#942E3A] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Home</span>
@@ -62,7 +62,7 @@ export default function LoginPage() {
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2">
-        <h1 className="text-4xl font-black font-playfair tracking-tight text-[#005F6B]">
+        <h1 className="text-4xl font-black font-playfair tracking-tight text-[#942E3A]">
           DeRoma
         </h1>
         <p className="text-xs text-stone-500 uppercase tracking-widest font-bold">
@@ -77,10 +77,10 @@ export default function LoginPage() {
         transition={{ duration: 0.3 }}
         className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
       >
-        <div className="bg-[#F2D4D7]/20 border border-[#F88379]/30 rounded-3xl p-6 sm:p-10 shadow-xs space-y-6">
+        <div className="bg-[#FFF9EB]/20 border border-[#942E3A]/30 rounded-3xl p-6 sm:p-10 shadow-xs space-y-6">
           <div className="text-center space-y-1">
-            <h2 className="text-xl font-bold font-playfair text-[#005F6B]">
-              {isRegister ? "Create Account" : "Welcome Back"}
+            <h2 className="text-xl font-bold font-playfair text-[#942E3A]">
+               {isRegister ? "Create Account" : "Welcome Back"}
             </h2>
             <p className="text-xs text-stone-600 font-light">
               {isRegister ? "Sign up to start tracking orders and customizing your profile" : "Sign in to track orders and manage your profile"}
@@ -92,11 +92,11 @@ export default function LoginPage() {
             {/* Full Name Field (Only in Register mode) */}
             {isRegister && (
               <div className="space-y-1">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-[#005F6B]/80 block">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#942E3A]/80 block">
                   Full Name
                 </label>
                 <div className="relative rounded-xl shadow-xs">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#F88379]">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#942E3A]">
                     <User className="h-4 w-4" />
                   </div>
                   <input
@@ -104,7 +104,7 @@ export default function LoginPage() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Farida Ahmed"
-                    className="block w-full pl-9 pr-3 py-2.5 text-xs text-[#005F6B] bg-[#FFF9EB] border border-[#F88379]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#005F6B] focus:border-[#005F6B] transition-all"
+                    className="block w-full pl-9 pr-3 py-2.5 text-xs text-[#942E3A] bg-[#FFF9EB] border border-[#942E3A]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#942E3A] focus:border-[#942E3A] transition-all"
                     required
                   />
                 </div>
@@ -113,11 +113,11 @@ export default function LoginPage() {
 
             {/* Email Field */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-[#005F6B]/80 block">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-[#942E3A]/80 block">
                 Email Address
               </label>
               <div className="relative rounded-xl shadow-xs">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#F88379]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#942E3A]">
                   <Mail className="h-4 w-4" />
                 </div>
                 <input
@@ -125,7 +125,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="block w-full pl-9 pr-3 py-2.5 text-xs text-[#005F6B] bg-[#FFF9EB] border border-[#F88379]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#005F6B] focus:border-[#005F6B] transition-all"
+                  className="block w-full pl-9 pr-3 py-2.5 text-xs text-[#942E3A] bg-[#FFF9EB] border border-[#942E3A]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#942E3A] focus:border-[#942E3A] transition-all"
                   required
                 />
               </div>
@@ -133,11 +133,11 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-[#005F6B]/80 block">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-[#942E3A]/80 block">
                 Password
               </label>
               <div className="relative rounded-xl shadow-xs">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#F88379]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#942E3A]">
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
@@ -145,13 +145,13 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="block w-full pl-9 pr-10 py-2.5 text-xs text-[#005F6B] bg-[#FFF9EB] border border-[#F88379]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#005F6B] focus:border-[#005F6B] transition-all"
+                  className="block w-full pl-9 pr-10 py-2.5 text-xs text-[#942E3A] bg-[#FFF9EB] border border-[#942E3A]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#942E3A] focus:border-[#942E3A] transition-all"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-[#005F6B] transition-colors"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-[#942E3A] transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -170,7 +170,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center items-center py-3 px-4 rounded-full border border-transparent bg-[#F88379] hover:bg-[#E56F65] text-[#FFF9EB] text-xs font-bold shadow-md focus:outline-none transition-all active:scale-98 disabled:opacity-75 disabled:cursor-not-allowed"
+                className="w-full flex justify-center items-center py-3 px-4 rounded-full border border-transparent bg-[#942E3A] hover:bg-[#942E3A] text-[#FFF9EB] text-xs font-bold shadow-md focus:outline-none transition-all active:scale-98 disabled:opacity-75 disabled:cursor-not-allowed"
               >
                 {isLoading ? (isRegister ? "Creating account..." : "Signing in...") : (isRegister ? "Create Account" : "Sign In")}
               </button>
@@ -189,7 +189,7 @@ export default function LoginPage() {
                     setIsRegister(false);
                     setError("");
                   }}
-                  className="font-bold text-[#F88379] hover:underline"
+                  className="font-bold text-[#942E3A] hover:underline"
                 >
                   Sign In
                 </button>
@@ -203,7 +203,7 @@ export default function LoginPage() {
                     setIsRegister(true);
                     setError("");
                   }}
-                  className="font-bold text-[#F88379] hover:underline"
+                  className="font-bold text-[#942E3A] hover:underline"
                 >
                   Register Now
                 </button>

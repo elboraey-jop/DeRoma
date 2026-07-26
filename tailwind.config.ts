@@ -12,18 +12,18 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         aurora: {
-          bg: "#F2D4D7",
+          bg: "#FFF9EB",
           card: "#FFFFFF",
-          lavender: "#F88379",
-          lavenderCard: "#F88379",
-          dark: "#005F6B",
-          darkMuted: "#003E47",
-          coral: "#F88379",
-          coralHover: "#E56F65",
-          dusty: "#F88379",
-          textDark: "#005F6B",
-          textMuted: "#F88379",
-          border: "#F88379",
+          lavender: "#D8B46A",
+          lavenderCard: "#D8B46A",
+          dark: "#942E3A",
+          darkMuted: "#5C1C24",
+          coral: "#D8B46A",
+          coralHover: "#B8934A",
+          dusty: "#D8B46A",
+          textDark: "#942E3A",
+          textMuted: "#D8B46A",
+          border: "#D8B46A",
         }
       },
       fontFamily: {
@@ -37,7 +37,7 @@ const config: Config = {
       boxShadow: {
         'soft-card': '0 10px 30px rgba(35, 28, 56, 0.05)',
         'float-pill': '0 12px 32px rgba(35, 28, 56, 0.1)',
-        'coral-glow': '0 8px 24px rgba(232, 139, 126, 0.35)',
+        'coral-glow': '0 8px 24px rgba(148, 46, 58, 0.25)',
       },
       borderRadius: {
         '4xl': '2rem',
