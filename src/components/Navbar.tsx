@@ -252,10 +252,10 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="pointer-events-auto fixed inset-y-0 left-0 z-50 flex w-full max-w-[290px] flex-col bg-[#942E3A] text-[#FFF9EB] shadow-2xl lg:hidden border-r border-white/10"
+              className="pointer-events-auto fixed inset-y-0 left-0 z-50 flex w-full max-w-[290px] flex-col bg-[#942E3A] text-[#FFF9EB] shadow-2xl lg:hidden border-r border-white/10 rounded-r-[1.75rem] overflow-hidden"
             >
               {/* Header inside drawer */}
-              <div className="flex items-center justify-between px-5 pt-6 pb-4 border-b border-white/10">
+              <div className="flex items-center justify-between px-5 pt-5 pb-1">
                 <Link href="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2">
                   <span className="text-xl font-extrabold tracking-tight text-white font-playfair">
                     DeRoma
@@ -271,14 +271,14 @@ export default function Navbar() {
               </div>
 
               {/* Search Box in drawer */}
-              <div className="px-5 py-4">
+              <div className="px-5 pt-1.5 pb-3">
                 <form onSubmit={(e) => {
                   e.preventDefault();
                   if (searchQuery.trim()) {
                     router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
                     setIsOpen(false);
                   }
-                }} className="relative flex items-center bg-white/10 border border-white/15 rounded-full px-3 py-2">
+                }} className="relative flex items-center bg-white/10 border border-white/15 rounded-full px-3 py-1.5">
                   <Search className="w-4 h-4 text-[#D8B46A] mr-2 shrink-0" />
                   <input
                     type="text"
