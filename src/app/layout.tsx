@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fredoka, Playfair_Display, Outfit } from "next/font/google";
+import { Playfair_Display, Outfit } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/lib/cartStore";
@@ -16,12 +16,6 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
-const fredoka = Fredoka({
-  variable: "--font-numeric",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
 export const metadata: Metadata = {
   title: "DeRoma Store | Women's Premium Shoes",
   description: "Modern, handcrafted boutique collection of elegant women's shoes.",
@@ -34,11 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" dir="ltr">
-      <body className={`${playfair.variable} ${outfit.variable} ${fredoka.variable} font-outfit antialiased`}>
+      <body className={`${playfair.variable} ${outfit.variable} font-playfair antialiased`}>
         <CartProvider>
           <div className="min-h-screen flex flex-col bg-[#FFF9EB] text-[#942E3A]">
             <Navbar />
-            <main className="flex-1">
+            <main className="flex-1 pt-[72px] sm:pt-[80px]">
               {children}
             </main>
             <Footer />

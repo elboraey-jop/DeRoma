@@ -19,8 +19,6 @@ export default function Navbar() {
   const { setCartOpen, cartCount } = useCart();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,33 +54,6 @@ export default function Navbar() {
     };
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // On mobile/tablet screens only (viewport < 1024px)
-      if (window.innerWidth < 1024 && !isOpen) {
-        if (currentScrollY > lastScrollY && currentScrollY > 60) {
-          // Scrolling down: hide navbar
-          setIsVisible(false);
-        } else {
-          // Scrolling up: show navbar
-          setIsVisible(true);
-        }
-      } else {
-        // Desktop: always show navbar
-        setIsVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [lastScrollY, isOpen]);
-
   const navLinks: { label: string; href: string; icon: typeof Home; highlight?: boolean }[] = [
     { label: "Home", href: "/", icon: Home },
     { label: "Shop", href: "/shop", icon: Store },
@@ -93,13 +64,7 @@ export default function Navbar() {
   const brands = ["New Balance", "Adidas", "Nike", "ASICS"];
 
   return (
-    <div 
-      className={cn(
-        "sticky top-0 z-50 w-full px-3 pt-3 sm:px-4 lg:px-6 pointer-events-none mb-4 sm:mb-6 transition-transform duration-300 ease-in-out",
-        isVisible ? "translate-y-0" : "-translate-y-[120%] lg:translate-y-0"
-      )}
-      dir="ltr"
-    >
+    <div className="fixed top-0 left-0 right-0 z-50 px-3 pt-3 sm:px-4 lg:px-6 pointer-events-none" dir="ltr">
       <div className="mx-auto flex w-full max-w-[1320px] items-center justify-between gap-2 sm:gap-3">
         
         {/* ELEMENT 1: Main Compact Floating Pill Card */}
