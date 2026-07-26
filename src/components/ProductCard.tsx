@@ -140,7 +140,7 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
   return (
     <div className="group relative flex h-[330px] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_30px_rgba(148,46,58,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(148,46,58,0.13)] sm:h-[380px] sm:max-w-[230px] sm:rounded-[1.65rem]">
       {/* Top Product Image Container */}
-      <div className="relative h-[66%] sm:h-[72%] w-full shrink-0 overflow-hidden bg-[#FFF9EB]">
+      <div className="relative h-[71%] sm:h-[72%] w-full shrink-0 overflow-hidden bg-[#FFF9EB]">
         
         {/* Discount Badge */}
         {discountPercent && (
@@ -163,7 +163,7 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
       </div>
 
       {/* Card Details */}
-      <div className="relative z-10 -mt-7 flex flex-1 flex-col rounded-t-[1.15rem] bg-[#942E3A] px-2.5 pb-2.5 pt-2 text-[#FFF9EB] sm:-mt-9 sm:rounded-t-[1.35rem] sm:px-3 sm:pb-3.5 sm:pt-2.5">
+      <div className="relative z-10 -mt-7 flex flex-1 flex-col rounded-t-[1.15rem] bg-[#942E3A] px-2.5 pb-2 pt-2 text-[#FFF9EB] sm:-mt-9 sm:rounded-t-[1.35rem] sm:px-3 sm:pb-2.5 sm:pt-2.5">
         <div className="relative mb-0.5 min-h-[1.75rem]">
           <div className="absolute left-0 top-0 flex items-center gap-0.5 text-xs font-semibold text-amber-500">
             <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
@@ -190,7 +190,7 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
           )}
         </div>
 
-        <div className="mt-1 mb-1 flex min-h-5 flex-wrap items-center justify-center gap-1">
+        <div className="mt-1 mb-0.5 flex min-h-5 flex-wrap items-center justify-center gap-1">
           {sizesForColor.slice(0, 5).map((variant) => {
             const isSelected = selectedSize === variant.size;
             const isOutOfStock = variant.stock <= 0;
