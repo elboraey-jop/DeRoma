@@ -190,7 +190,7 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
           )}
         </div>
 
-        <div className="mt-1 flex min-h-5 flex-wrap items-center justify-center gap-1">
+        <div className="mt-1 mb-1.5 flex min-h-5 flex-wrap items-center justify-center gap-1">
           {sizesForColor.slice(0, 5).map((variant) => {
             const isSelected = selectedSize === variant.size;
             const isOutOfStock = variant.stock <= 0;

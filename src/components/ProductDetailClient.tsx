@@ -493,10 +493,22 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
       {/* Similar Products */}
       {similarProducts.length > 0 && (
         <section className="mx-auto w-full max-w-[1400px] px-4 lg:px-6 border-t border-[#D8B46A]/30 pt-8 sm:pt-12 mt-10 sm:mt-14">
-          <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair mb-4 sm:mb-6">You May Also Like</h2>
-          <div className="pdp-similar-grid">
+          <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair mb-4 sm:mb-6 text-center">You May Also Like</h2>
+          <div 
+            className="flex overflow-x-auto flex-nowrap gap-3 sm:gap-6 py-4 px-1 no-scrollbar justify-start md:justify-center"
+            style={{ 
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none"
+            }}
+          >
             {similarProducts.slice(0, 4).map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <div
+                key={p.id}
+                className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"
+              >
+                <ProductCard product={p} />
+              </div>
             ))}
           </div>
         </section>
