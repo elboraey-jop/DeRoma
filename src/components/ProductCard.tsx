@@ -172,7 +172,7 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
             </span>
           </div>
 
-          <Link href={`/shop/${product.id}`} className="block px-6 sm:px-9 text-center transition-colors group-hover:text-white">
+          <Link href={`/shop/${product.id}`} className="block pl-9 pr-3 sm:px-9 text-center transition-colors group-hover:text-white">
             <h3 className="text-[10px] font-extrabold leading-[1.15] tracking-tight text-[#FFF9EB] line-clamp-2 sm:text-[11px]">
               {product.name}
             </h3>
