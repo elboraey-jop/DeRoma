@@ -63,7 +63,7 @@ export default function Navbar() {
 
   return (
     <div className="sticky top-0 z-50 w-full px-3 pt-3 sm:px-4 lg:px-6 pointer-events-none mb-4 sm:mb-6" dir="ltr">
-      <div className="relative mx-auto flex w-full max-w-[1320px] items-center justify-between gap-2 sm:gap-3">
+      <div className="mx-auto flex w-full max-w-[1320px] items-center justify-between gap-2 sm:gap-3">
         
         {/* ELEMENT 1: Main Compact Floating Pill Card */}
         <header className="relative pointer-events-auto flex min-w-0 flex-1 h-12 sm:h-12 items-center justify-between rounded-[1.35rem] sm:rounded-full bg-[#942E3A]/95 text-white backdrop-blur-xl px-3 sm:px-5 shadow-xl border border-white/20 transition-all duration-300">
@@ -96,7 +96,12 @@ export default function Navbar() {
             </Link>
           </div>
 
-
+          {/* Absolutely centered Brand Logo for Mobile */}
+          <Link href="/" className="absolute left-[56%] top-1/2 -translate-x-1/2 -translate-y-1/2 lg:hidden flex min-w-0 items-center gap-1.5 group z-0">
+            <span className="text-base sm:text-lg font-extrabold tracking-tight text-white font-playfair">
+              DeRoma
+            </span>
+          </Link>
 
           {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center gap-x-0.5 bg-white/10 p-0.5 rounded-full border border-white/10 mx-2 z-10">
@@ -202,13 +207,6 @@ export default function Navbar() {
             )}
           </AnimatePresence>
         </header>
-
-        {/* Absolutely centered Brand Logo for Mobile (centered on screen width) */}
-        <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:hidden flex min-w-0 items-center gap-1.5 group z-20 pointer-events-auto">
-          <span className="text-base sm:text-lg font-extrabold tracking-tight text-white font-playfair">
-            DeRoma
-          </span>
-        </Link>
 
         {/* ELEMENT 2: Independent Wishlist Circle Button */}
         <Link
