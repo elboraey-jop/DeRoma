@@ -473,7 +473,7 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
                 onClick={() => toggle(product.id)}
                 className="h-12 w-12 rounded-full border border-[#D8B46A] bg-white flex items-center justify-center text-[#D8B46A] hover:bg-[#F2E7D5] transition-colors shrink-0 shadow-sm"
               >
-                <Heart className={`h-5 w-5 ${isWishlisted ? "fill-[#D8B46A] text-[#D8B46A]" : "text-[#D8B46A]"}`} />
+                <Heart className={`h-5 w-5 ${isWishlisted ? "fill-[#942E3A] text-[#942E3A]" : "text-[#D8B46A]"}`} />
               </button>
             </div>
 

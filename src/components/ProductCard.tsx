@@ -229,10 +229,12 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
 
             <button
               onClick={() => toggle(product.id)}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/70 bg-transparent text-white shadow-xs transition-all hover:bg-white hover:text-[#D8B46A] active:scale-95 sm:h-8 sm:w-8"
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-transparent shadow-xs transition-all hover:bg-white hover:text-[#D8B46A] active:scale-95 sm:h-8 sm:w-8 border ${
+                isWishlisted ? "border-[#D8B46A] text-[#D8B46A]" : "border-white/70 text-white"
+              }`}
               aria-label="Add to wishlist"
             >
-              <Heart className={`h-3.5 w-3.5 ${isWishlisted ? "fill-current" : ""}`} />
+              <Heart className={`h-3.5 w-3.5 ${isWishlisted ? "fill-[#D8B46A]" : ""}`} />
             </button>
 
             <button
