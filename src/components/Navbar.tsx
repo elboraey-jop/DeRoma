@@ -63,29 +63,43 @@ export default function Navbar() {
 
   return (
     <div className="sticky top-0 z-50 w-full px-3 pt-3 sm:px-4 lg:px-6 pointer-events-none mb-4 sm:mb-6" dir="ltr">
-      <div className="mx-auto flex w-full max-w-[1320px] items-center justify-between gap-2 sm:gap-3">
+      <div className="relative mx-auto flex w-full max-w-[1320px] items-center justify-between gap-2 sm:gap-3">
         
         {/* ELEMENT 1: Main Compact Floating Pill Card */}
-        <header className="pointer-events-auto flex min-w-0 flex-1 h-12 sm:h-12 items-center justify-between rounded-[1.35rem] sm:rounded-full bg-[#942E3A]/95 text-white backdrop-blur-xl px-3 sm:px-5 shadow-xl border border-white/20 transition-all duration-300">
+        <header className="relative pointer-events-auto flex min-w-0 flex-1 h-12 sm:h-12 items-center justify-between rounded-[1.35rem] sm:rounded-full bg-[#942E3A]/95 text-white backdrop-blur-xl px-3 sm:px-5 shadow-xl border border-white/20 transition-all duration-300">
           
-          {/* Mobile menu toggle */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="inline-flex items-center justify-center rounded-full p-1.5 text-stone-200 hover:bg-white/10 hover:text-white lg:hidden transition-colors mr-0.5"
-            aria-label="Toggle menu"
-          >
-            {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
+          {/* Left Side: Mobile Menu + Mobile Search on mobile; Desktop Logo on desktop */}
+          <div className="flex items-center gap-1 z-10">
+            {/* Mobile menu toggle */}
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="inline-flex items-center justify-center rounded-full p-1.5 text-stone-200 hover:bg-white/10 hover:text-white lg:hidden transition-colors"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
 
-          {/* Brand Logo */}
-          <Link href="/" className="flex min-w-0 items-center gap-1.5 group shrink">
-            <span className="truncate text-base sm:text-lg font-extrabold tracking-tight text-white font-playfair">
-              DeRoma
-            </span>
-          </Link>
+            {/* Mobile Search button */}
+            <button
+              onClick={handleSearchClick}
+              className="p-1.5 text-stone-200 hover:text-white hover:bg-white/10 rounded-full transition-colors lg:hidden"
+              aria-label="Search"
+            >
+              <Search className="h-3.5 w-3.5" />
+            </button>
+
+            {/* Brand Logo - Desktop */}
+            <Link href="/" className="hidden lg:flex min-w-0 items-center gap-1.5 group shrink">
+              <span className="truncate text-base sm:text-lg font-extrabold tracking-tight text-white font-playfair">
+                DeRoma
+              </span>
+            </Link>
+          </div>
+
+
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-x-0.5 bg-white/10 p-0.5 rounded-full border border-white/10 mx-2">
+          <nav className="hidden lg:flex items-center gap-x-0.5 bg-white/10 p-0.5 rounded-full border border-white/10 mx-2 z-10">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
@@ -105,8 +119,8 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Search Trigger */}
-          <div className="relative flex items-center shrink-0 gap-0.5 sm:gap-1.5 ml-2 border-l border-white/20 pl-2">
+          {/* Right Side: Desktop Search & Profile */}
+          <div className="hidden lg:flex items-center shrink-0 gap-1.5 border-l border-white/20 pl-2 z-10">
             <AnimatePresence>
               {showSearchInput && (
                 <form onSubmit={handleSearchSubmit}>
@@ -118,44 +132,10 @@ export default function Navbar() {
                     placeholder="Search shoes..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="hidden lg:block mr-1.5 text-[11px] bg-white/10 border border-white/20 rounded-full px-2.5 py-0.5 text-white placeholder-stone-300 focus:outline-none focus:ring-1 focus:ring-[#942E3A]"
+                    className="mr-1.5 text-[11px] bg-white/10 border border-white/20 rounded-full px-2.5 py-0.5 text-white placeholder-stone-300 focus:outline-none focus:ring-1 focus:ring-[#942E3A]"
                     autoFocus
                   />
                 </form>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {showMobileSearch && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: "-50%" }}
-                  animate={{ opacity: 1, scale: 1, y: "-50%" }}
-                  exit={{ opacity: 0, scale: 0.95, y: "-50%" }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 w-48 h-8 rounded-full bg-[#942E3A]/95 text-white backdrop-blur-xl border border-white/20 px-2.5 shadow-xl lg:hidden flex items-center gap-1.5 z-50 pointer-events-auto"
-                >
-                  <form onSubmit={handleSearchSubmit} className="flex-1 flex items-center pl-0.5">
-                    <Search className="w-3.5 h-3.5 text-[#D8B46A] mr-1.5 shrink-0" />
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full text-[11px] !bg-transparent !border-0 !p-0 !m-0 !h-full focus:outline-none focus:ring-0 !shadow-none text-white placeholder-stone-300"
-                      autoFocus
-                    />
-                  </form>
-                  <button 
-                    onClick={() => {
-                      setSearchQuery("");
-                      setShowMobileSearch(false);
-                    }}
-                    type="button"
-                    className="p-0.5 text-stone-300 hover:text-white rounded-full transition-colors shrink-0"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </motion.div>
               )}
             </AnimatePresence>
 
@@ -182,11 +162,53 @@ export default function Navbar() {
                 className="text-[10px] sm:text-[11px] font-bold text-[#FFF9EB] hover:text-white hover:bg-white/10 transition-all p-1.5 sm:px-2.5 sm:py-1 rounded-full bg-white/10 flex items-center gap-1 shrink-0"
               >
                 <User className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
-                <span className="hidden sm:inline">Sign In</span>
+                <span>Sign In</span>
               </Link>
             )}
           </div>
+
+          {/* Mobile search overlay container */}
+          <AnimatePresence>
+            {showMobileSearch && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: "-50%" }}
+                animate={{ opacity: 1, scale: 1, y: "-50%" }}
+                exit={{ opacity: 0, scale: 0.95, y: "-50%" }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-48 h-8 rounded-full bg-[#942E3A]/95 text-white backdrop-blur-xl border border-white/20 px-2.5 shadow-xl lg:hidden flex items-center gap-1.5 z-50 pointer-events-auto"
+              >
+                <form onSubmit={handleSearchSubmit} className="flex-1 flex items-center pl-0.5">
+                  <Search className="w-3.5 h-3.5 text-[#D8B46A] mr-1.5 shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full text-[11px] !bg-transparent !border-0 !p-0 !m-0 !h-full focus:outline-none focus:ring-0 !shadow-none text-white placeholder-stone-300"
+                    autoFocus
+                  />
+                </form>
+                <button 
+                  onClick={() => {
+                    setSearchQuery("");
+                    setShowMobileSearch(false);
+                  }}
+                  type="button"
+                  className="p-0.5 text-stone-300 hover:text-white rounded-full transition-colors shrink-0"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </header>
+
+        {/* Absolutely centered Brand Logo for Mobile (centered on screen width) */}
+        <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:hidden flex min-w-0 items-center gap-1.5 group z-20 pointer-events-auto">
+          <span className="text-base sm:text-lg font-extrabold tracking-tight text-white font-playfair">
+            DeRoma
+          </span>
+        </Link>
 
         {/* ELEMENT 2: Independent Wishlist Circle Button */}
         <Link
