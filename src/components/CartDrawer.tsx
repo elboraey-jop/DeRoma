@@ -53,7 +53,7 @@ export default function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-            className="fixed inset-y-0 right-0 z-50 flex h-full w-full max-w-[290px] sm:max-w-md flex-col bg-[#FFF9EB] shadow-2xl border-l border-[#D8B46A]/20 rounded-l-[1.75rem] overflow-hidden"
+            className="fixed inset-y-0 right-0 z-50 flex h-full w-[82vw] max-w-[340px] sm:w-full sm:max-w-md flex-col bg-[#FFF9EB] shadow-2xl border-l border-[#D8B46A]/20 rounded-l-[1.75rem] overflow-hidden"
             dir="ltr"
           >
             {/* Header */}
