@@ -172,7 +172,7 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
             </span>
           </div>
 
-          <Link href={`/shop/${product.id}`} className="block pl-9 pr-3 sm:px-9 text-center transition-colors group-hover:text-white">
+          <Link href={`/shop/${product.id}`} className="block px-8 sm:px-9 text-center transition-colors group-hover:text-white">
             <h3 className="text-[10px] font-extrabold leading-[1.15] tracking-tight text-[#FFF9EB] line-clamp-2 sm:text-[11px]">
               {product.name}
             </h3>
@@ -199,9 +199,9 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
                 key={variant.id}
                 disabled={isOutOfStock}
                 onClick={() => setSelectedSize(variant.size)}
-                className={`font-numeric min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
+                className={`font-numeric relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
                   isOutOfStock
-                    ? "border-white/20 bg-white/10 text-white/40 line-through"
+                    ? "border-white/20 bg-white/10 text-white/40 after:absolute after:left-1 after:right-1 after:top-[48%] after:h-[1.2px] after:bg-white after:content-['']"
                     : isSelected
                     ? "border-[#D8B46A] bg-[#D8B46A] text-white"
                     : "border-white/60 bg-[#FFF9EB] text-[#942E3A] hover:border-white"
