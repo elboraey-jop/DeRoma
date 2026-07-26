@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ShoppingBag, Search, Heart, Menu, X, User, Home, Store, Info, ShieldCheck, PackageSearch, Tags } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
+import { useWishlist } from "@/lib/wishlistStore";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
@@ -14,7 +15,8 @@ export default function Navbar() {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { count } = useWishlist();
+  const isWishlisted = count > 0;
   const pathname = usePathname();
   const { setCartOpen, cartCount } = useCart();
 
@@ -212,8 +214,7 @@ export default function Navbar() {
 
         {/* ELEMENT 2: Independent Wishlist Circle Button */}
         <Link
-          href="/shop?wishlist=true"
-          onClick={() => setIsWishlisted(!isWishlisted)}
+          href="/wishlist"
           className="pointer-events-auto h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-full bg-[#D8B46A]/95 text-[#FFF9EB] backdrop-blur-xl border border-white/20 shadow-xl flex items-center justify-center hover:bg-[#B8934A] transition-all hover:scale-105 active:scale-95"
           aria-label="Wishlist"
         >
@@ -376,7 +377,7 @@ export default function Navbar() {
 
                   {/* Wishlist Shortcut */}
                   <Link
-                    href="/shop?wishlist=true"
+                    href="/wishlist"
                     onClick={() => setIsOpen(false)}
                     className="text-xs font-semibold py-2 px-3 rounded-xl text-stone-200 hover:text-[#FFF9EB] hover:bg-white/10 transition-all flex justify-between items-center"
                   >

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ShoppingBag, Check, Heart, Star } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
+import { useWishlist } from "@/lib/wishlistStore";
 
 export interface ProductVariant {
   id: string;
@@ -97,7 +98,8 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
   const [activeColorIndex, setActiveColorIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [added, setAdded] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { has, toggle } = useWishlist();
+  const isWishlisted = has(product.id);
 
   const uniqueColors = Array.from(new Set(product.variants.map((v) => v.color)));
   const activeColor = uniqueColors[activeColorIndex] || uniqueColors[0];
@@ -144,7 +146,7 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
         
         {/* Discount Badge */}
         {discountPercent && (
-          <span className="font-numeric absolute left-2 top-2 z-10 rounded-full bg-[#D8B46A] px-2 py-0.5 text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-white shadow-xs">
+          <span className="product-card-badge-number absolute left-2 top-2 z-10 rounded-full bg-[#D8B46A] px-2 py-0.5 text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-white shadow-xs">
             -{discountPercent}%
           </span>
         )}
@@ -167,13 +169,13 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
         <div className="relative mb-0.5 min-h-[1.75rem]">
           <div className="absolute left-0 top-0 flex items-center gap-0.5 text-xs font-semibold text-amber-500">
             <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
-            <span className="font-numeric text-[#FFF9EB] text-[10px] font-medium sm:text-[11px]">
+            <span className="product-card-badge-number text-[#FFF9EB] text-[10px] font-medium sm:text-[11px]">
               {product.rating ? product.rating.toFixed(1) : "4.8"}
             </span>
           </div>
 
           <Link href={`/shop/${product.id}`} className="block px-8 sm:px-9 text-center transition-colors group-hover:text-white">
-            <h3 className="text-[10px] font-extrabold leading-[1.15] tracking-tight text-[#FFF9EB] line-clamp-2 sm:text-[11px]">
+            <h3 className="product-card-name text-[10px] font-extrabold leading-[1.15] tracking-tight text-[#FFF9EB] line-clamp-2 sm:text-[11px]">
               {product.name}
             </h3>
           </Link>
@@ -199,7 +201,7 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
                 key={variant.id}
                 disabled={isOutOfStock}
                 onClick={() => setSelectedSize(variant.size)}
-                className={`font-numeric relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
+                className={`product-card-badge-number relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
                   isOutOfStock
                     ? "border-white/20 bg-white/10 text-white/40 after:absolute after:left-1 after:right-1 after:top-[48%] after:h-[1.2px] after:bg-white after:content-['']"
                     : isSelected
@@ -207,7 +209,7 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
                     : "border-white/60 bg-[#FFF9EB] text-[#942E3A] hover:border-white"
                 }`}
               >
-                {variant.size}
+                <span className="relative -top-0.5">{variant.size}</span>
               </button>
             );
           })}
@@ -226,7 +228,7 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
             </button>
 
             <button
-              onClick={() => setIsWishlisted(!isWishlisted)}
+              onClick={() => toggle(product.id)}
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/70 bg-transparent text-white shadow-xs transition-all hover:bg-white hover:text-[#D8B46A] active:scale-95 sm:h-8 sm:w-8"
               aria-label="Add to wishlist"
             >

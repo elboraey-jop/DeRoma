@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
+import { useWishlist } from "@/lib/wishlistStore";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCard, { ProductWithVariants, COLOR_TRANSLATIONS } from "@/components/ProductCard";
 
@@ -138,7 +139,8 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [added, setAdded] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { has, toggle } = useWishlist();
+  const isWishlisted = has(product.id);
 
   // Build a color -> images mapping
   // Each color gets a subset of images. Since the current data structure maps images by index to colors,
@@ -257,7 +259,7 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
             {/* Main Image */}
             <div className="pdp-main-image relative w-full pt-[100%] rounded-2xl sm:rounded-[2rem] border border-[#942E3A]/20 overflow-hidden">
               {discountPercent && (
-                <span className="absolute right-3 top-3 sm:right-5 sm:top-5 z-10 rounded-full bg-[#942E3A] px-3 py-1 text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider shadow-sm">
+                <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-10 rounded-full bg-[#942E3A] px-3 py-1 text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider shadow-sm">
                   -{discountPercent}% OFF
                 </span>
               )}
@@ -316,10 +318,10 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
                     <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <span className="text-[11px] sm:text-xs font-bold text-[#942E3A]">
+                <span className="font-numeric text-[11px] sm:text-xs font-bold text-[#942E3A]">
                   {product.rating ? product.rating.toFixed(1) : "4.8"}
                 </span>
-                <span className="text-[11px] sm:text-xs text-[#D8B46A]">
+                <span className="font-numeric text-[11px] sm:text-xs text-[#D8B46A]">
                   ({product.reviewsCount ? `${product.reviewsCount} Reviews` : "12 Reviews"})
                 </span>
               </div>
@@ -327,11 +329,11 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
 
             {/* Price Row */}
             <div className="flex items-baseline justify-center lg:justify-start gap-x-2.5 py-3 border-y border-[#D8B46A]/30 w-full">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#942E3A]">
+              <span className="font-numeric text-2xl sm:text-3xl font-extrabold text-[#942E3A]">
                 {formatCurrency(priceNum)}
               </span>
               {compareAtPriceNum && (
-                <span className="text-sm text-[#D8B46A] line-through">
+                <span className="font-numeric text-sm text-[#D8B46A] line-through">
                   {formatCurrency(compareAtPriceNum)}
                 </span>
               )}
@@ -409,7 +411,7 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
                       key={variant.id}
                       disabled={isOutOfStock}
                       onClick={() => setSelectedSize(variant.size)}
-                      className={`h-11 w-11 rounded-full text-xs font-bold transition-all border-2 flex items-center justify-center ${
+                      className={`font-numeric h-11 w-11 rounded-full text-xs font-bold transition-all border-2 flex items-center justify-center ${
                         isOutOfStock
                           ? "bg-stone-100 border-stone-200 text-stone-300 line-through cursor-not-allowed"
                           : isSelected
@@ -433,7 +435,7 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
                 >
                   <Minus className="h-3.5 w-3.5" />
                 </button>
-                <span className="w-8 text-center text-xs font-bold text-[#942E3A]">{quantity}</span>
+                <span className="font-numeric w-8 text-center text-xs font-bold text-[#942E3A]">{quantity}</span>
                 <button
                   onClick={() => setQuantity((q) => q + 1)}
                   className="p-1.5 text-[#D8B46A] hover:text-[#942E3A] transition-colors"
@@ -468,7 +470,7 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
 
               {/* Wishlist */}
               <button
-                onClick={() => setIsWishlisted(!isWishlisted)}
+                onClick={() => toggle(product.id)}
                 className="h-12 w-12 rounded-full border border-[#D8B46A] bg-white flex items-center justify-center text-[#D8B46A] hover:bg-[#F2E7D5] transition-colors shrink-0 shadow-sm"
               >
                 <Heart className={`h-5 w-5 ${isWishlisted ? "fill-[#D8B46A] text-[#D8B46A]" : "text-[#D8B46A]"}`} />
