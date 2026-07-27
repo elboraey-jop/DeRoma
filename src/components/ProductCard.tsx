@@ -7,6 +7,7 @@ import { ShoppingBag, Check, Heart, Star } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
 import { useWishlist } from "@/lib/wishlistStore";
+import { motion } from "framer-motion";
 
 export interface ProductVariant {
   id: string;
@@ -100,6 +101,7 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
   const [added, setAdded] = useState(false);
   const { has, toggle } = useWishlist();
   const isWishlisted = has(product.id);
+  const [imageLoading, setImageLoading] = useState(true);
 
   const uniqueColors = Array.from(new Set(product.variants.map((v) => v.color)));
   const activeColor = uniqueColors[activeColorIndex] || uniqueColors[0];
@@ -122,6 +124,10 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
     }
   }, [availableSizes, selectedSize]);
 
+  useEffect(() => {
+    setImageLoading(true);
+  }, [activeImage]);
+
   const handleAddSelected = () => {
     if (!selectedVariant) return;
 
@@ -140,7 +146,10 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
   };
 
   return (
-    <div className="group relative flex h-[330px] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_30px_rgba(148,46,58,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(148,46,58,0.13)] sm:h-[380px] sm:max-w-[230px] sm:rounded-[1.65rem]">
+    <motion.div
+      whileHover={{ y: -5, transition: { duration: 0.25, ease: "easeOut" } }}
+      className="group relative flex h-[330px] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_30px_rgba(148,46,58,0.06)] hover:shadow-[0_18px_38px_rgba(148,46,58,0.13)] sm:h-[380px] sm:max-w-[230px] sm:rounded-[1.65rem] transition-shadow duration-300"
+    >
       {/* Top Product Image Container */}
       <div className="relative h-[71%] sm:h-[72%] w-full shrink-0 overflow-hidden bg-[#FFF9EB]">
         
@@ -151,14 +160,22 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
           </span>
         )}
 
+        {/* Shimmer Image Placeholder */}
+        {imageLoading && (
+          <div className="absolute inset-0 z-10 bg-gradient-to-r from-stone-200/50 via-stone-100/50 to-stone-200/50 animate-pulse" />
+        )}
+
         {/* Product Image Link */}
         <Link href={`/shop/${product.id}`} className="relative h-full w-full flex items-center justify-center">
           <Image
             src={activeImage}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className={`object-cover transition-all duration-500 group-hover:scale-105 ${
+              imageLoading ? "opacity-0 scale-95" : "opacity-100 scale-100"
+            }`}
             sizes="(max-width: 768px) 50vw, 230px"
+            onLoad={() => setImageLoading(false)}
           />
         </Link>
 
@@ -197,20 +214,22 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
             const isSelected = selectedSize === variant.size;
             const isOutOfStock = variant.stock <= 0;
             return (
-              <button
+              <motion.button
                 key={variant.id}
                 disabled={isOutOfStock}
                 onClick={() => setSelectedSize(variant.size)}
+                whileHover={!isOutOfStock ? { scale: 1.1 } : {}}
+                whileTap={!isOutOfStock ? { scale: 0.9 } : {}}
                 className={`product-card-badge-number relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
                   isOutOfStock
-                    ? "border-white/20 bg-white/10 text-white/40 after:absolute after:left-1 after:right-1 after:top-[48%] after:h-[1.2px] after:bg-white after:content-['']"
+                    ? "border-white/20 bg-white/10 text-white/40 after:absolute after:left-1 after:right-1 after:top-[48%] after:h-[1.2px] after:bg-white/30 after:content-['']"
                     : isSelected
                     ? "border-[#D8B46A] bg-[#D8B46A] text-white"
                     : "border-white/60 bg-[#FFF9EB] text-[#942E3A] hover:border-white"
                 }`}
               >
                 <span className="relative -top-0.5">{variant.size}</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
@@ -218,35 +237,41 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
         {/* Action Buttons */}
         <div className="mt-auto border-t border-white/35 pt-1">
           <div className="flex items-center gap-1.5">
-            <button
+            <motion.button
               onClick={handleAddSelected}
               disabled={!selectedVariant}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#D8B46A] text-white shadow-xs transition-all hover:bg-[#FFF9EB] hover:text-[#942E3A] active:scale-95 disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:w-8"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#D8B46A] text-white shadow-xs transition-all hover:bg-[#FFF9EB] hover:text-[#942E3A] disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:w-8"
               aria-label="Add to cart"
             >
               {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
               onClick={() => toggle(product.id)}
-              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-transparent shadow-xs transition-all hover:bg-white hover:text-[#D8B46A] active:scale-95 sm:h-8 sm:w-8 border ${
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-transparent shadow-xs transition-all hover:bg-white hover:text-[#D8B46A] sm:h-8 sm:w-8 border ${
                 isWishlisted ? "border-[#D8B46A] text-[#D8B46A]" : "border-white/70 text-white"
               }`}
               aria-label="Add to wishlist"
             >
               <Heart className={`h-3.5 w-3.5 ${isWishlisted ? "fill-[#D8B46A]" : ""}`} />
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
               onClick={handleAddSelected}
               disabled={!selectedVariant}
-              className="flex h-7 flex-1 items-center justify-center rounded-full bg-[#FFF9EB] px-3 text-[9px] font-black text-[#942E3A] shadow-xs transition-all hover:bg-[#D8B46A] hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:text-[10px]"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex h-7 flex-1 items-center justify-center rounded-full bg-[#FFF9EB] px-3 text-[9px] font-black text-[#942E3A] shadow-xs transition-all hover:bg-[#D8B46A] hover:text-white disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:text-[10px]"
             >
               Buy Now
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

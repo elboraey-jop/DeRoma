@@ -25,6 +25,7 @@ import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
 import { useWishlist } from "@/lib/wishlistStore";
 import { motion, AnimatePresence } from "framer-motion";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 import ProductCard, { ProductWithVariants, COLOR_TRANSLATIONS } from "@/components/ProductCard";
 
 interface ProductDetailClientProps {
@@ -234,44 +235,57 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
     <div className="pdp-page w-full flex flex-col pb-16 sm:pb-24 bg-[#FFF9EB] text-[#942E3A]" dir="ltr">
       
       {/* Breadcrumbs */}
-      <nav className="pdp-breadcrumb mx-auto w-full max-w-[1400px] px-4 lg:px-6 pt-3 sm:pt-4">
-        <ol className="flex items-center gap-x-1.5 text-[11px] sm:text-xs font-bold text-[#D8B46A]">
-          <li>
-            <Link href="/" className="hover:text-[#942E3A] transition-colors">Home</Link>
-          </li>
-          <ChevronRight className="h-3 w-3 text-[#D8B46A] shrink-0" />
-          <li>
-            <Link href="/shop" className="hover:text-[#942E3A] transition-colors">Shop</Link>
-          </li>
-          <ChevronRight className="h-3 w-3 text-[#D8B46A] shrink-0" />
-          <li className="text-[#942E3A] truncate">
-            {product.name}
-          </li>
-        </ol>
-      </nav>
+      <ScrollReveal direction="none" duration={0.5}>
+        <nav className="pdp-breadcrumb mx-auto w-full max-w-[1400px] px-4 lg:px-6 pt-3 sm:pt-4">
+          <ol className="flex items-center gap-x-1.5 text-[11px] sm:text-xs font-bold text-[#D8B46A]">
+            <li>
+              <Link href="/" className="hover:text-[#942E3A] transition-colors">Home</Link>
+            </li>
+            <ChevronRight className="h-3 w-3 text-[#D8B46A] shrink-0" />
+            <li>
+              <Link href="/shop" className="hover:text-[#942E3A] transition-colors">Shop</Link>
+            </li>
+            <ChevronRight className="h-3 w-3 text-[#D8B46A] shrink-0" />
+            <li className="text-[#942E3A] truncate">
+              {product.name}
+            </li>
+          </ol>
+        </nav>
+      </ScrollReveal>
 
       {/* Main PDP Grid */}
       <section className="pdp-shell mx-auto w-full max-w-[1400px] px-4 lg:px-6 mt-3 sm:mt-6">
-        <div className="pdp-layout">
+        <StaggerContainer className="pdp-layout">
           
           {/* Gallery Left (6 cols) */}
-          <div className="pdp-gallery flex flex-col gap-3 w-full">
+          <StaggerItem direction="left" className="pdp-gallery flex flex-col gap-3 w-full">
             {/* Main Image */}
-            <div className="pdp-main-image relative w-full pt-[100%] rounded-2xl sm:rounded-[2rem] border border-[#942E3A]/20 overflow-hidden">
+            <div className="pdp-main-image relative w-full pt-[100%] rounded-2xl sm:rounded-[2rem] border border-[#942E3A]/20 overflow-hidden bg-[#F2E7D5]/20">
               {discountPercent && (
-                <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-10 rounded-full bg-[#942E3A] px-3 py-1 text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider shadow-sm">
+                <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-15 rounded-full bg-[#942E3A] px-3 py-1 text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider shadow-sm">
                   -{discountPercent}% OFF
                 </span>
               )}
               
-              <Image
-                src={currentColorImages[activeImageIndex] || currentColorImages[0]}
-                alt={product.name}
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                priority
-              />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${selectedColor}-${activeImageIndex}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0 w-full h-full"
+                >
+                  <Image
+                    src={currentColorImages[activeImageIndex] || currentColorImages[0]}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover transition-transform duration-500 hover:scale-105"
+                    priority
+                  />
+                </motion.div>
+              </AnimatePresence>
             </div>
 
             {/* Thumbnail Row */}
@@ -300,10 +314,10 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
                 })}
               </div>
             )}
-          </div>
+          </StaggerItem>
 
           {/* Details Right (6 cols) */}
-          <div className="pdp-details flex flex-col gap-5 sm:gap-6 w-full max-w-[34rem] mx-auto lg:max-w-none">
+          <StaggerItem direction="right" className="pdp-details flex flex-col gap-5 sm:gap-6 w-full max-w-[34rem] mx-auto lg:max-w-none">
             
             {/* Title */}
             <div className="w-full">
@@ -483,37 +497,39 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
               <span>Free Express Delivery On Orders Over $150 & Doorstep fitting guarantee</span>
             </div>
 
-          </div>
-        </div>
+          </StaggerItem>
+        </StaggerContainer>
       </section>
 
       {/* Reviews Section */}
-      <div className="mt-10 sm:mt-14">
+      <ScrollReveal className="mt-10 sm:mt-14">
         <ReviewsSection ratingBreakdown={ratingBreakdown} product={product} />
-      </div>
+      </ScrollReveal>
 
       {/* Similar Products */}
       {similarProducts.length > 0 && (
-        <section className="mx-auto w-full max-w-[1400px] px-4 lg:px-6 border-t border-[#D8B46A]/30 pt-8 sm:pt-12 mt-10 sm:mt-14">
-          <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair mb-4 sm:mb-6 text-center">You May Also Like</h2>
-          <div 
-            className="flex overflow-x-auto flex-nowrap gap-3 sm:gap-6 py-4 px-1 no-scrollbar justify-start md:justify-center"
-            style={{ 
-              WebkitOverflowScrolling: "touch",
-              scrollbarWidth: "none",
-              msOverflowStyle: "none"
-            }}
-          >
-            {similarProducts.slice(0, 4).map((p) => (
-              <div
-                key={p.id}
-                className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"
-              >
-                <ProductCard product={p} />
-              </div>
-            ))}
-          </div>
-        </section>
+        <ScrollReveal>
+          <section className="mx-auto w-full max-w-[1400px] px-4 lg:px-6 border-t border-[#D8B46A]/30 pt-8 sm:pt-12 mt-10 sm:mt-14">
+            <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair mb-4 sm:mb-6 text-center">You May Also Like</h2>
+            <div 
+              className="flex overflow-x-auto flex-nowrap gap-3 sm:gap-6 py-4 px-1 no-scrollbar justify-start md:justify-center"
+              style={{ 
+                WebkitOverflowScrolling: "touch",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none"
+              }}
+            >
+              {similarProducts.slice(0, 4).map((p) => (
+                <div
+                  key={p.id}
+                  className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"
+                >
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </div>
+          </section>
+        </ScrollReveal>
       )}
     </div>
   );

@@ -61,6 +61,7 @@ export default function Navbar() {
     { label: "Shop", href: "/shop", icon: Store },
     { label: "About Us", href: "/about", icon: Info },
     { label: "Our Privacy", href: "/privacy", icon: ShieldCheck },
+    { label: "Track Order", href: "/track", icon: PackageSearch },
   ];
 
   const brands = ["New Balance", "Adidas", "Nike", "ASICS"];
@@ -357,24 +358,6 @@ export default function Navbar() {
                 <div className="pt-4 border-t border-white/10 mt-4 space-y-1">
                   <p className="text-[10px] uppercase font-bold tracking-wider text-[#D8B46A] px-3 mb-2">Shop & Orders</p>
                   
-                  {/* Track Order */}
-                  <Link
-                    href="/track"
-                    onClick={() => setIsOpen(false)}
-                    className={cn(
-                      "text-xs font-semibold py-2 px-3 rounded-xl transition-all flex justify-between items-center",
-                      pathname === "/track"
-                        ? "bg-[#FFF9EB] text-[#942E3A] font-bold shadow-xs"
-                        : "text-stone-200 hover:text-[#FFF9EB] hover:bg-white/10"
-                    )}
-                  >
-                    <span className="flex items-center gap-2">
-                      <PackageSearch className="h-3.5 w-3.5 text-[#D8B46A]" />
-                      <span>Track Order</span>
-                    </span>
-                    <span className="text-[10px] text-stone-400">&rarr;</span>
-                  </Link>
-
                   {/* Wishlist Shortcut */}
                   <Link
                     href="/wishlist"

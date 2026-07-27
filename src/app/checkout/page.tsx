@@ -29,7 +29,7 @@ interface GovItem {
   fee: number;
 }
 
-const GOVERNORATES: GovItem[] = [
+const LEGACY_GOVERNORATES: GovItem[] = [
   { en: "Cairo", ar: "Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©", fee: 50 },
   { en: "Giza", ar: "Ø§Ù„Ø¬ÙŠØ²Ø©", fee: 50 },
   { en: "Alexandria", ar: "Ø§Ù„Ø¥Ø³ÙƒÙ†Ø¯Ø±ÙŠØ©", fee: 60 },
@@ -56,6 +56,35 @@ const GOVERNORATES: GovItem[] = [
   { en: "Matrouh", ar: "Ù…Ø·Ø±ÙˆØ­", fee: 120 },
   { en: "North Sinai", ar: "Ø´Ù…Ø§Ù„ Ø³ÙŠÙ†Ø§Ø¡", fee: 120 },
   { en: "South Sinai", ar: "Ø¬Ù†ÙˆØ¨ Ø³ÙŠÙ†Ø§Ø¡", fee: 120 },
+];
+
+const GOVERNORATES: GovItem[] = [
+  { en: "Cairo", ar: "القاهرة", fee: 50 },
+  { en: "Giza", ar: "الجيزة", fee: 50 },
+  { en: "Alexandria", ar: "الإسكندرية", fee: 60 },
+  { en: "Qalyubia", ar: "القليوبية", fee: 70 },
+  { en: "Sharqia", ar: "الشرقية", fee: 70 },
+  { en: "Dakahlia", ar: "الدقهلية", fee: 70 },
+  { en: "Monufia", ar: "المنوفية", fee: 70 },
+  { en: "Gharbia", ar: "الغربية", fee: 70 },
+  { en: "Kafr El Sheikh", ar: "كفر الشيخ", fee: 70 },
+  { en: "Damietta", ar: "دمياط", fee: 70 },
+  { en: "Port Said", ar: "بورسعيد", fee: 70 },
+  { en: "Ismailia", ar: "الإسماعيلية", fee: 70 },
+  { en: "Suez", ar: "السويس", fee: 70 },
+  { en: "Fayoum", ar: "الفيوم", fee: 90 },
+  { en: "Beni Suef", ar: "بني سويف", fee: 90 },
+  { en: "Minya", ar: "المنيا", fee: 90 },
+  { en: "Asyut", ar: "أسيوط", fee: 90 },
+  { en: "Sohag", ar: "سوهاج", fee: 90 },
+  { en: "Qena", ar: "قنا", fee: 90 },
+  { en: "Luxor", ar: "الأقصر", fee: 90 },
+  { en: "Aswan", ar: "أسوان", fee: 90 },
+  { en: "Red Sea", ar: "البحر الأحمر", fee: 120 },
+  { en: "New Valley", ar: "الوادي الجديد", fee: 120 },
+  { en: "Matrouh", ar: "مطروح", fee: 120 },
+  { en: "North Sinai", ar: "شمال سيناء", fee: 120 },
+  { en: "South Sinai", ar: "جنوب سيناء", fee: 120 },
 ];
 
 const CENTERS_BY_GOVERNORATE: Record<string, string[]> = {
@@ -212,18 +241,18 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#fffaf0] px-4 py-8 text-[#481827] sm:px-6 sm:py-12 lg:px-8" dir="ltr">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-8 flex flex-col gap-5 border-b border-[#eadfd6] pb-7 sm:flex-row sm:items-end sm:justify-between">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#fffaf0] px-3 py-6 text-[#481827] sm:px-6 sm:py-12 lg:px-8" dir="ltr">
+      <div className="mx-auto w-full min-w-0 max-w-6xl">
+        <div className="mb-8 flex flex-col items-center gap-5 border-b border-[#eadfd6] pb-7 text-center sm:flex-row sm:items-end sm:justify-between sm:text-left">
           <div>
-            <Link href="/shop" className="inline-flex items-center gap-2 text-xs font-semibold text-[#806e73] transition hover:text-[#942e3a]">
+            <Link href="/shop" className="flex w-full items-center justify-start gap-2 text-left text-xs font-semibold text-[#806e73] transition hover:text-[#942e3a] sm:inline-flex sm:w-auto">
               <ArrowLeft className="h-4 w-4" /> Continue shopping
             </Link>
             <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.3em] text-[#c49a50]">DeRoma checkout</p>
             <h1 className="mt-1 font-playfair text-3xl font-semibold sm:text-4xl">Complete your order</h1>
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-semibold text-[#806e73]">
+          <div className="flex items-center justify-center gap-3 text-xs font-semibold text-[#806e73]">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#942e3a] text-white"><Check className="h-4 w-4" /></span>
             <span className="text-[#942e3a]">Bag</span>
             <span className="h-px w-8 bg-[#d8b46a] sm:w-12" />
@@ -241,8 +270,8 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-8">
-          <form id="checkout-form" onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-8">
+          <form id="checkout-form" onSubmit={handleSubmit} className="order-2 min-w-0 space-y-5 lg:order-1">
             <section className="rounded-3xl border border-[#eadfd6] bg-white p-5 shadow-[0_14px_40px_rgba(73,24,39,0.05)] sm:p-7">
               <div className="mb-6 flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#942e3a]/10 text-[#942e3a]"><UserRound className="h-5 w-5" /></div>
@@ -267,7 +296,7 @@ export default function CheckoutPage() {
                       setIsGovMenuOpen((open) => !open);
                       setGovSearch("");
                     }}
-                    className={`${inputClass} flex items-center justify-between text-left ${selectedGovEn ? "text-[#481827]" : "text-[#a99ca0]"}`}
+                    className={`${inputClass} flex min-w-0 items-center justify-between overflow-hidden text-left ${selectedGovEn ? "text-[#481827]" : "text-[#a99ca0]"}`}
                   >
                     <span>{selectedGovEn ? `${selectedGovEn} · ${activeGov?.fee} EGP delivery` : "Select governorate"}</span>
                     <ChevronDown className={`h-4 w-4 shrink-0 text-[#942e3a] transition-transform ${isGovMenuOpen ? "rotate-180" : ""}`} />
@@ -308,7 +337,7 @@ export default function CheckoutPage() {
                       setIsCenterMenuOpen((open) => !open);
                       setCenterSearch("");
                     }}
-                    className={`${inputClass} flex items-center justify-between text-left ${city ? "text-[#481827]" : "text-[#a99ca0]"} disabled:cursor-not-allowed disabled:bg-[#f8f3ed] disabled:opacity-70`}
+                    className={`${inputClass} flex min-w-0 items-center justify-between overflow-hidden text-left ${city ? "text-[#481827]" : "text-[#a99ca0]"} disabled:cursor-not-allowed disabled:bg-[#f8f3ed] disabled:opacity-70`}
                   >
                     <span>{city || (selectedGovEn ? "Select city / center" : "Select governorate first")}</span>
                     <ChevronDown className={`h-4 w-4 shrink-0 text-[#942e3a] transition-transform ${isCenterMenuOpen ? "rotate-180" : ""}`} />
@@ -343,7 +372,7 @@ export default function CheckoutPage() {
             </section>
           </form>
 
-          <aside className="space-y-5 lg:sticky lg:top-6">
+          <aside className="order-1 min-w-0 space-y-5 lg:order-2 lg:sticky lg:top-6">
             <section className="rounded-3xl bg-[#942e3a] p-5 text-[#fffaf0] shadow-[0_18px_45px_rgba(148,46,58,0.2)] sm:p-6">
               <div className="flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#d8b46a]">Your bag</p><h2 className="mt-1 font-playfair text-2xl font-semibold">Order summary</h2></div><span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10"><ShoppingBag className="h-5 w-5" /></span></div>
               <div className="my-5 h-px bg-white/15" />

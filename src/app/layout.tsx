@@ -4,6 +4,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/lib/cartStore";
 import CartDrawer from "@/components/CartDrawer";
+import SmoothScroll from "@/components/SmoothScroll";
+import SplashScreen from "@/components/SplashScreen";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -29,6 +31,8 @@ export default function RootLayout({
   return (
     <html lang="en" dir="ltr">
       <body className={`${playfair.variable} ${outfit.variable} font-playfair antialiased`}>
+        <SmoothScroll />
+        <SplashScreen />
         <CartProvider>
           <div className="min-h-screen flex flex-col bg-[#FFF9EB] text-[#942E3A]">
             <Navbar />

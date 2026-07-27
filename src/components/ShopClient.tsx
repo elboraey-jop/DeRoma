@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal, ArrowUpDown, X, Check, ChevronDown } from "lucide-react";
 import ProductCard, { ProductWithVariants, COLOR_TRANSLATIONS } from "@/components/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 
 interface ShopClientProps {
   initialProducts: ProductWithVariants[];
@@ -213,11 +214,10 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="order-3 sm:order-none flex h-[42px] items-center justify-center gap-x-1.5 rounded-full bg-[#942E3A] px-3.5 sm:px-4 text-xs font-bold text-white hover:bg-[#76232D] transition-colors whitespace-nowrap shadow-md shadow-[#942E3A]/10"
+              className="order-3 sm:order-none hidden sm:flex h-[42px] items-center justify-center gap-x-1.5 rounded-full bg-[#942E3A] px-4 text-xs font-bold text-white hover:bg-[#76232D] transition-colors whitespace-nowrap shadow-md shadow-[#942E3A]/10"
             >
               <X className="h-3.5 w-3.5 text-[#D8B46A]" />
-              <span className="hidden sm:inline">Clear Filters</span>
-              <span className="inline sm:hidden">Clear</span>
+              <span>Clear Filters</span>
             </button>
           )}
 
@@ -278,9 +278,9 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
       {/* Main Grid & Filters */}
       <div className="flex gap-x-8">
         {/* Desktop Sidebar Filters */}
-        <aside className="hidden md:block w-64 flex-shrink-0 space-y-6">
+        <StaggerContainer className="hidden md:block w-64 flex-shrink-0 space-y-6">
           {/* Brands */}
-          <div className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
+          <StaggerItem direction="left" className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
             <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">Brands</h3>
             <div className="flex flex-col gap-y-1">
               {brands.map((brand) => {
@@ -307,10 +307,10 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                 );
               })}
             </div>
-          </div>
+          </StaggerItem>
 
           {/* Sizes */}
-          <div className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
+          <StaggerItem direction="left" className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
             <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">Women's Sizes</h3>
             <div className="grid grid-cols-4 gap-2">
               {allSizes.map((size) => {
@@ -330,10 +330,10 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                 );
               })}
             </div>
-          </div>
+          </StaggerItem>
 
           {/* Colors */}
-          <div className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
+          <StaggerItem direction="left" className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
             <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">Color Options</h3>
             <div className="flex flex-wrap gap-2">
               {allColors.map((color) => {
@@ -354,17 +354,19 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                 );
               })}
             </div>
-          </div>
+          </StaggerItem>
 
           {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="w-full text-center py-2 text-xs font-bold text-[#942E3A] hover:underline"
-            >
-              Clear All Filters
-            </button>
+            <StaggerItem direction="left" className="w-full">
+              <button
+                onClick={clearFilters}
+                className="w-full text-center py-2 text-xs font-bold text-[#942E3A] hover:underline"
+              >
+                Clear All Filters
+              </button>
+            </StaggerItem>
           )}
-        </aside>
+        </StaggerContainer>
 
         {/* Product Cards Grid */}
         <div className="flex-1">
@@ -381,11 +383,26 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 justify-items-center gap-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredProducts.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
+            <motion.div 
+              layout
+              className="grid grid-cols-2 justify-items-center gap-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 w-full"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredProducts.map((p) => (
+                  <motion.div
+                    layout
+                    key={p.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full flex justify-center"
+                  >
+                    <ProductCard product={p} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
           )}
         </div>
       </div>

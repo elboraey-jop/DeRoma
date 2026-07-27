@@ -3,8 +3,6 @@
 import prisma from "@/lib/prisma";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 interface CheckoutItemInput {
   productId: string;
   variantId: string;
@@ -148,8 +146,12 @@ export async function createOrder(input: CreateOrderInput) {
       return newOrder;
     });
 
-    // 6. Send notification email to admin using Resend
-    try {
+    // 6. Send notification email to admin using Resend.
+    // Email is an optional side effect and must never prevent an order from
+    // being created when the Resend key is not configured on a deployment.
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
       const itemsHtml = dbItemsToCreate
         .map(
           (item) => `
@@ -211,9 +213,12 @@ export async function createOrder(input: CreateOrderInput) {
         subject: `طلب جديد في المتجر! #${orderNumber}`,
         html: emailHtml,
       });
-    } catch (emailErr) {
-      // Log error but don't fail the order if only the email fails
-      console.error("Failed to send alert email via Resend:", emailErr);
+      } catch (emailErr) {
+        // Log error but don't fail the order if only the email fails.
+        console.error("Failed to send alert email via Resend:", emailErr);
+      }
+    } else {
+      console.warn("RESEND_API_KEY is not configured; skipping order email notification.");
     }
 
     return { success: true, orderId: order.id, orderNumber: order.orderNumber };

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "./ScrollReveal";
 import {
   ShoppingBag,
   Truck,
@@ -135,8 +136,8 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       title: "Soft Sport Icons",
       desc: "Pastel runners and everyday silhouettes for easy comfort, soft colour, and feminine street style.",
       href: "/shop?category=retro",
-      image: "/banners/hero-1-desktop.png",
-      mobileImage: "/banners/hero-1-mobile.png"
+      image: "/banners/hero-1-desktop.webp",
+      mobileImage: "/banners/hero-1-mobile.webp"
     },
     // CARD 2: PERFORMANCE SNEAKERS
     {
@@ -145,8 +146,8 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       title: "Performance Running & Gym",
       desc: "Super-lightweight cushioned trainers from Asics & Nike engineered for gym workouts, daily running, and support.",
       href: "/shop?category=running",
-      image: "/banners/hero-2-desktop.png",
-      mobileImage: "/banners/hero-2-mobile.png"
+      image: "/banners/hero-2-desktop.webp",
+      mobileImage: "/banners/hero-2-mobile.webp"
     },
     // CARD 3: CHUNKY PLATFORMS
     {
@@ -155,8 +156,8 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       title: "Chunky & Platform Soles",
       desc: "Bold elevated profiles combined with soft memory foam footbeds for maximum casual comfort.",
       href: "/shop?category=chunky",
-      image: "/banners/hero-3-desktop.png",
-      mobileImage: "/banners/hero-3-mobile.png"
+      image: "/banners/hero-3-desktop.webp",
+      mobileImage: "/banners/hero-3-mobile.webp"
     }
   ];
 
@@ -179,12 +180,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
   ];
 
   useEffect(() => {
-    const timerSlideIndex = ((activeSlide % heroCards.length) + heroCards.length) % heroCards.length;
-    const duration = timerSlideIndex === 0 ? 6000 : 3000;
     const timer = window.setTimeout(() => {
       setDirection(1);
       setActiveSlide((prev) => prev + 1);
-    }, duration);
+    }, 3000);
 
     return () => window.clearTimeout(timer);
   }, [activeSlide]);
@@ -338,6 +337,15 @@ export default function HomeClient({ products }: { products: ProductWithVariants
 
   return (
     <div className="w-full flex flex-col space-y-8 pb-16 bg-[#FFF9EB] text-[#942E3A]" dir="ltr">
+      {/* Eagerly preload all hero banner images */}
+      <div className="hidden" aria-hidden="true">
+        {heroCards.map((card) => (
+          <picture key={card.id}>
+            <source media="(max-width: 639px)" srcSet={card.mobileImage} />
+            <img src={card.image} alt="preload" />
+          </picture>
+        ))}
+      </div>
       
       {/* 1. HERO CAROUSEL - Sleek, Compact & Refined */}
       <section className="px-2 sm:px-4 lg:px-6 pt-0">
@@ -518,7 +526,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                   <Link
                     href={currentCard.href}
                     onPointerDown={(event) => event.stopPropagation()}
-                    className="absolute bottom-[5%] left-[40%] z-20 inline-flex -translate-x-1/2 items-center justify-center rounded-full bg-[#942E3A] px-3 py-1 text-[8px] font-bold tracking-wide text-[#FFF9EB] shadow-md transition-transform hover:scale-105 hover:bg-[#7d2530] sm:bottom-[8%] sm:left-[27.5%] sm:px-8 sm:py-3 sm:text-sm"
+                    className="absolute bottom-[3.8%] left-[39.8%] z-20 inline-flex -translate-x-1/2 items-center justify-center rounded-full bg-[#942E3A] px-4 py-2 text-[10px] font-bold tracking-wide text-[#FFF9EB] shadow-md transition-transform hover:scale-105 hover:bg-[#7d2530] sm:bottom-[8%] sm:left-[27.5%] sm:px-8 sm:py-3 sm:text-sm"
                   >
                     SHOP NOW
                   </Link>
@@ -557,111 +565,115 @@ export default function HomeClient({ products }: { products: ProductWithVariants
 
       {/* 1.5. BRAND REVIEWS - Compact deck-style swipe carousel */}
       <section className="px-2 sm:px-4 lg:px-6">
-        <div className="mx-auto max-w-[94vw] lg:max-w-[1320px]">
-          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-[#942E3A] px-4 py-5 sm:px-8 sm:py-6 lg:px-12 text-[#FFF9EB] shadow-lg">
-            <div className="pointer-events-none absolute -left-16 -top-20 h-48 w-48 rounded-full bg-[#D8B46A]/10 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-56 rounded-full bg-[#FFF9EB]/10 blur-3xl" />
+        <ScrollReveal>
+          <div className="mx-auto max-w-[94vw] lg:max-w-[1320px]">
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-[#942E3A] px-4 py-5 sm:px-8 sm:py-6 lg:px-12 text-[#FFF9EB] shadow-lg">
+              <div className="pointer-events-none absolute -left-16 -top-20 h-48 w-48 rounded-full bg-[#D8B46A]/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-56 rounded-full bg-[#FFF9EB]/10 blur-3xl" />
 
-            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8">
-              <div className="shrink-0 sm:w-[170px] lg:w-[220px]">
-                <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">THE DE ROMA EDIT</span>
-                <h2 className="mt-1 font-playfair text-xl font-semibold leading-tight sm:text-2xl">Loved by every step.</h2>
-                <div className="mt-3 flex items-center gap-1.5 text-[#D8B46A]" aria-label="5 out of 5 stars">
-                  {Array.from({ length: 5 }).map((_, index) => <Star key={index} className="h-3.5 w-3.5 fill-current" />)}
-                  <span className="ml-1 text-[10px] font-semibold text-[#FFF9EB]/75">4.9 / 5</span>
+              <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8">
+                <div className="shrink-0 sm:w-[170px] lg:w-[220px]">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">THE DE ROMA EDIT</span>
+                  <h2 className="mt-1 font-playfair text-xl font-semibold leading-tight sm:text-2xl">Loved by every step.</h2>
+                  <div className="mt-3 flex items-center gap-1.5 text-[#D8B46A]" aria-label="5 out of 5 stars">
+                    {Array.from({ length: 5 }).map((_, index) => <Star key={index} className="h-3.5 w-3.5 fill-current" />)}
+                    <span className="ml-1 text-[10px] font-semibold text-[#FFF9EB]/75">4.9 / 5</span>
+                  </div>
+                  <p className="mt-3 hidden max-w-[190px] text-[10px] leading-relaxed text-[#FFF9EB]/60 sm:block">Swipe the cards to discover what our sneaker community is saying.</p>
                 </div>
-                <p className="mt-3 hidden max-w-[190px] text-[10px] leading-relaxed text-[#FFF9EB]/60 sm:block">Swipe the cards to discover what our sneaker community is saying.</p>
-              </div>
 
-              <div className="relative min-w-0 flex-1 sm:h-[190px]">
-                <div className="relative mx-auto h-[220px] w-full max-w-[620px] sm:h-full">
-                  {[0, 1, 2, ...(returningReview !== null ? [3] : [])].map((stackPosition) => {
-                    const isReturning = stackPosition === 3 && returningReview !== null;
-                    const reviewIndex = isReturning ? returningReview : (activeReview + stackPosition) % reviews.length;
-                    const review = reviews[reviewIndex];
-                    const isFront = stackPosition === 0;
+                <div className="relative min-w-0 flex-1 sm:h-[190px]">
+                  <div className="relative mx-auto h-[220px] w-full max-w-[620px] sm:h-full">
+                    {[0, 1, 2, ...(returningReview !== null ? [3] : [])].map((stackPosition) => {
+                      const isReturning = stackPosition === 3 && returningReview !== null;
+                      const reviewIndex = isReturning ? returningReview : (activeReview + stackPosition) % reviews.length;
+                      const review = reviews[reviewIndex];
+                      const isFront = stackPosition === 0;
 
-                    return (
-                      <motion.article
-                        key={isReturning ? `${review.model}-returning` : review.model}
-                        drag={isFront ? "x" : false}
-                        dragConstraints={{ left: -520, right: 520 }}
-                        dragElastic={0.18}
-                        onDragEnd={isFront ? handleReviewDragEnd : undefined}
-                        initial={{
-                          x: isReturning ? reviewDirection * 760 : isFront ? reviewDirection * 34 : stackPosition * 10,
-                          y: stackPosition * 7,
-                          rotate: stackPosition === 0 ? 0 : stackPosition === 1 ? 3 : -3,
-                          opacity: isReturning ? 0.95 : isFront ? 0.65 : 1 - stackPosition * 0.12,
-                          scale: 1 - stackPosition * 0.035,
-                        }}
-                        animate={{
-                          x: isFront && isReviewLeaving ? reviewDirection * 760 : stackPosition * 10,
-                          y: stackPosition * 7,
-                          rotate: stackPosition === 0 ? 0 : stackPosition === 1 ? 3 : -3,
-                          scale: 1 - stackPosition * 0.035,
-                          opacity: 1 - stackPosition * 0.12,
-                        }}
-                        transition={isFront && isReviewLeaving
-                          ? { duration: 0.62, ease: [0.22, 1, 0.36, 1] }
-                          : isReturning
-                            ? { duration: 0.9, ease: [0.22, 1, 0.36, 1] }
-                          : { type: "spring", stiffness: 150, damping: 26, mass: 0.9 }}
-                        className={`absolute inset-y-0 left-0 right-0 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] p-4 text-[#942E3A] shadow-xl sm:p-5 ${isFront ? "z-30 cursor-grab active:cursor-grabbing" : stackPosition === 1 ? "z-20" : "z-10"}`}
-                        style={{ transformOrigin: "bottom center" }}
-                      >
-                        <div className="flex h-full flex-col justify-between">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex items-center gap-2.5">
-                              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-xs font-bold text-[#D8B46A]">{review.initials}</span>
-                              <div>
-                                <p className="text-[10px] font-semibold text-[#942E3A]">{review.name}</p>
-                                <div className="mt-1 flex items-center gap-2">
-                                  <div className="flex gap-0.5 text-[#D8B46A]" aria-label={`${review.rating} out of 5 stars`}>{Array.from({ length: 5 }).map((_, index) => <Star key={index} className={`h-3 w-3 ${index < review.rating ? "fill-current" : "fill-transparent opacity-40"}`} />)}</div>
-                                  <span className="text-[9px] font-bold tracking-[0.12em] text-[#942E3A]/65">{review.model}</span>
+                      return (
+                        <motion.article
+                          key={isReturning ? `${review.model}-returning` : review.model}
+                          drag={isFront ? "x" : false}
+                          dragConstraints={{ left: -520, right: 520 }}
+                          dragElastic={0.18}
+                          onDragEnd={isFront ? handleReviewDragEnd : undefined}
+                          initial={{
+                            x: isReturning ? reviewDirection * 760 : isFront ? reviewDirection * 34 : stackPosition * 10,
+                            y: stackPosition * 7,
+                            rotate: stackPosition === 0 ? 0 : stackPosition === 1 ? 3 : -3,
+                            opacity: isReturning ? 0.95 : isFront ? 0.65 : 1 - stackPosition * 0.12,
+                            scale: 1 - stackPosition * 0.035,
+                          }}
+                          animate={{
+                            x: isFront && isReviewLeaving ? reviewDirection * 760 : stackPosition * 10,
+                            y: stackPosition * 7,
+                            rotate: stackPosition === 0 ? 0 : stackPosition === 1 ? 3 : -3,
+                            scale: 1 - stackPosition * 0.035,
+                            opacity: 1 - stackPosition * 0.12,
+                          }}
+                          transition={isFront && isReviewLeaving
+                            ? { duration: 0.62, ease: [0.22, 1, 0.36, 1] }
+                            : isReturning
+                              ? { duration: 0.9, ease: [0.22, 1, 0.36, 1] }
+                            : { type: "spring", stiffness: 150, damping: 26, mass: 0.9 }}
+                          className={`absolute inset-y-0 left-0 right-0 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] p-4 text-[#942E3A] shadow-xl sm:p-5 ${isFront ? "z-30 cursor-grab active:cursor-grabbing" : stackPosition === 1 ? "z-20" : "z-10"}`}
+                          style={{ transformOrigin: "bottom center" }}
+                        >
+                          <div className="flex h-full flex-col justify-between">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-center gap-2.5">
+                                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-xs font-bold text-[#D8B46A]">{review.initials}</span>
+                                <div>
+                                  <p className="text-[10px] font-semibold text-[#942E3A]">{review.name}</p>
+                                  <div className="mt-1 flex items-center gap-2">
+                                    <div className="flex gap-0.5 text-[#D8B46A]" aria-label={`${review.rating} out of 5 stars`}>{Array.from({ length: 5 }).map((_, index) => <Star key={index} className={`h-3 w-3 ${index < review.rating ? "fill-current" : "fill-transparent opacity-40"}`} />)}</div>
+                                    <span className="text-[9px] font-bold tracking-[0.12em] text-[#942E3A]/65">{review.model}</span>
+                                  </div>
                                 </div>
                               </div>
+                              <Quote className="h-6 w-6 rotate-180 text-[#942E3A]/20" />
                             </div>
-                            <Quote className="h-6 w-6 rotate-180 text-[#942E3A]/20" />
+                            <p className="max-w-[540px] font-playfair text-base leading-snug sm:text-lg">“{review.quote}”</p>
+                            <div className="flex items-center justify-between gap-3 text-[10px]">
+                              <span className="font-bold tracking-[0.14em] text-[#D8B46A]">{review.brand}</span>
+                              <span className="text-[#942E3A]/55">{review.detail}</span>
+                            </div>
                           </div>
-                          <p className="max-w-[540px] font-playfair text-base leading-snug sm:text-lg">“{review.quote}”</p>
-                          <div className="flex items-center justify-between gap-3 text-[10px]">
-                            <span className="font-bold tracking-[0.14em] text-[#D8B46A]">{review.brand}</span>
-                            <span className="text-[#942E3A]/55">{review.detail}</span>
-                          </div>
-                        </div>
-                      </motion.article>
-                    );
-                  })}
+                        </motion.article>
+                      );
+                    })}
+                  </div>
+                  <div className="absolute -bottom-1 left-0 right-0 z-40 flex items-center justify-center gap-1.5 sm:-bottom-3">
+                    {reviews.map((review, index) => <button key={`${review.brand}-${index}`} type="button" onClick={() => selectReview(index)} aria-label={`Show ${review.brand} review`} className={`h-1.5 rounded-full transition-all duration-300 ${index === activeReview ? "w-6 bg-[#D8B46A]" : "w-1.5 bg-[#FFF9EB]/45 hover:bg-[#FFF9EB]"}`} />)}
+                  </div>
                 </div>
-                <div className="absolute -bottom-1 left-0 right-0 z-40 flex items-center justify-center gap-1.5 sm:-bottom-3">
-                  {reviews.map((review, index) => <button key={`${review.brand}-${index}`} type="button" onClick={() => selectReview(index)} aria-label={`Show ${review.brand} review`} className={`h-1.5 rounded-full transition-all duration-300 ${index === activeReview ? "w-6 bg-[#D8B46A]" : "w-1.5 bg-[#FFF9EB]/45 hover:bg-[#FFF9EB]"}`} />)}
-                </div>
-              </div>
 
-              <div className="absolute right-0 top-0 z-40 flex gap-1.5 sm:right-0 sm:top-auto sm:bottom-1">
-                <button type="button" onClick={() => changeReview(-1)} aria-label="Previous review" className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]"><ChevronLeft className="h-4 w-4" /></button>
-                <button type="button" onClick={() => changeReview(1)} aria-label="Next review" className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]"><ChevronRight className="h-4 w-4" /></button>
+                <div className="absolute right-0 top-0 z-40 flex gap-1.5 sm:right-0 sm:top-auto sm:bottom-1">
+                  <button type="button" onClick={() => changeReview(-1)} aria-label="Previous review" className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]"><ChevronLeft className="h-4 w-4" /></button>
+                  <button type="button" onClick={() => changeReview(1)} aria-label="Next review" className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]"><ChevronRight className="h-4 w-4" /></button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* 2. CUSTOM BENTO GRID BOUTIQUE BRANDS SECTION (Matches Hand-Drawn Sketch Exactly) */}
       <section className="px-2 sm:px-4 lg:px-6">
         <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] space-y-3">
-          <div className="flex items-center justify-center py-2">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#942E3A] font-playfair tracking-[0.2em] uppercase text-center">
-              OUR COLLECTIONS
-            </h2>
-          </div>
+          <ScrollReveal>
+            <div className="flex items-center justify-center py-2">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#942E3A] font-playfair tracking-[0.2em] uppercase text-center">
+                OUR COLLECTIONS
+              </h2>
+            </div>
+          </ScrollReveal>
 
           {/* UNIFIED 6-BOX BENTO GRID - PERFECT SYMMETRY (1:2:1) & ENLARGED LOGOS */}
-          <div className="flex flex-row flex-nowrap items-stretch w-full gap-1.5 sm:gap-2.5 lg:gap-3.5">
+          <StaggerContainer className="flex flex-row flex-nowrap items-stretch w-full gap-1.5 sm:gap-2.5 lg:gap-3.5">
             
             {/* LEFT COLUMN (flex-[1]) -> Full Height Tall Vertical Box: New Balance */}
-            <div className="flex-[1] min-w-0 shrink-0 flex flex-col">
+            <StaggerItem className="flex-[1] min-w-0 shrink-0 flex flex-col" scale={true}>
               <Link
                 href="/shop?brand=New%20Balance"
                 className="group relative w-full h-full min-h-[115px] sm:min-h-[210px] lg:min-h-[268px] rounded-lg sm:rounded-2xl bg-transparent border border-[#942E3A]/15 hover:border-[#942E3A] hover:bg-black/[0.02] transition-all duration-300 flex flex-col items-center justify-center p-0.5 sm:p-3 lg:p-4 text-center overflow-hidden"
@@ -672,10 +684,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                   </svg>
                 </div>
               </Link>
-            </div>
+            </StaggerItem>
 
             {/* CENTER AREA (flex-[2]) -> Top Row (Wide + Small) & Bottom Row (Small + Wide) */}
-            <div className="flex-[2] min-w-0 shrink-0 flex flex-col justify-between gap-1.5 sm:gap-2.5 lg:gap-3.5">
+            <StaggerItem className="flex-[2] min-w-0 shrink-0 flex flex-col justify-between gap-1.5 sm:gap-2.5 lg:gap-3.5" scale={true}>
               
               {/* TOP ROW: Wide Box (Asics) + Small Box (Adidas) */}
               <div className="flex-1 flex flex-row flex-nowrap gap-1.5 sm:gap-2.5 lg:gap-3.5 min-h-0">
@@ -738,10 +750,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                 </Link>
               </div>
 
-            </div>
+            </StaggerItem>
 
-            {/* RIGHT COLUMN (flex-[1]) -> Full Height Tall Vertical Box: Puma */}
-            <div className="flex-[1] min-w-0 shrink-0 flex flex-col">
+            {/* RIGHT COLUMN (flex-[1]) -> Full Height Puma */}
+            <StaggerItem className="flex-[1] min-w-0 shrink-0 flex flex-col" scale={true}>
               <Link
                 href="/shop?brand=Puma"
                 className="group relative w-full h-full min-h-[115px] sm:min-h-[210px] lg:min-h-[268px] rounded-lg sm:rounded-2xl bg-transparent border border-[#942E3A]/15 hover:border-[#942E3A] hover:bg-black/[0.02] transition-all duration-300 flex flex-col items-center justify-center p-0.5 sm:p-3 lg:p-4 text-center overflow-hidden"
@@ -752,67 +764,70 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                   </svg>
                 </div>
               </Link>
-            </div>
-
-          </div>
+            </StaggerItem>
+          </StaggerContainer>
         </div>
       </section>
 
       {/* 3. CATEGORY TITLE */}
       <section className="px-2 sm:px-4 lg:px-6">
-        <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] text-center border-b border-[#D8B46A]/40 pb-4">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">FOR HER</span>
-          <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair tracking-tight mt-1">
-            BOUTIQUE HIGHLIGHTS
-          </h2>
-        </div>
+        <ScrollReveal>
+          <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] text-center border-b border-[#D8B46A]/40 pb-4">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">FOR HER</span>
+            <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair tracking-tight mt-1">
+              BOUTIQUE HIGHLIGHTS
+            </h2>
+          </div>
+        </ScrollReveal>
       </section>
 
       {/* 4. PRODUCT GRID (Infinite Scroll Row) */}
       <section className="px-2 sm:px-4 lg:px-6">
-        <div className="mx-auto max-w-[94vw] lg:max-w-[1320px]">
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-2xl border border-[#D8B46A] p-6">
-              <ShoppingBag className="h-8 w-8 text-[#D8B46A] mx-auto mb-2" />
-              <h3 className="text-sm font-bold text-[#942E3A]">No shoes found</h3>
-              <p className="text-[11px] text-[#D8B46A] mt-1">Explore our full boutique collection to view all women's styles.</p>
-            </div>
-          ) : (
-            <>
-              <style dangerouslySetInnerHTML={{ __html: `
-                .no-scrollbar::-webkit-scrollbar {
-                  display: none !important;
-                }
-              `}} />
-              <div
-                ref={scrollRef}
-                onMouseDown={handleMouseDown}
-                className="flex overflow-x-auto flex-nowrap gap-3 sm:gap-4 py-4 px-1 no-scrollbar cursor-grab active:cursor-grabbing select-none"
-                style={{ 
-                  WebkitOverflowScrolling: "touch",
-                  scrollbarWidth: "none",
-                  msOverflowStyle: "none"
-                }}
-              >
-                {repeatedProducts.map((product, idx) => (
-                  <div
-                    key={`${product.id}-${idx}`}
-                    className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"
-                  >
-                    <ProductCard product={product} />
-                  </div>
-                ))}
+        <ScrollReveal>
+          <div className="mx-auto max-w-[94vw] lg:max-w-[1320px]">
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-2xl border border-[#D8B46A] p-6">
+                <ShoppingBag className="h-8 w-8 text-[#D8B46A] mx-auto mb-2" />
+                <h3 className="text-sm font-bold text-[#942E3A]">No shoes found</h3>
+                <p className="text-[11px] text-[#D8B46A] mt-1">Explore our full boutique collection to view all women's styles.</p>
               </div>
-            </>
-          )}
-        </div>
+            ) : (
+              <>
+                <style dangerouslySetInnerHTML={{ __html: `
+                  .no-scrollbar::-webkit-scrollbar {
+                    display: none !important;
+                  }
+                `}} />
+                <div
+                  ref={scrollRef}
+                  onMouseDown={handleMouseDown}
+                  className="flex overflow-x-auto flex-nowrap gap-3 sm:gap-4 py-4 px-1 no-scrollbar cursor-grab active:cursor-grabbing select-none"
+                  style={{ 
+                    WebkitOverflowScrolling: "touch",
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none"
+                  }}
+                >
+                  {repeatedProducts.map((product, idx) => (
+                    <div
+                      key={`${product.id}-${idx}`}
+                      className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"
+                    >
+                      <ProductCard product={product} />
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </ScrollReveal>
       </section>
 
       {/* 8. TRUST FOOTNOTE BAR */}
       <section className="px-2 sm:px-4 lg:px-6">
-        <div className="w-full mx-auto max-w-[94vw] lg:max-w-[1320px] grid !grid-cols-4 gap-x-1.5 gap-y-0 sm:gap-y-6 sm:gap-x-4 bg-white border border-[#D8B46A]/45 rounded-2xl p-3 sm:p-5 shadow-xs">
+        <StaggerContainer className="w-full mx-auto max-w-[94vw] lg:max-w-[1320px] grid !grid-cols-4 gap-x-1.5 gap-y-0 sm:gap-y-6 sm:gap-x-4 bg-white border border-[#D8B46A]/45 rounded-2xl p-3 sm:p-5 shadow-xs">
           
-          <div className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
+          <StaggerItem direction="up" scale={true} className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
             <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
               <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
@@ -820,9 +835,9 @@ export default function HomeClient({ products }: { products: ProductWithVariants
               <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Quick Fitting</p>
               <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Try on sizes at your door</p>
             </div>
-          </div>
+          </StaggerItem>
 
-          <div className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
+          <StaggerItem direction="up" scale={true} className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
             <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
               <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
@@ -830,9 +845,9 @@ export default function HomeClient({ products }: { products: ProductWithVariants
               <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Mirror Quality</p>
               <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Nike & New Balance sports</p>
             </div>
-          </div>
+          </StaggerItem>
 
-          <div className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
+          <StaggerItem direction="up" scale={true} className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
             <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
               <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
@@ -840,9 +855,9 @@ export default function HomeClient({ products }: { products: ProductWithVariants
               <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Sole Cushioning</p>
               <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Perfect for running & gym</p>
             </div>
-          </div>
+          </StaggerItem>
 
-          <div className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
+          <StaggerItem direction="up" scale={true} className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
             <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
               <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
@@ -850,41 +865,43 @@ export default function HomeClient({ products }: { products: ProductWithVariants
               <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Easy Exchanges</p>
               <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Fast swap for perfect fit</p>
             </div>
-          </div>
+          </StaggerItem>
 
-        </div>
+        </StaggerContainer>
       </section>
 
       {/* 4.5 BEST SELLERS SECTION */}
       <section className="px-2 sm:px-4 lg:px-6">
-        <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] space-y-6">
-          <div className="text-center border-b border-[#D8B46A]/40 pb-4">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">BEST SELLERS</span>
-            <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair tracking-tight mt-1">
-              BESTSELLER HIGHLIGHTS
-            </h2>
-          </div>
+        <ScrollReveal>
+          <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] space-y-6">
+            <div className="text-center border-b border-[#D8B46A]/40 pb-4">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">BEST SELLERS</span>
+              <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair tracking-tight mt-1">
+                BESTSELLER HIGHLIGHTS
+              </h2>
+            </div>
 
-          <div
-            ref={bestsellerScrollRef}
-            onMouseDown={handleBestsellerMouseDown}
-            className="flex overflow-x-auto flex-nowrap gap-3 sm:gap-4 py-4 px-1 no-scrollbar cursor-grab active:cursor-grabbing select-none"
-            style={{ 
-              WebkitOverflowScrolling: "touch",
-              scrollbarWidth: "none",
-              msOverflowStyle: "none"
-            }}
-          >
-            {products.slice(0, 4).map((product) => (
-              <div
-                key={`bestseller-${product.id}`}
-                className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"
-              >
-                <ProductCard product={product} />
-              </div>
-            ))}
+            <div
+              ref={bestsellerScrollRef}
+              onMouseDown={handleBestsellerMouseDown}
+              className="flex overflow-x-auto flex-nowrap gap-3 sm:gap-4 py-4 px-1 no-scrollbar cursor-grab active:cursor-grabbing select-none"
+              style={{ 
+                WebkitOverflowScrolling: "touch",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none"
+              }}
+            >
+              {products.slice(0, 4).map((product) => (
+                <div
+                  key={`bestseller-${product.id}`}
+                  className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
     </div>

@@ -51,6 +51,20 @@ const GOV_AR_TO_EN: Record<string, string> = {
   "جنوب سيناء": "South Sinai",
 };
 
+function getGovernorateName(value: string) {
+  let repaired = value;
+
+  // Older orders may contain Arabic that was decoded as Latin-1 more than once.
+  // Repair those values at render time while new orders use normal UTF-8.
+  for (let attempt = 0; attempt < 2 && /[ÃÂØÙ]/.test(repaired); attempt += 1) {
+    const decoded = Buffer.from(repaired, "latin1").toString("utf8");
+    if (decoded === repaired || decoded.includes("�")) break;
+    repaired = decoded;
+  }
+
+  return GOV_AR_TO_EN[repaired] || repaired;
+}
+
 const statusLabels: Record<string, string> = {
   pending: "Order Confirmed",
   shipped: "With Courier",
@@ -281,7 +295,7 @@ export default async function TrackOrderPage({ searchParams }: PageProps) {
                   </h3>
                   <div className="space-y-3 text-sm text-[#6B1F2A]">
                     <p><span className="font-bold text-[#942E3A]">Name:</span> {order.customerName}</p>
-                    <p><span className="font-bold text-[#942E3A]">Governorate:</span> {GOV_AR_TO_EN[order.governorate] || order.governorate}</p>
+                    <p><span className="font-bold text-[#942E3A]">Governorate:</span> {getGovernorateName(order.governorate)}</p>
                     <p><span className="font-bold text-[#942E3A]">City / Area:</span> {order.city}</p>
                     <p><span className="font-bold text-[#942E3A]">Address:</span> {order.address}</p>
                   </div>
