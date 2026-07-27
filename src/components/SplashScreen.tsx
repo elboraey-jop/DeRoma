@@ -4,24 +4,25 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function SplashScreen() {
-  const [show, setShow] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  // Render the splash immediately on the server as well, so the page content
+  // cannot flash before the client-side effect starts.
+  const [show, setShow] = useState(true);
 
   useEffect(() => {
-    setIsMounted(true);
     // Check if splash was already shown in this session
     const hasShown = sessionStorage.getItem("deroma_splash_shown");
-    if (!hasShown) {
-      setShow(true);
-      const timer = setTimeout(() => {
-        setShow(false);
-        sessionStorage.setItem("deroma_splash_shown", "true");
-      }, 1800); // Display for 1.8s
-      return () => clearTimeout(timer);
+    if (hasShown) {
+      setShow(false);
+      return;
     }
-  }, []);
 
-  if (!isMounted) return null;
+    const timer = setTimeout(() => {
+      setShow(false);
+      sessionStorage.setItem("deroma_splash_shown", "true");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <AnimatePresence>

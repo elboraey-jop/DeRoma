@@ -143,49 +143,49 @@ export default async function TrackOrderPage({ searchParams }: PageProps) {
       : "";
 
   return (
-    <div className="min-h-screen bg-[#FFF9EB] px-4 py-12 text-[#942E3A] sm:px-6 lg:px-8" dir="ltr">
-      <div className="mx-auto max-w-[1120px] space-y-8">
+    <div className="min-h-screen bg-[#FFF9EB] px-3 py-5 text-[#942E3A] sm:px-6 sm:py-12 lg:px-8" dir="ltr">
+      <div className="mx-auto max-w-[1120px] space-y-4 sm:space-y-8">
         <Link href="/" className="inline-flex items-center gap-1 text-xs font-bold text-[#942E3A] transition-colors hover:text-[#6B1F2A]">
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>Back to Home</span>
         </Link>
 
-        <section className="grid gap-6 lg:grid-cols-[1fr_420px] lg:items-stretch">
-          <div className="rounded-3xl border border-[#942E3A]/20 bg-[#942E3A] p-7 text-[#FFF9EB] shadow-lg sm:p-10">
+        <section className="grid gap-4 lg:grid-cols-[1fr_420px] lg:items-stretch lg:gap-6">
+          <div className="rounded-3xl border border-[#942E3A]/20 bg-[#942E3A] p-5 text-[#FFF9EB] shadow-lg sm:p-10">
             <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">Order Tracking</span>
-            <h1 className="mt-4 font-playfair text-4xl font-black tracking-tight sm:text-5xl">
+            <h1 className="mt-2 font-playfair text-3xl font-black tracking-tight sm:mt-4 sm:text-5xl">
               Track Your Order
             </h1>
-            <p className="mt-4 max-w-2xl text-sm font-light leading-relaxed text-[#FFF9EB]/85 sm:text-base">
+            <p className="mt-2 max-w-2xl text-xs font-light leading-relaxed text-[#FFF9EB]/85 sm:mt-4 sm:text-base">
               Follow your DeRoma order from confirmation to doorstep delivery using your order reference or phone number.
             </p>
-            <div className="mt-7 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-[#D8B46A]/25 bg-white/8 p-4">
-                <Clock className="mb-2 h-4 w-4 text-[#D8B46A]" />
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#FFF9EB]/70">Support Hours</p>
-                <p className="mt-1 text-sm font-bold">9 AM - 10 PM</p>
+            <div className="mt-4 grid grid-cols-3 gap-2 sm:mt-7 sm:gap-3">
+              <div className="rounded-2xl border border-[#D8B46A]/25 bg-white/8 p-2.5 sm:p-4">
+                <Clock className="mb-1 h-3.5 w-3.5 text-[#D8B46A] sm:mb-2 sm:h-4 sm:w-4" />
+                <p className="text-[8px] font-bold uppercase tracking-wide text-[#FFF9EB]/70 sm:text-[10px] sm:tracking-wider">Support Hours</p>
+                <p className="mt-1 text-[10px] font-bold sm:text-sm">9 AM - 10 PM</p>
               </div>
-              <div className="rounded-2xl border border-[#D8B46A]/25 bg-white/8 p-4">
-                <Truck className="mb-2 h-4 w-4 text-[#D8B46A]" />
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#FFF9EB]/70">Delivery</p>
-                <p className="mt-1 text-sm font-bold">2-5 Days</p>
+              <div className="rounded-2xl border border-[#D8B46A]/25 bg-white/8 p-2.5 sm:p-4">
+                <Truck className="mb-1 h-3.5 w-3.5 text-[#D8B46A] sm:mb-2 sm:h-4 sm:w-4" />
+                <p className="text-[8px] font-bold uppercase tracking-wide text-[#FFF9EB]/70 sm:text-[10px] sm:tracking-wider">Delivery</p>
+                <p className="mt-1 text-[10px] font-bold sm:text-sm">2-5 Days</p>
               </div>
-              <div className="rounded-2xl border border-[#D8B46A]/25 bg-white/8 p-4">
-                <MapPin className="mb-2 h-4 w-4 text-[#D8B46A]" />
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#FFF9EB]/70">Coverage</p>
-                <p className="mt-1 text-sm font-bold">Egypt</p>
+              <div className="rounded-2xl border border-[#D8B46A]/25 bg-white/8 p-2.5 sm:p-4">
+                <MapPin className="mb-1 h-3.5 w-3.5 text-[#D8B46A] sm:mb-2 sm:h-4 sm:w-4" />
+                <p className="text-[8px] font-bold uppercase tracking-wide text-[#FFF9EB]/70 sm:text-[10px] sm:tracking-wider">Coverage</p>
+                <p className="mt-1 text-[10px] font-bold sm:text-sm">Egypt</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-[#942E3A]/25 bg-white p-6 shadow-xs sm:p-7">
+          <div className="rounded-3xl border border-[#942E3A]/25 bg-white p-4 shadow-xs sm:p-7">
             <div className="mb-5">
-              <h2 className="font-playfair text-2xl font-extrabold text-[#942E3A]">Find your package</h2>
+              <h2 className="font-playfair text-xl font-extrabold text-[#942E3A] sm:text-2xl">Find your package</h2>
               <p className="mt-1 text-xs leading-relaxed text-[#6B1F2A]/75">
                 Use an order number like DR-1001 or the primary phone number used at checkout.
               </p>
             </div>
-            <form action="/track" method="GET" className="space-y-3">
+            <form action="/track" method="GET" className="space-y-2 sm:space-y-3">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
                 <input
@@ -194,17 +194,17 @@ export default async function TrackOrderPage({ searchParams }: PageProps) {
                   defaultValue={query}
                   required
                   placeholder="Order reference or phone number"
-                  className="m-0 w-full rounded-2xl border border-[#942E3A]/20 bg-[#FFF9EB]/70 py-4 pl-11 pr-4 text-sm font-semibold text-[#942E3A] placeholder:text-[#942E3A]/45 outline-none transition-all focus:border-[#942E3A] focus:bg-white focus:ring-4 focus:ring-[#942E3A]/10"
+                  className="m-0 w-full rounded-2xl border border-[#942E3A]/20 bg-[#FFF9EB]/70 py-3 pl-11 pr-4 text-sm font-semibold text-[#942E3A] placeholder:text-[#942E3A]/45 outline-none transition-all focus:border-[#942E3A] focus:bg-white focus:ring-4 focus:ring-[#942E3A]/10 sm:py-4"
                 />
               </div>
               <button
                 type="submit"
-                className="flex w-full items-center justify-center rounded-2xl bg-[#942E3A] px-6 py-4 text-sm font-bold text-[#FFF9EB] shadow-sm transition-all hover:bg-[#802832] active:scale-[0.99]"
+                className="flex w-full items-center justify-center rounded-2xl bg-[#942E3A] px-6 py-3 text-sm font-bold text-[#FFF9EB] shadow-sm transition-all hover:bg-[#802832] active:scale-[0.99] sm:py-4"
               >
                 Track Order
               </button>
             </form>
-            <div className="mt-5 rounded-2xl border border-[#D8B46A]/25 bg-[#FFF9EB] p-4 text-xs leading-relaxed text-[#6B1F2A]">
+            <div className="mt-3 rounded-2xl border border-[#D8B46A]/25 bg-[#FFF9EB] p-3 text-xs leading-relaxed text-[#6B1F2A] sm:mt-5 sm:p-4">
               <span className="font-bold text-[#942E3A]">Tip:</span> If you placed the order while signed in, you can also open it from your profile orders.
             </div>
           </div>
@@ -218,17 +218,17 @@ export default async function TrackOrderPage({ searchParams }: PageProps) {
         )}
 
         {!query && (
-          <section className="grid gap-4 md:grid-cols-3">
+          <section className="grid grid-cols-3 gap-2 md:gap-4">
             {timelineSteps.map((step, index) => (
-              <div key={step.key} className="rounded-2xl border border-[#942E3A]/25 bg-white p-6 shadow-xs">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF9EB] text-[#942E3A]">
-                    <step.icon className="h-5 w-5" />
+              <div key={step.key} className="rounded-2xl border border-[#942E3A]/25 bg-white p-3 shadow-xs sm:p-6">
+                <div className="mb-2 flex items-center justify-between sm:mb-4">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF9EB] text-[#942E3A] sm:h-10 sm:w-10">
+                    <step.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                   <span className="text-xs font-black text-[#D8B46A]">0{index + 1}</span>
                 </div>
-                <h2 className="font-playfair text-lg font-bold text-[#942E3A]">{step.title}</h2>
-                <p className="mt-2 text-xs font-light leading-relaxed text-[#6B1F2A]">{step.text}</p>
+                <h2 className="font-playfair text-xs font-bold text-[#942E3A] sm:text-lg">{step.title}</h2>
+                <p className="mt-1 text-[9px] font-light leading-snug text-[#6B1F2A] sm:mt-2 sm:text-xs sm:leading-relaxed">{step.text}</p>
               </div>
             ))}
           </section>

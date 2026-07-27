@@ -6,6 +6,7 @@ import { CartProvider } from "@/lib/cartStore";
 import CartDrawer from "@/components/CartDrawer";
 import SmoothScroll from "@/components/SmoothScroll";
 import SplashScreen from "@/components/SplashScreen";
+import ScrollToTop from "@/components/ScrollToTop";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -32,6 +33,7 @@ export default function RootLayout({
     <html lang="en" dir="ltr">
       <body className={`${playfair.variable} ${outfit.variable} font-playfair antialiased`}>
         <SmoothScroll />
+        <ScrollToTop />
         <SplashScreen />
         <CartProvider>
           <div className="min-h-screen flex flex-col bg-[#FFF9EB] text-[#942E3A]">

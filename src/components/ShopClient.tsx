@@ -53,10 +53,16 @@ function getColorHex(colorName: string): string {
 
 export default function ShopClient({ initialProducts }: ShopClientProps) {
   const searchParams = useSearchParams();
-  const initialSearch = searchParams.get("q") || searchParams.get("brand") || "";
+  const initialSearch = searchParams.get("q") || "";
+  const brands = ["New Balance", "Adidas", "Nike", "ASICS"];
+  const initialBrands = searchParams.getAll("brand").flatMap((value) => value.split(","));
+  const normalizedInitialBrands = brands.filter((brand) =>
+    initialBrands.some((value) => value.trim().toLowerCase() === brand.toLowerCase())
+  );
   const initialCat = searchParams.get("category") || "all";
 
   const [search, setSearch] = useState(initialSearch);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(normalizedInitialBrands);
   const [activeCategory, setActiveCategory] = useState(initialCat);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -72,8 +78,12 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
   ];
 
   useEffect(() => {
-    const q = searchParams.get("q") || searchParams.get("brand") || "";
+    const q = searchParams.get("q") || "";
     setSearch(q);
+    const requestedBrands = searchParams.getAll("brand").flatMap((value) => value.split(","));
+    setSelectedBrands(
+      brands.filter((brand) => requestedBrands.some((value) => value.trim().toLowerCase() === brand.toLowerCase()))
+    );
     const cat = searchParams.get("category") || "all";
     setActiveCategory(cat);
   }, [searchParams]);
@@ -95,8 +105,6 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
       document.removeEventListener("keydown", handleEscape);
     };
   }, []);
-
-  const brands = ["New Balance", "Adidas", "Nike", "ASICS"];
 
   const allSizes = useMemo(() => {
     const sizes = new Set<string>();
@@ -126,6 +134,10 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
       result = result.filter((p) => p.category.toLowerCase() === activeCategory.toLowerCase());
     }
 
+    if (selectedBrands.length > 0) {
+      result = result.filter((p) => Boolean(p.brand && selectedBrands.includes(p.brand)));
+    }
+
     if (selectedSizes.length > 0) {
       result = result.filter((p) =>
         p.variants.some((v) => selectedSizes.includes(v.size) && v.stock > 0)
@@ -145,7 +157,14 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     }
 
     return result;
-  }, [initialProducts, search, activeCategory, selectedSizes, selectedColors, sortBy]);
+  }, [initialProducts, search, activeCategory, selectedBrands, selectedSizes, selectedColors, sortBy]);
+
+  const toggleBrand = (brand: string) => {
+    setSelectedBrands((prev) =>
+      prev.includes(brand) ? prev.filter((item) => item !== brand) : [...prev, brand]
+    );
+    setActiveCategory("all");
+  };
 
   const toggleSize = (size: string) => {
     setSelectedSizes((prev) =>
@@ -162,13 +181,14 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
   const clearFilters = () => {
     setSelectedSizes([]);
     setSelectedColors([]);
+    setSelectedBrands([]);
     setSearch("");
     setActiveCategory("all");
     setSortBy("newest");
   };
 
   const hasActiveFilters =
-    selectedSizes.length > 0 || selectedColors.length > 0 || search !== "" || activeCategory !== "all";
+    selectedBrands.length > 0 || selectedSizes.length > 0 || selectedColors.length > 0 || search !== "" || activeCategory !== "all";
 
   return (
     <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] px-2 sm:px-4 lg:px-6 pb-6 pt-1 sm:py-6 bg-[#FFF9EB] text-[#942E3A]" dir="ltr">
@@ -284,18 +304,11 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
             <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">Brands</h3>
             <div className="flex flex-col gap-y-1">
               {brands.map((brand) => {
-                const isActive = search.toLowerCase() === brand.toLowerCase();
+                const isActive = selectedBrands.includes(brand);
                 return (
                   <button
                     key={brand}
-                    onClick={() => {
-                      if (isActive) {
-                        setSearch("");
-                      } else {
-                        setSearch(brand);
-                        setActiveCategory("all");
-                      }
-                    }}
+                    onClick={() => toggleBrand(brand)}
                     className={`text-left text-xs py-2 px-3 rounded-xl font-bold transition-all ${
                       isActive
                         ? "bg-[#D8B46A] text-[#FFF9EB] shadow-xs"
@@ -449,18 +462,11 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                   <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">Brands</h3>
                   <div className="flex flex-col gap-y-1">
                     {brands.map((brand) => {
-                      const isActive = search.toLowerCase() === brand.toLowerCase();
+                      const isActive = selectedBrands.includes(brand);
                       return (
                         <button
                           key={brand}
-                          onClick={() => {
-                            if (isActive) {
-                              setSearch("");
-                            } else {
-                              setSearch(brand);
-                              setActiveCategory("all");
-                            }
-                          }}
+                          onClick={() => toggleBrand(brand)}
                           className={`text-left text-xs py-2.5 px-4 rounded-xl font-bold transition-all ${
                             isActive
                               ? "bg-[#D8B46A] text-[#FFF9EB] shadow-xs"

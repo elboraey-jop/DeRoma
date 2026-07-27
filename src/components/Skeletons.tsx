@@ -259,3 +259,98 @@ export function CheckoutSkeleton() {
     </div>
   );
 }
+
+export function HomeSkeleton() {
+  return (
+    <div className="min-h-screen bg-[#FFF9EB] px-3 py-6 sm:px-6 lg:px-8" dir="ltr">
+      <div className="mx-auto max-w-[1320px] space-y-8 animate-pulse">
+        <div className="aspect-[1209/1300] w-full rounded-3xl bg-[#942E3A]/10 sm:aspect-[2120/742]" />
+        <div className="mx-auto h-4 w-32 rounded bg-[#942E3A]/15" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-6">
+          {[1, 2, 3, 4].map((i) => <CardSkeleton key={i} />)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ContentPageSkeleton() {
+  return (
+    <div className="min-h-[70vh] bg-[#FFF9EB] px-4 py-10 sm:px-6 sm:py-16" dir="ltr">
+      <div className="mx-auto max-w-4xl animate-pulse space-y-8">
+        <div className="mx-auto h-10 w-64 rounded bg-[#942E3A]/20" />
+        <div className="mx-auto h-4 w-48 rounded bg-[#D8B46A]/30" />
+        <div className="rounded-3xl border border-[#D8B46A]/15 bg-white p-6 sm:p-10">
+          <div className="space-y-4">
+            {["w-full", "w-11/12", "w-10/12", "w-full", "w-9/12", "w-11/12", "w-8/12"].map((width, i) => (
+              <div key={i} className={`h-4 rounded bg-[#942E3A]/10 ${width}`} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AuthSkeleton() {
+  return (
+    <div className="min-h-[70vh] bg-[#FFF9EB] px-4 py-12 sm:py-20" dir="ltr">
+      <div className="mx-auto max-w-md animate-pulse rounded-3xl border border-[#D8B46A]/15 bg-white p-6 sm:p-8">
+        <div className="mx-auto mb-8 h-9 w-40 rounded bg-[#942E3A]/20" />
+        <div className="space-y-5">
+          <div className="h-12 rounded-xl bg-[#942E3A]/10" />
+          <div className="h-12 rounded-xl bg-[#942E3A]/10" />
+          <div className="h-12 rounded-full bg-[#942E3A]/20" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function TrackSkeleton() {
+  return (
+    <div className="min-h-[70vh] bg-[#FFF9EB] px-4 py-10 sm:px-6 sm:py-16" dir="ltr">
+      <div className="mx-auto max-w-6xl animate-pulse space-y-6">
+        <div className="mx-auto h-10 w-56 rounded bg-[#942E3A]/20" />
+        <div className="mx-auto h-12 max-w-xl rounded-full bg-white" />
+        <div className="grid gap-5 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => <div key={i} className="h-40 rounded-3xl border border-[#D8B46A]/15 bg-white" />)}
+        </div>
+        <div className="grid gap-5 lg:grid-cols-[1fr_1.2fr]">
+          <div className="h-64 rounded-3xl bg-white" />
+          <div className="h-64 rounded-3xl bg-white" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ProfileSkeleton() {
+  return (
+    <div className="min-h-[70vh] bg-[#FFF9EB] px-4 py-10 sm:px-6 sm:py-16" dir="ltr">
+      <div className="mx-auto max-w-5xl animate-pulse space-y-6">
+        <div className="h-10 w-48 rounded bg-[#942E3A]/20" />
+        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+          <div className="h-64 rounded-3xl bg-white" />
+          <div className="space-y-4 rounded-3xl bg-white p-6">
+            <div className="h-6 w-40 rounded bg-[#942E3A]/15" />
+            {[1, 2, 3, 4].map((i) => <div key={i} className="h-14 rounded-2xl bg-[#942E3A]/10" />)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function SuccessSkeleton() {
+  return (
+    <div className="min-h-[70vh] bg-[#FFF9EB] px-4 py-16" dir="ltr">
+      <div className="mx-auto max-w-xl animate-pulse rounded-3xl bg-white p-8 text-center sm:p-12">
+        <div className="mx-auto h-16 w-16 rounded-full bg-[#D8B46A]/30" />
+        <div className="mx-auto mt-6 h-8 w-64 rounded bg-[#942E3A]/20" />
+        <div className="mx-auto mt-4 h-4 w-80 max-w-full rounded bg-[#942E3A]/10" />
+        <div className="mx-auto mt-8 h-12 w-48 rounded-full bg-[#942E3A]/20" />
+      </div>
+    </div>
+  );
+}

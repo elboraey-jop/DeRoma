@@ -825,9 +825,9 @@ export default function HomeClient({ products }: { products: ProductWithVariants
 
       {/* 8. TRUST FOOTNOTE BAR */}
       <section className="px-2 sm:px-4 lg:px-6">
-        <StaggerContainer className="w-full mx-auto max-w-[94vw] lg:max-w-[1320px] grid !grid-cols-4 gap-x-1.5 gap-y-0 sm:gap-y-6 sm:gap-x-4 bg-white border border-[#D8B46A]/45 rounded-2xl p-3 sm:p-5 shadow-xs">
+        <StaggerContainer className="w-full mx-auto max-w-[94vw] lg:max-w-[1320px] grid grid-cols-3 sm:grid-cols-4 gap-x-1.5 gap-y-0 sm:gap-y-6 sm:gap-x-4 bg-white border border-[#D8B46A]/45 rounded-2xl p-3 sm:p-5 shadow-xs">
           
-          <StaggerItem direction="up" scale={true} className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
+          <StaggerItem direction="up" scale={true} className="hidden w-full min-w-0 flex-col items-center text-center gap-1 sm:flex sm:gap-2 justify-center">
             <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
               <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
