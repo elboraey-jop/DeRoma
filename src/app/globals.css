@@ -1,6 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 :root {
   /* These are defaults - they will be overridden by settings CSS vars injected in layout.tsx */
   --bg-dark: #942E3A;
@@ -35,7 +45,7 @@
   --radius: var(--border-radius, 4px);
   --radius-sm: 2px;
   --font-heading: var(--font-heading, 'Playfair Display', serif);
-  --font-body: var(--font-body, 'Inter', sans-serif);
+  --font-body: var(--font-playfair), serif;
   --container: 1300px;
 }
 html.dark {
@@ -77,7 +87,7 @@ body {
 .summary-row,
 .qty,
 .price-number {
-  font-family: var(--font-numeric), var(--font-outfit), sans-serif;
+  font-family: var(--font-playfair), serif;
   font-variant-numeric: lining-nums tabular-nums;
   letter-spacing: 0;
 }
@@ -90,6 +100,15 @@ h6 {
   font-family: var(--font-heading);
   font-weight: 400;
   margin-top: 0;
+}
+.product-card-name {
+  font-family: var(--font-playfair), serif !important;
+}
+.product-card-badge-number {
+  font-family: var(--font-playfair), serif !important;
+}
+.product-detail-discount-badge {
+  font-family: var(--font-playfair), serif !important;
 }
 .container {
   max-width: var(--container);

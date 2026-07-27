@@ -50,6 +50,12 @@ function enrichCatalogProduct(product: ProductWithVariants): ProductWithVariants
 
   return {
     ...product,
+    name: catalogProduct.name,
+    description: catalogProduct.description,
+    price: catalogProduct.price,
+    compareAtPrice: catalogProduct.compareAtPrice,
+    category: catalogProduct.category,
+    images: [catalogProduct.image],
     brand: catalogProduct.brand,
     modelKey: catalogProduct.modelKey,
     colorLabel: catalogProduct.colorLabel,
@@ -65,28 +71,22 @@ export const FALLBACK_PRODUCTS: ProductWithVariants[] = CATALOG_PRODUCTS.map(toP
 export async function getActiveProducts(): Promise<ProductWithVariants[]> {
   try {
     const dbProducts = await prisma.product.findMany({
-      where: { status: "active", id: { in: CATALOG_PRODUCT_IDS } },
+      where: { status: "active" },
       include: { variants: true },
       orderBy: { createdAt: "desc" },
     });
 
-    if (dbProducts && dbProducts.length === FALLBACK_PRODUCTS.length) {
-      const products = dbProducts.map((p) =>
-        enrichCatalogProduct({
-          ...p,
-          price: Number(p.price),
-          compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
-          variants: p.variants.map((v) => ({
-            ...v,
-            stock: Number(v.stock),
-          })),
-        } as ProductWithVariants)
-      );
-
-      return CATALOG_PRODUCT_IDS.map((id) => products.find((product) => product.id === id)).filter(
-        Boolean
-      ) as ProductWithVariants[];
-    }
+    return dbProducts.map((p) =>
+      enrichCatalogProduct({
+        ...p,
+        price: Number(p.price),
+        compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+        variants: p.variants.map((v) => ({
+          ...v,
+          stock: Number(v.stock),
+        })),
+      } as ProductWithVariants)
+    );
   } catch (error) {
     console.warn("Database connection issue. Using fallback products dataset:", error);
   }
@@ -104,7 +104,7 @@ export async function getProductById(id: string): Promise<ProductWithVariants | 
       include: { variants: true },
     });
 
-    if (product && CATALOG_PRODUCT_IDS.includes(product.id)) {
+    if (product) {
       return enrichCatalogProduct({
         ...product,
         price: Number(product.price),

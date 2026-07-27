@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search, SlidersHorizontal, ArrowUpDown, X, Check } from "lucide-react";
+import { Search, SlidersHorizontal, ArrowUpDown, X, Check, ChevronDown } from "lucide-react";
 import ProductCard, { ProductWithVariants, COLOR_TRANSLATIONS } from "@/components/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -61,6 +61,14 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const sortMenuRef = useRef<HTMLDivElement>(null);
+
+  const sortOptions = [
+    { value: "newest", label: "Newest Arrivals" },
+    { value: "price-asc", label: "Price: Low to High" },
+    { value: "price-desc", label: "Price: High to Low" },
+  ];
 
   useEffect(() => {
     const q = searchParams.get("q") || searchParams.get("brand") || "";
@@ -68,6 +76,24 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     const cat = searchParams.get("category") || "all";
     setActiveCategory(cat);
   }, [searchParams]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(event.target as Node)) {
+        setShowSortMenu(false);
+      }
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowSortMenu(false);
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   const brands = ["New Balance", "Adidas", "Nike", "ASICS"];
 
@@ -144,13 +170,13 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     selectedSizes.length > 0 || selectedColors.length > 0 || search !== "" || activeCategory !== "all";
 
   return (
-    <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] px-2 sm:px-4 lg:px-6 py-6 bg-[#FFF9EB] text-[#942E3A]" dir="ltr">
+    <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] px-2 sm:px-4 lg:px-6 pb-6 pt-1 sm:py-6 bg-[#FFF9EB] text-[#942E3A]" dir="ltr">
 
 
       {/* Search & Sort Bar */}
-      <div className="mb-6 flex flex-col sm:flex-row gap-3">
+      <div className="mb-6 flex flex-row items-center gap-2 sm:gap-3">
         {/* Search */}
-        <div className="relative flex-1">
+        <div className="relative order-2 min-w-0 flex-1 sm:order-none">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
           <input
             type="text"
@@ -170,11 +196,11 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-x-2">
+        <div className="contents shrink-0 gap-x-2 sm:flex">
           {/* Mobile Filters Toggle */}
           <button
             onClick={() => setShowMobileFilters(true)}
-            className="flex md:hidden items-center justify-center gap-x-2 rounded-full border border-[#D8B46A] bg-white px-5 py-3 text-xs font-bold text-[#942E3A] hover:bg-[#F2E7D5]"
+            className="order-1 flex md:hidden items-center justify-center gap-x-1.5 rounded-full border border-[#D8B46A] bg-white px-3 py-3 text-xs font-bold text-[#942E3A] hover:bg-[#F2E7D5] whitespace-nowrap sm:order-none"
           >
             <SlidersHorizontal className="h-4 w-4" />
             <span>Filters</span>
@@ -183,18 +209,68 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
             )}
           </button>
 
-          {/* Sort Dropdown */}
-          <div className="relative flex items-center rounded-full border border-[#D8B46A] bg-white px-4 py-2 text-xs text-[#942E3A]">
-            <ArrowUpDown className="h-4 w-4 mr-2 text-[#D8B46A]" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-transparent font-bold outline-none cursor-pointer text-[#942E3A] pr-4 pl-1 appearance-none text-xs"
+          {/* Clear Filters */}
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="order-3 sm:order-none flex h-[42px] items-center justify-center gap-x-1.5 rounded-full bg-[#942E3A] px-3.5 sm:px-4 text-xs font-bold text-white hover:bg-[#76232D] transition-colors whitespace-nowrap shadow-md shadow-[#942E3A]/10"
             >
-              <option value="newest">Newest Arrivals</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-            </select>
+              <X className="h-3.5 w-3.5 text-[#D8B46A]" />
+              <span className="hidden sm:inline">Clear Filters</span>
+              <span className="inline sm:hidden">Clear</span>
+            </button>
+          )}
+
+          {/* Sort Dropdown */}
+          <div ref={sortMenuRef} className="order-4 relative sm:order-none">
+            <button
+              type="button"
+              onClick={() => setShowSortMenu((current) => !current)}
+              aria-haspopup="listbox"
+              aria-expanded={showSortMenu}
+              className="flex h-[42px] w-[42px] items-center justify-center rounded-full border border-[#D8B46A] bg-white text-xs text-[#942E3A] transition-colors hover:bg-[#F2E7D5] sm:h-auto sm:w-auto sm:justify-start sm:px-4 sm:py-3"
+            >
+              <ArrowUpDown className="h-4 w-4 text-[#D8B46A] sm:mr-2" />
+              <span className="hidden font-bold sm:inline">
+                {sortOptions.find((option) => option.value === sortBy)?.label}
+              </span>
+              <ChevronDown className="ml-2 hidden h-3.5 w-3.5 text-[#D8B46A] sm:inline" />
+            </button>
+
+            {showSortMenu && (
+              <div
+                role="listbox"
+                aria-label="Sort products"
+                className="absolute right-0 top-full z-40 mt-2 w-52 overflow-hidden rounded-2xl border border-[#D8B46A]/60 bg-[#FFF9EB] p-1.5 shadow-[0_14px_30px_rgba(93,13,24,0.18)]"
+              >
+                <p className="px-3 pb-1.5 pt-2 text-[9px] font-bold uppercase tracking-[0.16em] text-[#D8B46A]">
+                  Sort by
+                </p>
+                {sortOptions.map((option) => {
+                  const isSelected = sortBy === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      onClick={() => {
+                        setSortBy(option.value);
+                        setShowSortMenu(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition-colors ${
+                        isSelected
+                          ? "bg-[#942E3A] text-[#FFF9EB]"
+                          : "text-[#942E3A] hover:bg-[#F2E7D5]"
+                      }`}
+                    >
+                      <span>{option.label}</span>
+                      {isSelected && <Check className="h-3.5 w-3.5 text-[#D8B46A]" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -213,8 +289,12 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                   <button
                     key={brand}
                     onClick={() => {
-                      setSearch(brand);
-                      setActiveCategory("all");
+                      if (isActive) {
+                        setSearch("");
+                      } else {
+                        setSearch(brand);
+                        setActiveCategory("all");
+                      }
                     }}
                     className={`text-left text-xs py-2 px-3 rounded-xl font-bold transition-all ${
                       isActive
@@ -317,36 +397,36 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
+              animate={{ opacity: 0.45 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowMobileFilters(false)}
-              className="fixed inset-0 z-50 bg-black"
+              className="fixed inset-0 z-50 bg-black backdrop-blur-[2px]"
             />
 
             {/* Drawer Content */}
             <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
               transition={{ type: "tween", duration: 0.3 }}
-              className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-[#FFF9EB] p-6 shadow-2xl flex flex-col text-[#942E3A]"
+              className="fixed bottom-0 left-0 right-0 z-50 flex h-[78vh] max-h-full flex-col overflow-hidden rounded-t-[1.75rem] bg-[#FFF9EB] text-[#942E3A] shadow-2xl"
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-[#D8B46A]/30 pb-4 mb-6">
+              <div className="flex items-center justify-between border-b border-[#D8B46A]/40 bg-[#942E3A] px-5 py-4">
                 <div className="flex items-center gap-x-2">
-                  <SlidersHorizontal className="h-5 w-5 text-[#942E3A]" />
-                  <h2 className="text-lg font-bold font-playfair uppercase tracking-wider">Filters</h2>
+                  <SlidersHorizontal className="h-5 w-5 text-[#D8B46A]" />
+                  <h2 className="text-lg font-bold font-playfair uppercase tracking-wider text-[#FFF9EB]">Filters</h2>
                 </div>
                 <button
                   onClick={() => setShowMobileFilters(false)}
-                  className="p-1 rounded-full hover:bg-[#F2E7D5] transition-colors"
+                  className="rounded-full p-1 text-[#FFF9EB] transition-colors hover:bg-white/10 hover:text-[#D8B46A]"
                 >
-                  <X className="h-6 w-6 text-[#942E3A]" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 
               {/* Scrollable Filters List */}
-              <div className="flex-1 overflow-y-auto space-y-6 pr-2 -mr-2 no-scrollbar">
+              <div className="flex-1 overflow-y-auto space-y-6 px-5 py-5 no-scrollbar">
                 {/* Brands */}
                 <div className="space-y-3">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">Brands</h3>
@@ -357,8 +437,12 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                         <button
                           key={brand}
                           onClick={() => {
-                            setSearch(brand);
-                            setActiveCategory("all");
+                            if (isActive) {
+                              setSearch("");
+                            } else {
+                              setSearch(brand);
+                              setActiveCategory("all");
+                            }
                           }}
                           className={`text-left text-xs py-2.5 px-4 rounded-xl font-bold transition-all ${
                             isActive
@@ -422,7 +506,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
               </div>
 
               {/* Bottom Buttons */}
-              <div className="border-t border-[#D8B46A]/30 pt-4 mt-6 flex gap-3">
+              <div className="mt-auto flex gap-3 border-t border-[#D8B46A]/40 bg-white/95 px-5 py-4">
                 {hasActiveFilters && (
                   <button
                     onClick={() => {

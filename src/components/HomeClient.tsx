@@ -12,13 +12,21 @@ import {
   Headphones,
   RotateCcw,
   Activity,
-  RefreshCw
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  Quote,
+  Star
 } from "lucide-react";
 import ProductCard, { ProductWithVariants } from "./ProductCard";
 
 export default function HomeClient({ products }: { products: ProductWithVariants[] }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [activeReview, setActiveReview] = useState(0);
+  const [reviewDirection, setReviewDirection] = useState(1);
+  const [isReviewLeaving, setIsReviewLeaving] = useState(false);
+  const [returningReview, setReturningReview] = useState<number | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bestsellerScrollRef = useRef<HTMLDivElement>(null);
@@ -123,11 +131,12 @@ export default function HomeClient({ products }: { products: ProductWithVariants
     // CARD 1: RETRO SNEAKERS
     {
       id: 1,
-      tag: "THE EDIT",
-      title: "Retro Running Silhouettes",
-      desc: "Timeless street sportswear styles from New Balance & Adidas, redesigned for everyday lifestyle.",
+      tag: "THE FEMININE EDIT",
+      title: "Soft Sport Icons",
+      desc: "Pastel runners and everyday silhouettes for easy comfort, soft colour, and feminine street style.",
       href: "/shop?category=retro",
-      image: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800&auto=format&fit=crop&q=80"
+      image: "/banners/hero-1-desktop.png",
+      mobileImage: "/banners/hero-1-mobile.png"
     },
     // CARD 2: PERFORMANCE SNEAKERS
     {
@@ -136,7 +145,8 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       title: "Performance Running & Gym",
       desc: "Super-lightweight cushioned trainers from Asics & Nike engineered for gym workouts, daily running, and support.",
       href: "/shop?category=running",
-      image: "https://images.unsplash.com/photo-1582588678413-dbf45f4823e9?w=800&auto=format&fit=crop&q=80"
+      image: "/banners/hero-2-desktop.png",
+      mobileImage: "/banners/hero-2-mobile.png"
     },
     // CARD 3: CHUNKY PLATFORMS
     {
@@ -145,7 +155,8 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       title: "Chunky & Platform Soles",
       desc: "Bold elevated profiles combined with soft memory foam footbeds for maximum casual comfort.",
       href: "/shop?category=chunky",
-      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&auto=format&fit=crop&q=80"
+      image: "/banners/hero-3-desktop.png",
+      mobileImage: "/banners/hero-3-mobile.png"
     }
   ];
 
@@ -168,13 +179,15 @@ export default function HomeClient({ products }: { products: ProductWithVariants
   ];
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const timerSlideIndex = ((activeSlide % heroCards.length) + heroCards.length) % heroCards.length;
+    const duration = timerSlideIndex === 0 ? 6000 : 3000;
+    const timer = window.setTimeout(() => {
       setDirection(1);
       setActiveSlide((prev) => prev + 1);
-    }, 4500);
+    }, duration);
 
-    return () => clearInterval(timer);
-  }, []);
+    return () => window.clearTimeout(timer);
+  }, [activeSlide]);
 
   const handleNext = () => {
     setDirection(1);
@@ -198,6 +211,110 @@ export default function HomeClient({ products }: { products: ProductWithVariants
   const currentIndex = ((activeSlide % heroCards.length) + heroCards.length) % heroCards.length;
   const currentCard = heroCards[currentIndex];
   const currentTheme = cardThemes[currentIndex];
+
+  const reviews = [
+    {
+      brand: "NEW BALANCE",
+      initials: "NB",
+      model: "530 Beige",
+      rating: 5,
+      quote: "The fit is perfect and the quality feels even better in person. DeRoma made choosing my everyday pair effortless.",
+      name: "Mariam A.",
+      detail: "Verified DeRoma customer",
+    },
+    {
+      brand: "ADIDAS",
+      initials: "AD",
+      model: "Handball Spezial",
+      rating: 4,
+      quote: "Exactly the pair I was looking for. The delivery was quick, the packaging was beautiful, and the shoes are so comfortable.",
+      name: "Youssef M.",
+      detail: "Verified DeRoma customer",
+    },
+    {
+      brand: "ASICS",
+      initials: "AS",
+      model: "Gel-Kayano 14",
+      rating: 5,
+      quote: "Finally found a stylish running shoe that feels light all day. The sizing guide was spot on.",
+      name: "Nour K.",
+      detail: "Verified DeRoma customer",
+    },
+    {
+      brand: "NIKE",
+      initials: "NK",
+      model: "V2K Run",
+      rating: 4,
+      quote: "The whole experience feels premium—from browsing the collection to wearing my new favourite sneakers.",
+      name: "Omar H.",
+      detail: "Verified DeRoma customer",
+    },
+    {
+      brand: "PUMA",
+      initials: "PM",
+      model: "Palermo Vintage",
+      rating: 3,
+      quote: "A beautiful everyday sneaker with a really easy-to-style colourway. I have been wearing it nonstop.",
+      name: "Salma R.",
+      detail: "Verified DeRoma customer",
+    },
+    {
+      brand: "ADIDAS",
+      initials: "AD",
+      model: "Campus 00s",
+      rating: 5,
+      quote: "The sizing advice helped me choose confidently, and the pair arrived exactly as pictured.",
+      name: "Jana E.",
+      detail: "Verified DeRoma customer",
+    },
+    {
+      brand: "NEW BALANCE",
+      initials: "NB",
+      model: "327 Burgundy",
+      rating: 4,
+      quote: "Super light, very comfortable, and the burgundy detail makes the whole outfit feel more special.",
+      name: "Farah S.",
+      detail: "Verified DeRoma customer",
+    },
+    {
+      brand: "NIKE",
+      initials: "NK",
+      model: "Court Vision Low",
+      rating: 3,
+      quote: "Clean design and a comfortable sole for daily wear. The delivery experience was smooth from start to finish.",
+      name: "Lina M.",
+      detail: "Verified DeRoma customer",
+    },
+  ];
+
+  const activeReviewData = reviews[activeReview];
+
+  const changeReview = (step: number, exitDirection = step > 0 ? 1 : -1) => {
+    if (isReviewLeaving) return;
+    const departingReview = activeReview;
+    const nextReview = (activeReview + step + reviews.length) % reviews.length;
+    setReviewDirection(exitDirection);
+    setIsReviewLeaving(true);
+    window.setTimeout(() => {
+      setActiveReview(nextReview);
+      setIsReviewLeaving(false);
+      setReturningReview(departingReview);
+      window.setTimeout(() => setReturningReview(null), 900);
+    }, 620);
+  };
+
+  const selectReview = (index: number) => {
+    setReviewDirection(index >= activeReview ? 1 : -1);
+    setActiveReview(index);
+  };
+
+  const handleReviewDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number }; velocity: { x: number } }) => {
+    if (Math.abs(info.offset.x) > 45 || Math.abs(info.velocity.x) > 350) {
+      // A hand swipe always dismisses the front card and reveals the card underneath.
+      // The swipe direction only controls the visual direction of the exit.
+      changeReview(1, info.offset.x < 0 ? 1 : -1);
+    }
+  };
 
   const slideVariants = {
     enter: (dir: number) => ({
@@ -226,7 +343,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       <section className="px-2 sm:px-4 lg:px-6 pt-0">
         <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] relative select-none">
           
-          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2rem] shadow-lg min-h-[380px] sm:min-h-[440px] lg:min-h-[460px] cursor-grab active:cursor-grabbing">
+          <div className="relative aspect-[1209/1300] overflow-hidden rounded-2xl shadow-lg sm:aspect-[2120/742] sm:rounded-3xl lg:rounded-[2rem] cursor-grab active:cursor-grabbing">
             
             <AnimatePresence mode="popLayout" custom={direction}>
               <motion.div
@@ -239,50 +356,64 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.15}
+                dragDirectionLock
+                dragMomentum={false}
                 onDragEnd={handleDragEnd}
-                className={`w-full h-full relative rounded-2xl sm:rounded-3xl lg:rounded-[2rem] border border-white/10 min-h-[420px] sm:min-h-[440px] lg:min-h-[460px] overflow-hidden ${currentTheme.bgColor} ${currentTheme.textColor}`}
+                whileTap={{ scale: 0.995 }}
+                className={`relative h-full w-full touch-pan-y overflow-hidden rounded-2xl border border-white/10 sm:rounded-3xl lg:rounded-[2rem] ${currentTheme.bgColor} ${currentTheme.textColor}`}
               >
                 <div className={`absolute -top-20 -right-20 h-64 w-64 rounded-full ${currentTheme.accentBlur} blur-2xl pointer-events-none z-0`} />
                 <div className={`absolute -bottom-20 -left-20 h-64 w-64 rounded-full ${currentTheme.accentBlur} blur-2xl pointer-events-none z-0`} />
 
-                {currentIndex === 0 && (
-                  <div className="w-full h-full p-5 sm:p-8 lg:p-10 flex flex-col justify-end relative min-h-[420px] sm:min-h-[440px] lg:min-h-[460px]">
-                    {/* Background Image */}
-                    <Image
-                      src={currentCard.image}
-                      alt={currentCard.title}
-                      fill
-                      className="object-cover absolute inset-0 z-0 select-none pointer-events-none"
-                      priority
-                    />
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#942E3A]/95 via-[#942E3A]/30 to-transparent z-10" />
+                {false && currentIndex === 0 && (
+                  <div className="relative flex h-[420px] flex-col overflow-hidden bg-[#942E3A] text-[#FFF9EB] sm:grid sm:grid-cols-1 sm:grid-rows-[1.22fr_0.78fr] sm:h-[440px] lg:h-[460px] lg:grid-cols-[0.88fr_1.12fr] lg:grid-rows-1">
+                    {/* Quiet brand canvas */}
+                    <div className="pointer-events-none absolute -bottom-40 -left-20 h-[430px] w-[430px] rounded-full border border-[#D8B46A]/15" />
+                    <div className="pointer-events-none absolute -bottom-28 -left-8 h-[300px] w-[300px] rounded-full border border-[#D8B46A]/10" />
+                    <div className="pointer-events-none absolute right-[38%] top-1/2 hidden -translate-y-1/2 select-none font-sans text-[180px] font-black leading-none tracking-[-0.12em] text-white/[0.035] lg:block">D</div>
 
-                    {/* Content */}
-                    <div className="relative z-20 flex flex-col space-y-2 pointer-events-auto max-w-md pb-6 text-left">
-                      <span className="text-[#D8B46A] tracking-[0.25em] text-[10px] sm:text-xs font-bold font-sans uppercase">
-                        {currentCard.tag}
-                      </span>
-                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light font-playfair tracking-tight leading-tight text-white">
-                        {currentCard.title}
-                      </h1>
-                      <p className="text-xs sm:text-sm text-[#FFF9EB]/80 font-sans font-light max-w-sm">
-                        {currentCard.desc}
-                      </p>
-                      <div className="pt-2">
-                        <Link
-                          href={currentCard.href}
-                          className="group inline-flex items-center gap-2 text-xs font-semibold text-[#D8B46A] hover:text-white transition-colors font-sans border-b border-[#D8B46A]/40 pb-0.5 w-fit"
-                        >
-                          <span>Shop Retro Collection</span>
-                          <ArrowRight className="h-3.5 w-3.5 translate-x-0 group-hover:translate-x-1.5 transition-transform" />
+                    {/* Editorial copy */}
+                    <div className="relative z-20 flex h-full flex-col justify-between p-5 pb-[128px] sm:p-9 sm:pb-9 lg:p-12">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <span className="font-playfair text-lg font-semibold text-[#D8B46A]">DeRoma</span>
+                          <span className="h-px w-8 bg-[#D8B46A]/60" />
+                          <span className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#FFF9EB]/55">Edition 01</span>
+                        </div>
+                        <span className="text-[10px] font-bold tracking-[0.18em] text-[#D8B46A]">01 / 03</span>
+                      </div>
+
+                      <div className="max-w-[390px] py-3 sm:py-5 lg:py-0">
+                        <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#D8B46A]">{currentCard.tag}</p>
+                        <h1 className="font-playfair text-[2.35rem] font-normal leading-[0.9] tracking-[-0.045em] text-[#FFF9EB] sm:text-5xl lg:text-[3.9rem]">Soft<br />Sport<br /><em className="text-[#D8B46A]">Icons</em></h1>
+                        <p className="mt-4 max-w-[330px] text-[11px] leading-relaxed text-[#FFF9EB]/70 sm:text-sm">A feminine everyday edit in soft colour, easy comfort, and unmistakable street style.</p>
+                        <Link href={currentCard.href} className="group mt-5 inline-flex items-center gap-4 rounded-full bg-[#FFF9EB] py-2 pl-5 pr-2 text-[11px] font-bold text-[#942E3A] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D8B46A]">
+                          <span>Shop the collection</span>
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#942E3A] text-[#FFF9EB] transition-transform duration-300 group-hover:translate-x-0.5"><ArrowRight className="h-4 w-4" /></span>
                         </Link>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#FFF9EB]/55">
+                        <span>New Balance</span><span className="h-1 w-1 rounded-full bg-[#D8B46A]" /><span>Adidas</span><span className="h-1 w-1 rounded-full bg-[#D8B46A]" /><span>Daily icons</span>
+                      </div>
+                    </div>
+
+                    {/* Product portrait */}
+                    <div className="absolute bottom-4 left-4 right-4 z-10 h-[105px] min-h-0 p-0 sm:relative sm:inset-auto sm:h-auto sm:p-7 sm:pt-0 lg:min-h-0 lg:p-8 lg:pl-0 lg:pr-10 lg:py-10">
+                      <div className="relative h-full min-h-0 overflow-hidden rounded-[1.5rem] border border-[#FFF9EB]/50 bg-[#FFF9EB] shadow-[0_22px_50px_rgba(28,10,14,0.25)] sm:rounded-[2rem] lg:min-h-0">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_28%,rgba(216,180,106,0.32),transparent_26%),linear-gradient(145deg,#fff9eb_0%,#f3dfd1_100%)]" />
+                        <div className="absolute inset-x-5 top-14 h-px bg-[#942E3A]/15" />
+                        <div className="absolute inset-x-5 bottom-14 h-px bg-[#942E3A]/15" />
+                        <div className="absolute left-5 top-5 z-10 flex items-center gap-2 text-[#942E3A]/60"><span className="h-1.5 w-1.5 rounded-full bg-[#D8B46A]" /><span className="text-[9px] font-bold uppercase tracking-[0.22em]">New Balance · 9060</span></div>
+                        <Image src={currentCard.image} alt={currentCard.title} fill className="relative z-[1] scale-[1.3] object-contain p-0 mix-blend-multiply transition-transform duration-700 hover:scale-[1.38] sm:scale-[1.38] sm:hover:scale-[1.46] lg:scale-[1.45] lg:hover:scale-[1.52]" priority />
+                        <div className="absolute bottom-5 left-5 z-10 font-playfair text-2xl italic text-[#942E3A]">01</div>
+                        <div className="absolute bottom-5 right-5 z-10 text-right"><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#942E3A]/55">Pastel pink</p><p className="mt-1 font-playfair text-xl italic text-[#942E3A]">Everyday, elevated.</p></div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {currentIndex === 1 && (
+                {false && currentIndex === 1 && (
                   <div className="w-full h-full p-5 sm:p-8 lg:p-10 grid grid-cols-1 lg:grid-cols-12 items-center gap-6 relative min-h-[420px] sm:min-h-[440px] lg:min-h-[460px] overflow-hidden text-left">
                     {/* Large outline text watermark behind everything */}
                     <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[90px] sm:text-[130px] lg:text-[160px] font-black text-[#942E3A]/5 select-none uppercase tracking-widest font-sans pointer-events-none z-0">
@@ -332,7 +463,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                   </div>
                 )}
 
-                {currentIndex === 2 && (
+                {false && currentIndex === 2 && (
                   <div className="w-full h-full p-5 sm:p-8 lg:p-10 flex flex-col justify-center items-center text-center relative min-h-[420px] sm:min-h-[440px] lg:min-h-[460px]">
                     {/* Frame Portrait of Boots */}
                     <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-[#942E3A]/20 p-1.5 shadow-2xl flex items-center justify-center overflow-hidden mb-5">
@@ -372,6 +503,27 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                   </div>
                 )}
 
+                {/* Responsive artwork supplied by DeRoma */}
+                <picture className="absolute inset-0 z-10 block h-full w-full">
+                  <source media="(max-width: 639px)" srcSet={currentCard.mobileImage} />
+                  <img
+                    src={currentCard.image}
+                    alt={currentCard.title}
+                    className="h-full w-full select-none object-cover"
+                    draggable={false}
+                  />
+                </picture>
+
+                {currentIndex === 0 && (
+                  <Link
+                    href={currentCard.href}
+                    onPointerDown={(event) => event.stopPropagation()}
+                    className="absolute bottom-[5%] left-[40%] z-20 inline-flex -translate-x-1/2 items-center justify-center rounded-full bg-[#942E3A] px-3 py-1 text-[8px] font-bold tracking-wide text-[#FFF9EB] shadow-md transition-transform hover:scale-105 hover:bg-[#7d2530] sm:bottom-[8%] sm:left-[27.5%] sm:px-8 sm:py-3 sm:text-sm"
+                  >
+                    SHOP NOW
+                  </Link>
+                )}
+
                 {/* Embedded Dots */}
                 <div className="absolute bottom-4 left-0 right-0 z-30 flex justify-center items-center gap-2 pointer-events-auto">
                   {heroCards.map((c, idx) => {
@@ -379,14 +531,15 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                     return (
                       <button
                         key={c.id}
+                        onPointerDown={(event) => event.stopPropagation()}
                         onClick={() => {
                           setDirection(idx > currentIndex ? 1 : -1);
                           setActiveSlide(idx);
                         }}
                         className={`h-2 rounded-full transition-all duration-500 ${
                           isActive
-                            ? `w-7 ${currentIndex !== 0 ? "bg-[#942E3A]" : "bg-white"} shadow-md`
-                            : `w-2 ${currentIndex !== 0 ? "bg-[#942E3A]/30 hover:bg-[#942E3A]/60" : "bg-white/40 hover:bg-white/70"}`
+                            ? "w-7 bg-[#942E3A] shadow-md"
+                            : "w-2 bg-[#942E3A]/30 hover:bg-[#942E3A]/60"
                         }`}
                         aria-label={`Go to card ${idx + 1}`}
                       />
@@ -399,6 +552,99 @@ export default function HomeClient({ products }: { products: ProductWithVariants
 
           </div>
 
+        </div>
+      </section>
+
+      {/* 1.5. BRAND REVIEWS - Compact deck-style swipe carousel */}
+      <section className="px-2 sm:px-4 lg:px-6">
+        <div className="mx-auto max-w-[94vw] lg:max-w-[1320px]">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-[#942E3A] px-4 py-5 sm:px-8 sm:py-6 lg:px-12 text-[#FFF9EB] shadow-lg">
+            <div className="pointer-events-none absolute -left-16 -top-20 h-48 w-48 rounded-full bg-[#D8B46A]/10 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-56 rounded-full bg-[#FFF9EB]/10 blur-3xl" />
+
+            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8">
+              <div className="shrink-0 sm:w-[170px] lg:w-[220px]">
+                <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">THE DE ROMA EDIT</span>
+                <h2 className="mt-1 font-playfair text-xl font-semibold leading-tight sm:text-2xl">Loved by every step.</h2>
+                <div className="mt-3 flex items-center gap-1.5 text-[#D8B46A]" aria-label="5 out of 5 stars">
+                  {Array.from({ length: 5 }).map((_, index) => <Star key={index} className="h-3.5 w-3.5 fill-current" />)}
+                  <span className="ml-1 text-[10px] font-semibold text-[#FFF9EB]/75">4.9 / 5</span>
+                </div>
+                <p className="mt-3 hidden max-w-[190px] text-[10px] leading-relaxed text-[#FFF9EB]/60 sm:block">Swipe the cards to discover what our sneaker community is saying.</p>
+              </div>
+
+              <div className="relative min-w-0 flex-1 sm:h-[190px]">
+                <div className="relative mx-auto h-[220px] w-full max-w-[620px] sm:h-full">
+                  {[0, 1, 2, ...(returningReview !== null ? [3] : [])].map((stackPosition) => {
+                    const isReturning = stackPosition === 3 && returningReview !== null;
+                    const reviewIndex = isReturning ? returningReview : (activeReview + stackPosition) % reviews.length;
+                    const review = reviews[reviewIndex];
+                    const isFront = stackPosition === 0;
+
+                    return (
+                      <motion.article
+                        key={isReturning ? `${review.model}-returning` : review.model}
+                        drag={isFront ? "x" : false}
+                        dragConstraints={{ left: -520, right: 520 }}
+                        dragElastic={0.18}
+                        onDragEnd={isFront ? handleReviewDragEnd : undefined}
+                        initial={{
+                          x: isReturning ? reviewDirection * 760 : isFront ? reviewDirection * 34 : stackPosition * 10,
+                          y: stackPosition * 7,
+                          rotate: stackPosition === 0 ? 0 : stackPosition === 1 ? 3 : -3,
+                          opacity: isReturning ? 0.95 : isFront ? 0.65 : 1 - stackPosition * 0.12,
+                          scale: 1 - stackPosition * 0.035,
+                        }}
+                        animate={{
+                          x: isFront && isReviewLeaving ? reviewDirection * 760 : stackPosition * 10,
+                          y: stackPosition * 7,
+                          rotate: stackPosition === 0 ? 0 : stackPosition === 1 ? 3 : -3,
+                          scale: 1 - stackPosition * 0.035,
+                          opacity: 1 - stackPosition * 0.12,
+                        }}
+                        transition={isFront && isReviewLeaving
+                          ? { duration: 0.62, ease: [0.22, 1, 0.36, 1] }
+                          : isReturning
+                            ? { duration: 0.9, ease: [0.22, 1, 0.36, 1] }
+                          : { type: "spring", stiffness: 150, damping: 26, mass: 0.9 }}
+                        className={`absolute inset-y-0 left-0 right-0 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] p-4 text-[#942E3A] shadow-xl sm:p-5 ${isFront ? "z-30 cursor-grab active:cursor-grabbing" : stackPosition === 1 ? "z-20" : "z-10"}`}
+                        style={{ transformOrigin: "bottom center" }}
+                      >
+                        <div className="flex h-full flex-col justify-between">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-center gap-2.5">
+                              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-xs font-bold text-[#D8B46A]">{review.initials}</span>
+                              <div>
+                                <p className="text-[10px] font-semibold text-[#942E3A]">{review.name}</p>
+                                <div className="mt-1 flex items-center gap-2">
+                                  <div className="flex gap-0.5 text-[#D8B46A]" aria-label={`${review.rating} out of 5 stars`}>{Array.from({ length: 5 }).map((_, index) => <Star key={index} className={`h-3 w-3 ${index < review.rating ? "fill-current" : "fill-transparent opacity-40"}`} />)}</div>
+                                  <span className="text-[9px] font-bold tracking-[0.12em] text-[#942E3A]/65">{review.model}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <Quote className="h-6 w-6 rotate-180 text-[#942E3A]/20" />
+                          </div>
+                          <p className="max-w-[540px] font-playfair text-base leading-snug sm:text-lg">“{review.quote}”</p>
+                          <div className="flex items-center justify-between gap-3 text-[10px]">
+                            <span className="font-bold tracking-[0.14em] text-[#D8B46A]">{review.brand}</span>
+                            <span className="text-[#942E3A]/55">{review.detail}</span>
+                          </div>
+                        </div>
+                      </motion.article>
+                    );
+                  })}
+                </div>
+                <div className="absolute -bottom-1 left-0 right-0 z-40 flex items-center justify-center gap-1.5 sm:-bottom-3">
+                  {reviews.map((review, index) => <button key={`${review.brand}-${index}`} type="button" onClick={() => selectReview(index)} aria-label={`Show ${review.brand} review`} className={`h-1.5 rounded-full transition-all duration-300 ${index === activeReview ? "w-6 bg-[#D8B46A]" : "w-1.5 bg-[#FFF9EB]/45 hover:bg-[#FFF9EB]"}`} />)}
+                </div>
+              </div>
+
+              <div className="absolute right-0 top-0 z-40 flex gap-1.5 sm:right-0 sm:top-auto sm:bottom-1">
+                <button type="button" onClick={() => changeReview(-1)} aria-label="Previous review" className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]"><ChevronLeft className="h-4 w-4" /></button>
+                <button type="button" onClick={() => changeReview(1)} aria-label="Next review" className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]"><ChevronRight className="h-4 w-4" /></button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
