@@ -139,6 +139,7 @@ export default function CheckoutPage() {
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
+  const [couponCode, setCouponCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isMounted, setIsMounted] = useState(false);
@@ -146,6 +147,11 @@ export default function CheckoutPage() {
   const [govSearch, setGovSearch] = useState("");
   const [isCenterMenuOpen, setIsCenterMenuOpen] = useState(false);
   const [centerSearch, setCenterSearch] = useState("");
+  const [adminShipping, setAdminShipping] = useState<Array<{ governorates: string[]; fee: number; freeShippingThreshold: number | null }>>([]);
+
+  useEffect(() => { fetch("/api/shipping").then((response) => response.ok ? response.json() : []).then(setAdminShipping).catch(() => null); }, []);
+
+  const governorates = GOVERNORATES.map((governorate) => ({ ...governorate, fee: adminShipping.find((zone) => zone.governorates.includes(governorate.ar) || zone.governorates.includes(governorate.en))?.fee ?? governorate.fee }));
   const govMenuRef = useRef<HTMLDivElement>(null);
   const centerMenuRef = useRef<HTMLDivElement>(null);
 
@@ -164,8 +170,8 @@ export default function CheckoutPage() {
 
   if (!isMounted) return null;
 
-  const activeGov = GOVERNORATES.find((gov) => gov.en === selectedGovEn);
-  const filteredGovernorates = GOVERNORATES.filter((gov) =>
+  const activeGov = governorates.find((gov) => gov.en === selectedGovEn);
+  const filteredGovernorates = governorates.filter((gov) =>
     gov.en.toLowerCase().includes(govSearch.trim().toLowerCase())
   );
   const availableCenters = selectedGovEn ? CENTERS_BY_GOVERNORATE[selectedGovEn] || [] : [];
@@ -199,6 +205,7 @@ export default function CheckoutPage() {
         city,
         address,
         notes,
+        couponCode,
         items: cart.map((item) => ({
           productId: item.productId,
           variantId: item.variantId,
@@ -209,7 +216,7 @@ export default function CheckoutPage() {
       if (result.success && result.orderNumber) {
         clearCart();
         router.push(
-          `/checkout/success?orderNumber=${result.orderNumber}&name=${encodeURIComponent(name)}&total=${grandTotal}&shipping=${shippingCost}&gov=${encodeURIComponent(selectedGovEn)}`
+          `/checkout/success?orderNumber=${result.orderNumber}&name=${encodeURIComponent(name)}&total=${result.totalPrice}&shipping=${result.shippingCost}&gov=${encodeURIComponent(selectedGovEn)}`
         );
       } else {
         setError(result.error || "Something went wrong. Please try again.");
@@ -380,7 +387,7 @@ export default function CheckoutPage() {
                 {cart.map((item) => <div key={item.variantId} className="flex items-center gap-3"><div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-white"><Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-bold">{item.name}</p><p className="mt-1 text-[11px] text-white/65">{item.color} · Size {item.size}</p><p className="mt-1 text-[11px] text-white/65">Quantity: {item.quantity}</p></div><p className="shrink-0 text-sm font-bold">{formatCurrency(item.price * item.quantity)}</p></div>)}
               </div>
               <div className="my-5 h-px bg-white/15" />
-              <div className="space-y-3 text-sm"><div className="flex justify-between text-white/70"><span>Subtotal</span><span className="font-semibold text-white">{formatCurrency(cartTotal)}</span></div><div className="flex justify-between text-white/70"><span>Delivery</span><span className="font-semibold text-white">{selectedGovEn ? `${shippingCost} EGP` : "Select governorate"}</span></div><div className="flex items-end justify-between border-t border-white/15 pt-4"><span className="font-bold">Total</span><span className="font-playfair text-2xl font-semibold">{formatCurrency(grandTotal)}</span></div></div>
+              <div className="mb-4 flex gap-2"><input value={couponCode} onChange={(event) => setCouponCode(event.target.value.toUpperCase())} placeholder="Coupon code" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-xs text-white placeholder:text-white/45 outline-none" /><span className="flex items-center text-[10px] font-bold text-[#d8b46a]">Applied at checkout</span></div><div className="space-y-3 text-sm"><div className="flex justify-between text-white/70"><span>Subtotal</span><span className="font-semibold text-white">{formatCurrency(cartTotal)}</span></div><div className="flex justify-between text-white/70"><span>Delivery</span><span className="font-semibold text-white">{selectedGovEn ? `${shippingCost} EGP` : "Select governorate"}</span></div><div className="flex items-end justify-between border-t border-white/15 pt-4"><span className="font-bold">Total*</span><span className="font-playfair text-2xl font-semibold">{formatCurrency(grandTotal)}</span></div><p className="text-[10px] text-white/50">*Coupon discounts are validated and applied securely when the order is placed.</p></div>
               <button form="checkout-form" type="submit" disabled={loading} className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#d8b46a] px-5 py-3.5 text-sm font-bold text-[#481827] shadow-lg transition hover:bg-[#e5c785] disabled:cursor-not-allowed disabled:opacity-60">{loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#481827] border-t-transparent" /> : <><span>Place order</span><ArrowLeft className="h-4 w-4 rotate-180" /></>}</button>
               <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-white/60"><LockKeyhole className="h-3.5 w-3.5" /> Your details are kept private</div>
             </section>

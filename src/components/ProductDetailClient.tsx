@@ -27,10 +27,21 @@ import { useWishlist } from "@/lib/wishlistStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 import ProductCard, { ProductWithVariants, COLOR_TRANSLATIONS } from "@/components/ProductCard";
+import { submitReviewAction } from "@/app/review-actions";
+
+export interface ProductReviewView {
+  id: string | number;
+  name: string;
+  avatar: string;
+  rating: number;
+  date: string;
+  comment: string;
+}
 
 interface ProductDetailClientProps {
   product: ProductWithVariants;
   similarProducts: ProductWithVariants[];
+  reviews?: ProductReviewView[];
 }
 
 function getColorHex(colorName: string): string {
@@ -117,7 +128,7 @@ const MOCK_REVIEWS = [
   },
 ];
 
-export default function ProductDetailClient({ product, similarProducts }: ProductDetailClientProps) {
+export default function ProductDetailClient({ product, similarProducts, reviews = [] }: ProductDetailClientProps) {
   const { addItem } = useCart();
   const router = useRouter();
   const productColors = Array.from(new Set(product.variants.map((v) => v.color)));
@@ -503,7 +514,7 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
 
       {/* Reviews Section */}
       <ScrollReveal className="mt-10 sm:mt-14">
-        <ReviewsSection ratingBreakdown={ratingBreakdown} product={product} />
+        <ReviewsSection ratingBreakdown={ratingBreakdown} product={product} reviews={reviews} />
       </ScrollReveal>
 
       {/* Similar Products */}
@@ -538,17 +549,19 @@ export default function ProductDetailClient({ product, similarProducts }: Produc
 // ── Reviews Section Component ──
 function ReviewsSection({ 
   ratingBreakdown,
-  product
+  product,
+  reviews: storedReviews,
 }: { 
   ratingBreakdown: { stars: number; percentage: number }[];
   product: ProductWithVariants;
+  reviews: ProductReviewView[];
 }) {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReviewRating, setNewReviewRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewName, setReviewName] = useState("");
   const [reviewComment, setReviewComment] = useState("");
-  const [reviews, setReviews] = useState(MOCK_REVIEWS);
+  const [reviews, setReviews] = useState<ProductReviewView[]>(storedReviews.length ? storedReviews : MOCK_REVIEWS);
 
   const scrollLeft = () => {
     const container = document.getElementById("reviews-carousel");
@@ -560,8 +573,11 @@ function ReviewsSection({
     if (container) container.scrollBy({ left: 320, behavior: "smooth" });
   };
 
-  const handleSubmitReview = () => {
+  const handleSubmitReview = async () => {
     if (!reviewName.trim() || !reviewComment.trim() || newReviewRating === 0) return;
+
+    const result = await submitReviewAction({ productId: product.id, customerName: reviewName, rating: newReviewRating, body: reviewComment });
+    if (!result.success) return;
 
     const newReview = {
       id: reviews.length + 1,

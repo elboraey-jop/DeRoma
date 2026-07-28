@@ -1,6 +1,10 @@
 import prisma from "@/lib/prisma";
 import { ProductWithVariants } from "@/components/ProductCard";
-import { CATALOG_PRODUCT_IDS, CATALOG_PRODUCTS, CatalogProduct } from "@/lib/productCatalog";
+import {
+  CATALOG_PRODUCT_IDS,
+  CATALOG_PRODUCTS,
+  CatalogProduct,
+} from "@/lib/productCatalog";
 
 function buildVariants(product: CatalogProduct) {
   return product.sizes.map((size, index) => ({
@@ -8,13 +12,15 @@ function buildVariants(product: CatalogProduct) {
     productId: product.id,
     size,
     color: product.color,
-    stock: (index % 3 === 0) ? 0 : Math.max(product.stock - (index % 2), 1),
+    stock: index % 3 === 0 ? 0 : Math.max(product.stock - (index % 2), 1),
     sku: `DR-${product.id.toUpperCase()}-${size}`,
   }));
 }
 
 function buildColorways(product: CatalogProduct) {
-  return CATALOG_PRODUCTS.filter((item) => item.modelKey === product.modelKey).map((item) => ({
+  return CATALOG_PRODUCTS.filter(
+    (item) => item.modelKey === product.modelKey,
+  ).map((item) => ({
     productId: item.id,
     color: item.color,
     label: item.colorLabel,
@@ -44,29 +50,35 @@ function toProductWithVariants(product: CatalogProduct): ProductWithVariants {
   };
 }
 
-function enrichCatalogProduct(product: ProductWithVariants): ProductWithVariants {
-  const catalogProduct = CATALOG_PRODUCTS.find((item) => item.id === product.id);
+function enrichCatalogProduct(
+  product: ProductWithVariants,
+): ProductWithVariants {
+  const catalogProduct = CATALOG_PRODUCTS.find(
+    (item) => item.id === product.id,
+  );
   if (!catalogProduct) return product;
 
   return {
     ...product,
-    name: catalogProduct.name,
-    description: catalogProduct.description,
-    price: catalogProduct.price,
-    compareAtPrice: catalogProduct.compareAtPrice,
-    category: catalogProduct.category,
-    images: [catalogProduct.image],
-    brand: catalogProduct.brand,
+    name: product.name || catalogProduct.name,
+    description: product.description || catalogProduct.description,
+    price: product.price || catalogProduct.price,
+    compareAtPrice: product.compareAtPrice ?? catalogProduct.compareAtPrice,
+    category: product.category || catalogProduct.category,
+    images: product.images.length > 0 ? product.images : [catalogProduct.image],
+    brand: product.brand || catalogProduct.brand,
     modelKey: catalogProduct.modelKey,
     colorLabel: catalogProduct.colorLabel,
     colorHex: catalogProduct.colorHex,
     colorways: buildColorways(catalogProduct),
-    rating: catalogProduct.rating,
-    reviewsCount: catalogProduct.reviewsCount,
+    rating: product.rating ?? catalogProduct.rating,
+    reviewsCount: product.reviewsCount ?? catalogProduct.reviewsCount,
   };
 }
 
-export const FALLBACK_PRODUCTS: ProductWithVariants[] = CATALOG_PRODUCTS.map(toProductWithVariants);
+export const FALLBACK_PRODUCTS: ProductWithVariants[] = CATALOG_PRODUCTS.map(
+  toProductWithVariants,
+);
 
 export async function getActiveProducts(): Promise<ProductWithVariants[]> {
   try {
@@ -81,22 +93,28 @@ export async function getActiveProducts(): Promise<ProductWithVariants[]> {
         ...p,
         price: Number(p.price),
         compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+        rating: Number(p.rating),
+        reviewsCount: p.reviewsCount,
         variants: p.variants.map((v) => ({
           ...v,
           stock: Number(v.stock),
         })),
-      } as ProductWithVariants)
+      } as ProductWithVariants),
     );
   } catch (error) {
-    console.warn("Database connection issue. Using fallback products dataset:", error);
+    console.warn(
+      "Database connection issue. Using fallback products dataset:",
+      error,
+    );
   }
 
   return FALLBACK_PRODUCTS;
 }
 
-export async function getProductById(id: string): Promise<ProductWithVariants | null> {
+export async function getProductById(
+  id: string,
+): Promise<ProductWithVariants | null> {
   const fallbackProduct = FALLBACK_PRODUCTS.find((p) => p.id === id);
-  if (fallbackProduct) return fallbackProduct;
 
   try {
     const product = await prisma.product.findUnique({
@@ -108,7 +126,11 @@ export async function getProductById(id: string): Promise<ProductWithVariants | 
       return enrichCatalogProduct({
         ...product,
         price: Number(product.price),
-        compareAtPrice: product.compareAtPrice ? Number(product.compareAtPrice) : null,
+        compareAtPrice: product.compareAtPrice
+          ? Number(product.compareAtPrice)
+          : null,
+        rating: Number(product.rating),
+        reviewsCount: product.reviewsCount,
         variants: product.variants.map((v) => ({
           ...v,
           stock: Number(v.stock),
@@ -119,5 +141,5 @@ export async function getProductById(id: string): Promise<ProductWithVariants | 
     console.warn("Database error during getProductById:", error);
   }
 
-  return null;
+  return fallbackProduct || null;
 }

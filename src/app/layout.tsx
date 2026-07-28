@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Outfit } from "next/font/google";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import SiteChrome from "@/components/SiteChrome";
 import { CartProvider } from "@/lib/cartStore";
 import CartDrawer from "@/components/CartDrawer";
 import SmoothScroll from "@/components/SmoothScroll";
@@ -36,13 +35,7 @@ export default function RootLayout({
         <ScrollToTop />
         <SplashScreen />
         <CartProvider>
-          <div className="min-h-screen flex flex-col bg-[#FFF9EB] text-[#942E3A]">
-            <Navbar />
-            <main className="flex-1 pt-[72px] sm:pt-[80px]">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          <SiteChrome>{children}</SiteChrome>
           <CartDrawer />
         </CartProvider>
       </body>

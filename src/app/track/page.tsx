@@ -235,14 +235,14 @@ export default async function TrackOrderPage({ searchParams }: PageProps) {
         )}
 
         {order && (
-          <section className="space-y-6">
-            <div className="rounded-3xl border border-[#942E3A]/25 bg-white p-6 shadow-xs sm:p-8">
-              <div className="flex flex-col gap-5 border-b border-[#942E3A]/10 pb-6 sm:flex-row sm:items-center sm:justify-between">
+          <section className="space-y-4 sm:space-y-6">
+            <div className="rounded-3xl border border-[#942E3A]/25 bg-white p-4 shadow-xs sm:p-8">
+              <div className="flex items-center justify-between gap-3 border-b border-[#942E3A]/10 pb-4 sm:flex-row sm:gap-5 sm:pb-6">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">Order Reference</p>
-                  <h2 className="mt-2 font-playfair text-3xl font-black text-[#942E3A]">{order.orderNumber}</h2>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#D8B46A] sm:text-[10px] sm:tracking-[0.25em]">Order Reference</p>
+                  <h2 className="mt-1 font-playfair text-2xl font-black text-[#942E3A] sm:mt-2 sm:text-3xl">{order.orderNumber}</h2>
                 </div>
-                <span className={`inline-flex w-fit rounded-full border px-4 py-2 text-xs font-black ${statusStyles[order.status] || statusStyles.pending}`}>
+                <span className={`inline-flex w-fit shrink-0 rounded-full border px-3 py-1.5 text-[10px] font-black sm:px-4 sm:py-2 sm:text-xs ${statusStyles[order.status] || statusStyles.pending}`}>
                   {statusLabels[order.status] || statusLabels.pending}
                 </span>
               </div>
@@ -255,30 +255,30 @@ export default async function TrackOrderPage({ searchParams }: PageProps) {
                   </p>
                 </div>
               ) : (
-                <div className="mt-6 grid gap-4 md:grid-cols-3">
+                <div className="mt-4 grid grid-cols-3 gap-2 sm:mt-6 sm:gap-4">
                   {timelineSteps.map((step) => {
                     const state = getStepState(order.status, step.key);
                     const isComplete = state === "complete";
                     return (
                       <div
                         key={step.key}
-                        className={`rounded-2xl border p-5 ${
+                        className={`rounded-2xl border p-2.5 sm:p-5 ${
                           isComplete
                             ? "border-[#D8B46A]/50 bg-[#FFF9EB]"
                             : "border-[#942E3A]/15 bg-white"
                         }`}
                       >
-                        <div className="mb-4 flex items-center gap-3">
+                        <div className="mb-2 flex flex-col items-center gap-1.5 text-center sm:mb-4 sm:flex-row sm:gap-3 sm:text-left">
                           <div
-                            className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full sm:h-10 sm:w-10 ${
                               isComplete ? "bg-[#942E3A] text-[#FFF9EB]" : "bg-stone-100 text-stone-400"
                             }`}
                           >
-                            {isComplete ? <CheckCircle2 className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
+                            {isComplete ? <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" /> : <Circle className="h-4 w-4 sm:h-5 sm:w-5" />}
                           </div>
-                          <h3 className="font-playfair text-lg font-bold text-[#942E3A]">{step.title}</h3>
+                          <h3 className="font-playfair text-[10px] font-bold leading-tight text-[#942E3A] sm:text-lg">{step.title}</h3>
                         </div>
-                        <p className="text-xs font-light leading-relaxed text-[#6B1F2A]">{step.text}</p>
+                        <p className="text-[9px] font-light leading-snug text-[#6B1F2A] sm:text-xs sm:leading-relaxed">{step.text}</p>
                       </div>
                     );
                   })}

@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import { CATALOG_PRODUCT_IDS, CATALOG_PRODUCTS } from "../src/lib/productCatalog";
 
 const prisma = new PrismaClient();
@@ -15,6 +16,24 @@ function buildVariants(product: (typeof CATALOG_PRODUCTS)[number]) {
 }
 
 async function main() {
+  if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
+    const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 12);
+    await prisma.user.upsert({
+      where: { email: process.env.ADMIN_EMAIL.trim().toLowerCase() },
+      create: {
+        email: process.env.ADMIN_EMAIL.trim().toLowerCase(),
+        passwordHash,
+        name: "Store Administrator",
+        role: "admin",
+      },
+      update: {
+        passwordHash,
+        role: "admin",
+        name: "Store Administrator",
+      },
+    });
+  }
+
   await prisma.product.updateMany({
     where: { id: { notIn: CATALOG_PRODUCT_IDS } },
     data: { status: "draft" },

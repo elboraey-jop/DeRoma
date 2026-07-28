@@ -26,12 +26,107 @@ model Product {
   price          Decimal
   compareAtPrice Decimal?         // To show discount (e.g. 1200 EGP was 1500 EGP)
   status         String           @default("active") // "active", "draft"
-  category       String
+  category       String           // shoes, bags, perfumes, accessories
+  subcategory    String?
+  brand          String?
+  material       String?
+  wholesalePrice Decimal?
+  additionalCost Decimal?
+  supplierId     String?
+  supplier       Supplier?        @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  badge          String?
+  featured       Boolean          @default(false)
+  bestSeller     Boolean          @default(false)
+  rating         Decimal          @default(0)
+  reviewsCount   Int              @default(0)
+  lowStockLimit  Int              @default(2)
   images         String[]         // Array of image URLs
   variants       ProductVariant[]
+  relatedFrom    ProductRelation[] @relation("ProductRelationsFrom")
+  relatedTo      ProductRelation[] @relation("ProductRelationsTo")
+  reviews        Review[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   orderItems     OrderItem[]
+}
+
+model Supplier {
+  id           String    @id @default(uuid())
+  name         String
+  phone        String?
+  email        String?
+  address      String?
+  notes        String?
+  products     Product[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model CatalogOption {
+  id         String   @id @default(uuid())
+  category   String   // shoes, bags, perfumes, accessories
+  type       String   // brand, color, size, material, subcategory, volume
+  name       String
+  value      String?
+  sortOrder  Int      @default(0)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([category, type, name])
+  @@index([category, type])
+}
+
+model ProductRelation {
+  productId        String
+  relatedProductId String
+  product          Product @relation("ProductRelationsFrom", fields: [productId], references: [id], onDelete: Cascade)
+  relatedProduct   Product @relation("ProductRelationsTo", fields: [relatedProductId], references: [id], onDelete: Cascade)
+
+  @@id([productId, relatedProductId])
+}
+
+model ShippingZone {
+  id                    String   @id @default(uuid())
+  name                  String
+  governorates          String[]
+  fee                   Decimal
+  estimatedDays         String?
+  freeShippingThreshold Decimal?
+  active                Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model Promotion {
+  id                String    @id @default(uuid())
+  code              String?   @unique
+  name              String
+  type              String    // percentage, fixed, free_shipping
+  value             Decimal   @default(0)
+  scope             String    @default("order") // order, category, product, color, material
+  targetValue      String?
+  minimumOrderValue Decimal?
+  usageLimit        Int?
+  usedCount         Int       @default(0)
+  startsAt          DateTime?
+  endsAt            DateTime?
+  active            Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model AnnouncementBar {
+  id            String    @id @default(uuid())
+  text          String
+  backgroundColor String  @default("#942E3A")
+  textColor     String    @default("#FFF9EB")
+  moving        Boolean   @default(false)
+  active        Boolean   @default(true)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model ProductVariant {
@@ -55,6 +150,9 @@ model Order {
   city           String
   address        String
   notes          String?
+  subtotalPrice  Decimal          @default(0)
+  discountAmount Decimal          @default(0)
+  manual         Boolean          @default(false)
   totalPrice     Decimal
   shippingCost   Decimal
   status         String      @default("pending") // "pending", "shipped", "delivered", "cancelled"
@@ -78,4 +176,22 @@ model OrderItem {
   color       String
   quantity    Int
   price       Decimal
+  unitCost    Decimal        @default(0)
+}
+
+model Review {
+  id               String   @id @default(uuid())
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customerName     String
+  customerPhone    String?
+  rating           Int
+  title            String?
+  body             String
+  status           String   @default("pending") // pending, approved, rejected
+  verifiedPurchase Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([productId, status])
 }

@@ -1,0 +1,40 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { ClipboardList, Eye, Search, Plus } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { updateOrderStatusAction } from "@/app/admin/orders/actions";
+
+export interface AdminOrderRow {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  totalPrice: number;
+  status: string;
+  createdAt: string;
+}
+
+const statuses = ["all", "pending", "shipped", "delivered", "cancelled"];
+const labels: Record<string, string> = { pending: "Pending", shipped: "With courier", delivered: "Delivered", cancelled: "Cancelled" };
+
+export default function AdminOrdersClient({ orders }: { orders: AdminOrderRow[] }) {
+  const [status, setStatus] = useState("all");
+  const [search, setSearch] = useState("");
+  const filtered = useMemo(() => orders.filter((order) => {
+    const matchesStatus = status === "all" || order.status === status;
+    const query = search.toLowerCase();
+    return matchesStatus && (!query || order.orderNumber.toLowerCase().includes(query) || order.customerName.toLowerCase().includes(query) || order.customerPhone.includes(query));
+  }), [orders, search, status]);
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">Operations</p><h1 className="mt-1 font-playfair text-3xl font-black">Orders</h1><p className="mt-1 text-xs text-[#6B1F2A]/65">Review, update, and prepare every customer order.</p></div><Link href="/admin/orders/new" className="inline-flex w-fit items-center gap-2 rounded-xl bg-[#942E3A] px-3 py-2.5 text-xs font-bold text-[#FFF9EB]"><Plus className="h-4 w-4 text-[#D8B46A]" /> Manual order</Link></div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4"><div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3"><p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">All orders</p><p className="mt-1 font-playfair text-2xl font-black">{orders.length}</p></div><div className="rounded-2xl border border-[#D8B46A]/35 bg-[#fff7df] p-3"><p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">Pending</p><p className="mt-1 font-playfair text-2xl font-black">{orders.filter((o) => o.status === "pending").length}</p></div><div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3"><p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">Delivered</p><p className="mt-1 font-playfair text-2xl font-black">{orders.filter((o) => o.status === "delivered").length}</p></div><div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3"><p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">Filtered</p><p className="mt-1 font-playfair text-2xl font-black">{filtered.length}</p></div></div>
+      <div className="rounded-3xl border border-[#942E3A]/10 bg-white p-4 shadow-sm sm:p-5"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div className="flex gap-1 overflow-x-auto pb-1">{statuses.map((item) => <button key={item} type="button" onClick={() => setStatus(item)} className={`whitespace-nowrap rounded-full px-3 py-2 text-[10px] font-bold capitalize ${status === item ? "bg-[#942E3A] text-[#FFF9EB]" : "bg-[#FFF9EB] text-[#942E3A]/70"}`}>{item === "all" ? "All orders" : labels[item]}</button>)}</div><label className="relative block lg:w-72"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search order, customer, phone" className="w-full rounded-xl border border-[#942E3A]/10 bg-[#FFF9EB]/60 py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#942E3A]" /></label></div>
+        <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[760px] text-left text-xs"><thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55"><tr><th className="pb-3">Order</th><th className="pb-3">Customer</th><th className="pb-3">Date</th><th className="pb-3">Status</th><th className="pb-3 text-right">Total</th><th className="pb-3 text-right">Open</th></tr></thead><tbody className="divide-y divide-[#942E3A]/8">{filtered.map((order) => <tr key={order.id}><td className="py-3 font-bold text-[#942E3A]">{order.orderNumber}</td><td className="py-3"><p className="font-bold text-[#942E3A]">{order.customerName}</p><p className="text-[10px] text-[#6B1F2A]/60">{order.customerPhone}</p></td><td className="py-3 text-[#6B1F2A]/65">{new Date(order.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td><td className="py-3"><form action={updateOrderStatusAction} className="flex items-center gap-1.5"><input type="hidden" name="orderId" value={order.id} /><select name="status" defaultValue={order.status} className="rounded-lg border border-[#942E3A]/10 bg-[#FFF9EB] px-2 py-1.5 text-[10px] font-bold text-[#942E3A]"><option value="pending">Pending</option><option value="shipped">With courier</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select><button type="submit" className="text-[10px] font-bold text-[#942E3A] hover:underline">Save</button></form></td><td className="py-3 text-right font-bold text-[#942E3A]">{formatCurrency(order.totalPrice)}</td><td className="py-3 text-right"><Link href={`/admin/orders/${order.id}`} className="inline-flex items-center gap-1 font-bold text-[#942E3A] hover:underline"><Eye className="h-3.5 w-3.5" /> View</Link></td></tr>)}</tbody></table>{filtered.length === 0 && <div className="flex flex-col items-center justify-center py-12 text-center"><ClipboardList className="h-7 w-7 text-[#D8B46A]" /><p className="mt-2 text-sm font-bold">No orders found</p><p className="mt-1 text-xs text-[#6B1F2A]/60">New orders will appear here.</p></div>}</div>
+      </div>
+    </div>
+  );
+}

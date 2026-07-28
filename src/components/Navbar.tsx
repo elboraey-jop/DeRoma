@@ -3,7 +3,7 @@
 import { Fragment, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ShoppingBag, Search, Heart, Menu, X, User, Home, Store, Info, ShieldCheck, PackageSearch, Tags } from "lucide-react";
+import { ShoppingBag, Search, Heart, Menu, X, User, Home, Store, Info, ShieldCheck, PackageSearch } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
 import { useWishlist } from "@/lib/wishlistStore";
@@ -64,7 +64,12 @@ export default function Navbar() {
     { label: "Track Order", href: "/track", icon: PackageSearch },
   ];
 
-  const brands = ["New Balance", "Adidas", "Nike", "ASICS"];
+  const shopCategories = [
+    { label: "Shoes", href: "/shop", comingSoon: false },
+    { label: "Bags", href: "/shop/bags", comingSoon: true },
+    { label: "Perfumes", href: "/shop/perfumes", comingSoon: true },
+    { label: "Accessories", href: "/shop/accessories", comingSoon: true },
+  ];
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 px-3 pt-3 sm:px-4 lg:px-6 pointer-events-none" dir="ltr">
@@ -332,19 +337,20 @@ export default function Navbar() {
 
                       {link.label === "Shop" && (
                         <div className="mb-2 ml-8 border-l border-white/15 pl-3">
-                          <p className="mb-2 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-[#D8B46A]">
-                            <Tags className="h-3 w-3" />
-                            Brands
-                          </p>
                           <div className="flex flex-col gap-0.5">
-                            {brands.map((brand) => (
+                            {shopCategories.map((category) => (
                               <Link
-                                key={brand}
-                                href={`/shop?brand=${encodeURIComponent(brand)}`}
+                                key={category.label}
+                                href={category.href}
                                 onClick={() => setIsOpen(false)}
-                                className="block px-1 py-1 text-[10px] font-semibold text-stone-300 transition-colors hover:text-[#FFF9EB]"
+                                className="flex items-center justify-between gap-2 px-1 py-1 text-[10px] font-semibold text-[#D8B46A] transition-colors hover:text-[#FFF9EB]"
                               >
-                                {brand}
+                                <span>{category.label}</span>
+                                {category.comingSoon && (
+                                  <span className="text-[8px] font-bold uppercase tracking-wide text-[#D8B46A]">
+                                    Coming Soon
+                                  </span>
+                                )}
                               </Link>
                             ))}
                           </div>
