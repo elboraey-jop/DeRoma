@@ -79,7 +79,9 @@ body {
   min-height: 100%;
 }
 html {
-  scroll-behavior: smooth
+  /* Keep one scroll engine in charge. Lenis handles desktop wheel input;
+     touch devices use native scrolling for the lowest latency. */
+  scroll-behavior: auto;
 }
 body {
   margin: 0;
@@ -89,6 +91,55 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Lightweight reveal animations. These animate only opacity/transform, so
+   they stay on the compositor and do not reflow the page while scrolling. */
+[data-reveal],
+[data-reveal-item] {
+  opacity: 0;
+  transform: translate3d(var(--reveal-x, 0), var(--reveal-y, 16px), 0)
+    scale(var(--reveal-scale, 1));
+  transition:
+    opacity var(--reveal-duration, 0.45s) ease-out var(--reveal-delay, 0s),
+    transform var(--reveal-duration, 0.45s) ease-out var(--reveal-delay, 0s);
+  will-change: opacity, transform;
+}
+
+[data-reveal].is-visible,
+[data-reveal-stagger].is-visible > [data-reveal-item] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  will-change: auto;
+}
+
+[data-reveal-stagger].is-visible > [data-reveal-item] {
+  transition-delay: calc(
+    var(--stagger-delay, 0s) + var(--stagger-index, 0) * var(--stagger-step, 0.05s)
+  );
+}
+
+[data-reveal-stagger] > [data-reveal-item] {
+  --stagger-index: 0;
+}
+
+[data-reveal-stagger] > [data-reveal-item]:nth-child(2) { --stagger-index: 1; }
+[data-reveal-stagger] > [data-reveal-item]:nth-child(3) { --stagger-index: 2; }
+[data-reveal-stagger] > [data-reveal-item]:nth-child(4) { --stagger-index: 3; }
+[data-reveal-stagger] > [data-reveal-item]:nth-child(5) { --stagger-index: 4; }
+[data-reveal-stagger] > [data-reveal-item]:nth-child(6) { --stagger-index: 5; }
+[data-reveal-stagger] > [data-reveal-item]:nth-child(7) { --stagger-index: 6; }
+[data-reveal-stagger] > [data-reveal-item]:nth-child(8) { --stagger-index: 7; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .font-numeric,
@@ -3143,7 +3194,7 @@ select:disabled {
   gap: 24px;
   overflow-x: auto;
   overflow-y: visible;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -4509,7 +4560,7 @@ select:disabled {
   display: flex;
   gap: 20px;
   overflow-x: auto;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   padding: 20px 10px;
   scrollbar-width: none;
   -ms-overflow-style: none;

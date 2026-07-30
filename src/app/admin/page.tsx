@@ -133,13 +133,13 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <section className="flex flex-col justify-between gap-4 rounded-3xl bg-[#942E3A] p-5 text-[#FFF9EB] shadow-lg sm:flex-row sm:items-end sm:p-7">
+    <div className="w-full min-w-0 space-y-4 sm:space-y-6">
+      <section className="flex min-w-0 flex-col justify-between gap-3 rounded-3xl bg-[#942E3A] p-4 text-[#FFF9EB] shadow-lg sm:flex-row sm:items-end sm:gap-4 sm:p-7">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">
             {dateLabel} · Store overview
           </p>
-          <h1 className="mt-2 font-playfair text-3xl font-black sm:text-4xl">
+          <h1 className="mt-2 font-playfair text-2xl font-black sm:text-4xl">
             {greeting}, {admin.name?.split(" ")[0] || "Admin"}.
           </h1>
           <p className="mt-2 max-w-xl text-xs leading-relaxed text-white/75 sm:text-sm">
@@ -155,11 +155,11 @@ export default async function AdminDashboardPage() {
         </Link>
       </section>
 
-      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <section className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className={`rounded-2xl border border-[#942E3A]/10 p-4 shadow-sm ${stat.tone}`}
+            className={`min-w-0 rounded-2xl border border-[#942E3A]/10 p-3 shadow-sm sm:p-4 ${stat.tone}`}
           >
             <div className="flex items-start justify-between gap-2">
               <p className="text-[10px] font-bold uppercase tracking-wide opacity-70">
@@ -167,7 +167,7 @@ export default async function AdminDashboardPage() {
               </p>
               <stat.icon className="h-4 w-4 text-[#D8B46A]" />
             </div>
-            <p className="mt-3 break-words font-playfair text-xl font-black sm:text-2xl">
+            <p className="mt-2 break-words font-playfair text-xl font-black sm:mt-3 sm:text-2xl">
               {stat.value}
             </p>
             <p className="mt-1 text-[10px] opacity-60">{stat.note}</p>
@@ -175,8 +175,8 @@ export default async function AdminDashboardPage() {
         ))}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
-        <div className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-6">
+      <section className="grid min-w-0 gap-4 xl:grid-cols-[1.35fr_0.65fr] xl:gap-6">
+        <div className="min-w-0 rounded-3xl border border-[#942E3A]/10 bg-white p-4 shadow-sm sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
@@ -193,39 +193,39 @@ export default async function AdminDashboardPage() {
               View all <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[560px] text-left text-xs">
+          <div className="mt-4 min-w-0 overflow-hidden sm:mt-5">
+            <table className="w-full table-fixed text-left text-xs">
               <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
                 <tr>
-                  <th className="pb-3 font-bold">Order</th>
-                  <th className="pb-3 font-bold">Customer</th>
-                  <th className="pb-3 font-bold">Date</th>
-                  <th className="pb-3 font-bold">Status</th>
-                  <th className="pb-3 text-right font-bold">Total</th>
+                  <th className="w-[24%] pb-3 font-bold">Order</th>
+                  <th className="w-[27%] pb-3 font-bold">Customer</th>
+                  <th className="w-[16%] pb-3 font-bold">Date</th>
+                  <th className="w-[18%] pb-3 font-bold">Status</th>
+                  <th className="w-[15%] pb-3 text-right font-bold">Total</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#942E3A]/8">
                 {data.recentOrders.length ? (
                   data.recentOrders.map((order) => (
                     <tr key={order.orderNumber}>
-                      <td className="py-3 font-bold text-[#942E3A]">
+                      <td className="truncate py-3 font-bold text-[#942E3A]">
                         {order.orderNumber}
                       </td>
-                      <td className="py-3 text-[#6B1F2A]">
+                      <td className="truncate py-3 text-[#6B1F2A]">
                         {order.customerName}
                       </td>
-                      <td className="py-3 text-[#6B1F2A]/65">
+                      <td className="truncate py-3 text-[#6B1F2A]/65">
                         {new Date(order.createdAt).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
                         })}
                       </td>
                       <td className="py-3">
-                        <span className="rounded-full bg-[#FFF9EB] px-2 py-1 text-[10px] font-bold text-[#942E3A]">
+                        <span className="inline-block max-w-full truncate rounded-full bg-[#FFF9EB] px-2 py-1 text-[10px] font-bold text-[#942E3A]">
                           {statusLabels[order.status] || order.status}
                         </span>
                       </td>
-                      <td className="py-3 text-right font-bold text-[#942E3A]">
+                      <td className="truncate py-3 text-right font-bold text-[#942E3A]">
                         {formatCurrency(Number(order.totalPrice))}
                       </td>
                     </tr>
@@ -245,47 +245,47 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-6">
+        <div className="min-w-0 space-y-4 sm:space-y-6">
+          <div className="min-w-0 rounded-3xl border border-[#942E3A]/10 bg-white p-4 shadow-sm sm:p-6">
             <div className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-[#D8B46A]" />
               <h2 className="font-playfair text-xl font-bold">Quick actions</h2>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-3 grid min-w-0 grid-cols-2 gap-2 sm:mt-4">
               <Link
                 href="/admin/orders/new"
-                className="rounded-xl bg-[#942E3A] px-3 py-3 text-center text-[10px] font-bold text-[#FFF9EB]"
+                className="min-w-0 truncate rounded-xl bg-[#942E3A] px-2 py-2.5 text-center text-[10px] font-bold text-[#FFF9EB] sm:px-3 sm:py-3"
               >
                 Manual order
               </Link>
               <Link
                 href="/admin/inventory"
-                className="rounded-xl border border-[#942E3A]/15 px-3 py-3 text-center text-[10px] font-bold text-[#942E3A]"
+                className="min-w-0 truncate rounded-xl border border-[#942E3A]/15 px-2 py-2.5 text-center text-[10px] font-bold text-[#942E3A] sm:px-3 sm:py-3"
               >
                 Check inventory
               </Link>
               <Link
                 href="/admin/promotions"
-                className="rounded-xl border border-[#942E3A]/15 px-3 py-3 text-center text-[10px] font-bold text-[#942E3A]"
+                className="min-w-0 truncate rounded-xl border border-[#942E3A]/15 px-2 py-2.5 text-center text-[10px] font-bold text-[#942E3A] sm:px-3 sm:py-3"
               >
                 Create offer
               </Link>
               <Link
                 href="/admin/analytics"
-                className="rounded-xl border border-[#942E3A]/15 px-3 py-3 text-center text-[10px] font-bold text-[#942E3A]"
+                className="min-w-0 truncate rounded-xl border border-[#942E3A]/15 px-2 py-2.5 text-center text-[10px] font-bold text-[#942E3A] sm:px-3 sm:py-3"
               >
                 View analytics
               </Link>
             </div>
           </div>
-          <div className="rounded-3xl border border-[#D8B46A]/35 bg-[#fff7df] p-5 shadow-sm sm:p-6">
+          <div className="min-w-0 rounded-3xl border border-[#D8B46A]/35 bg-[#fff7df] p-4 shadow-sm sm:p-6">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-[#942E3A]" />
               <h2 className="font-playfair text-xl font-bold">
                 Needs attention
               </h2>
             </div>
-            <div className="mt-4 space-y-2 text-xs">
+            <div className="mt-3 space-y-2 text-xs sm:mt-4">
               <Link
                 href="/admin/orders?status=pending"
                 className="flex items-center justify-between rounded-xl bg-white/70 px-3 py-2.5 font-semibold text-[#942E3A]"

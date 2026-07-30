@@ -7,14 +7,19 @@ export default function SmoothScroll() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Initialize Lenis
+    // Native touch scrolling is already optimized by the browser. Running a
+    // second animation loop on phones makes scrolling feel delayed and heavy.
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+    if (prefersReducedMotion || isTouchDevice) return;
+
     const lenis = new Lenis({
-      duration: 1.4,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Smooth exponential easing
-      touchMultiplier: 1.5,
+      duration: 0.65,
+      easing: (t) => 1 - Math.pow(1 - t, 4),
+      smoothWheel: true,
+      wheelMultiplier: 1,
     });
 
-    // Setup the requestAnimationFrame loop
     let rafId: number;
     function raf(time: number) {
       lenis.raf(time);
@@ -22,7 +27,6 @@ export default function SmoothScroll() {
     }
     rafId = requestAnimationFrame(raf);
 
-    // Cleanup
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();

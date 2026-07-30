@@ -131,7 +131,9 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     }
 
     if (activeCategory !== "all") {
-      result = result.filter((p) => p.category.toLowerCase() === activeCategory.toLowerCase());
+      result = result.filter(
+        (p) => (p.subcategory || p.category).toLowerCase() === activeCategory.toLowerCase(),
+      );
     }
 
     if (selectedBrands.length > 0) {

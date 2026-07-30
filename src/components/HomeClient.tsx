@@ -40,13 +40,12 @@ export default function HomeClient({ products }: { products: ProductWithVariants
     const container = scrollRef.current;
     if (!container || products.length === 0) return;
 
-    const singleWidth = container.scrollWidth / repeatCount;
+    let singleWidth = container.scrollWidth / repeatCount;
     const middleIndex = Math.floor(repeatCount / 2);
     container.scrollLeft = middleIndex * singleWidth;
 
     const handleScroll = () => {
       const scrollLeft = container.scrollLeft;
-      const singleWidth = container.scrollWidth / repeatCount;
       const middleIndex = Math.floor(repeatCount / 2);
 
       const lowerLimit = (middleIndex - 1) * singleWidth;
@@ -60,7 +59,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
     };
 
     const handleResize = () => {
-      const singleWidth = container.scrollWidth / repeatCount;
+      singleWidth = container.scrollWidth / repeatCount;
       const middleIndex = Math.floor(repeatCount / 2);
       container.scrollLeft = middleIndex * singleWidth;
     };
@@ -135,7 +134,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       tag: "THE FEMININE EDIT",
       title: "Soft Sport Icons",
       desc: "Pastel runners and everyday silhouettes for easy comfort, soft colour, and feminine street style.",
-      href: "/shop?category=retro",
+      href: "/shop?category=shoes",
       image: "/banners/hero-1-desktop.webp",
       mobileImage: "/banners/hero-1-mobile.webp"
     },
@@ -145,7 +144,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       tag: "NEW RELEASE",
       title: "Performance Running & Gym",
       desc: "Super-lightweight cushioned trainers from Asics & Nike engineered for gym workouts, daily running, and support.",
-      href: "/shop?category=running",
+      href: "/shop?category=shoes",
       image: "/banners/hero-2-desktop.webp",
       mobileImage: "/banners/hero-2-mobile.webp"
     },
@@ -155,7 +154,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       tag: "LIFESTYLE DROP",
       title: "Chunky & Platform Soles",
       desc: "Bold elevated profiles combined with soft memory foam footbeds for maximum casual comfort.",
-      href: "/shop?category=chunky",
+      href: "/shop?category=shoes",
       image: "/banners/hero-3-desktop.webp",
       mobileImage: "/banners/hero-3-mobile.webp"
     }

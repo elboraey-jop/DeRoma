@@ -33,7 +33,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
   }
   const similarProducts = [
     ...allProducts.filter((p) => relatedIds.includes(p.id)),
-    ...allProducts.filter((p) => p.category === product.category && p.id !== product.id && !relatedIds.includes(p.id)),
+    ...allProducts.filter(
+      (p) =>
+        (p.subcategory || p.category) === (product.subcategory || product.category) &&
+        p.id !== product.id &&
+        !relatedIds.includes(p.id),
+    ),
   ].slice(0, 4);
 
   return (

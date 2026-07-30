@@ -34,6 +34,7 @@ export interface ProductWithVariants {
   price: any;
   compareAtPrice: any;
   category: string;
+  subcategory?: string | null;
   images: string[];
   variants: ProductVariant[];
   brand?: string;
