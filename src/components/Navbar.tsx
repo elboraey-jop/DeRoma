@@ -9,7 +9,7 @@ import { useCart } from "@/lib/cartStore";
 import { useWishlist } from "@/lib/wishlistStore";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function Navbar() {
+export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: boolean }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [showSearchInput, setShowSearchInput] = useState(false);
@@ -72,7 +72,10 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 px-3 pt-3 sm:px-4 lg:px-6 pointer-events-none" dir="ltr">
+    <div className={cn(
+      "w-full px-3 sm:px-4 lg:px-6 pointer-events-none",
+      hasAnnouncement ? "pt-1.5 sm:pt-2" : "pt-3"
+    )} dir="ltr">
       <div className="mx-auto flex w-full max-w-[1320px] items-center justify-between gap-2 sm:gap-3">
         
         {/* ELEMENT 1: Main Compact Floating Pill Card */}
@@ -252,7 +255,7 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="pointer-events-auto fixed inset-0 z-50 bg-black/60 backdrop-blur-xs lg:hidden"
+              className="pointer-events-auto fixed inset-0 z-[70] bg-black/60 lg:hidden"
             />
 
             {/* Sidebar Panel */}
@@ -260,8 +263,8 @@ export default function Navbar() {
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="pointer-events-auto fixed inset-y-0 left-0 z-50 flex w-full max-w-[290px] flex-col bg-[#942E3A] text-[#FFF9EB] shadow-2xl lg:hidden border-r border-white/10 rounded-r-[1.75rem] overflow-hidden"
+              transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+              className="pointer-events-auto fixed inset-y-0 left-0 z-[75] flex w-full max-w-[290px] flex-col bg-[#942E3A] text-[#FFF9EB] shadow-2xl lg:hidden border-r border-white/10 rounded-r-[1.75rem] overflow-hidden"
             >
               {/* Header inside drawer */}
               <div className="flex items-center justify-between px-5 pt-5 pb-1">

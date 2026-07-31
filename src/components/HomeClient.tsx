@@ -297,8 +297,8 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       setActiveReview(nextReview);
       setIsReviewLeaving(false);
       setReturningReview(departingReview);
-      window.setTimeout(() => setReturningReview(null), 900);
-    }, 620);
+      window.setTimeout(() => setReturningReview(null), 300);
+    }, 250);
   };
 
   const selectReview = (index: number) => {
@@ -611,10 +611,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                             opacity: 1 - stackPosition * 0.12,
                           }}
                           transition={isFront && isReviewLeaving
-                            ? { duration: 0.62, ease: [0.22, 1, 0.36, 1] }
+                            ? { duration: 0.25, ease: "easeOut" }
                             : isReturning
-                              ? { duration: 0.9, ease: [0.22, 1, 0.36, 1] }
-                            : { type: "spring", stiffness: 150, damping: 26, mass: 0.9 }}
+                              ? { duration: 0.3, ease: "easeOut" }
+                            : { type: "spring", stiffness: 220, damping: 24, mass: 0.8 }}
                           className={`absolute inset-y-0 left-0 right-0 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] p-4 text-[#942E3A] shadow-xl sm:p-5 ${isFront ? "z-30 cursor-grab active:cursor-grabbing" : stackPosition === 1 ? "z-20" : "z-10"}`}
                           style={{ transformOrigin: "bottom center" }}
                         >

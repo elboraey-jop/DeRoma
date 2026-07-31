@@ -432,7 +432,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
               animate={{ opacity: 0.45 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowMobileFilters(false)}
-              className="fixed inset-0 z-50 bg-black backdrop-blur-[2px]"
+              className="fixed inset-0 z-[70] bg-black/45"
             />
 
             {/* Drawer Content */}
@@ -440,8 +440,8 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              transition={{ type: "tween", duration: 0.3 }}
-              className="fixed bottom-0 left-0 right-0 z-50 flex h-[78vh] max-h-full flex-col overflow-hidden rounded-t-[1.75rem] bg-[#FFF9EB] text-[#942E3A] shadow-2xl"
+              transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+              className="fixed bottom-0 left-0 right-0 z-[75] flex h-[78vh] max-h-full flex-col overflow-hidden rounded-t-[1.75rem] bg-[#FFF9EB] text-[#942E3A] shadow-2xl"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-[#D8B46A]/40 bg-[#942E3A] px-5 py-4">

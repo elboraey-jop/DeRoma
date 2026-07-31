@@ -44,7 +44,7 @@ export default function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setCartOpen(false)}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs"
+            className="fixed inset-0 z-[70] bg-black/40"
           />
 
             {/* Drawer Panel */}
@@ -52,8 +52,8 @@ export default function CartDrawer() {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-            className="fixed inset-y-0 right-0 z-50 flex h-full w-[82vw] max-w-[340px] sm:w-full sm:max-w-md flex-col bg-[#FFF9EB] shadow-2xl rounded-l-[1.75rem] overflow-hidden"
+            transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+            className="fixed inset-y-0 right-0 z-[75] flex h-full w-[82vw] max-w-[340px] sm:w-full sm:max-w-md flex-col bg-[#FFF9EB] shadow-2xl rounded-l-[1.75rem] overflow-hidden"
             dir="ltr"
           >
             {/* Header */}
