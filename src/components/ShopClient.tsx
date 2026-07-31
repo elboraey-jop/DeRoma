@@ -6,6 +6,7 @@ import { Search, SlidersHorizontal, ArrowUpDown, X, Check, ChevronDown } from "l
 import ProductCard, { ProductWithVariants, COLOR_TRANSLATIONS } from "@/components/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
+import { useIsMobile } from "@/lib/useIsMobile";
 
 interface ShopClientProps {
   initialProducts: ProductWithVariants[];
@@ -69,6 +70,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const isMobile = useIsMobile();
   const sortMenuRef = useRef<HTMLDivElement>(null);
 
   const sortOptions = [
@@ -398,26 +400,36 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
               </button>
             </div>
           ) : (
-            <motion.div 
-              layout
-              className="grid grid-cols-2 justify-items-center gap-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 w-full"
-            >
-              <AnimatePresence mode="popLayout">
+            isMobile ? (
+              <div className="grid grid-cols-2 justify-items-center gap-2 w-full">
                 {filteredProducts.map((p) => (
-                  <motion.div
-                    layout
-                    key={p.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full flex justify-center"
-                  >
-                    <ProductCard product={p} />
-                  </motion.div>
+                  <div key={p.id} className="w-full flex justify-center">
+                    <ProductCard product={p} mobileOptimized />
+                  </div>
                 ))}
-              </AnimatePresence>
-            </motion.div>
+              </div>
+            ) : (
+              <motion.div
+                layout
+                className="grid grid-cols-2 justify-items-center gap-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 w-full"
+              >
+                <AnimatePresence mode="popLayout">
+                  {filteredProducts.map((p) => (
+                    <motion.div
+                      layout
+                      key={p.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.3 }}
+                      className="w-full flex justify-center"
+                    >
+                      <ProductCard product={p} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            )
           )}
         </div>
       </div>
@@ -431,6 +443,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.45 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: isMobile ? 0.08 : 0.2 }}
               onClick={() => setShowMobileFilters(false)}
               className="fixed inset-0 z-[70] bg-black/45"
             />
@@ -440,7 +453,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+              transition={{ type: "tween", duration: isMobile ? 0.12 : 0.25, ease: "easeOut" }}
               className="fixed bottom-0 left-0 right-0 z-[75] flex h-[78vh] max-h-full flex-col overflow-hidden rounded-t-[1.75rem] bg-[#FFF9EB] text-[#942E3A] shadow-2xl"
             >
               {/* Header */}

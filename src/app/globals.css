@@ -13,8 +13,8 @@
 }
 
 @keyframes marquee {
-  from { transform: translateX(100%); }
-  to { transform: translateX(-100%); }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .hide-scrollbar {
@@ -185,6 +185,44 @@ h6 {
 @media (max-width: 768px) {
   .container {
     padding-inline: 16px;
+  }
+}
+
+/* Keep touch interactions compositor-only and avoid expensive hover/skeleton work. */
+@media (max-width: 767px) {
+  .product-card-shell {
+    transition: none !important;
+    will-change: auto;
+  }
+
+  .product-card-shell:hover {
+    transform: none !important;
+    box-shadow: 0 12px 30px rgba(148, 46, 58, 0.06) !important;
+  }
+
+  .product-card-shell:hover img {
+    transform: none !important;
+  }
+
+  .product-card-shell .animate-pulse {
+    animation: none !important;
+  }
+
+  #reviews-carousel {
+    scroll-snap-type: x proximity;
+    scroll-behavior: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    contain: layout paint;
+  }
+
+  #reviews-carousel > div {
+    transition: none !important;
+  }
+
+  .mobile-filter-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
 .site-footer {

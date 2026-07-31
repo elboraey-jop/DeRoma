@@ -1,8 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AnnouncementBar from "@/components/AnnouncementBar";
@@ -18,6 +17,8 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
+  const chromeRef = useRef<HTMLDivElement>(null);
+  const [chromeHeight, setChromeHeight] = useState(68);
 
   useEffect(() => {
     if (isAdmin) return;
@@ -27,22 +28,29 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
       .catch(() => null);
   }, [isAdmin]);
 
+  useLayoutEffect(() => {
+    const chrome = chromeRef.current;
+    if (!chrome) return;
+
+    const updateChromeHeight = () => setChromeHeight(Math.ceil(chrome.getBoundingClientRect().height));
+    updateChromeHeight();
+
+    const observer = new ResizeObserver(updateChromeHeight);
+    observer.observe(chrome);
+    return () => observer.disconnect();
+  }, []);
+
   if (isAdmin) {
     return <div className="min-h-screen bg-[#f7f1e8] text-[#942E3A]">{children}</div>;
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FFF9EB] text-[#942E3A]">
-      <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none flex flex-col" dir="ltr">
+      <div ref={chromeRef} className="fixed top-0 left-0 right-0 z-50 pointer-events-none flex flex-col" dir="ltr">
         {announcement && <AnnouncementBar announcement={announcement} />}
         <Navbar hasAnnouncement={!!announcement} />
       </div>
-      <main
-        className={cn(
-          "flex-1 transition-all duration-300",
-          announcement ? "pt-[92px] sm:pt-[100px]" : "pt-[60px] sm:pt-[68px]"
-        )}
-      >
+      <main className="flex-1" style={{ paddingTop: `${chromeHeight}px` }}>
         {children}
       </main>
       <Footer />

@@ -25,6 +25,7 @@ import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
 import { useWishlist } from "@/lib/wishlistStore";
 import { motion, AnimatePresence } from "framer-motion";
+import { useIsMobile } from "@/lib/useIsMobile";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 import ProductCard, { ProductWithVariants, COLOR_TRANSLATIONS } from "@/components/ProductCard";
 import { submitReviewAction } from "@/app/review-actions";
@@ -556,6 +557,7 @@ function ReviewsSection({
   product: ProductWithVariants;
   reviews: ProductReviewView[];
 }) {
+  const isMobile = useIsMobile();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReviewRating, setNewReviewRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -565,12 +567,12 @@ function ReviewsSection({
 
   const scrollLeft = () => {
     const container = document.getElementById("reviews-carousel");
-    if (container) container.scrollBy({ left: -320, behavior: "smooth" });
+    if (container) container.scrollBy({ left: -320, behavior: isMobile ? "auto" : "smooth" });
   };
 
   const scrollRight = () => {
     const container = document.getElementById("reviews-carousel");
-    if (container) container.scrollBy({ left: 320, behavior: "smooth" });
+    if (container) container.scrollBy({ left: 320, behavior: isMobile ? "auto" : "smooth" });
   };
 
   const handleSubmitReview = async () => {

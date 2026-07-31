@@ -95,7 +95,13 @@ function getColorHex(colorName: string): string {
   }
 }
 
-export default function ProductCard({ product }: { product: ProductWithVariants }) {
+export default function ProductCard({
+  product,
+  mobileOptimized = false,
+}: {
+  product: ProductWithVariants;
+  mobileOptimized?: boolean;
+}) {
   const { addItem } = useCart();
   const [activeColorIndex, setActiveColorIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
@@ -148,8 +154,8 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
 
   return (
     <motion.div
-      whileHover={{ y: -5, transition: { duration: 0.25, ease: "easeOut" } }}
-      className="group relative flex h-[330px] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_30px_rgba(148,46,58,0.06)] hover:shadow-[0_18px_38px_rgba(148,46,58,0.13)] sm:h-[380px] sm:max-w-[230px] sm:rounded-[1.65rem] transition-shadow duration-300"
+      whileHover={mobileOptimized ? undefined : { y: -5, transition: { duration: 0.25, ease: "easeOut" } }}
+      className="product-card-shell group relative flex h-[330px] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_30px_rgba(148,46,58,0.06)] hover:shadow-[0_18px_38px_rgba(148,46,58,0.13)] sm:h-[380px] sm:max-w-[230px] sm:rounded-[1.65rem] transition-shadow duration-300"
     >
       {/* Top Product Image Container */}
       <div className="relative h-[71%] sm:h-[72%] w-full shrink-0 overflow-hidden bg-[#FFF9EB]">
@@ -219,8 +225,8 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
                 key={variant.id}
                 disabled={isOutOfStock}
                 onClick={() => setSelectedSize(variant.size)}
-                whileHover={!isOutOfStock ? { scale: 1.1 } : {}}
-                whileTap={!isOutOfStock ? { scale: 0.9 } : {}}
+                whileHover={!mobileOptimized && !isOutOfStock ? { scale: 1.1 } : undefined}
+                whileTap={!mobileOptimized && !isOutOfStock ? { scale: 0.9 } : undefined}
                 className={`product-card-badge-number relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
                   isOutOfStock
                     ? "border-white/20 bg-white/10 text-white/40 after:absolute after:left-1 after:right-1 after:top-[48%] after:h-[1.2px] after:bg-white/30 after:content-['']"
@@ -241,8 +247,8 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
             <motion.button
               onClick={handleAddSelected}
               disabled={!selectedVariant}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={mobileOptimized ? undefined : { scale: 1.1 }}
+              whileTap={mobileOptimized ? undefined : { scale: 0.9 }}
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#D8B46A] text-white shadow-xs transition-all hover:bg-[#FFF9EB] hover:text-[#942E3A] disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:w-8"
               aria-label="Add to cart"
             >
@@ -251,8 +257,8 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
 
             <motion.button
               onClick={() => toggle(product.id)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={mobileOptimized ? undefined : { scale: 1.1 }}
+              whileTap={mobileOptimized ? undefined : { scale: 0.9 }}
               className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-transparent shadow-xs transition-all hover:bg-white hover:text-[#D8B46A] sm:h-8 sm:w-8 border ${
                 isWishlisted ? "border-[#D8B46A] text-[#D8B46A]" : "border-white/70 text-white"
               }`}
@@ -264,8 +270,8 @@ export default function ProductCard({ product }: { product: ProductWithVariants 
             <motion.button
               onClick={handleAddSelected}
               disabled={!selectedVariant}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={mobileOptimized ? undefined : { scale: 1.03 }}
+              whileTap={mobileOptimized ? undefined : { scale: 0.97 }}
               className="flex h-7 flex-1 items-center justify-center rounded-full bg-[#FFF9EB] px-3 text-[9px] font-black text-[#942E3A] shadow-xs transition-all hover:bg-[#D8B46A] hover:text-white disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:text-[10px]"
             >
               Buy Now
