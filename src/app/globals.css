@@ -4,11 +4,35 @@
 
 @layer components {
   .admin-input {
-    @apply w-full rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB]/50 px-3 py-3 text-sm outline-none transition focus:border-[#942E3A] focus:ring-2 focus:ring-[#942E3A]/10;
+    @apply w-full rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-sm text-[#6B1F2A] outline-none shadow-[0_2px_8px_rgba(67,25,31,0.025)] transition placeholder:text-[#6B1F2A]/35 focus:border-[#942E3A] focus:ring-4 focus:ring-[#D8B46A]/15;
   }
 
   .field-label {
     @apply mb-1.5 block text-[10px] font-bold uppercase tracking-wide;
+  }
+
+  input[type="date"].admin-input,
+  select.admin-input {
+    min-height: 48px;
+  }
+
+  .product-editor-panel {
+    @apply overflow-hidden rounded-[28px] border border-[#942E3A]/10 bg-white shadow-[0_10px_30px_rgba(67,25,31,0.055)];
+  }
+
+  .product-editor-panel > p:first-child {
+    @apply mb-1 border-b border-[#942E3A]/10 bg-[#FFF9EB]/55 px-5 pb-4 pt-5 sm:px-7 sm:pt-6;
+  }
+
+  .product-editor-panel > h2:first-of-type {
+    @apply px-5 pt-1 font-playfair text-2xl font-black text-[#942E3A] sm:px-7;
+  }
+
+  .product-editor-panel > .mt-5,
+  .product-editor-panel > .mt-4,
+  .product-editor-panel > form,
+  .product-editor-panel > div:not([class*="absolute"]) {
+    @apply px-5 sm:px-7;
   }
 }
 

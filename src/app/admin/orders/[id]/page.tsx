@@ -10,12 +10,20 @@ import {
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import { formatCurrency } from "@/lib/utils";
-import { updateOrderStatusAction } from "@/app/admin/orders/actions";
 import AdminPrintButton from "@/components/AdminPrintButton";
+import AdminStatusSelect from "@/components/AdminStatusSelect";
 
 const statusMessages: Record<string, string> = {
   pending:
     "Hello {name}, your DeRoma order {order} has been confirmed and is being prepared.",
+  pending_payment:
+    "Hello {name}, your DeRoma order {order} is awaiting payment confirmation.",
+  paid:
+    "Hello {name}, payment for your DeRoma order {order} was received and it is being prepared.",
+  confirmed:
+    "Hello {name}, your DeRoma order {order} has been confirmed and is being prepared.",
+  preparing:
+    "Hello {name}, your DeRoma order {order} is being prepared.",
   shipped:
     "Hello {name}, your DeRoma order {order} is on its way with the courier.",
   delivered:
@@ -87,9 +95,7 @@ export default async function AdminOrderDetailsPage({
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
                 Customer
               </p>
-              <h2 className="mt-1 font-playfair text-2xl font-bold">
-                {order.customerName}
-              </h2>
+              <Link href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`} className="mt-1 block font-playfair text-2xl font-bold hover:underline">{order.customerName}</Link>
               <a
                 href={`tel:${order.customerPhone}`}
                 className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-[#942E3A]"
@@ -98,28 +104,7 @@ export default async function AdminOrderDetailsPage({
                 {order.customerPhone}
               </a>
             </div>
-            <form
-              action={updateOrderStatusAction}
-              className="flex items-center gap-2 print:hidden"
-            >
-              <input type="hidden" name="orderId" value={order.id} />
-              <select
-                name="status"
-                defaultValue={order.status}
-                className="rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB] px-3 py-2 text-xs font-bold text-[#942E3A]"
-              >
-                <option value="pending">Pending</option>
-                <option value="shipped">With courier</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-              <button
-                type="submit"
-                className="rounded-xl bg-[#942E3A] px-3 py-2 text-xs font-bold text-[#FFF9EB]"
-              >
-                Update
-              </button>
-            </form>
+            <div className="flex items-center gap-2 print:hidden"><span className="text-[10px] font-bold uppercase tracking-wide text-[#6B1F2A]/55">Status</span><AdminStatusSelect orderId={order.id} status={order.status} paymentMethod={order.paymentMethod} /></div>
           </div>
           <div className="mt-5 grid gap-3 text-xs sm:grid-cols-2">
             <div className="rounded-2xl bg-[#FFF9EB] p-3">

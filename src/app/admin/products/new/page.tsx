@@ -6,8 +6,9 @@ import AdminProductCreateForm from "@/components/AdminProductCreateForm";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewProductPage() {
+export default async function NewProductPage({ searchParams }: { searchParams: Promise<{ fromInvoice?: string }> }) {
   await requireAdmin();
+  const params = await searchParams;
   const [options, suppliers, products] = await Promise.all([
     prisma.catalogOption
       .findMany({
@@ -53,6 +54,7 @@ export default async function NewProductPage() {
         options={options}
         suppliers={suppliers}
         products={products}
+        redirectTo={params.fromInvoice === "1" ? "/admin/suppliers/invoices/new" : undefined}
       />
     </div>
   );

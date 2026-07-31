@@ -5,13 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
+import { getAllowedNextStatuses } from "@/lib/orderStatus";
 
-const allowedStatuses = new Set([
-  "pending",
-  "shipped",
-  "delivered",
-  "cancelled",
-]);
 type ManualOrderItem = { variantId: string; quantity: number };
 
 function createOrderNumber() {
@@ -32,7 +27,7 @@ export async function updateOrderStatusAction(formData: FormData) {
   await requireAdmin();
   const id = String(formData.get("orderId") || "");
   const status = String(formData.get("status") || "");
-  if (!id || !allowedStatuses.has(status))
+  if (!id || !status)
     throw new Error("Invalid order status.");
 
   const productIds = await prisma.$transaction(async (tx) => {
@@ -43,6 +38,8 @@ export async function updateOrderStatusAction(formData: FormData) {
     if (!order) throw new Error("Order not found.");
     if (order.status === status)
       return order.items.map((item) => item.productId);
+    if (!getAllowedNextStatuses(order.status, order.paymentMethod).includes(status))
+      throw new Error("This order can only move to its next step or be cancelled.");
 
     if (order.status !== "cancelled" && status === "cancelled") {
       for (const item of order.items) {
@@ -157,6 +154,7 @@ export async function createManualOrderAction(formData: FormData) {
         subtotalPrice,
         discountAmount,
         manual: true,
+        paymentMethod: "cod",
         status: "pending",
         items: {
           create: itemsInput.map((item) => {

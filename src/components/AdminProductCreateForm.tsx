@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ImagePlus, PackagePlus, Plus, Star, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ImagePlus, PackagePlus, Plus, Star, Trash2 } from "lucide-react";
 import { createProductAction } from "@/app/admin/products/actions";
 import AdminImageGalleryField from "@/components/AdminImageGalleryField";
 
@@ -37,6 +37,15 @@ const categoryHelp: Record<string, string> = {
   accessories:
     "Choose the accessory category, brand and material, then add its stock options.",
 };
+
+const productSteps = [
+  { label: "Identity", caption: "Name & category" },
+  { label: "Pricing", caption: "Costs & visibility" },
+  { label: "Gallery", caption: "Images & media" },
+  { label: "Inventory", caption: "Variants & stock" },
+  { label: "Relations", caption: "Similar products" },
+  { label: "Reviews", caption: "Social proof" },
+];
 
 function OptionsSelect({
   options,
@@ -92,16 +101,19 @@ export default function AdminProductCreateForm({
   options,
   suppliers,
   products,
+  redirectTo,
 }: {
   options: CatalogOption[];
   suppliers: Supplier[];
   products: RelatedProduct[];
+  redirectTo?: string;
 }) {
   const [category, setCategory] = useState("shoes");
   const [variants, setVariants] = useState<VariantDraft[]>([
     { sku: "", color: "", size: "", stock: 0 },
   ]);
   const [reviews, setReviews] = useState<ReviewDraft[]>([]);
+  const [activeStep, setActiveStep] = useState(0);
   const categoryOptions = (type: string) =>
     options.filter(
       (option) => option.category === category && option.type === type,
@@ -143,10 +155,38 @@ export default function AdminProductCreateForm({
 
   return (
     <form action={createProductAction} className="space-y-5">
+      {redirectTo && <input type="hidden" name="redirectTo" value={redirectTo} />}
       <input type="hidden" name="variants" value={JSON.stringify(variants)} />
       <input type="hidden" name="reviews" value={JSON.stringify(reviews)} />
 
-      <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+      <div className="sticky top-3 z-20 rounded-3xl border border-[#942E3A]/10 bg-[#FFF9EB]/95 p-2 shadow-[0_12px_30px_rgba(67,25,31,0.1)] backdrop-blur sm:p-3">
+        <div className="grid grid-cols-3 gap-1 sm:grid-cols-6">
+          {productSteps.map((step, index) => {
+            const isActive = activeStep === index;
+            const isComplete = activeStep > index;
+            return (
+              <button
+                key={step.label}
+                type="button"
+                onClick={() => setActiveStep(index)}
+                className={`group rounded-2xl px-2 py-2.5 text-left transition sm:px-3 ${isActive ? "bg-[#942E3A] text-[#FFF9EB] shadow-[0_6px_15px_rgba(148,46,58,0.16)]" : "text-[#942E3A]/65 hover:bg-white"}`}
+              >
+                <span className="flex items-center gap-2">
+                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${isActive ? "bg-[#D8B46A] text-[#942E3A]" : isComplete ? "bg-[#942E3A]/10 text-[#942E3A]" : "bg-white text-[#942E3A]/55"}`}>
+                    {isComplete ? <Check className="h-3.5 w-3.5" /> : index + 1}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[10px] font-bold sm:text-xs">{step.label}</span>
+                    <span className={`hidden truncate text-[9px] sm:block ${isActive ? "text-[#FFF9EB]/60" : "text-[#6B1F2A]/45"}`}>{step.caption}</span>
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <section hidden={activeStep !== 0} className="product-editor-panel p-5 sm:p-6">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
           Step 1
         </p>
@@ -231,7 +271,7 @@ export default function AdminProductCreateForm({
         </div>
       </section>
 
-      <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+      <section hidden={activeStep !== 1} className="product-editor-panel p-5 sm:p-6">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
           Step 2
         </p>
@@ -330,7 +370,7 @@ export default function AdminProductCreateForm({
         </div>
       </section>
 
-      <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+      <section hidden={activeStep !== 2} className="product-editor-panel p-5 sm:p-6">
         <div className="flex items-center gap-2">
           <ImagePlus className="h-4 w-4 text-[#D8B46A]" />
           <div>
@@ -345,7 +385,7 @@ export default function AdminProductCreateForm({
         <AdminImageGalleryField />
       </section>
 
-      <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+      <section hidden={activeStep !== 3} className="product-editor-panel p-5 sm:p-6">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <PackagePlus className="h-4 w-4 text-[#D8B46A]" />
@@ -482,7 +522,7 @@ export default function AdminProductCreateForm({
         </div>
       </section>
 
-      <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+      <section hidden={activeStep !== 4} className="product-editor-panel p-5 sm:p-6">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
           Step 5
         </p>
@@ -517,7 +557,7 @@ export default function AdminProductCreateForm({
         )}
       </section>
 
-      <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+      <section hidden={activeStep !== 5} className="product-editor-panel p-5 sm:p-6">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Star className="h-4 w-4 text-[#D8B46A]" />
@@ -615,19 +655,16 @@ export default function AdminProductCreateForm({
         </div>
       </section>
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Link
-          href="/admin/products"
-          className="rounded-xl border border-[#942E3A]/15 bg-white px-5 py-3 text-center text-xs font-bold text-[#942E3A]"
-        >
-          Cancel
-        </Link>
-        <button
-          type="submit"
-          className="rounded-xl bg-[#942E3A] px-6 py-3 text-xs font-bold text-[#FFF9EB]"
-        >
-          Create complete product
-        </button>
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <Link href="/admin/products" className="rounded-xl border border-[#942E3A]/15 bg-white px-5 py-3 text-center text-xs font-bold text-[#942E3A]">Cancel</Link>
+        <div className="flex gap-2 sm:ml-auto">
+          {activeStep > 0 && <button type="button" onClick={() => setActiveStep((step) => step - 1)} className="inline-flex items-center gap-2 rounded-xl border border-[#942E3A]/15 bg-white px-4 py-3 text-xs font-bold text-[#942E3A]"><ArrowLeft className="h-3.5 w-3.5" /> Back</button>}
+          {activeStep < productSteps.length - 1 ? (
+            <button type="button" onClick={() => setActiveStep((step) => step + 1)} className="inline-flex items-center gap-2 rounded-xl bg-[#942E3A] px-5 py-3 text-xs font-bold text-[#FFF9EB]">Continue <ArrowRight className="h-3.5 w-3.5 text-[#D8B46A]" /></button>
+          ) : (
+            <button type="submit" className="rounded-xl bg-[#942E3A] px-6 py-3 text-xs font-bold text-[#FFF9EB]">Create complete product</button>
+          )}
+        </div>
       </div>
     </form>
   );

@@ -7,13 +7,13 @@ import {
   ClipboardList,
   DollarSign,
   Package,
-  Plus,
   ShoppingBag,
   Truck,
 } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import { requireAdmin } from "@/lib/adminAuth";
+import AdminStatusSelect from "@/components/AdminStatusSelect";
 
 export const dynamic = "force-dynamic";
 
@@ -35,10 +35,13 @@ async function getDashboardData() {
           orderBy: { createdAt: "desc" },
           take: 5,
           select: {
+            id: true,
             orderNumber: true,
             customerName: true,
+            customerPhone: true,
             totalPrice: true,
             status: true,
+            paymentMethod: true,
             createdAt: true,
           },
         }),
@@ -70,13 +73,6 @@ async function getDashboardData() {
     };
   }
 }
-
-const statusLabels: Record<string, string> = {
-  pending: "Pending",
-  shipped: "Shipped",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
-};
 
 export default async function AdminDashboardPage() {
   const admin = await requireAdmin();
@@ -147,18 +143,13 @@ export default async function AdminDashboardPage() {
             boutique moving beautifully.
           </p>
         </div>
-        <Link
-          href="/admin/products/new"
-          className="inline-flex w-fit items-center gap-2 rounded-full bg-[#D8B46A] px-4 py-2.5 text-xs font-bold text-[#942E3A] transition-colors hover:bg-[#e6c982]"
-        >
-          <Plus className="h-4 w-4" /> Add product
-        </Link>
       </section>
 
       <section className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
         {stats.map((stat) => (
-          <div
+          <Link
             key={stat.label}
+            href={stat.label === "Orders" ? "/admin/orders" : stat.label === "Active products" ? "/admin/products" : stat.label === "Stock alerts" ? "/admin/inventory?filter=low" : "/admin/analytics"}
             className={`min-w-0 rounded-2xl border border-[#942E3A]/10 p-3 shadow-sm sm:p-4 ${stat.tone}`}
           >
             <div className="flex items-start justify-between gap-2">
@@ -171,7 +162,7 @@ export default async function AdminDashboardPage() {
               {stat.value}
             </p>
             <p className="mt-1 text-[10px] opacity-60">{stat.note}</p>
-          </div>
+          </Link>
         ))}
       </section>
 
@@ -193,8 +184,8 @@ export default async function AdminDashboardPage() {
               View all <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <div className="mt-4 min-w-0 overflow-hidden sm:mt-5">
-            <table className="w-full table-fixed text-left text-xs">
+          <div className="mt-4 min-w-0 sm:mt-5">
+            <table className="hidden w-full table-fixed text-left text-xs sm:table">
               <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
                 <tr>
                   <th className="w-[24%] pb-3 font-bold">Order</th>
@@ -209,10 +200,10 @@ export default async function AdminDashboardPage() {
                   data.recentOrders.map((order) => (
                     <tr key={order.orderNumber}>
                       <td className="truncate py-3 font-bold text-[#942E3A]">
-                        {order.orderNumber}
+                        <Link href={`/admin/orders/${order.id}`} className="hover:underline">{order.orderNumber}</Link>
                       </td>
                       <td className="truncate py-3 text-[#6B1F2A]">
-                        {order.customerName}
+                        <Link href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`} className="hover:underline">{order.customerName}</Link>
                       </td>
                       <td className="truncate py-3 text-[#6B1F2A]/65">
                         {new Date(order.createdAt).toLocaleDateString("en-US", {
@@ -221,9 +212,7 @@ export default async function AdminDashboardPage() {
                         })}
                       </td>
                       <td className="py-3">
-                        <span className="inline-block max-w-full truncate rounded-full bg-[#FFF9EB] px-2 py-1 text-[10px] font-bold text-[#942E3A]">
-                          {statusLabels[order.status] || order.status}
-                        </span>
+                        <AdminStatusSelect orderId={order.id} status={order.status} paymentMethod={order.paymentMethod} />
                       </td>
                       <td className="truncate py-3 text-right font-bold text-[#942E3A]">
                         {formatCurrency(Number(order.totalPrice))}
@@ -242,6 +231,35 @@ export default async function AdminDashboardPage() {
                 )}
               </tbody>
             </table>
+            <div className="space-y-2 sm:hidden">
+              {data.recentOrders.length ? (
+                data.recentOrders.map((order) => (
+                  <div key={order.orderNumber} className="rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB]/45 p-3">
+                    <div className="flex min-w-0 items-center justify-between gap-3">
+                      <Link href={`/admin/orders/${order.id}`} className="min-w-0 truncate text-[11px] font-bold text-[#942E3A] hover:underline">
+                        {order.orderNumber}
+                      </Link>
+                      <span className="shrink-0 text-[10px] text-[#6B1F2A]/55">
+                        {new Date(order.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex min-w-0 items-center justify-between gap-3">
+                      <Link href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`} className="min-w-0 truncate text-[11px] font-semibold text-[#6B1F2A] hover:underline">
+                        {order.customerName}
+                      </Link>
+                      <span className="shrink-0 text-[11px] font-bold text-[#942E3A]">
+                        {formatCurrency(Number(order.totalPrice))}
+                      </span>
+                    </div>
+                    <div className="mt-3 border-t border-[#942E3A]/10 pt-3">
+                      <AdminStatusSelect orderId={order.id} status={order.status} paymentMethod={order.paymentMethod} />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="py-10 text-center text-xs text-[#6B1F2A]/60">No orders yet</p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -259,10 +277,10 @@ export default async function AdminDashboardPage() {
                 Manual order
               </Link>
               <Link
-                href="/admin/inventory"
+                href="/admin/suppliers/invoices/new"
                 className="min-w-0 truncate rounded-xl border border-[#942E3A]/15 px-2 py-2.5 text-center text-[10px] font-bold text-[#942E3A] sm:px-3 sm:py-3"
               >
-                Check inventory
+                Add invoice
               </Link>
               <Link
                 href="/admin/promotions"

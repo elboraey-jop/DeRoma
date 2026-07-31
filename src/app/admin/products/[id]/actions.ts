@@ -33,7 +33,11 @@ export async function updateProductAction(formData: FormData) {
       name,
       description: String(formData.get("description") || "").trim() || null,
       category,
-      status: formData.get("status") === "draft" ? "draft" : "active",
+      status: ["active", "archived", "draft"].includes(
+        String(formData.get("status") || ""),
+      )
+        ? String(formData.get("status"))
+        : "active",
       subcategory: String(formData.get("subcategory") || "").trim() || null,
       brand: String(formData.get("brand") || "").trim() || null,
       material: String(formData.get("material") || "").trim() || null,

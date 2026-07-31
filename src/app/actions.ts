@@ -227,6 +227,7 @@ export async function createOrder(input: CreateOrderInput) {
           subtotalPrice: subtotal,
           discountAmount,
           manual: false,
+          paymentMethod: "cod",
           shippingCost,
           totalPrice,
           items: {

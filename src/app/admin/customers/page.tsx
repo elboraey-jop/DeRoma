@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import { Users } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -97,7 +98,9 @@ export default async function CustomersPage() {
               {customers.map((customer) => (
                 <tr key={customer.phone}>
                   <td className="py-3 font-bold text-[#942E3A]">
-                    {customer.name}
+                    <Link href={`/admin/customers/${encodeURIComponent(customer.phone)}`} className="hover:underline">
+                      {customer.name}
+                    </Link>
                   </td>
                   <td className="py-3 text-[#6B1F2A]">{customer.phone}</td>
                   <td className="py-3 text-[#6B1F2A]">{customer.orders}</td>

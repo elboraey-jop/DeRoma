@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BarChart3,
   Boxes,
@@ -42,11 +42,25 @@ const navigation = [
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const handleWheel = (event: WheelEvent) => {
+      if (nav.scrollHeight <= nav.clientHeight) return;
+      event.preventDefault();
+      event.stopPropagation();
+      nav.scrollTop += event.deltaY;
+    };
+    nav.addEventListener("wheel", handleWheel, { passive: false });
+    return () => nav.removeEventListener("wheel", handleWheel);
+  }, []);
 
   if (pathname === "/admin/login") return <>{children}</>;
 
   const sidebar = (
-    <aside className="flex h-full w-[250px] shrink-0 flex-col bg-[#942E3A] text-[#FFF9EB]">
+    <aside className="flex h-full min-h-0 w-[250px] shrink-0 flex-col bg-[#942E3A] text-[#FFF9EB]">
       <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
         <Link href="/admin" onClick={() => setIsSidebarOpen(false)} className="font-playfair text-2xl font-black tracking-tight">
           DeRoma <span className="text-xs font-sans font-bold uppercase tracking-[0.2em] text-[#D8B46A]">Admin</span>
@@ -63,7 +77,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </div>
       </div>
 
-      <nav className="hide-scrollbar flex-1 space-y-1 overflow-y-auto px-3 pb-5">
+      <nav
+        ref={navRef}
+        className="hide-scrollbar min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 pb-5"
+      >
         {navigation.map((item) => {
           const isActive = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
           return (

@@ -4,6 +4,7 @@ import { ArrowLeft, ImagePlus, PackagePlus, Star, Trash2 } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import AdminImageGalleryField from "@/components/AdminImageGalleryField";
+import AdminProductEditTabs from "@/components/AdminProductEditTabs";
 import {
   createProductReviewAction,
   createVariantAction,
@@ -60,9 +61,10 @@ export default async function EditProductPage({
           </h1>
         </div>
       </div>
+      <AdminProductEditTabs>
       <form action={updateProductAction} className="space-y-5">
         <input type="hidden" name="id" value={product.id} />
-        <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+        <section className="product-editor-panel p-5 sm:p-6">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
             Step 1
           </p>
@@ -100,6 +102,7 @@ export default async function EditProductPage({
                 className="admin-input"
               >
                 <option value="active">Active</option>
+                <option value="archived">Archive</option>
                 <option value="draft">Draft</option>
               </select>
             </label>
@@ -139,7 +142,7 @@ export default async function EditProductPage({
             </label>
           </div>
         </section>
-        <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+        <section className="product-editor-panel p-5 sm:p-6">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
             Step 2
           </p>
@@ -252,7 +255,7 @@ export default async function EditProductPage({
             </div>
           </div>
         </section>
-        <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+        <section className="product-editor-panel p-5 sm:p-6">
           <div className="flex items-center gap-2">
             <ImagePlus className="h-4 w-4 text-[#D8B46A]" />
             <div>
@@ -273,7 +276,7 @@ export default async function EditProductPage({
           </button>
         </div>
       </form>
-      <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+      <section className="product-editor-panel p-5 sm:p-6">
         <div className="flex items-center gap-2">
           <PackagePlus className="h-4 w-4 text-[#D8B46A]" />
           <h2 className="font-playfair text-xl font-bold">Variants & stock</h2>
@@ -361,7 +364,7 @@ export default async function EditProductPage({
           </div>
         </form>
       </section>
-      <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+      <section className="product-editor-panel p-5 sm:p-6">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
           Merchandising
         </p>
@@ -401,7 +404,7 @@ export default async function EditProductPage({
           </button>
         </form>
       </section>
-      <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">
+      <section className="product-editor-panel p-5 sm:p-6">
         <div className="flex items-center gap-2">
           <Star className="h-4 w-4 text-[#D8B46A]" />
           <h2 className="font-playfair text-xl font-bold">Product reviews</h2>
@@ -490,6 +493,7 @@ export default async function EditProductPage({
           </button>
         </form>
       </section>
+      </AdminProductEditTabs>
     </div>
   );
 }

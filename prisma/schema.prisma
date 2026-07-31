@@ -45,6 +45,7 @@ model Product {
   relatedFrom    ProductRelation[] @relation("ProductRelationsFrom")
   relatedTo      ProductRelation[] @relation("ProductRelationsTo")
   reviews        Review[]
+  invoiceItems   PurchaseInvoiceItem[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   orderItems     OrderItem[]
@@ -58,6 +59,7 @@ model Supplier {
   address      String?
   notes        String?
   products     Product[]
+  invoices     PurchaseInvoice[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -138,6 +140,8 @@ model ProductVariant {
   stock     Int         @default(0)
   sku       String      @unique
   orderItems OrderItem[]
+  invoiceItems PurchaseInvoiceItem[]
+  inventoryLots InventoryLot[]
 }
 
 model Order {
@@ -153,6 +157,7 @@ model Order {
   subtotalPrice  Decimal          @default(0)
   discountAmount Decimal          @default(0)
   manual         Boolean          @default(false)
+  paymentMethod  String           @default("cod") // cod, card, wallet, etc.
   totalPrice     Decimal
   shippingCost   Decimal
   status         String      @default("pending") // "pending", "shipped", "delivered", "cancelled"
@@ -161,6 +166,59 @@ model Order {
   userId         String?
   user           User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   items          OrderItem[]
+}
+
+model PurchaseInvoice {
+  id            String                 @id @default(uuid())
+  invoiceNumber String                 @unique
+  supplierId    String
+  supplier      Supplier               @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  invoiceDate   DateTime               @default(now())
+  dueDate       DateTime?
+  reference     String?
+  notes         String?
+  status        String                 @default("received")
+  subtotal      Decimal                @default(0)
+  shippingCost  Decimal                @default(0)
+  discount      Decimal                @default(0)
+  total         Decimal                @default(0)
+  amountPaid    Decimal                @default(0)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  items         PurchaseInvoiceItem[]
+
+  @@index([supplierId, invoiceDate])
+}
+
+model PurchaseInvoiceItem {
+  id             String          @id @default(uuid())
+  invoiceId      String
+  invoice        PurchaseInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variantId      String
+  variant        ProductVariant  @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  quantity       Int
+  wholesalePrice Decimal
+  retailPrice    Decimal
+  lineTotal      Decimal
+  notes          String?
+  lot            InventoryLot?
+}
+
+model InventoryLot {
+  id             String              @id @default(uuid())
+  variantId      String
+  variant        ProductVariant      @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  invoiceItemId  String              @unique
+  invoiceItem    PurchaseInvoiceItem @relation(fields: [invoiceItemId], references: [id], onDelete: Restrict)
+  quantity       Int
+  remaining      Int
+  wholesalePrice Decimal
+  retailPrice    Decimal
+  receivedAt     DateTime            @default(now())
+
+  @@index([variantId, receivedAt])
 }
 
 model OrderItem {

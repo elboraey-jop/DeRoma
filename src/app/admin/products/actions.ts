@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
@@ -13,6 +14,78 @@ type ReviewInput = {
 };
 
 const productCategories = new Set(["shoes", "bags", "perfumes", "accessories"]);
+const productStatuses = new Set(["active", "archived", "draft"]);
+
+export async function updateProductDiscountAction(formData: FormData) {
+  await requireAdmin();
+  const productId = String(formData.get("productId") || "").trim();
+  const action = String(formData.get("action") || "apply");
+  const discountType = String(formData.get("discountType") || "percentage");
+  const discountValue = Number(formData.get("discountValue"));
+
+  if (!productId) throw new Error("Product id is required.");
+
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { price: true, compareAtPrice: true },
+  });
+  if (!product) throw new Error("Product not found.");
+
+  if (action === "remove") {
+    const restoredPrice = product.compareAtPrice
+      ? Number(product.compareAtPrice)
+      : Number(product.price);
+    await prisma.product.update({
+      where: { id: productId },
+      data: { price: restoredPrice, compareAtPrice: null },
+    });
+  } else {
+    const basePrice = Number(product.price);
+    if (!Number.isFinite(discountValue) || discountValue <= 0) {
+      throw new Error("Discount value must be greater than zero.");
+    }
+    if (discountType === "percentage" && discountValue >= 100) {
+      throw new Error("Percentage discount must be less than 100.");
+    }
+    if (discountType === "fixed" && discountValue >= basePrice) {
+      throw new Error("Fixed discount must be less than the product price.");
+    }
+
+    const discountedPrice =
+      discountType === "fixed"
+        ? basePrice - discountValue
+        : basePrice * (1 - discountValue / 100);
+    const roundedPrice = Math.round((discountedPrice + Number.EPSILON) * 100) / 100;
+
+    await prisma.product.update({
+      where: { id: productId },
+      data: { price: roundedPrice, compareAtPrice: basePrice },
+    });
+  }
+
+  revalidatePath("/admin/products");
+  revalidatePath(`/admin/products/${productId}`);
+  revalidatePath(`/shop/${productId}`);
+}
+
+export async function updateProductStatusAction(formData: FormData) {
+  await requireAdmin();
+  const productId = String(formData.get("productId") || "").trim();
+  const status = String(formData.get("status") || "").trim();
+
+  if (!productId || !productStatuses.has(status)) {
+    throw new Error("A valid product and status are required.");
+  }
+
+  await prisma.product.update({
+    where: { id: productId },
+    data: { status },
+  });
+
+  revalidatePath("/admin/products");
+  revalidatePath(`/admin/products/${productId}`);
+  revalidatePath(`/shop/${productId}`);
+}
 
 function optionalNumber(value: FormDataEntryValue | null) {
   const text = String(value || "").trim();
@@ -40,7 +113,10 @@ export async function createProductAction(formData: FormData) {
   await requireAdmin();
   const name = String(formData.get("name") || "").trim();
   const category = String(formData.get("category") || "shoes").trim();
-  const status = formData.get("status") === "draft" ? "draft" : "active";
+  const requestedStatus = String(formData.get("status") || "active");
+  const status = productStatuses.has(requestedStatus)
+    ? requestedStatus
+    : "active";
   const price = Number(formData.get("price"));
   const lowStockLimit = Number(formData.get("lowStockLimit") || 2);
   const images = String(formData.get("images") || "")
@@ -149,5 +225,6 @@ export async function createProductAction(formData: FormData) {
     },
   });
 
-  redirect(`/admin/products/${product.id}`);
+  const redirectTo = String(formData.get("redirectTo") || "").trim();
+  redirect(redirectTo === "/admin/suppliers/invoices/new" ? `${redirectTo}?productId=${product.id}` : `/admin/products/${product.id}`);
 }
