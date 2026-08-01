@@ -11,22 +11,7 @@ function buildVariants(product: CatalogProduct) {
     id: `${product.id}-${size}`,
     productId: product.id,
     size,
-    color: product.color,
     stock: index % 3 === 0 ? 0 : Math.max(product.stock - (index % 2), 1),
-    sku: `DR-${product.id.toUpperCase()}-${size}`,
-  }));
-}
-
-function buildColorways(product: CatalogProduct) {
-  return CATALOG_PRODUCTS.filter(
-    (item) => item.modelKey === product.modelKey,
-  ).map((item) => ({
-    productId: item.id,
-    color: item.color,
-    label: item.colorLabel,
-    hex: item.colorHex,
-    image: item.image,
-    name: item.name,
   }));
 }
 
@@ -41,10 +26,8 @@ function toProductWithVariants(product: CatalogProduct): ProductWithVariants {
     subcategory: product.subcategory,
     images: [product.image],
     brand: product.brand,
-    modelKey: product.modelKey,
-    colorLabel: product.colorLabel,
-    colorHex: product.colorHex,
-    colorways: buildColorways(product),
+    sku: `DR-${product.id.toUpperCase()}`,
+    color: product.color,
     variants: buildVariants(product),
     rating: product.rating,
     reviewsCount: product.reviewsCount,
@@ -69,10 +52,7 @@ function enrichCatalogProduct(
     subcategory: product.subcategory ?? catalogProduct.subcategory,
     images: product.images.length > 0 ? product.images : [catalogProduct.image],
     brand: product.brand || catalogProduct.brand,
-    modelKey: catalogProduct.modelKey,
-    colorLabel: catalogProduct.colorLabel,
-    colorHex: catalogProduct.colorHex,
-    colorways: buildColorways(catalogProduct),
+    color: product.color ?? catalogProduct.color,
     rating: product.rating ?? catalogProduct.rating,
     reviewsCount: product.reviewsCount ?? catalogProduct.reviewsCount,
   };
@@ -100,6 +80,10 @@ export async function getActiveProducts(): Promise<ProductWithVariants[]> {
         variants: p.variants.map((v) => ({
           ...v,
           stock: Number(v.stock),
+          price: v.price == null ? null : Number(v.price),
+          compareAtPrice: v.compareAtPrice == null ? null : Number(v.compareAtPrice),
+          wholesalePrice: v.wholesalePrice == null ? null : Number(v.wholesalePrice),
+          additionalCost: v.additionalCost == null ? null : Number(v.additionalCost),
         })),
       } as ProductWithVariants),
     );
@@ -136,6 +120,10 @@ export async function getProductById(
         variants: product.variants.map((v) => ({
           ...v,
           stock: Number(v.stock),
+          price: v.price == null ? null : Number(v.price),
+          compareAtPrice: v.compareAtPrice == null ? null : Number(v.compareAtPrice),
+          wholesalePrice: v.wholesalePrice == null ? null : Number(v.wholesalePrice),
+          additionalCost: v.additionalCost == null ? null : Number(v.additionalCost),
         })),
       } as ProductWithVariants);
     }

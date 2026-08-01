@@ -13,9 +13,11 @@ export interface ProductVariant {
   id: string;
   productId: string;
   size: string;
-  color: string;
   stock: number;
-  sku: string;
+  price?: number | null;
+  compareAtPrice?: number | null;
+  wholesalePrice?: number | null;
+  additionalCost?: number | null;
 }
 
 export interface ProductColorway {
@@ -38,10 +40,8 @@ export interface ProductWithVariants {
   images: string[];
   variants: ProductVariant[];
   brand?: string;
-  modelKey?: string;
-  colorLabel?: string;
-  colorHex?: string;
-  colorways?: ProductColorway[];
+  sku?: string | null;
+  color?: string | null;
   rating?: number;
   reviewsCount?: number;
 }
@@ -103,23 +103,23 @@ export default function ProductCard({
   mobileOptimized?: boolean;
 }) {
   const { addItem } = useCart();
-  const [activeColorIndex, setActiveColorIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [added, setAdded] = useState(false);
   const { has, toggle } = useWishlist();
   const isWishlisted = has(product.id);
   const [imageLoading, setImageLoading] = useState(true);
+  const isBag = product.category === "bags";
 
-  const uniqueColors = Array.from(new Set(product.variants.map((v) => v.color)));
-  const activeColor = uniqueColors[activeColorIndex] || uniqueColors[0];
-  const activeImage = product.images[activeColorIndex] || product.images[0];
-  const sizesForColor = product.variants.filter((v) => v.color === activeColor);
-  const availableSizes = sizesForColor.filter((v) => v.stock > 0);
+  const activeImage = product.images[0];
+  const sizesForProduct = product.variants;
+  const availableSizes = sizesForProduct.filter((v) => v.stock > 0);
   const selectedVariant =
     availableSizes.find((variant) => variant.size === selectedSize) || availableSizes[0];
 
-  const priceNum = Number(product.price);
-  const compareAtPriceNum = product.compareAtPrice ? Number(product.compareAtPrice) : null;
+  const priceNum = Number(selectedVariant?.price ?? product.price);
+  const compareAtPriceNum = selectedVariant?.compareAtPrice != null
+    ? Number(selectedVariant.compareAtPrice)
+    : product.compareAtPrice ? Number(product.compareAtPrice) : null;
   const discountPercent = compareAtPriceNum
     ? Math.round(((compareAtPriceNum - priceNum) / compareAtPriceNum) * 100)
     : null;
@@ -144,7 +144,7 @@ export default function ProductCard({
       name: product.name,
       price: priceNum,
       image: activeImage,
-      color: COLOR_TRANSLATIONS[selectedVariant.color] || selectedVariant.color,
+      color: product.color || "",
       size: selectedVariant.size,
     });
 
@@ -216,8 +216,8 @@ export default function ProductCard({
           )}
         </div>
 
-        <div className="mt-1 mb-1 flex min-h-5 flex-wrap items-center justify-center gap-1">
-          {sizesForColor.slice(0, 5).map((variant) => {
+        {!isBag && <div className="mt-1 mb-1 flex min-h-5 flex-wrap items-center justify-center gap-1">
+          {sizesForProduct.slice(0, 5).map((variant) => {
             const isSelected = selectedSize === variant.size;
             const isOutOfStock = variant.stock <= 0;
             return (
@@ -239,7 +239,7 @@ export default function ProductCard({
               </motion.button>
             );
           })}
-        </div>
+        </div>}
 
         {/* Action Buttons */}
         <div className="mt-auto border-t border-white/35 pt-1">

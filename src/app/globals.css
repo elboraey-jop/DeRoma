@@ -50,6 +50,11 @@
   display: none;
 }
 
+.admin-modal-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
 :root {
   /* These are defaults - they will be overridden by settings CSS vars injected in layout.tsx */
   --bg-dark: #942E3A;

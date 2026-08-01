@@ -17,7 +17,8 @@ export default async function AdminCategoriesPage() {
     price: number;
     compareAtPrice: number | null;
     images: string[];
-    variants: Array<{ size: string; color: string; stock: number }>;
+    color: string | null;
+    variants: Array<{ size: string; stock: number }>;
   }> = [];
   try {
     options = await prisma.catalogOption.findMany({ where: { active: true }, select: { id: true, category: true, type: true, name: true }, orderBy: [{ category: "asc" }, { type: "asc" }, { sortOrder: "asc" }, { name: "asc" }] });
@@ -32,7 +33,8 @@ export default async function AdminCategoriesPage() {
         price: true,
         compareAtPrice: true,
         images: true,
-        variants: { select: { size: true, color: true, stock: true } },
+        color: true,
+        variants: { select: { size: true, stock: true } },
       },
       orderBy: { name: "asc" },
     })).map((product) => ({

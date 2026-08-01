@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import { getAllowedNextStatuses } from "@/lib/orderStatus";
+import { consumeInventoryLots } from "@/lib/inventoryLots";
 
 type ManualOrderItem = { variantId: string; quantity: number };
 
@@ -136,9 +137,10 @@ export async function createManualOrderAction(formData: FormData) {
           (candidate) => candidate.id === item.variantId,
         )!;
         throw new Error(
-          `Not enough stock for ${variant.product.name} (${variant.color} / ${variant.size}).`,
+          `Not enough stock for ${variant.product.name} (${variant.product.color || "No color"} / ${variant.size}).`,
         );
       }
+      await consumeInventoryLots(tx, item.variantId, Number(item.quantity));
     }
 
     return tx.order.create({
@@ -166,7 +168,7 @@ export async function createManualOrderAction(formData: FormData) {
               variantId: variant.id,
               productName: variant.product.name,
               size: variant.size,
-              color: variant.color,
+              color: variant.product.color || "",
               quantity: Number(item.quantity),
               price: variant.product.price,
               unitCost:

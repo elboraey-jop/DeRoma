@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ShoppingBag,
   ChevronRight,
@@ -131,22 +130,6 @@ const MOCK_REVIEWS = [
 
 export default function ProductDetailClient({ product, similarProducts, reviews = [] }: ProductDetailClientProps) {
   const { addItem } = useCart();
-  const router = useRouter();
-  const productColors = Array.from(new Set(product.variants.map((v) => v.color)));
-  const colorwayOptions =
-    product.colorways && product.colorways.length > 0
-      ? product.colorways
-      : productColors.map((color) => ({
-          productId: product.id,
-          color,
-          label: COLOR_TRANSLATIONS[color] || color,
-          hex: getColorHex(color),
-          image: product.images[productColors.indexOf(color)] || product.images[0],
-          name: product.name,
-        }));
-  const uniqueColors = colorwayOptions.map((colorway) => colorway.color);
-  
-  const [selectedColor, setSelectedColor] = useState(productColors[0] || uniqueColors[0] || "");
   const [selectedSize, setSelectedSize] = useState("");
   const [sizeUnit, setSizeUnit] = useState<"EU" | "US" | "CM">("EU");
   const [quantity, setQuantity] = useState(1);
@@ -154,80 +137,40 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const [added, setAdded] = useState(false);
   const { has, toggle } = useWishlist();
   const isWishlisted = has(product.id);
+  const uniqueColors: string[] = [];
+  const [selectedColor, setSelectedColor] = useState(product.color || "");
+  const isBag = product.category === "bags";
+  const sizesForColor = product.variants;
+  const currentColorImages = product.images;
 
-  // Build a color -> images mapping
-  // Each color gets a subset of images. Since the current data structure maps images by index to colors,
-  // we assign images proportionally. If only 1 image per color, each color gets its corresponding image.
-  // For fallback: color at index i -> image at index i
-  const getImagesForColor = (color: string): string[] => {
-    const colorway = colorwayOptions.find((item) => item.color === color);
-    if (colorway) {
-      return [colorway.productId === product.id ? product.images[0] || colorway.image : colorway.image];
-    }
+  const activeVariant = isBag
+    ? product.variants[0]
+    : product.variants.find((v) => v.size === selectedSize);
 
-    const colorIdx = uniqueColors.indexOf(color);
-    if (colorIdx === -1) return [product.images[0]];
-    
-    // If we have exactly as many images as colors, 1 image per color
-    if (product.images.length === uniqueColors.length) {
-      return [product.images[colorIdx]];
-    }
-    
-    // If more images than colors, distribute proportionally
-    const imagesPerColor = Math.max(1, Math.floor(product.images.length / uniqueColors.length));
-    const startIdx = colorIdx * imagesPerColor;
-    const endIdx = colorIdx === uniqueColors.length - 1 
-      ? product.images.length 
-      : startIdx + imagesPerColor;
-    
-    return product.images.slice(startIdx, endIdx);
-  };
-
-  const currentColorImages = getImagesForColor(selectedColor);
-
-  useEffect(() => {
-    // Reset to first image when color changes
-    setActiveImageIndex(0);
-  }, [selectedColor]);
-
-  useEffect(() => {
-    const selectedColorway = colorwayOptions.find(
-      (colorway) => colorway.color === selectedColor && colorway.productId !== product.id
-    );
-
-    if (selectedColorway) {
-      router.push(`/shop/${selectedColorway.productId}`);
-    }
-  }, [selectedColor, product.id, router]);
-
-  const sizesForColor = product.variants.filter((v) => v.color === selectedColor);
-  const activeVariant = product.variants.find(
-    (v) => v.color === selectedColor && v.size === selectedSize
-  );
-
-  const priceNum = Number(product.price);
-  const compareAtPriceNum = product.compareAtPrice ? Number(product.compareAtPrice) : null;
+  const priceNum = Number(activeVariant?.price ?? product.price);
+  const compareAtPriceNum = activeVariant?.compareAtPrice != null
+    ? Number(activeVariant.compareAtPrice)
+    : product.compareAtPrice ? Number(product.compareAtPrice) : null;
   const discountPercent = compareAtPriceNum
     ? Math.round(((compareAtPriceNum - priceNum) / compareAtPriceNum) * 100)
     : null;
 
   const handleAddToCart = () => {
-    if (!selectedSize) {
+    if (!isBag && !selectedSize) {
       alert("Please select your shoe size first.");
       return;
     }
 
     if (!activeVariant) return;
 
-    const colorIdx = uniqueColors.indexOf(selectedColor);
     addItem({
       productId: product.id,
       variantId: activeVariant.id,
       name: product.name,
       price: priceNum,
-      image: currentColorImages[0] || product.images[0],
-      color: COLOR_TRANSLATIONS[selectedColor] || selectedColor,
-      size: selectedSize,
+      image: product.images[0],
+      color: product.color || "",
+      size: isBag ? "" : selectedSize,
       quantity,
     });
 
@@ -372,6 +315,12 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
               </p>
             )}
 
+            {product.color && (
+              <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#D8B46A] lg:justify-start">
+                <span>Color:</span><span className="text-[#942E3A]">{product.color}</span>
+              </div>
+            )}
+
             {/* Color Selector */}
             {uniqueColors.length > 0 && (
               <div className="space-y-2 w-full">
@@ -409,7 +358,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             )}
 
             {/* Size Selector */}
-            <div className="space-y-3 w-full">
+            {!isBag && <div className="space-y-3 w-full">
               <div className="flex items-center justify-center lg:justify-between gap-3">
                 <span className="text-xs font-bold text-[#942E3A]">Select Size (Women)</span>
                 <div className="flex items-center gap-0.5 bg-[#F2E7D5]/50 p-1 rounded-full text-[10px] font-bold">
@@ -450,7 +399,13 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                   );
                 })}
               </div>
-            </div>
+            </div>}
+            {isBag && (
+              <div className="flex items-center justify-between rounded-2xl border border-[#D8B46A]/35 bg-[#FFF9EB] px-4 py-3 text-xs font-bold text-[#942E3A]">
+                <span>Bag stock</span>
+                <span>{product.variants[0]?.stock > 0 ? "Available" : "Out of stock"}</span>
+              </div>
+            )}
 
             {/* Quantity + Buy Now Row */}
             <div className="flex items-center justify-center lg:justify-start gap-3 py-1 w-full">

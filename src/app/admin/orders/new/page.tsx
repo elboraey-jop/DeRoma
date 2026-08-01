@@ -13,10 +13,11 @@ export default async function NewManualOrderPage() {
     select: {
       id: true,
       name: true,
+      color: true,
       price: true,
       variants: {
         where: { stock: { gt: 0 } },
-        select: { id: true, size: true, color: true, stock: true },
+        select: { id: true, size: true, stock: true },
       },
     },
     orderBy: { name: "asc" },

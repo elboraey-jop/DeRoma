@@ -22,7 +22,7 @@ export default async function NewProductPage({ searchParams }: { searchParams: P
       .catch(() => []),
     prisma.product
       .findMany({
-        select: { id: true, name: true, category: true },
+        select: { id: true, name: true, category: true, sku: true },
         orderBy: { name: "asc" },
       })
       .catch(() => []),
@@ -45,8 +45,7 @@ export default async function NewProductPage({ searchParams }: { searchParams: P
             Add complete product
           </h1>
           <p className="mt-1 text-xs text-[#6B1F2A]/65">
-            Create the product, gallery, stock, reviews and recommendations in
-            one place.
+            Create the product, gallery, stock and recommendations in one place.
           </p>
         </div>
       </div>

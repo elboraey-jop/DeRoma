@@ -14,7 +14,7 @@ type InvoiceItemInput = {
   notes?: string;
 };
 
-export async function createSupplierAction(formData: FormData) {
+async function createSupplierRecord(formData: FormData) {
   await requireAdmin();
   const name = String(formData.get("name") || "").trim();
   const phone = String(formData.get("phone") || "").trim() || null;
@@ -22,10 +22,23 @@ export async function createSupplierAction(formData: FormData) {
   const address = String(formData.get("address") || "").trim() || null;
   const notes = String(formData.get("notes") || "").trim() || null;
   if (!name) throw new Error("Supplier name is required.");
-  await prisma.supplier.create({
+  const supplier = await prisma.supplier.create({
     data: { name, phone, email, address, notes },
   });
+  return supplier;
+}
+
+export async function createSupplierAction(formData: FormData) {
+  await createSupplierRecord(formData);
   revalidatePath("/admin/suppliers");
+  revalidatePath("/admin/products/new");
+}
+
+export async function createSupplierWithResultAction(formData: FormData) {
+  const supplier = await createSupplierRecord(formData);
+  revalidatePath("/admin/suppliers");
+  revalidatePath("/admin/products/new");
+  return { id: supplier.id, name: supplier.name };
 }
 
 export async function deleteSupplierAction(formData: FormData) {

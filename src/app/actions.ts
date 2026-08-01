@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import prisma from "@/lib/prisma";
 import { Resend } from "resend";
+import { consumeInventoryLots } from "@/lib/inventoryLots";
 
 interface CheckoutItemInput {
   productId: string;
@@ -106,7 +107,7 @@ export async function createOrder(input: CreateOrderInput) {
       if (variant.stock < item.quantity) {
         return {
           success: false,
-          error: `عذراً، المقاس المطلوب للحذاء "${variant.product.name}" باللون (${variant.color}) والمقاس (${variant.size}) غير متوفر بالكمية المطلوبة. المتوفر حالياً: ${variant.stock} فقط.`,
+          error: `عذراً، المقاس المطلوب للحذاء "${variant.product.name}" باللون (${variant.product.color || "غير محدد"}) والمقاس (${variant.size}) غير متوفر بالكمية المطلوبة. المتوفر حالياً: ${variant.stock} فقط.`,
         };
       }
 
@@ -118,7 +119,7 @@ export async function createOrder(input: CreateOrderInput) {
         variantId: variant.id,
         productName: variant.product.name,
         size: variant.size,
-        color: variant.color,
+        color: variant.product.color || "",
         quantity: item.quantity,
         price: itemPrice,
         unitCost:
@@ -246,6 +247,7 @@ export async function createOrder(input: CreateOrderInput) {
         });
         if (reserved.count !== 1)
           throw new Error("Stock changed while the order was being placed.");
+        await consumeInventoryLots(tx, item.variantId, item.quantity);
       }
 
       return newOrder;

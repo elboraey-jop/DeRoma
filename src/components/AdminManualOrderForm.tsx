@@ -8,7 +8,8 @@ interface Product {
   id: string;
   name: string;
   price: number;
-  variants: Array<{ id: string; size: string; color: string; stock: number }>;
+  color: string | null;
+  variants: Array<{ id: string; size: string; stock: number }>;
 }
 interface Line {
   variantId: string;
@@ -108,7 +109,7 @@ export default function AdminManualOrderForm({
                 .filter((variant) => variant.stock > 0)
                 .map((variant) => (
                   <option key={variant.id} value={variant.id}>
-                    {product.name} · {variant.color} · {variant.size} ·{" "}
+                    {product.name} · {product.color || "No color"} · {variant.size} ·{" "}
                     {variant.stock} in stock
                   </option>
                 )),
@@ -136,7 +137,7 @@ export default function AdminManualOrderForm({
                 className="flex items-center gap-3 rounded-xl bg-[#FFF9EB] p-3 text-xs"
               >
                 <span className="min-w-0 flex-1 truncate font-bold">
-                  {product?.name} · {variant?.color} · {variant?.size}
+                  {product?.name} · {product?.color || "No color"} · {variant?.size}
                 </span>
                 <input
                   name={`qty-${line.variantId}`}

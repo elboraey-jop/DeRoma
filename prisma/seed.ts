@@ -5,13 +5,12 @@ import { CATALOG_PRODUCT_IDS, CATALOG_PRODUCTS } from "../src/lib/productCatalog
 const prisma = new PrismaClient();
 
 function buildVariants(product: (typeof CATALOG_PRODUCTS)[number]) {
-  return product.sizes.map((size, index) => ({
+  const sizes = product.category === "shoes" ? ["36", "37", "38", "39", "40", "41"] : product.sizes;
+  return sizes.map((size, index) => ({
     id: `${product.id}-${size}`,
     productId: product.id,
     size,
-    color: product.color,
     stock: (index % 3 === 0) ? 0 : Math.max(product.stock - (index % 2), 1),
-    sku: `DR-${product.id.toUpperCase()}-${size}`,
   }));
 }
 
@@ -108,6 +107,7 @@ async function main() {
       where: { id: product.id },
       create: {
         id: product.id,
+        sku: `DR-${product.id.toUpperCase()}`,
         name: product.name,
         description: product.description,
         price: product.price,
@@ -127,9 +127,11 @@ async function main() {
         reviewsCount: 3,
         lowStockLimit: 2,
         images: [product.image],
+        color: product.color,
       },
       update: {
         name: product.name,
+        sku: `DR-${product.id.toUpperCase()}`,
         description: product.description,
         price: product.price,
         compareAtPrice: product.compareAtPrice,
@@ -148,17 +150,17 @@ async function main() {
         reviewsCount: 3,
         lowStockLimit: 2,
         images: [product.image],
+        color: product.color,
       },
     });
 
     for (const variant of buildVariants(product)) {
       await prisma.productVariant.upsert({
-        where: { sku: variant.sku },
+        where: { id: variant.id },
         create: variant,
         update: {
           productId: variant.productId,
           size: variant.size,
-          color: variant.color,
           stock: variant.stock,
         },
       });
@@ -210,7 +212,7 @@ async function main() {
       const product = CATALOG_PRODUCTS[productIndex];
       const variant = variantsByProduct.get(product.id);
       if (!variant) throw new Error(`Missing seeded variant for ${product.id}`);
-      return { productId: product.id, variantId: variant.id, productName: product.name, size: variant.size, color: variant.color, quantity: 1, price: product.price, unitCost: Math.round(product.price * 0.62) + 85 };
+      return { productId: product.id, variantId: variant.id, productName: product.name, size: variant.size, color: product.color, quantity: 1, price: product.price, unitCost: Math.round(product.price * 0.62) + 85 };
     });
     const subtotalPrice = items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
     await prisma.order.upsert({

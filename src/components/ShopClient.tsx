@@ -77,6 +77,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     { value: "newest", label: "Newest Arrivals" },
     { value: "price-asc", label: "Price: Low to High" },
     { value: "price-desc", label: "Price: High to Low" },
+    { value: "color-asc", label: "Color: A to Z" },
   ];
 
   useEffect(() => {
@@ -116,7 +117,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
 
   const allColors = useMemo(() => {
     const colors = new Set<string>();
-    initialProducts.forEach((p) => p.variants.forEach((v) => colors.add(v.color)));
+    initialProducts.forEach((p) => { if (p.color) colors.add(p.color); });
     return Array.from(colors);
   }, [initialProducts]);
 
@@ -150,7 +151,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
 
     if (selectedColors.length > 0) {
       result = result.filter((p) =>
-        p.variants.some((v) => selectedColors.includes(v.color))
+        p.color ? selectedColors.includes(p.color) : false
       );
     }
 
@@ -158,6 +159,8 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
       result.sort((a, b) => Number(a.price) - Number(b.price));
     } else if (sortBy === "price-desc") {
       result.sort((a, b) => Number(b.price) - Number(a.price));
+    } else if (sortBy === "color-asc") {
+      result.sort((a, b) => (a.color || "").localeCompare(b.color || ""));
     }
 
     return result;

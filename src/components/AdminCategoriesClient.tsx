@@ -40,7 +40,8 @@ interface ProductPreview {
   price: number;
   compareAtPrice: number | null;
   images: string[];
-  variants: Array<{ size: string; color: string; stock: number }>;
+  color: string | null;
+  variants: Array<{ size: string; stock: number }>;
 }
 
 const categories = [
@@ -155,7 +156,7 @@ export default function AdminCategoriesClient({
         const matches = (candidate: string | null | undefined) =>
           candidate?.trim().toLowerCase() === value;
         if (activeOption.type === "brand") return matches(product.brand);
-        if (activeOption.type === "color") return product.variants.some((variant) => matches(variant.color));
+        if (activeOption.type === "color") return matches(product.color);
         if (activeOption.type === "size" || activeOption.type === "volume") {
           return product.variants.some((variant) => matches(variant.size));
         }

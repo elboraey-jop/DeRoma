@@ -26,9 +26,9 @@ export default async function InventoryPage() {
       product.variants.map((variant) => ({
         variantId: variant.id,
         product: product.name,
-        sku: variant.sku,
+        sku: product.sku || "",
         size: variant.size,
-        color: variant.color,
+        color: product.color || "",
         stock: variant.stock,
         lowStockLimit: product.lowStockLimit,
       })),
@@ -39,9 +39,9 @@ export default async function InventoryPage() {
       product.variants.map((variant) => ({
         variantId: variant.id,
         product: product.name,
-        sku: variant.sku,
+        sku: product.sku || "",
         size: variant.size,
-        color: variant.color,
+        color: product.color || "",
         stock: variant.stock,
         lowStockLimit: 2,
       })),
