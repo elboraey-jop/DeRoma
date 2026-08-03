@@ -12,6 +12,7 @@ import { requireAdmin } from "@/lib/adminAuth";
 import { formatCurrency } from "@/lib/utils";
 import AdminPrintButton from "@/components/AdminPrintButton";
 import AdminStatusSelect from "@/components/AdminStatusSelect";
+import AdminCopyButton from "@/components/AdminCopyButton";
 
 const statusMessages: Record<string, string> = {
   pending:
@@ -96,13 +97,7 @@ export default async function AdminOrderDetailsPage({
                 Customer
               </p>
               <Link href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`} className="mt-1 block font-playfair text-2xl font-bold hover:underline">{order.customerName}</Link>
-              <a
-                href={`tel:${order.customerPhone}`}
-                className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-[#942E3A]"
-              >
-                <Phone className="h-3.5 w-3.5 text-[#D8B46A]" />{" "}
-                {order.customerPhone}
-              </a>
+              <span className="mt-1 inline-flex items-center gap-1.5"><a href={`tel:${order.customerPhone}`} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#942E3A]"><Phone className="h-3.5 w-3.5 text-[#D8B46A]" />{order.customerPhone}</a><AdminCopyButton value={order.customerPhone} /></span>
             </div>
             <div className="flex items-center gap-2 print:hidden"><span className="text-[10px] font-bold uppercase tracking-wide text-[#6B1F2A]/55">Status</span><AdminStatusSelect orderId={order.id} status={order.status} paymentMethod={order.paymentMethod} /></div>
           </div>

@@ -82,6 +82,15 @@ export async function createPromotionAction(formData: FormData) {
   revalidatePath("/admin/promotions");
 }
 
+export async function createFreeShippingPromotionAction(formData: FormData) {
+  const next = formData;
+  next.set("type", "free_shipping");
+  next.set("scope", "order");
+  next.set("value", "0");
+  next.set("targetValue", "");
+  return (createPromotionAction as unknown as (data: FormData) => Promise<void>)(next);
+}
+
 export async function createAnnouncementAction(formData: FormData) {
   await requireAdmin();
   const text = String(formData.get("text") || "").trim();

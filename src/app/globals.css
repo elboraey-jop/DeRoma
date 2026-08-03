@@ -50,6 +50,18 @@
   display: none;
 }
 
+/* Keep dropdowns and modal lists scrollable without showing a browser scrollbar. */
+.overflow-y-auto {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  display: none;
+}
+
 .admin-modal-scroll {
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable;

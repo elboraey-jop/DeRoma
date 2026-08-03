@@ -71,11 +71,14 @@ export async function createOrder(input: CreateOrderInput) {
     }
 
     // 2. Resolve shipping fee from admin settings, with legacy fallback.
+    const shippingSettings = await prisma.shippingSettings.findUnique({ where: { id: "default" } });
     const shippingZone = await prisma.shippingZone.findFirst({
       where: { active: true, governorates: { has: input.governorate } },
+      include: { exceptions: true },
     });
+    const cityException = shippingZone?.exceptions.find((exception) => exception.city.toLowerCase() === input.city.toLowerCase());
     let shippingCost = shippingZone
-      ? Number(shippingZone.fee)
+      ? cityException ? Number(cityException.fee) : Number(shippingZone.fee)
       : (SHIPPING_FEES[input.governorate] ?? 70);
 
     // 3. Process items and calculate total securely on server
@@ -160,6 +163,7 @@ export async function createOrder(input: CreateOrderInput) {
           return false;
         })
       : [];
+    if (shippingSettings?.freeShippingEnabled && shippingSettings.freeShippingThreshold !== null && subtotal >= Number(shippingSettings.freeShippingThreshold)) shippingCost = 0;
     const promotionBase = eligibleItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,

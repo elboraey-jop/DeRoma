@@ -66,6 +66,20 @@ model Supplier {
   updatedAt    DateTime  @updatedAt
 }
 
+model Customer {
+  id           String   @id @default(uuid())
+  name         String
+  email        String?
+  phone        String   @unique
+  phone2       String?
+  governorate  String
+  city         String
+  address      String
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 model CatalogOption {
   id         String   @id @default(uuid())
   category   String   // shoes, bags, perfumes, accessories
@@ -98,6 +112,27 @@ model ShippingZone {
   estimatedDays         String?
   freeShippingThreshold Decimal?
   active                Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  exceptions            ShippingZoneException[]
+}
+
+model ShippingZoneException {
+  id             String       @id @default(uuid())
+  shippingZoneId String
+  city           String
+  fee            Decimal
+  shippingZone   ShippingZone @relation(fields: [shippingZoneId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([shippingZoneId, city])
+}
+
+model ShippingSettings {
+  id                    String   @id @default("default")
+  freeShippingEnabled   Boolean  @default(false)
+  freeShippingThreshold Decimal?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }

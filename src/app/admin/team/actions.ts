@@ -55,6 +55,18 @@ export async function changeAdminPasswordAction(formData: FormData) {
   revalidatePath("/admin/team");
 }
 
+export async function changeTeamMemberPasswordAction(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const newPassword = String(formData.get("newPassword") || "");
+  const confirmation = String(formData.get("confirmPassword") || "");
+  if (!id || newPassword.length < 8) throw new Error("The new password must be at least 8 characters.");
+  if (newPassword !== confirmation) throw new Error("The new password confirmation does not match.");
+  await prisma.user.update({ where: { id }, data: { passwordHash: await bcrypt.hash(newPassword, 12), role: "admin" } });
+  revalidatePath("/admin/team");
+  revalidatePath(`/admin/team/${id}`);
+}
+
 export async function removeTeamMemberAction(formData: FormData) {
   const current = await requireAdmin();
   const id = String(formData.get("id") || "");
