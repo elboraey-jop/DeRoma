@@ -185,7 +185,8 @@ model ProductVariant {
 
 model Order {
   id             String      @id @default(uuid())
-  orderNumber    String      @unique // E.g., DR-1001
+  orderNumber    String      @unique // E.g., DR-0001, then DR-10000 after 9999
+  orderSequence  Int         @unique @default(autoincrement())
   customerName   String
   customerPhone  String
   customerPhone2 String?     // Secondary contact

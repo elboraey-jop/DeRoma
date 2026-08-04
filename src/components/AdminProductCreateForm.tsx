@@ -47,7 +47,6 @@ type ReviewDraft = {
   id?: string;
   customerName: string;
   rating: number;
-  title: string;
   body: string;
 };
 type BrandState = {
@@ -95,7 +94,6 @@ type EditProduct = {
     id?: string;
     customerName: string;
     rating: number;
-    title: string;
     body: string;
   }>;
 };
@@ -1009,7 +1007,6 @@ export default function AdminProductCreateForm({
   const [reviewDraft, setReviewDraft] = useState<ReviewDraft>({
     customerName: "",
     rating: 5,
-    title: "",
     body: "",
   });
   useEffect(() => {
@@ -2086,7 +2083,6 @@ export default function AdminProductCreateForm({
                 setReviewDraft({
                   customerName: "",
                   rating: 5,
-                  title: "",
                   body: "",
                 });
                 setReviewModalOpen(true);
@@ -2112,9 +2108,6 @@ export default function AdminProductCreateForm({
                         />
                       ))}
                     </div>
-                    <h3 className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">
-                      {review.title || "Customer review"}
-                    </h3>
                     <p className="mt-1 text-xs font-bold text-[#6B1F2A]/60">
                       {review.customerName}
                     </p>
@@ -2206,12 +2199,19 @@ export default function AdminProductCreateForm({
                   </label>
                   <div className="relative" ref={ratingMenuRef}>
                     <span className="field-label">Rating</span>
+                    <div className="mt-2 flex items-center gap-1.5" role="radiogroup" aria-label="Rating">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button key={star} type="button" role="radio" aria-checked={reviewDraft.rating === star} aria-label={`${star} out of 5 stars`} onClick={() => setReviewDraft((current) => ({ ...current, rating: star }))} className="rounded-lg p-1 transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#D8B46A]/50">
+                          <Star className={`h-7 w-7 ${star <= reviewDraft.rating ? "fill-[#D8B46A] text-[#D8B46A]" : "text-[#d9c8b8] hover:text-[#D8B46A]/70"}`} />
+                        </button>
+                      ))}
+                    </div>
                     <button
                       type="button"
                       aria-haspopup="listbox"
                       aria-expanded={ratingMenuOpen}
                       onClick={() => setRatingMenuOpen((current) => !current)}
-                      className="admin-input mt-2 flex w-full items-center justify-between text-left transition hover:border-[#D8B46A]"
+                      className="hidden"
                     >
                       <span className="flex items-center gap-2">
                         <span className="tracking-[0.15em] text-[#D8B46A]">
@@ -2258,20 +2258,6 @@ export default function AdminProductCreateForm({
                       </div>
                     )}
                   </div>
-                  <label className="sm:col-span-2">
-                    <span className="field-label">Review title</span>
-                    <input
-                      value={reviewDraft.title}
-                      onChange={(event) =>
-                        setReviewDraft((current) => ({
-                          ...current,
-                          title: event.target.value,
-                        }))
-                      }
-                      className="admin-input"
-                      placeholder="A short headline"
-                    />
-                  </label>
                   <label className="sm:col-span-2">
                     <span className="field-label">Review</span>
                     <textarea

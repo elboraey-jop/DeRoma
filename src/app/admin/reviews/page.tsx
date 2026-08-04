@@ -1,13 +1,22 @@
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
-import { MessageSquareQuote } from "lucide-react";
-import { deleteReviewAction, updateReviewStatusAction } from "@/app/admin/reviews/actions";
+import AdminReviewsClient from "@/components/AdminReviewsClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminReviewsPage() {
   await requireAdmin();
-  let reviews: Array<{ id: string; customerName: string; rating: number; createdAt: Date; status: string; body: string; product: { name: string } }> = [];
-  try { reviews = await prisma.review.findMany({ include: { product: { select: { name: true } } }, orderBy: { createdAt: "desc" } }); } catch (error) { console.warn("Unable to load reviews", error); }
-  return <div className="space-y-5"><div><p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">Customer voice</p><h1 className="mt-1 font-playfair text-3xl font-black">Reviews</h1><p className="mt-1 text-xs text-[#6B1F2A]/65">Approve genuine reviews before they appear on the storefront.</p></div><section className="rounded-3xl border border-[#942E3A]/10 bg-white p-4 shadow-sm sm:p-6"><div className="flex items-center gap-2"><MessageSquareQuote className="h-4 w-4 text-[#D8B46A]" /><h2 className="font-playfair text-xl font-bold">Review inbox</h2></div><div className="mt-4 space-y-3">{reviews.map((review) => <article key={review.id} className="rounded-2xl border border-[#942E3A]/10 p-4"><div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start"><div><p className="text-xs font-bold text-[#942E3A]">{review.customerName} · {review.rating}/5</p><p className="mt-1 text-[10px] text-[#6B1F2A]/60">{review.product.name} · {new Date(review.createdAt).toLocaleDateString("en-US")}</p></div><div className="flex items-center gap-2"><form action={updateReviewStatusAction} className="flex gap-1"><input type="hidden" name="id" value={review.id} /><select name="status" defaultValue={review.status} className="rounded-lg border border-[#942E3A]/15 bg-[#FFF9EB] px-2 py-1.5 text-[10px]"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select><button className="rounded-lg bg-[#942E3A] px-2 py-1.5 text-[10px] font-bold text-[#FFF9EB]">Save</button></form><form action={deleteReviewAction}><input type="hidden" name="id" value={review.id} /><button className="text-[10px] font-bold text-red-600">Delete</button></form></div></div><p className="mt-3 text-xs leading-relaxed text-[#6B1F2A]">{review.body}</p></article>)}{reviews.length === 0 && <p className="py-12 text-center text-xs text-[#6B1F2A]/60">No reviews yet.</p>}</div></section></div>;
+  try {
+    const [reviews, products] = await Promise.all([
+      prisma.review.findMany({ include: { product: { select: { id: true, name: true, images: true, category: true } }, }, orderBy: { createdAt: "desc" } }),
+      prisma.product.findMany({ select: { id: true, name: true, images: true, category: true }, orderBy: { name: "asc" } }),
+    ]);
+    return <AdminReviewsClient
+      reviews={reviews.map((review) => ({ ...review, createdAt: review.createdAt.toISOString(), updatedAt: review.updatedAt.toISOString() }))}
+      products={products}
+    />;
+  } catch (error) {
+    console.warn("Unable to load reviews", error);
+    return <AdminReviewsClient reviews={[]} products={[]} />;
+  }
 }

@@ -46,12 +46,12 @@ const ANNOUNCEMENTS = [
 ];
 
 const DEMO_ORDERS = [
-  { orderNumber: "DR-DEMO-1001", customerName: "Mariam Hassan", customerPhone: "01011112222", governorate: "Cairo", city: "New Cairo", address: "Street 90, Fifth Settlement", status: "pending", shippingCost: 60, discountAmount: 0, daysAgo: 0, productIndexes: [0, 5] },
-  { orderNumber: "DR-DEMO-1002", customerName: "Nour Adel", customerPhone: "01033334444", governorate: "Giza", city: "Dokki", address: "12 Tahrir Street, Dokki", status: "shipped", shippingCost: 60, discountAmount: 250, daysAgo: 3, productIndexes: [3] },
-  { orderNumber: "DR-DEMO-1003", customerName: "Salma Youssef", customerPhone: "01155556666", governorate: "Alexandria", city: "Smouha", address: "45 Victor Emanuel Street", status: "delivered", shippingCost: 85, discountAmount: 0, daysAgo: 8, productIndexes: [8, 10] },
-  { orderNumber: "DR-DEMO-1004", customerName: "Hana Mahmoud", customerPhone: "01277778888", governorate: "Qalyubia", city: "Banha", address: "El Geish Street, Banha", status: "delivered", shippingCost: 85, discountAmount: 150, daysAgo: 14, productIndexes: [1] },
-  { orderNumber: "DR-DEMO-1005", customerName: "Farida Samir", customerPhone: "01099990000", governorate: "Giza", city: "Sheikh Zayed", address: "Beverly Hills, Sheikh Zayed", status: "cancelled", shippingCost: 60, discountAmount: 0, daysAgo: 21, productIndexes: [6] },
-  { orderNumber: "DR-DEMO-1006", customerName: "Laila Omar", customerPhone: "01122223333", governorate: "Cairo", city: "Heliopolis", address: "Baghdad Street, Korba", status: "delivered", shippingCost: 60, discountAmount: 0, daysAgo: 28, productIndexes: [11, 12] },
+  { orderNumber: "DR-0006", customerName: "Mariam Hassan", customerPhone: "01011112222", governorate: "Cairo", city: "New Cairo", address: "Street 90, Fifth Settlement", status: "pending", shippingCost: 60, discountAmount: 0, daysAgo: 0, productIndexes: [0, 5] },
+  { orderNumber: "DR-0005", customerName: "Nour Adel", customerPhone: "01033334444", governorate: "Giza", city: "Dokki", address: "12 Tahrir Street, Dokki", status: "shipped", shippingCost: 60, discountAmount: 250, daysAgo: 3, productIndexes: [3] },
+  { orderNumber: "DR-0004", customerName: "Salma Youssef", customerPhone: "01155556666", governorate: "Alexandria", city: "Smouha", address: "45 Victor Emanuel Street", status: "delivered", shippingCost: 85, discountAmount: 0, daysAgo: 8, productIndexes: [8, 10] },
+  { orderNumber: "DR-0003", customerName: "Hana Mahmoud", customerPhone: "01277778888", governorate: "Qalyubia", city: "Banha", address: "El Geish Street, Banha", status: "delivered", shippingCost: 85, discountAmount: 150, daysAgo: 14, productIndexes: [1] },
+  { orderNumber: "DR-0002", customerName: "Farida Samir", customerPhone: "01099990000", governorate: "Giza", city: "Sheikh Zayed", address: "Beverly Hills, Sheikh Zayed", status: "cancelled", shippingCost: 60, discountAmount: 0, daysAgo: 21, productIndexes: [6] },
+  { orderNumber: "DR-0001", customerName: "Laila Omar", customerPhone: "01122223333", governorate: "Cairo", city: "Heliopolis", address: "Baghdad Street, Korba", status: "delivered", shippingCost: 60, discountAmount: 0, daysAgo: 28, productIndexes: [11, 12] },
 ];
 
 const REVIEW_LINES = [
@@ -215,11 +215,13 @@ async function main() {
       return { productId: product.id, variantId: variant.id, productName: product.name, size: variant.size, color: product.color, quantity: 1, price: product.price, unitCost: Math.round(product.price * 0.62) + 85 };
     });
     const subtotalPrice = items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
-    await prisma.order.upsert({
-      where: { orderNumber: orderSeed.orderNumber },
-      create: { orderNumber: orderSeed.orderNumber, customerName: orderSeed.customerName, customerPhone: orderSeed.customerPhone, governorate: orderSeed.governorate, city: orderSeed.city, address: orderSeed.address, subtotalPrice, discountAmount: orderSeed.discountAmount, totalPrice: subtotalPrice - orderSeed.discountAmount + orderSeed.shippingCost, shippingCost: orderSeed.shippingCost, status: orderSeed.status, manual: true, createdAt: new Date(Date.now() - orderSeed.daysAgo * 86400000), items: { create: items } },
-      update: { customerName: orderSeed.customerName, customerPhone: orderSeed.customerPhone, governorate: orderSeed.governorate, city: orderSeed.city, address: orderSeed.address, subtotalPrice, discountAmount: orderSeed.discountAmount, totalPrice: subtotalPrice - orderSeed.discountAmount + orderSeed.shippingCost, shippingCost: orderSeed.shippingCost, status: orderSeed.status, items: { deleteMany: {}, create: items } },
-    });
+    const existingOrder = await prisma.order.findFirst({ where: { customerPhone: orderSeed.customerPhone }, select: { id: true } });
+    const orderData = { customerName: orderSeed.customerName, customerPhone: orderSeed.customerPhone, governorate: orderSeed.governorate, city: orderSeed.city, address: orderSeed.address, subtotalPrice, discountAmount: orderSeed.discountAmount, totalPrice: subtotalPrice - orderSeed.discountAmount + orderSeed.shippingCost, shippingCost: orderSeed.shippingCost, status: orderSeed.status, manual: true, createdAt: new Date(Date.now() - orderSeed.daysAgo * 86400000) };
+    if (existingOrder) {
+      await prisma.order.update({ where: { id: existingOrder.id }, data: { ...orderData, items: { deleteMany: {}, create: items } } });
+    } else {
+      await prisma.order.create({ data: { ...orderData, orderNumber: orderSeed.orderNumber, orderSequence: 7 - DEMO_ORDERS.indexOf(orderSeed), items: { create: items } } });
+    }
   }
 }
 

@@ -23,6 +23,12 @@ import { useCart } from "@/lib/cartStore";
 import { formatCurrency } from "@/lib/utils";
 import { createOrder } from "@/app/actions";
 
+import {
+  calculateShippingFee,
+  ShippingSettingsData,
+  ShippingZoneData,
+} from "@/lib/shippingHelper";
+
 interface GovItem {
   en: string;
   ar: string;
@@ -147,11 +153,25 @@ export default function CheckoutPage() {
   const [govSearch, setGovSearch] = useState("");
   const [isCenterMenuOpen, setIsCenterMenuOpen] = useState(false);
   const [centerSearch, setCenterSearch] = useState("");
-  const [adminShipping, setAdminShipping] = useState<Array<{ governorates: string[]; fee: number; freeShippingThreshold: number | null }>>([]);
+  const [adminShippingData, setAdminShippingData] = useState<{
+    zones: ShippingZoneData[];
+    settings: ShippingSettingsData;
+  }>({ zones: [], settings: null });
 
-  useEffect(() => { fetch("/api/shipping").then((response) => response.ok ? response.json() : []).then(setAdminShipping).catch(() => null); }, []);
+  useEffect(() => {
+    fetch("/api/shipping")
+      .then((response) => (response.ok ? response.json() : { zones: [], settings: null }))
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAdminShippingData({ zones: data, settings: null });
+        } else {
+          setAdminShippingData({ zones: data.zones || [], settings: data.settings || null });
+        }
+      })
+      .catch(() => null);
+  }, []);
 
-  const governorates = GOVERNORATES.map((governorate) => ({ ...governorate, fee: adminShipping.find((zone) => zone.governorates.includes(governorate.ar) || zone.governorates.includes(governorate.en))?.fee ?? governorate.fee }));
+  const governorates = GOVERNORATES;
   const govMenuRef = useRef<HTMLDivElement>(null);
   const centerMenuRef = useRef<HTMLDivElement>(null);
 
@@ -178,7 +198,15 @@ export default function CheckoutPage() {
   const filteredCenters = availableCenters.filter((center) =>
     center.toLowerCase().includes(centerSearch.trim().toLowerCase())
   );
-  const shippingCost = activeGov?.fee ?? 0;
+  const shippingCost = selectedGovEn
+    ? calculateShippingFee({
+        governorate: selectedGovEn,
+        city,
+        subtotal: cartTotal,
+        zones: adminShippingData.zones,
+        settings: adminShippingData.settings,
+      })
+    : 0;
   const grandTotal = cartTotal + shippingCost;
 
   const handleSubmit = async (event: React.FormEvent) => {

@@ -205,7 +205,7 @@ export async function updateProductAction(formData: FormData) {
         const reviewData = {
           customerName: review.customerName.trim(),
           rating: Number(review.rating),
-          title: review.title?.trim() || null,
+          title: null,
           body: review.body.trim(),
         };
         if (review.id && existingReviews.some((item) => item.id === review.id))

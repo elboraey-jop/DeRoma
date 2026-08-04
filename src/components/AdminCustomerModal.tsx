@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown, Search, UserPlus, X } from "lucide-react";
 import {
   createCustomerAction,
@@ -37,6 +37,7 @@ function LocationDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const filtered = options.filter((item) =>
     item.toLowerCase().includes(search.toLowerCase()),
   );
@@ -46,8 +47,16 @@ function LocationDropdown({
       setSearch("");
     }
   }, [disabled]);
+  useEffect(() => {
+    if (!open) return;
+    const closeOnOutside = (event: PointerEvent) => {
+      if (!dropdownRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutside);
+    return () => document.removeEventListener("pointerdown", closeOnOutside);
+  }, [open]);
   return (
-    <div className="relative">
+    <div ref={dropdownRef} className="relative">
       <span className="field-label">{label} *</span>
       <button
         type="button"

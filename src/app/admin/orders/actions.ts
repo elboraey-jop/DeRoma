@@ -7,12 +7,9 @@ import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import { getAllowedNextStatuses } from "@/lib/orderStatus";
 import { consumeInventoryLots } from "@/lib/inventoryLots";
+import { formatOrderNumber } from "@/lib/orderNumber";
 
 type ManualOrderItem = { variantId: string; quantity: number };
-
-function createOrderNumber() {
-  return `DR-${randomUUID().slice(0, 8).toUpperCase()}`;
-}
 
 function parseItems(value: FormDataEntryValue | null): ManualOrderItem[] {
   try {
@@ -79,11 +76,16 @@ export async function createManualOrderAction(formData: FormData) {
   await requireAdmin();
   const customerName = String(formData.get("customerName") || "").trim();
   const customerPhone = String(formData.get("customerPhone") || "").trim();
+  const customerPhone2 = String(formData.get("customerPhone2") || "").trim() || null;
+  const customerEmail = String(formData.get("customerEmail") || "").trim().toLowerCase() || null;
   const governorate = String(formData.get("governorate") || "").trim();
   const city = String(formData.get("city") || "").trim();
   const address = String(formData.get("address") || "").trim();
   const shippingCost = Number(formData.get("shippingCost") || 0);
   const requestedDiscount = Number(formData.get("discount") || 0);
+  const paymentMethod = String(formData.get("paymentMethod") || "cod").trim();
+  const orderSource = String(formData.get("orderSource") || "").trim();
+  const notesInput = String(formData.get("notes") || "").trim();
   const itemsInput = parseItems(formData.get("itemsJson"));
 
   if (!customerName || !customerPhone || !governorate || !city || !address)
@@ -109,6 +111,8 @@ export async function createManualOrderAction(formData: FormData) {
     new Set(itemsInput.map((item) => item.variantId)).size !== itemsInput.length
   )
     throw new Error("Duplicate product variants are not allowed.");
+  if (!['cod', 'instapay', 'wallet', 'card'].includes(paymentMethod))
+    throw new Error("Invalid payment method.");
 
   const variants = await prisma.productVariant.findMany({
     where: { id: { in: itemsInput.map((item) => item.variantId) } },
@@ -143,11 +147,18 @@ export async function createManualOrderAction(formData: FormData) {
       await consumeInventoryLots(tx, item.variantId, Number(item.quantity));
     }
 
-    return tx.order.create({
+    await tx.customer.upsert({
+      where: { phone: customerPhone },
+      create: { name: customerName, phone: customerPhone, phone2: customerPhone2, email: customerEmail, governorate, city, address },
+      update: { name: customerName, phone2: customerPhone2, email: customerEmail, governorate, city, address },
+    });
+    const notes = [orderSource && `Source: ${orderSource}`, notesInput].filter(Boolean).join("\n") || null;
+    const createdOrder = await tx.order.create({
       data: {
-        orderNumber: createOrderNumber(),
+        orderNumber: `DR-PENDING-${randomUUID()}`,
         customerName,
         customerPhone,
+        customerPhone2,
         governorate,
         city,
         address,
@@ -155,8 +166,9 @@ export async function createManualOrderAction(formData: FormData) {
         totalPrice,
         subtotalPrice,
         discountAmount,
+        notes,
         manual: true,
-        paymentMethod: "cod",
+        paymentMethod,
         status: "pending",
         items: {
           create: itemsInput.map((item) => {
@@ -178,6 +190,10 @@ export async function createManualOrderAction(formData: FormData) {
           }),
         },
       },
+    });
+    return tx.order.update({
+      where: { id: createdOrder.id },
+      data: { orderNumber: formatOrderNumber(createdOrder.orderSequence) },
     });
   });
 

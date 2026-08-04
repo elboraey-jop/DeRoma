@@ -13,6 +13,8 @@ export default async function NewManualOrderPage() {
     select: {
       id: true,
       name: true,
+      category: true,
+      images: true,
       color: true,
       price: true,
       variants: {
@@ -22,9 +24,33 @@ export default async function NewManualOrderPage() {
     },
     orderBy: { name: "asc" },
   });
+  const customers = await prisma.customer.findMany({
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      phone2: true,
+      email: true,
+      governorate: true,
+      city: true,
+      address: true,
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 250,
+  });
+
+  const [shippingZones, shippingSettings] = await Promise.all([
+    prisma.shippingZone.findMany({
+      where: { active: true },
+      include: { exceptions: true },
+    }),
+    prisma.shippingSettings.findUnique({
+      where: { id: "default" },
+    }),
+  ]);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5">
+    <div className="mx-auto max-w-6xl space-y-5">
       <div className="flex items-center gap-3">
         <Link
           href="/admin/orders"
@@ -46,6 +72,20 @@ export default async function NewManualOrderPage() {
           ...product,
           price: Number(product.price),
         }))}
+        customers={customers}
+        shippingZones={shippingZones.map((zone) => ({
+          id: zone.id,
+          name: zone.name,
+          governorates: zone.governorates,
+          fee: Number(zone.fee),
+          estimatedDays: zone.estimatedDays,
+          freeShippingThreshold: zone.freeShippingThreshold ? Number(zone.freeShippingThreshold) : null,
+          exceptions: zone.exceptions.map((e) => ({ city: e.city, fee: Number(e.fee) })),
+        }))}
+        shippingSettings={shippingSettings ? {
+          freeShippingEnabled: shippingSettings.freeShippingEnabled,
+          freeShippingThreshold: shippingSettings.freeShippingThreshold ? Number(shippingSettings.freeShippingThreshold) : null,
+        } : null}
       />
     </div>
   );

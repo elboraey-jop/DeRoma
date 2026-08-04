@@ -4,6 +4,12 @@ import { randomUUID } from "node:crypto";
 import prisma from "@/lib/prisma";
 import { Resend } from "resend";
 import { consumeInventoryLots } from "@/lib/inventoryLots";
+import { formatOrderNumber } from "@/lib/orderNumber";
+import {
+  calculateShippingFee,
+  ShippingSettingsData,
+  ShippingZoneData,
+} from "@/lib/shippingHelper";
 
 interface CheckoutItemInput {
   productId: string;
@@ -70,16 +76,34 @@ export async function createOrder(input: CreateOrderInput) {
       };
     }
 
-    // 2. Resolve shipping fee from admin settings, with legacy fallback.
-    const shippingSettings = await prisma.shippingSettings.findUnique({ where: { id: "default" } });
-    const shippingZone = await prisma.shippingZone.findFirst({
-      where: { active: true, governorates: { has: input.governorate } },
-      include: { exceptions: true },
-    });
-    const cityException = shippingZone?.exceptions.find((exception) => exception.city.toLowerCase() === input.city.toLowerCase());
-    let shippingCost = shippingZone
-      ? cityException ? Number(cityException.fee) : Number(shippingZone.fee)
-      : (SHIPPING_FEES[input.governorate] ?? 70);
+    // 2. Resolve shipping zones and settings from admin
+    const [allZones, shippingSettings] = await Promise.all([
+      prisma.shippingZone.findMany({
+        where: { active: true },
+        include: { exceptions: true },
+      }),
+      prisma.shippingSettings.findUnique({ where: { id: "default" } }),
+    ]);
+
+    const formattedZones: ShippingZoneData[] = allZones.map((zone) => ({
+      id: zone.id,
+      name: zone.name,
+      governorates: zone.governorates,
+      fee: Number(zone.fee),
+      freeShippingThreshold: zone.freeShippingThreshold
+        ? Number(zone.freeShippingThreshold)
+        : null,
+      exceptions: zone.exceptions.map((e) => ({ city: e.city, fee: Number(e.fee) })),
+    }));
+
+    const formattedSettings: ShippingSettingsData = shippingSettings
+      ? {
+          freeShippingEnabled: shippingSettings.freeShippingEnabled,
+          freeShippingThreshold: shippingSettings.freeShippingThreshold
+            ? Number(shippingSettings.freeShippingThreshold)
+            : null,
+        }
+      : null;
 
     // 3. Process items and calculate total securely on server
     let subtotal = 0;
@@ -96,7 +120,6 @@ export async function createOrder(input: CreateOrderInput) {
       material: string | null;
     }> = [];
 
-    // Fetch product details and check stock
     for (const item of input.items) {
       const variant = await prisma.productVariant.findUnique({
         where: { id: item.variantId },
@@ -132,6 +155,14 @@ export async function createOrder(input: CreateOrderInput) {
         material: variant.product.material,
       });
     }
+
+    let shippingCost = calculateShippingFee({
+      governorate: input.governorate,
+      city: input.city,
+      subtotal,
+      zones: formattedZones,
+      settings: formattedSettings,
+    });
 
     const promotionCandidate = input.couponCode
       ? await prisma.promotion.findFirst({
@@ -191,9 +222,6 @@ export async function createOrder(input: CreateOrderInput) {
     }
     const totalPrice = Math.max(0, subtotal - discountAmount + shippingCost);
 
-    // Generate a collision-resistant public reference without relying on a race-prone row count.
-    const orderNumber = `DR-${randomUUID().slice(0, 8).toUpperCase()}`;
-
     // 5. Database transaction (create order + deduct stock)
     const order = await prisma.$transaction(async (tx) => {
       if (promotion) {
@@ -218,10 +246,10 @@ export async function createOrder(input: CreateOrderInput) {
           throw new Error("Promotion is no longer available.");
       }
 
-      // Create the order
+      // Reserve a database-backed sequence value, then format the public number.
       const newOrder = await tx.order.create({
         data: {
-          orderNumber,
+          orderNumber: `DR-PENDING-${randomUUID()}`,
           customerName: input.customerName,
           customerPhone: input.customerPhone,
           customerPhone2: input.customerPhone2 || null,
@@ -243,6 +271,11 @@ export async function createOrder(input: CreateOrderInput) {
         },
       });
 
+      await tx.order.update({
+        where: { id: newOrder.id },
+        data: { orderNumber: formatOrderNumber(newOrder.orderSequence) },
+      });
+
       // Reserve stock atomically so simultaneous checkouts cannot oversell.
       for (const item of input.items) {
         const reserved = await tx.productVariant.updateMany({
@@ -254,7 +287,7 @@ export async function createOrder(input: CreateOrderInput) {
         await consumeInventoryLots(tx, item.variantId, item.quantity);
       }
 
-      return newOrder;
+      return { ...newOrder, orderNumber: formatOrderNumber(newOrder.orderSequence) };
     });
 
     // 6. Send notification email to admin using Resend.
@@ -279,7 +312,7 @@ export async function createOrder(input: CreateOrderInput) {
 
         const emailHtml = `
         <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-          <h2 style="color: #942E3A; border-bottom: 2px solid #942E3A; padding-bottom: 10px;">طلب جديد رقم ${orderNumber} ✨</h2>
+          <h2 style="color: #942E3A; border-bottom: 2px solid #942E3A; padding-bottom: 10px;">طلب جديد رقم ${order.orderNumber} ✨</h2>
 
           <h3 style="color: #333;">بيانات العميل:</h3>
           <p><strong>الاسم:</strong> ${input.customerName}</p>
@@ -323,7 +356,7 @@ export async function createOrder(input: CreateOrderInput) {
             process.env.RESEND_FROM_EMAIL ||
             "DeRoma Store <onboarding@resend.dev>",
           to: process.env.ADMIN_ALERT_EMAIL || "elboraey.jop@gmail.com",
-          subject: `طلب جديد في المتجر! #${orderNumber}`,
+          subject: `طلب جديد في المتجر! #${order.orderNumber}`,
           html: emailHtml,
         });
       } catch (emailErr) {

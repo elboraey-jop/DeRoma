@@ -259,7 +259,7 @@ export async function createProductAction(formData: FormData) {
         create: reviews.map((review) => ({
           customerName: review.customerName.trim(),
           rating: Number(review.rating),
-          title: review.title?.trim() || null,
+          title: null,
           body: review.body.trim(),
           status: "approved",
         })),

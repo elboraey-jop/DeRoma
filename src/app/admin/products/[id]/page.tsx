@@ -86,7 +86,6 @@ export default async function EditProductPage({
       id: review.id,
       customerName: review.customerName,
       rating: review.rating,
-      title: review.title || "",
       body: review.body,
     })),
   };
