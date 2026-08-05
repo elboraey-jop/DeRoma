@@ -2,6 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 
@@ -73,4 +74,5 @@ export async function removeTeamMemberAction(formData: FormData) {
   if (id && id !== current.id)
     await prisma.user.update({ where: { id }, data: { role: "customer" } });
   revalidatePath("/admin/team");
+  redirect("/admin/team");
 }

@@ -57,9 +57,14 @@ export async function requireAdmin() {
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
 
-  const user = await prisma.user.findUnique({ where: { id: session.sub }, select: { id: true, email: true, role: true, name: true } });
-  if (!user || user.role !== "admin") redirect("/admin/login");
-  return user;
+  try {
+    const user = await prisma.user.findUnique({ where: { id: session.sub }, select: { id: true, email: true, role: true, name: true } });
+    if (!user || user.role !== "admin") redirect("/admin/login");
+    return user;
+  } catch (error) {
+    console.error("Failed to verify admin session user:", error);
+    redirect("/admin/login");
+  }
 }
 
 export async function loginAdmin(email: string, password: string) {

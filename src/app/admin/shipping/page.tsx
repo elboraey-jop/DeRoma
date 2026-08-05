@@ -21,16 +21,25 @@ export default async function ShippingPage() {
         include: { exceptions: true },
         orderBy: { createdAt: "asc" },
       })
-      .catch(() => []),
+      .catch((err) => {
+        console.error("Failed to load shipping zones:", err);
+        return [];
+      }),
     prisma.shippingSettings
       .findUnique({ where: { id: "default" } })
-      .catch(() => null),
+      .catch((err) => {
+        console.error("Failed to load shipping settings:", err);
+        return null;
+      }),
     prisma.promotion
       .findMany({
         where: { type: "free_shipping" },
         orderBy: { createdAt: "desc" },
       })
-      .catch(() => []),
+      .catch((err) => {
+        console.error("Failed to load free shipping promotions:", err);
+        return [];
+      }),
   ]);
   return (
     <div className="space-y-5">

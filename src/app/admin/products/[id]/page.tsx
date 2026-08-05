@@ -16,7 +16,7 @@ export default async function EditProductPage({
 }) {
   await requireAdmin();
   const { id } = await params;
-  const [product, options, suppliers, relatedProducts] = await Promise.all([
+  const [product, options, suppliers, relatedProducts, orderCount] = await Promise.all([
     prisma.product.findUnique({
       where: { id },
       include: {
@@ -31,17 +31,30 @@ export default async function EditProductPage({
         select: { category: true, type: true, name: true, value: true },
         orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
       })
-      .catch(() => []),
+      .catch((err) => {
+        console.error("Failed to load catalog options:", err);
+        return [];
+      }),
     prisma.supplier
       .findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } })
-      .catch(() => []),
+      .catch((err) => {
+        console.error("Failed to load suppliers:", err);
+        return [];
+      }),
     prisma.product
       .findMany({
         where: { id: { not: id } },
         select: { id: true, name: true, category: true, sku: true },
         orderBy: { name: "asc" },
       })
-      .catch(() => []),
+      .catch((err) => {
+        console.error("Failed to load related products:", err);
+        return [];
+      }),
+    prisma.orderItem.count({ where: { productId: id } }).catch((err) => {
+      console.error("Failed to count order items for product:", err);
+      return 0;
+    }),
   ]);
   if (!product) notFound();
   const initialProduct = {
@@ -151,11 +164,21 @@ export default async function EditProductPage({
         <h2 className="mt-1 font-playfair text-xl font-bold text-red-800">
           Delete product
         </h2>
+        {orderCount > 0 ? (
+          <div className="mt-3 rounded-2xl border border-red-300 bg-red-100/70 p-3 text-xs font-semibold text-red-900">
+            This product is linked to {orderCount} customer order(s) and cannot be deleted to protect sales history. Set the status to <strong>Archive</strong> instead.
+          </div>
+        ) : null}
         <form action={deleteProductAction} className="mt-4">
           <input type="hidden" name="productId" value={product.id} />
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2.5 text-xs font-bold text-white"
+            disabled={orderCount > 0}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition ${
+              orderCount > 0
+                ? "cursor-not-allowed bg-red-300 opacity-60"
+                : "bg-red-700 hover:bg-red-800"
+            }`}
           >
             <Trash2 className="h-4 w-4" /> Delete product
           </button>

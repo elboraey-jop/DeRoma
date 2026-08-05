@@ -33,6 +33,7 @@ export default async function AdminProductsPage() {
             ? Number(product.compareAtPrice)
             : null,
           status: product.status,
+          lowStockLimit: product.lowStockLimit || 2,
           image: product.images[0] || null,
           stock: product.variants.reduce(
             (total, variant) => total + variant.stock,
@@ -53,7 +54,8 @@ export default async function AdminProductsPage() {
         suppliers={suppliers}
       />
     );
-  } catch {
+  } catch (error) {
+    console.error("Failed to load admin products:", error);
     const products = await getActiveProducts();
     return (
       <AdminProductsClient
@@ -68,6 +70,7 @@ export default async function AdminProductsPage() {
             ? Number(product.compareAtPrice)
             : null,
           status: "active",
+          lowStockLimit: (product as any).lowStockLimit || 2,
           image: product.images[0] || null,
           stock: product.variants.reduce(
             (total, variant) => total + variant.stock,

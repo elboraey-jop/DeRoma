@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getProductById, getActiveProducts } from "@/lib/products";
 import ProductDetailClient from "@/components/ProductDetailClient";
 import { notFound } from "next/navigation";
@@ -9,9 +10,38 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getProductById(id);
+  if (!product) return { title: "Product Not Found" };
+
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deromastore.com";
+  const title = `${product.name} | DeRoma Store`;
+  const description = product.description || `Buy ${product.name} handcrafted premium women's shoes at DeRoma Store.`;
+  const imageUrl = product.images[0] ? (product.images[0].startsWith("http") ? product.images[0] : `${baseUrl}${product.images[0]}`) : `${baseUrl}/banners/hero-1-desktop.webp`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/shop/${product.id}`,
+      siteName: "DeRoma Store",
+      images: [{ url: imageUrl, width: 800, height: 800, alt: product.name }],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+    },
+  };
+}
+
 export default async function ProductDetailPage({ params }: PageProps) {
   const { id } = await params;
-
   const product = await getProductById(id);
 
   if (!product) {
@@ -29,7 +59,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     relatedIds = relations.map((relation) => relation.relatedProductId);
     reviews = productReviews.map((review) => ({ id: review.id, name: review.customerName, avatar: review.customerName.charAt(0).toUpperCase(), rating: review.rating, date: new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }), comment: review.body }));
   } catch (error) {
-    console.warn("Unable to load product relations/reviews", error);
+    console.error("Unable to load product relations/reviews:", error);
   }
   const similarProducts = [
     ...allProducts.filter((p) => relatedIds.includes(p.id)),
@@ -41,8 +71,35 @@ export default async function ProductDetailPage({ params }: PageProps) {
     ),
   ].slice(0, 4);
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deromastore.com";
+  const productSchema = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    name: product.name,
+    image: product.images,
+    description: product.description || `${product.name} handcrafted women's shoes`,
+    sku: product.sku || product.id,
+    brand: {
+      "@type": "Brand",
+      name: product.brand || "DeRoma",
+    },
+    offers: {
+      "@type": "Offer",
+      url: `${baseUrl}/shop/${product.id}`,
+      priceCurrency: "EGP",
+      price: Number(product.price),
+      availability: product.variants.some((v) => v.stock > 0)
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+    },
+  };
+
   return (
     <main className="flex-1 bg-[#FFF9EB] min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
       <ProductDetailClient
         product={product}
         similarProducts={similarProducts}

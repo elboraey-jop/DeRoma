@@ -86,6 +86,16 @@ export function calculateShippingFee({
   );
 
   if (!matchingZone) {
+    const govClean = governorate.trim().toLowerCase();
+    for (const [key, aliases] of Object.entries(GOV_ALIASES)) {
+      if (aliases.some((a) => a.toLowerCase() === govClean)) {
+        if (key === "cairo" || key === "giza") return 50;
+        if (key === "alexandria") return 60;
+        if (["fayoum", "beni suef", "minya", "asyut", "sohag", "qena", "luxor", "aswan"].includes(key)) return 90;
+        if (["red sea", "new valley", "matrouh", "north sinai", "south sinai"].includes(key)) return 120;
+        return 70;
+      }
+    }
     return 70;
   }
 

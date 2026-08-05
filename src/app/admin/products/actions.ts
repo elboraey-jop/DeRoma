@@ -22,7 +22,7 @@ type ReviewInput = {
 };
 
 const productCategories = new Set(["shoes", "bags", "perfumes", "accessories"]);
-const productStatuses = new Set(["active", "archived", "draft"]);
+const productStatuses = new Set(["active", "archived"]);
 
 export async function updateProductDiscountAction(formData: FormData) {
   await requireAdmin();

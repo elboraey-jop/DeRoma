@@ -15,6 +15,7 @@ interface ProductRow {
   price: number;
   compareAtPrice: number | null;
   status: string;
+  lowStockLimit?: number;
   image: string | null;
   stock: number;
   wholesalePrice: number | null;
@@ -129,10 +130,10 @@ export default function AdminProductsClient({
         </div>
         <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3">
           <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
-            Drafts
+            Archived
           </p>
           <p className="mt-1 font-playfair text-2xl font-black">
-            {products.filter((p) => p.status === "draft").length}
+            {products.filter((p) => p.status === "archived").length}
           </p>
         </div>
         <div className="rounded-2xl border border-[#D8B46A]/35 bg-[#fff7df] p-3">
@@ -140,7 +141,7 @@ export default function AdminProductsClient({
             Low stock
           </p>
           <p className="mt-1 font-playfair text-2xl font-black">
-            {products.filter((p) => p.stock <= 2).length}
+            {products.filter((p) => p.stock <= (p.lowStockLimit ?? 2)).length}
           </p>
         </div>
       </div>

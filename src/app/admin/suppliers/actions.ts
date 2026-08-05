@@ -45,6 +45,10 @@ export async function deleteSupplierAction(formData: FormData) {
   await requireAdmin();
   const id = String(formData.get("id") || "");
   if (!id) throw new Error("Supplier id is required.");
+  const count = await prisma.purchaseInvoice.count({ where: { supplierId: id } });
+  if (count > 0) {
+    throw new Error(`Cannot delete supplier with ${count} existing purchase invoice(s).`);
+  }
   await prisma.supplier.delete({ where: { id } });
   revalidatePath("/admin/suppliers");
   revalidatePath("/admin/products");
@@ -64,18 +68,14 @@ export async function createPurchaseInvoiceAction(formData: FormData) {
   await requireAdmin();
   const supplierId = String(formData.get("supplierId") || "").trim();
   const invoiceDate = new Date(String(formData.get("invoiceDate") || ""));
-  const dueDateValue = String(formData.get("dueDate") || "").trim();
-  const dueDate = dueDateValue ? new Date(dueDateValue) : null;
   const reference = String(formData.get("reference") || "").trim() || null;
   const notes = String(formData.get("notes") || "").trim() || null;
   const shippingCost = Number(formData.get("shippingCost") || 0);
   const discount = Number(formData.get("discount") || 0);
-  const amountPaid = Number(formData.get("amountPaid") || 0);
   const items = parseInvoiceItems(formData.get("items"));
 
   if (!supplierId || Number.isNaN(invoiceDate.getTime())) throw new Error("Supplier and invoice date are required.");
-  if (dueDate && Number.isNaN(dueDate.getTime())) throw new Error("Due date is invalid.");
-  if ([shippingCost, discount, amountPaid].some((value) => !Number.isFinite(value) || value < 0)) throw new Error("Invoice totals must be valid positive numbers.");
+  if ([shippingCost, discount].some((value) => !Number.isFinite(value) || value < 0)) throw new Error("Invoice totals must be valid positive numbers.");
   if (!items.length || items.some((item) => !item.variantId || !Number.isInteger(Number(item.quantity)) || Number(item.quantity) < 1 || !Number.isFinite(Number(item.wholesalePrice)) || Number(item.wholesalePrice) < 0 || !Number.isFinite(Number(item.retailPrice)) || Number(item.retailPrice) < 0)) throw new Error("Add at least one complete invoice product.");
   if (new Set(items.map((item) => item.variantId)).size !== items.length) throw new Error("Each product variant can only be added once per invoice.");
 
@@ -85,8 +85,9 @@ export async function createPurchaseInvoiceAction(formData: FormData) {
 
   const subtotal = items.reduce((sum, item) => sum + Number(item.quantity) * Number(item.wholesalePrice), 0);
   const total = Math.max(0, subtotal + shippingCost - discount);
-  if (amountPaid > total) throw new Error("Paid amount cannot be greater than the invoice total.");
-  const status = amountPaid >= total ? "paid" : amountPaid > 0 ? "partially_paid" : "received";
+  const amountPaid = total;
+  const status = "paid";
+  const dueDate = null;
   const invoiceNumber = `INV-${new Date().getFullYear()}-${randomUUID().slice(0, 6).toUpperCase()}`;
 
   const invoice = await prisma.$transaction(async (tx) => {

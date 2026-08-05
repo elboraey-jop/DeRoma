@@ -16,7 +16,7 @@ export default async function AdminReviewsPage() {
       products={products}
     />;
   } catch (error) {
-    console.warn("Unable to load reviews", error);
+    console.error("Unable to load reviews:", error);
     return <AdminReviewsClient reviews={[]} products={[]} />;
   }
 }

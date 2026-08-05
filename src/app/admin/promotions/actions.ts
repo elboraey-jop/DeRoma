@@ -97,13 +97,45 @@ export async function createAnnouncementAction(formData: FormData) {
   const backgroundColor = String(formData.get("backgroundColor") || "#942E3A");
   const textColor = String(formData.get("textColor") || "#FFF9EB");
   const moving = formData.get("moving") === "on";
+  const startsAt = optionalDate(formData.get("startsAt"));
+  const endsAt = optionalDate(formData.get("endsAt"));
+
   if (!text) throw new Error("Announcement text is required.");
+  if (startsAt && endsAt && endsAt <= startsAt)
+    throw new Error("Announcement end date must be after start date.");
+
   await prisma.$transaction([
     prisma.announcementBar.updateMany({ data: { active: false } }),
     prisma.announcementBar.create({
-      data: { text, backgroundColor, textColor, moving, active: true },
+      data: { text, backgroundColor, textColor, moving, active: true, startsAt, endsAt },
     }),
   ]);
+  revalidatePath("/admin/promotions");
+  revalidatePath("/");
+}
+
+export async function toggleAnnouncementAction(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const active = String(formData.get("active") || "false") === "true";
+  if (id) {
+    if (!active) {
+      await prisma.announcementBar.updateMany({ data: { active: false } });
+    }
+    await prisma.announcementBar.update({
+      where: { id },
+      data: { active: !active },
+    });
+  }
+  revalidatePath("/admin/promotions");
+  revalidatePath("/");
+}
+
+export async function deleteAnnouncementAction(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") || "");
+  if (!id) throw new Error("Announcement id is required.");
+  await prisma.announcementBar.delete({ where: { id } });
   revalidatePath("/admin/promotions");
   revalidatePath("/");
 }

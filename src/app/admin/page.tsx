@@ -3,12 +3,9 @@ import {
   AlertTriangle,
   ArrowUpRight,
   BarChart3,
-  CheckCircle2,
   ClipboardList,
   DollarSign,
-  Package,
   ShoppingBag,
-  Truck,
 } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
@@ -25,7 +22,7 @@ async function getDashboardData() {
         prisma.order.count(),
         prisma.order.count({ where: { status: "pending" } }),
         prisma.productVariant.findMany({
-          select: { stock: true, product: { select: { lowStockLimit: true } } },
+          select: { stock: true, product: { select: { status: true, lowStockLimit: true } } },
         }),
         prisma.order.aggregate({
           where: { status: { not: "cancelled" } },
@@ -49,9 +46,14 @@ async function getDashboardData() {
 
     const lowStock = variants.filter(
       (variant) =>
-        variant.stock > 0 && variant.stock <= variant.product.lowStockLimit,
+        variant.product?.status === "active" &&
+        variant.stock > 0 &&
+        variant.stock <= (variant.product.lowStockLimit ?? 2),
     ).length;
-    const outOfStock = variants.filter((variant) => variant.stock === 0).length;
+    const outOfStock = variants.filter(
+      (variant) => variant.product?.status === "active" && variant.stock <= 0,
+    ).length;
+
     return {
       products,
       orders,
@@ -61,7 +63,8 @@ async function getDashboardData() {
       revenue: Number(revenue._sum.totalPrice || 0),
       recentOrders,
     };
-  } catch {
+  } catch (error) {
+    console.error("Failed to load admin dashboard data:", error);
     return {
       products: 0,
       orders: 0,

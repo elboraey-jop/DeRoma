@@ -10,7 +10,7 @@ const options = [
 ] as const;
 
 function labelForStatus(status: string) {
-  return status === "archived" ? "Archive" : status === "draft" ? "Draft" : "Active";
+  return status === "archived" ? "Archive" : "Active";
 }
 
 export default function AdminProductStatusSelect({

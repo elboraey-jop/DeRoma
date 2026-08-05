@@ -26,7 +26,7 @@ model Product {
   description    String?
   price          Decimal
   compareAtPrice Decimal?         // To show discount (e.g. 1200 EGP was 1500 EGP)
-  status         String           @default("active") // "active", "draft"
+  status         String           @default("active") // "active", "archived"
   category       String           // shoes, bags, perfumes, accessories
   subcategory    String?
   brand          String?
@@ -181,6 +181,7 @@ model ProductVariant {
   orderItems OrderItem[]
   invoiceItems PurchaseInvoiceItem[]
   inventoryLots InventoryLot[]
+  auditItems StockAuditItem[]
 }
 
 model Order {
@@ -293,3 +294,37 @@ model Review {
 
   @@index([productId, status])
 }
+
+model StockAudit {
+  id               String           @id @default(uuid())
+  auditNumber      String           @unique
+  title            String?
+  status           String           @default("completed") // draft, completed
+  notes            String?
+  totalExpected    Int              @default(0)
+  totalActual      Int              @default(0)
+  totalDiscrepancy Int              @default(0)
+  discrepancyValue Decimal          @default(0)
+  auditedBy        String?          @default("Admin")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  items            StockAuditItem[]
+}
+
+model StockAuditItem {
+  id            String         @id @default(uuid())
+  auditId       String
+  audit         StockAudit     @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  variantId     String
+  variant       ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  productName   String
+  sku           String?
+  size          String
+  color         String?
+  expectedStock Int
+  actualStock   Int
+  discrepancy   Int
+  unitPrice     Decimal        @default(0)
+  notes         String?
+}
+

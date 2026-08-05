@@ -1314,7 +1314,6 @@ export default function AdminProductCreateForm({
             placeholder="Select publishing status"
             values={[
               { value: "active", label: "Active" },
-              { value: "draft", label: "Draft" },
               { value: "archived", label: "Archived" },
             ]}
           />

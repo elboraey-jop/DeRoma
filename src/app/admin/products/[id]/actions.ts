@@ -107,7 +107,7 @@ export async function updateProductAction(formData: FormData) {
         sku,
         description: String(formData.get("description") || "").trim() || null,
         category,
-        status: ["active", "archived", "draft"].includes(
+        status: ["active", "archived"].includes(
           String(formData.get("status") || ""),
         )
           ? String(formData.get("status"))
@@ -323,7 +323,7 @@ export async function deleteProductAction(formData: FormData) {
   const orderCount = await prisma.orderItem.count({ where: { productId } });
   if (orderCount)
     throw new Error(
-      "Products used in orders cannot be deleted. Set the product to draft instead.",
+      "Products used in orders cannot be deleted. Set the product status to Archived instead.",
     );
   await prisma.product.delete({ where: { id: productId } });
   revalidatePath("/admin/products");

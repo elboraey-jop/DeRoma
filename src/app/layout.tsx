@@ -18,9 +18,60 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deromastore.com";
+
 export const metadata: Metadata = {
-  title: "DeRoma Store | Women's Premium Shoes",
-  description: "Modern, handcrafted boutique collection of elegant women's shoes.",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "DeRoma Store | Premium Women's Shoes & Handcrafted Footwear",
+    template: "%s | DeRoma Store",
+  },
+  description: "Handcrafted boutique collection of elegant women's shoes with cushioned comfort, everyday support, and doorstep fitting guarantee.",
+  keywords: ["women's shoes", "DeRoma shoes", "handcrafted footwear", "Egyptian boutique", "comfortable heels", "sneakers", "women's sneakers"],
+  openGraph: {
+    title: "DeRoma Store | Premium Women's Shoes",
+    description: "Handcrafted boutique collection of elegant women's shoes with cushioned comfort & doorstep fitting guarantee.",
+    url: baseUrl,
+    siteName: "DeRoma Store",
+    images: [
+      {
+        url: "/banners/hero-1-desktop.webp",
+        width: 1200,
+        height: 630,
+        alt: "DeRoma Store Women's Shoes Collection",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DeRoma Store | Premium Women's Shoes",
+    description: "Handcrafted boutique collection of elegant women's shoes with cushioned comfort.",
+    images: ["/banners/hero-1-desktop.webp"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "DeRoma Store",
+  url: baseUrl,
+  logo: `${baseUrl}/banners/hero-1-desktop.webp`,
+  sameAs: [
+    "https://instagram.com",
+    "https://facebook.com",
+  ],
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "Customer Support",
+    areaServed: "EG",
+    availableLanguage: ["en", "ar"],
+  },
 };
 
 export default function RootLayout({
@@ -30,6 +81,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" dir="ltr">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+      </head>
       <body className={`${playfair.variable} ${outfit.variable} font-playfair antialiased`}>
         <SmoothScroll />
         <ScrollToTop />
