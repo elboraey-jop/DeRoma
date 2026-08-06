@@ -69,8 +69,8 @@ function SuccessContent() {
             </section>
 
             <section className="mt-3 rounded-xl bg-[#942e3a] p-3.5 text-[#fffaf0]">
-              <div className="flex items-start gap-2.5"><Truck className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[#d8b46a]" /><div><h2 className="text-xs font-bold">A little note about delivery</h2><p className="mt-1 text-[11px] leading-4 text-white/70">You can open and try on your shoes in front of the courier before paying. Our delivery team will call you to coordinate the exact time.</p></div></div>
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-white/15 pt-3 text-[9px] font-bold uppercase tracking-[0.1em] text-[#d8b46a]"><span className="inline-flex items-center gap-1"><PackageCheck className="h-3 w-3" /> Try before you pay</span><span className="inline-flex items-center gap-1"><PhoneCall className="h-3 w-3" /> Courier will call</span></div>
+              <div className="flex items-start gap-2.5"><Truck className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[#d8b46a]" /><div><h2 className="text-xs font-bold">A little note about delivery</h2><p className="mt-1 text-[11px] leading-4 text-white/70">Our delivery team will call you to coordinate the exact time for your delivery.</p></div></div>
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-white/15 pt-3 text-[9px] font-bold uppercase tracking-[0.1em] text-[#d8b46a]"><span className="inline-flex items-center gap-1"><PackageCheck className="h-3 w-3" /> Fast delivery</span><span className="inline-flex items-center gap-1"><PhoneCall className="h-3 w-3" /> Courier will call</span></div>
             </section>
 
             <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">

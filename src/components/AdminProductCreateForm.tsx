@@ -22,6 +22,7 @@ import { createCatalogOptionAction } from "@/app/admin/products/categories/actio
 import { createSupplierWithResultAction } from "@/app/admin/suppliers/actions";
 import AdminImageGalleryField from "@/components/AdminImageGalleryField";
 import { AdminCatalogProductPicker } from "@/components/AdminProcurementPickers";
+import { useToast } from "@/providers/ToastProvider";
 
 type CatalogOption = {
   category: string;
@@ -885,6 +886,7 @@ export default function AdminProductCreateForm({
   redirectTo?: string;
   initialProduct?: EditProduct;
 }) {
+  const { toast } = useToast();
   const isEdit = Boolean(initialProduct);
   const steps = isEdit
     ? [
@@ -1093,6 +1095,9 @@ export default function AdminProductCreateForm({
   return (
     <form
       action={isEdit ? updateProductAction : createProductAction}
+      onSubmit={() => {
+        toast.success(isEdit ? "Product changes saved!" : "New product published!", "CATALOG");
+      }}
       className="space-y-5"
     >
       {initialProduct && (

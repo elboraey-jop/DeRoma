@@ -25,6 +25,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
+import { useToast } from "@/providers/ToastProvider";
 import {
   createPromotionAction,
   togglePromotionAction,
@@ -848,6 +849,7 @@ export default function AdminPromotionsClient({
   promotions: SerializedPromotion[];
   announcements: SerializedAnnouncementBar[];
 }) {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"promos" | "announcements">("promos");
 
   // Tab 1: Promo Filters & Search
@@ -882,7 +884,7 @@ export default function AdminPromotionsClient({
   // Tab 2: Announcement Form State (for live preview)
   const activeAnnouncement = announcements.find((a) => a.active);
   const [previewText, setPreviewText] = useState(
-    activeAnnouncement?.text || "🚚 Free shipping on orders over 2,500 EGP | Code: FREESHIP"
+    activeAnnouncement?.text || "Free shipping on orders over 2,500 EGP | Code: FREESHIP"
   );
   const [previewBg, setPreviewBg] = useState(activeAnnouncement?.backgroundColor || "#942E3A");
   const [previewTextColor, setPreviewTextColor] = useState(activeAnnouncement?.textColor || "#FFF9EB");
@@ -892,6 +894,7 @@ export default function AdminPromotionsClient({
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
+    toast.success(`Promo code "${code}" copied!`, "COPIED");
     setTimeout(() => setCopiedCode(null), 2000);
   };
 

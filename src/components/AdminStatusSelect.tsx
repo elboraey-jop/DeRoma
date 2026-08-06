@@ -4,6 +4,7 @@ import { ChevronDown, Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { updateOrderStatusAction } from "@/app/admin/orders/actions";
 import { getSelectableStatuses, getStatusLabel } from "@/lib/orderStatus";
+import { useToast } from "@/providers/ToastProvider";
 
 export default function AdminStatusSelect({
   orderId,
@@ -58,11 +59,16 @@ export default function AdminStatusSelect({
     };
   }, [isOpen, options.length]);
 
+  const { toast } = useToast();
+
   const chooseStatus = (nextStatus: string) => {
     const statusInput = formRef.current?.elements.namedItem("status");
     if (statusInput instanceof HTMLInputElement) statusInput.value = nextStatus;
     setIsOpen(false);
-    if (nextStatus !== status) formRef.current?.requestSubmit();
+    if (nextStatus !== status) {
+      toast.success(`Order status updated to "${getStatusLabel(nextStatus)}"`, "ORDER UPDATED");
+      formRef.current?.requestSubmit();
+    }
   };
 
   return (

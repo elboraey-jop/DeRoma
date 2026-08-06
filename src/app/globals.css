@@ -1768,7 +1768,16 @@ select:disabled {
       opacity: 0;
       transform: translateX(100%);
     }
-}
+  }
+
+  @keyframes toastProgress {
+    from {
+      width: 100%;
+    }
+    to {
+      width: 0%;
+    }
+  }
 /* --- Product Details Upgrade --- */
 
 /* Gallery */

@@ -68,6 +68,8 @@ model Supplier {
 
 model Customer {
   id           String   @id @default(uuid())
+  firstName    String?
+  lastName     String?
   name         String
   email        String?
   phone        String   @unique
@@ -185,11 +187,13 @@ model ProductVariant {
 }
 
 model Order {
-  id             String      @id @default(uuid())
-  orderNumber    String      @unique // E.g., DR-0001, then DR-10000 after 9999
-  orderSequence  Int         @unique @default(autoincrement())
-  customerName   String
-  customerPhone  String
+  id                String      @id @default(uuid())
+  orderNumber       String      @unique // E.g., DR-0001, then DR-10000 after 9999
+  orderSequence     Int         @unique @default(autoincrement())
+  customerFirstName String?
+  customerLastName  String?
+  customerName      String
+  customerPhone     String
   customerPhone2 String?     // Secondary contact
   governorate    String      // Shipping destination (e.g. Cairo)
   city           String

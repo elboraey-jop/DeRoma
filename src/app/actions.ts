@@ -18,6 +18,8 @@ interface CheckoutItemInput {
 }
 
 interface CreateOrderInput {
+  customerFirstName?: string;
+  customerLastName?: string;
   customerName: string;
   customerPhone: string;
   customerPhone2?: string;
@@ -62,18 +64,32 @@ const SHIPPING_FEES: Record<string, number> = {
 export async function createOrder(input: CreateOrderInput) {
   try {
     // 1. Validation
-    if (
-      !input.customerName ||
-      !input.customerPhone ||
-      !input.governorate ||
-      !input.city ||
-      !input.address ||
-      input.items.length === 0
-    ) {
-      return {
-        success: false,
-        error: "الرجاء ملء جميع الحقول المطلوبة وإضافة منتجات للسلة.",
-      };
+    const cleanFirstName = (input.customerFirstName || input.customerName.split(" ")[0] || "").trim();
+    const cleanLastName = (input.customerLastName || input.customerName.split(" ").slice(1).join(" ") || "").trim();
+    const cleanPhone = (input.customerPhone || "").replace(/[\s\-\+]/g, "").replace(/^20/, "");
+    const cleanPhone2 = input.customerPhone2 ? input.customerPhone2.replace(/[\s\-\+]/g, "").replace(/^20/, "") : null;
+    const egPhoneRegex = /^01[0125]\d{8}$/;
+
+    if (!cleanFirstName || cleanFirstName.length < 2) {
+      return { success: false, error: "الاسم الأول يجب أن يتكون من حرفين على الأقل." };
+    }
+    if (!cleanLastName || cleanLastName.length < 2) {
+      return { success: false, error: "الاسم الثاني يجب أن يتكون من حرفين على الأقل." };
+    }
+    if (!egPhoneRegex.test(cleanPhone)) {
+      return { success: false, error: "رقم الهاتف الرئيسي يجب أن يكون رقم مصري صحيح مكون من 11 رقم (مثال: 01012345678)." };
+    }
+    if (cleanPhone2 && !egPhoneRegex.test(cleanPhone2)) {
+      return { success: false, error: "رقم الهاتف البديل يجب أن يكون رقم مصري صحيح مكون من 11 رقم (مثال: 01112345678)." };
+    }
+    if (!input.governorate || !input.city) {
+      return { success: false, error: "الرجاء اختيار المحافظة والمدينة." };
+    }
+    if (!input.address || input.address.trim().length < 5) {
+      return { success: false, error: "العنوان التفصيلي يجب أن يتكون من 5 أحرف على الأقل." };
+    }
+    if (input.items.length === 0) {
+      return { success: false, error: "حقيبة التسوق فارغة." };
     }
 
     // 2. Resolve shipping zones and settings from admin
@@ -246,11 +262,40 @@ export async function createOrder(input: CreateOrderInput) {
           throw new Error("Promotion is no longer available.");
       }
 
+      const firstName = input.customerFirstName || input.customerName.split(" ")[0] || "";
+      const lastName = input.customerLastName || input.customerName.split(" ").slice(1).join(" ") || "";
+      const fullCustomerName = `${firstName} ${lastName}`.trim() || input.customerName;
+
+      await tx.customer.upsert({
+        where: { phone: input.customerPhone },
+        create: {
+          firstName,
+          lastName,
+          name: fullCustomerName,
+          phone: input.customerPhone,
+          phone2: input.customerPhone2 || null,
+          governorate: input.governorate,
+          city: input.city,
+          address: input.address,
+        },
+        update: {
+          firstName,
+          lastName,
+          name: fullCustomerName,
+          phone2: input.customerPhone2 || null,
+          governorate: input.governorate,
+          city: input.city,
+          address: input.address,
+        },
+      });
+
       // Reserve a database-backed sequence value, then format the public number.
       const newOrder = await tx.order.create({
         data: {
           orderNumber: `DR-PENDING-${randomUUID()}`,
-          customerName: input.customerName,
+          customerFirstName: firstName,
+          customerLastName: lastName,
+          customerName: fullCustomerName,
           customerPhone: input.customerPhone,
           customerPhone2: input.customerPhone2 || null,
           governorate: input.governorate,

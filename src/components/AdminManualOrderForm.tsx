@@ -145,7 +145,8 @@ export default function AdminManualOrderForm({
             </div>
             {customerMode === "existing" && <Field label="Choose a saved customer" icon={UserRound}><CustomerPicker value={selectedCustomer} customers={customers} onChange={selectCustomer} /></Field>}
             <div key={customerKey} className="grid gap-3 sm:grid-cols-2">
-              <Field label="Full name" icon={UserRound}><input required name="customerName" defaultValue={activeCustomer?.name} placeholder="Customer full name" className="manual-order-input" /></Field>
+              <Field label="First name" icon={UserRound}><input required name="customerFirstName" defaultValue={activeCustomer?.name?.split(" ")[0] || ""} placeholder="Customer first name" className="manual-order-input" /></Field>
+              <Field label="Second name" icon={UserRound}><input required name="customerLastName" defaultValue={activeCustomer?.name?.split(" ").slice(1).join(" ") || ""} placeholder="Customer second name" className="manual-order-input" /></Field>
               <Field label="Primary phone" icon={Phone}><input required name="customerPhone" type="tel" defaultValue={activeCustomer?.phone} placeholder="01X XXX XXXX" className="manual-order-input" /></Field>
               <Field label="Alternative phone" optional icon={Phone}><input name="customerPhone2" type="tel" defaultValue={activeCustomer?.phone2 || ""} placeholder="Optional backup number" className="manual-order-input" /></Field>
               <Field label="Email" optional icon={ReceiptText}><input name="customerEmail" type="email" defaultValue={activeCustomer?.email || ""} placeholder="Optional email" className="manual-order-input" /></Field>

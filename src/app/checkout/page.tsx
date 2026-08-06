@@ -17,9 +17,11 @@ import {
   Search,
   ShoppingBag,
   ShieldCheck,
+  Tag,
   UserRound,
 } from "lucide-react";
 import { useCart } from "@/lib/cartStore";
+import { useToast } from "@/providers/ToastProvider";
 import { formatCurrency } from "@/lib/utils";
 import { createOrder } from "@/app/actions";
 
@@ -137,8 +139,10 @@ function FieldLabel({ icon: Icon, children, optional = false }: { icon: typeof U
 
 export default function CheckoutPage() {
   const { cart, cartTotal, clearCart } = useCart();
+  const { toast } = useToast();
   const router = useRouter();
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [phone2, setPhone2] = useState("");
   const [selectedGovEn, setSelectedGovEn] = useState("");
@@ -146,7 +150,66 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [couponCode, setCouponCode] = useState("");
+  const [showPromoInput, setShowPromoInput] = useState(false);
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [promoIsFreeShipping, setPromoIsFreeShipping] = useState(false);
+  const [promoMessage, setPromoMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleApplyCoupon = async () => {
+    const clean = couponCode.trim().toUpperCase();
+    if (!clean) return;
+    setPromoLoading(true);
+    setPromoError("");
+
+    try {
+      const response = await fetch("/api/promotions/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: clean,
+          subtotal: cartTotal,
+          items: cart,
+        }),
+      });
+      const data = await response.json();
+      if (data.valid) {
+        setCouponApplied(true);
+        setAppliedDiscount(Number(data.discountAmount) || 0);
+        setPromoIsFreeShipping(Boolean(data.isFreeShipping));
+        setPromoMessage(data.message || `Code ${clean} applied!`);
+        setPromoError("");
+        toast.success(data.message || `Promo code ${clean} applied!`, "PROMO CODE");
+      } else {
+        const err = data.error || "Invalid promo code.";
+        setPromoError(err);
+        setCouponApplied(false);
+        setAppliedDiscount(0);
+        setPromoIsFreeShipping(false);
+        toast.error(err, "PROMO CODE");
+      }
+    } catch {
+      const msg = "Unable to validate promo code. Please try again.";
+      setPromoError(msg);
+      toast.error(msg, "PROMO CODE");
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponCode("");
+    setCouponApplied(false);
+    setAppliedDiscount(0);
+    setPromoIsFreeShipping(false);
+    setPromoError("");
+    setPromoMessage("");
+    toast.info("Promo code removed.", "PROMO CODE");
+  };
+
   const [error, setError] = useState("");
   const [isMounted, setIsMounted] = useState(false);
   const [isGovMenuOpen, setIsGovMenuOpen] = useState(false);
@@ -188,8 +251,6 @@ export default function CheckoutPage() {
     return () => document.removeEventListener("pointerdown", closeMenu);
   }, []);
 
-  if (!isMounted) return null;
-
   const activeGov = governorates.find((gov) => gov.en === selectedGovEn);
   const filteredGovernorates = governorates.filter((gov) =>
     gov.en.toLowerCase().includes(govSearch.trim().toLowerCase())
@@ -198,7 +259,16 @@ export default function CheckoutPage() {
   const filteredCenters = availableCenters.filter((center) =>
     center.toLowerCase().includes(centerSearch.trim().toLowerCase())
   );
-  const shippingCost = selectedGovEn
+  const isFreeShippingUnlocked = Boolean(
+    promoIsFreeShipping ||
+      (adminShippingData.settings?.freeShippingEnabled &&
+        adminShippingData.settings.freeShippingThreshold !== null &&
+        cartTotal >= Number(adminShippingData.settings.freeShippingThreshold))
+  );
+
+  const shippingCost = isFreeShippingUnlocked
+    ? 0
+    : selectedGovEn
     ? calculateShippingFee({
         governorate: selectedGovEn,
         city,
@@ -207,33 +277,101 @@ export default function CheckoutPage() {
         settings: adminShippingData.settings,
       })
     : 0;
-  const grandTotal = cartTotal + shippingCost;
+  const grandTotal = Math.max(0, cartTotal - appliedDiscount) + shippingCost;
+
+  const egPhoneRegex = /^01[0125]\d{8}$/;
+
+  const cleanFirst = firstName.trim();
+  const cleanLast = lastName.trim();
+  const cleanPhone = phone.replace(/[\s\-\+]/g, "").replace(/^20/, "");
+  const cleanPhone2 = phone2 ? phone2.replace(/[\s\-\+]/g, "").replace(/^20/, "") : "";
+
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    let err = "";
+    if (field === "firstName" && (!cleanFirst || cleanFirst.length < 2)) {
+      err = !cleanFirst ? "First name is required." : "First name must be at least 2 characters.";
+    } else if (field === "lastName" && (!cleanLast || cleanLast.length < 2)) {
+      err = !cleanLast ? "Second name is required." : "Second name must be at least 2 characters.";
+    } else if (field === "phone" && (!phone.trim() || !egPhoneRegex.test(cleanPhone))) {
+      err = !phone.trim() ? "Primary phone is required." : "Primary phone must be a valid 11-digit Egyptian mobile number (e.g. 01012345678).";
+    } else if (field === "phone2" && phone2.trim() && !egPhoneRegex.test(cleanPhone2)) {
+      err = "Alternative phone must be a valid 11-digit Egyptian mobile number.";
+    } else if (field === "governorate" && !selectedGovEn) {
+      err = "Please select a governorate.";
+    } else if (field === "city" && !city) {
+      err = "Please select a city or area.";
+    } else if (field === "address" && (!address.trim() || address.trim().length < 5)) {
+      err = !address.trim() ? "Detailed address is required." : "Detailed address must be at least 5 characters.";
+    }
+
+    if (err) {
+      toast.error(err, "INVALID FIELD");
+    }
+  };
+
+  const fieldErrors: Record<string, string> = {
+    firstName: touched.firstName ? (!cleanFirst ? "First name is required." : cleanFirst.length < 2 ? "First name must be at least 2 characters." : "") : "",
+    lastName: touched.lastName ? (!cleanLast ? "Second name is required." : cleanLast.length < 2 ? "Second name must be at least 2 characters." : "") : "",
+    phone: touched.phone ? (!phone.trim() ? "Primary phone is required." : !egPhoneRegex.test(cleanPhone) ? "Primary phone must be a valid 11-digit Egyptian mobile number (e.g. 01012345678)." : "") : "",
+    phone2: touched.phone2 && phone2.trim() && !egPhoneRegex.test(cleanPhone2) ? "Alternative phone must be a valid 11-digit Egyptian mobile number." : "",
+    governorate: touched.governorate ? (!selectedGovEn ? "Please select a governorate." : "") : "",
+    city: touched.city ? (!city ? "Please select a city or area." : "") : "",
+    address: touched.address ? (!address.trim() ? "Detailed address is required." : address.trim().length < 5 ? "Detailed address must be at least 5 characters." : "") : "",
+  };
+
+  const getFieldClass = (err?: string) =>
+    `${inputClass} ${err ? "border-rose-500 ring-2 ring-rose-500/10 bg-rose-50/20 text-rose-950 focus:border-rose-600 focus:ring-rose-500/20" : ""}`;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError("");
 
-    if (!name || !phone || !selectedGovEn || !city || !address) {
-      setError("Please complete all required fields before placing your order.");
+    setTouched({
+      firstName: true,
+      lastName: true,
+      phone: true,
+      phone2: true,
+      governorate: true,
+      city: true,
+      address: true,
+    });
+
+    if (
+      !cleanFirst || cleanFirst.length < 2 ||
+      !cleanLast || cleanLast.length < 2 ||
+      !phone.trim() || !egPhoneRegex.test(cleanPhone) ||
+      (phone2.trim() && !egPhoneRegex.test(cleanPhone2)) ||
+      !selectedGovEn ||
+      !city ||
+      !address || address.trim().length < 5
+    ) {
+      const msg = "Please fix the highlighted errors before placing your order.";
+      setError(msg);
+      toast.error(msg, "CHECKOUT");
       return;
     }
-
     if (cart.length === 0) {
-      setError("Your bag is empty. Please add items to checkout.");
+      const msg = "Your bag is empty. Please add items to checkout.";
+      setError(msg);
+      toast.error(msg, "CHECKOUT");
       return;
     }
 
     setLoading(true);
     try {
       const result = await createOrder({
-        customerName: name,
-        customerPhone: phone,
-        customerPhone2: phone2,
+        customerFirstName: cleanFirst,
+        customerLastName: cleanLast,
+        customerName: `${cleanFirst} ${cleanLast}`,
+        customerPhone: cleanPhone,
+        customerPhone2: cleanPhone2 || undefined,
         governorate: activeGov?.ar || "",
         city,
-        address,
-        notes,
-        couponCode,
+        address: address.trim(),
+        notes: notes.trim(),
+        couponCode: couponApplied ? couponCode : undefined,
         items: cart.map((item) => ({
           productId: item.productId,
           variantId: item.variantId,
@@ -242,20 +380,28 @@ export default function CheckoutPage() {
       });
 
       if (result.success && result.orderNumber) {
+        toast.success(`Order ${result.orderNumber} placed successfully!`, "ORDER CONFIRMED");
         clearCart();
+        const fullCustomerName = `${firstName.trim()} ${lastName.trim()}`;
         router.push(
-          `/checkout/success?orderNumber=${result.orderNumber}&name=${encodeURIComponent(name)}&total=${result.totalPrice}&shipping=${result.shippingCost}&gov=${encodeURIComponent(selectedGovEn)}`
+          `/checkout/success?orderNumber=${result.orderNumber}&name=${encodeURIComponent(fullCustomerName)}&total=${result.totalPrice}&shipping=${result.shippingCost}&gov=${encodeURIComponent(selectedGovEn)}`
         );
       } else {
-        setError(result.error || "Something went wrong. Please try again.");
+        const err = result.error || "Something went wrong. Please try again.";
+        setError(err);
+        toast.error(err, "ORDER FAILED");
       }
     } catch (submitError) {
       console.error(submitError);
-      setError("We could not connect to the server. Please try again.");
+      const msg = "We could not connect to the server. Please try again.";
+      setError(msg);
+      toast.error(msg, "CONNECTION ERROR");
     } finally {
       setLoading(false);
     }
   };
+
+  if (!isMounted) return null;
 
   if (cart.length === 0) {
     return (
@@ -299,12 +445,6 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {error && (
-          <div role="alert" className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
-            <span className="mt-0.5">!</span>{error}
-          </div>
-        )}
-
         <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-8">
           <form id="checkout-form" onSubmit={handleSubmit} className="order-2 min-w-0 space-y-5 lg:order-1">
             <section className="rounded-3xl border border-[#eadfd6] bg-white p-5 shadow-[0_14px_40px_rgba(73,24,39,0.05)] sm:p-7">
@@ -318,9 +458,55 @@ export default function CheckoutPage() {
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
-                <div><FieldLabel icon={UserRound}>Full name *</FieldLabel><input required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Yasmin Mohamed" className={inputClass} /></div>
-                <div><FieldLabel icon={Phone}>Primary phone *</FieldLabel><input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="010 1234 5678" className={inputClass} /></div>
-                <div><FieldLabel icon={Phone} optional>Alternative phone</FieldLabel><input type="tel" value={phone2} onChange={(e) => setPhone2(e.target.value)} placeholder="Another number" className={inputClass} /></div>
+                <div>
+                  <FieldLabel icon={UserRound}>First name *</FieldLabel>
+                  <input
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    onBlur={() => handleBlur("firstName")}
+                    placeholder="e.g. Yasmin"
+                    className={getFieldClass(fieldErrors.firstName)}
+                  />
+                  {fieldErrors.firstName && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.firstName}</p>}
+                </div>
+                <div>
+                  <FieldLabel icon={UserRound}>Second name *</FieldLabel>
+                  <input
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    onBlur={() => handleBlur("lastName")}
+                    placeholder="e.g. Mohamed"
+                    className={getFieldClass(fieldErrors.lastName)}
+                  />
+                  {fieldErrors.lastName && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.lastName}</p>}
+                </div>
+                <div>
+                  <FieldLabel icon={Phone}>Primary phone *</FieldLabel>
+                  <input
+                    required
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    onBlur={() => handleBlur("phone")}
+                    placeholder="010 1234 5678"
+                    className={getFieldClass(fieldErrors.phone)}
+                  />
+                  {fieldErrors.phone && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.phone}</p>}
+                </div>
+                <div>
+                  <FieldLabel icon={Phone} optional>Alternative phone</FieldLabel>
+                  <input
+                    type="tel"
+                    value={phone2}
+                    onChange={(e) => setPhone2(e.target.value)}
+                    onBlur={() => handleBlur("phone2")}
+                    placeholder="Another number"
+                    className={getFieldClass(fieldErrors.phone2)}
+                  />
+                  {fieldErrors.phone2 && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.phone2}</p>}
+                </div>
                 <div ref={govMenuRef} className="relative">
                   <FieldLabel icon={MapPin}>Governorate *</FieldLabel>
                   <button
@@ -330,14 +516,23 @@ export default function CheckoutPage() {
                     onClick={() => {
                       setIsGovMenuOpen((open) => !open);
                       setGovSearch("");
+                      handleBlur("governorate");
                     }}
-                    className={`${inputClass} flex min-w-0 items-center justify-between overflow-hidden text-left ${selectedGovEn ? "text-[#481827]" : "text-[#a99ca0]"}`}
+                    className={`${getFieldClass(fieldErrors.governorate)} flex min-w-0 items-center justify-between overflow-hidden text-left ${selectedGovEn ? "text-[#481827]" : "text-[#a99ca0]"}`}
                   >
-                    <span>{selectedGovEn ? `${selectedGovEn} · ${activeGov?.fee} EGP delivery` : "Select governorate"}</span>
+                    <span>{selectedGovEn ? <span>{selectedGovEn} · {isFreeShippingUnlocked ? <span className="font-bold text-emerald-700">FREE delivery</span> : `${activeGov?.fee} EGP delivery`}</span> : (isFreeShippingUnlocked ? <span>Select governorate (<span className="font-bold text-emerald-700">FREE delivery</span>)</span> : "Select governorate")}</span>
                     <ChevronDown className={`h-4 w-4 shrink-0 text-[#942e3a] transition-transform ${isGovMenuOpen ? "rotate-180" : ""}`} />
                   </button>
+                  {fieldErrors.governorate && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.governorate}</p>}
                   {isGovMenuOpen && (
-                    <div role="listbox" aria-label="Governorate" className="hide-scrollbar absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-y-auto rounded-2xl border border-[#eadfd6] bg-white p-1.5 shadow-[0_18px_40px_rgba(73,24,39,0.16)]">
+                    <div
+                      role="listbox"
+                      aria-label="Governorate"
+                      onWheel={(event) => event.stopPropagation()}
+                      onTouchMove={(event) => event.stopPropagation()}
+                      style={{ WebkitOverflowScrolling: "touch" }}
+                      className="absolute left-0 right-0 z-50 mt-2 max-h-60 overflow-y-auto overscroll-contain touch-pan-y rounded-2xl border border-[#eadfd6] bg-white p-1.5 shadow-[0_18px_40px_rgba(73,24,39,0.16)]"
+                    >
                       <div className="sticky top-0 z-10 bg-white pb-1.5">
                         <div className="relative">
                           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#942e3a]" />
@@ -352,16 +547,16 @@ export default function CheckoutPage() {
                           />
                         </div>
                       </div>
-                      {!govSearch && <button type="button" role="option" aria-selected={!selectedGovEn} onClick={() => { setSelectedGovEn(""); setCity(""); setIsGovMenuOpen(false); setGovSearch(""); }} className={`w-full rounded-xl px-3 py-3 text-left text-sm transition ${!selectedGovEn ? "bg-[#942e3a] text-white" : "text-[#806e73] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}>Select governorate</button>}
+                      {!govSearch && <button type="button" role="option" aria-selected={!selectedGovEn} onClick={() => { setSelectedGovEn(""); setCity(""); setIsGovMenuOpen(false); setGovSearch(""); handleBlur("governorate"); }} className={`w-full rounded-xl px-3 py-3 text-left text-sm transition ${!selectedGovEn ? "bg-[#942e3a] text-white" : "text-[#806e73] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}>Select governorate</button>}
                       {filteredGovernorates.map((gov) => {
                         const isSelected = gov.en === selectedGovEn;
-                        return <button key={gov.en} type="button" role="option" aria-selected={isSelected} onClick={() => { setSelectedGovEn(gov.en); setCity(""); setCenterSearch(""); setIsGovMenuOpen(false); setGovSearch(""); }} className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left text-sm transition ${isSelected ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}><span>{gov.en}</span><span className={`shrink-0 text-xs ${isSelected ? "text-[#fffaf0]/80" : "text-[#b8934a]"}`}>{gov.fee} EGP</span></button>;
+                        return <button key={gov.en} type="button" role="option" aria-selected={isSelected} onClick={() => { setSelectedGovEn(gov.en); setCity(""); setCenterSearch(""); setIsGovMenuOpen(false); setGovSearch(""); handleBlur("governorate"); }} className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left text-sm transition ${isSelected ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}><span>{gov.en}</span><span className={`shrink-0 text-xs ${isSelected ? (isFreeShippingUnlocked ? "text-emerald-200 font-bold" : "text-[#fffaf0]/80") : (isFreeShippingUnlocked ? "text-emerald-600 font-bold" : "text-[#b8934a]")}`}>{isFreeShippingUnlocked ? "FREE" : `${gov.fee} EGP`}</span></button>;
                       })}
                       {filteredGovernorates.length === 0 && <p className="px-3 py-4 text-center text-sm text-[#806e73]">No governorate found</p>}
                     </div>
                   )}
                 </div>
-                <div ref={centerMenuRef} className="relative sm:col-span-2">
+                <div ref={centerMenuRef} className="relative">
                   <FieldLabel icon={MapPin}>City / area *</FieldLabel>
                   <button
                     type="button"
@@ -371,26 +566,47 @@ export default function CheckoutPage() {
                     onClick={() => {
                       setIsCenterMenuOpen((open) => !open);
                       setCenterSearch("");
+                      handleBlur("city");
                     }}
-                    className={`${inputClass} flex min-w-0 items-center justify-between overflow-hidden text-left ${city ? "text-[#481827]" : "text-[#a99ca0]"} disabled:cursor-not-allowed disabled:bg-[#f8f3ed] disabled:opacity-70`}
+                    className={`${getFieldClass(fieldErrors.city)} flex min-w-0 items-center justify-between overflow-hidden text-left ${city ? "text-[#481827]" : "text-[#a99ca0]"} disabled:cursor-not-allowed disabled:bg-[#f8f3ed] disabled:opacity-70`}
                   >
                     <span>{city || (selectedGovEn ? "Select city / center" : "Select governorate first")}</span>
                     <ChevronDown className={`h-4 w-4 shrink-0 text-[#942e3a] transition-transform ${isCenterMenuOpen ? "rotate-180" : ""}`} />
                   </button>
+                  {fieldErrors.city && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.city}</p>}
                   {isCenterMenuOpen && selectedGovEn && (
-                    <div role="listbox" aria-label="City or center" className="hide-scrollbar absolute left-0 right-0 z-40 mt-2 max-h-64 overflow-y-auto rounded-2xl border border-[#eadfd6] bg-white p-1.5 shadow-[0_18px_40px_rgba(73,24,39,0.16)]">
+                    <div
+                      role="listbox"
+                      aria-label="City or center"
+                      onWheel={(event) => event.stopPropagation()}
+                      onTouchMove={(event) => event.stopPropagation()}
+                      style={{ WebkitOverflowScrolling: "touch" }}
+                      className="absolute left-0 right-0 z-40 mt-2 max-h-60 overflow-y-auto overscroll-contain touch-pan-y rounded-2xl border border-[#eadfd6] bg-white p-1.5 shadow-[0_18px_40px_rgba(73,24,39,0.16)]"
+                    >
                       <div className="sticky top-0 z-10 bg-white pb-1.5">
                         <div className="relative">
                           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#942e3a]" />
                           <input type="search" value={centerSearch} onChange={(event) => setCenterSearch(event.target.value)} onClick={(event) => event.stopPropagation()} placeholder="Search city or center..." aria-label="Search cities and centers" className="h-11 w-full rounded-xl border border-[#eadfd6] bg-[#fffaf0] pl-9 pr-3 text-sm text-[#481827] outline-none placeholder:text-[#a99ca0] focus:border-[#942e3a] focus:ring-2 focus:ring-[#942e3a]/10" />
                         </div>
                       </div>
-                      {filteredCenters.map((center) => <button key={center} type="button" role="option" aria-selected={center === city} onClick={() => { setCity(center); setIsCenterMenuOpen(false); setCenterSearch(""); }} className={`flex w-full items-center rounded-xl px-3 py-3 text-left text-sm transition ${center === city ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}>{center}</button>)}
+                      {filteredCenters.map((c) => <button key={c} type="button" role="option" aria-selected={c === city} onClick={() => { setCity(c); setIsCenterMenuOpen(false); setCenterSearch(""); handleBlur("city"); }} className={`flex w-full items-center rounded-xl px-3 py-3 text-left text-sm transition ${c === city ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}>{c}</button>)}
                       {filteredCenters.length === 0 && <p className="px-3 py-4 text-center text-sm text-[#806e73]">No city or center found</p>}
                     </div>
                   )}
                 </div>
-                <div className="sm:col-span-2"><FieldLabel icon={MapPin}>Detailed address *</FieldLabel><textarea required rows={3} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Street, building number, apartment number..." className={`${inputClass} h-auto resize-none py-3`} /></div>
+                <div className="sm:col-span-2">
+                  <FieldLabel icon={MapPin}>Detailed address *</FieldLabel>
+                  <textarea
+                    required
+                    rows={3}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    onBlur={() => handleBlur("address")}
+                    placeholder="Street, building number, apartment number..."
+                    className={`${getFieldClass(fieldErrors.address)} h-auto resize-none py-3`}
+                  />
+                  {fieldErrors.address && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.address}</p>}
+                </div>
                 <div className="sm:col-span-2"><FieldLabel icon={MessageSquare} optional>Delivery notes</FieldLabel><textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Call before delivery, leave with the guard..." className={`${inputClass} h-auto resize-none py-3`} /></div>
               </div>
             </section>
@@ -401,7 +617,7 @@ export default function CheckoutPage() {
                 <div><h2 className="font-playfair text-xl font-semibold">Payment method</h2><p className="mt-1 text-xs text-[#806e73]">Simple, secure payment at your doorstep.</p></div>
               </div>
               <div className="mt-5 flex items-center justify-between gap-4 rounded-2xl border-2 border-[#942e3a] bg-[#fffaf0] p-4">
-                <div className="flex items-center gap-3"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#942e3a] text-white"><Check className="h-3 w-3" /></span><div><p className="text-sm font-bold">Cash on delivery</p><p className="mt-1 text-[11px] text-[#806e73]">Inspect and try on before you pay.</p></div></div>
+                <div className="flex items-center gap-3"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#942e3a] text-white"><Check className="h-3 w-3" /></span><div><p className="text-sm font-bold">Cash on delivery</p><p className="mt-1 text-[11px] text-[#806e73]">Pay conveniently when your order arrives.</p></div></div>
                 <span className="hidden rounded-full bg-[#942e3a]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#942e3a] sm:inline">COD</span>
               </div>
             </section>
@@ -415,14 +631,96 @@ export default function CheckoutPage() {
                 {cart.map((item) => <div key={item.variantId} className="flex items-center gap-3"><div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-white"><Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-bold">{item.name}</p><p className="mt-1 text-[11px] text-white/65">{item.color} · Size {item.size}</p><p className="mt-1 text-[11px] text-white/65">Quantity: {item.quantity}</p></div><p className="shrink-0 text-sm font-bold">{formatCurrency(item.price * item.quantity)}</p></div>)}
               </div>
               <div className="my-5 h-px bg-white/15" />
-              <div className="mb-4 flex gap-2"><input value={couponCode} onChange={(event) => setCouponCode(event.target.value.toUpperCase())} placeholder="Coupon code" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-xs text-white placeholder:text-white/45 outline-none" /><span className="flex items-center text-[10px] font-bold text-[#d8b46a]">Applied at checkout</span></div><div className="space-y-3 text-sm"><div className="flex justify-between text-white/70"><span>Subtotal</span><span className="font-semibold text-white">{formatCurrency(cartTotal)}</span></div><div className="flex justify-between text-white/70"><span>Delivery</span><span className="font-semibold text-white">{selectedGovEn ? `${shippingCost} EGP` : "Select governorate"}</span></div><div className="flex items-end justify-between border-t border-white/15 pt-4"><span className="font-bold">Total*</span><span className="font-playfair text-2xl font-semibold">{formatCurrency(grandTotal)}</span></div><p className="text-[10px] text-white/50">*Coupon discounts are validated and applied securely when the order is placed.</p></div>
+
+              {/* Promo Code Collapsible Section */}
+              <div className="mb-4">
+                {!couponApplied ? (
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowPromoInput((prev) => !prev)}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-[#d8b46a] hover:text-[#e5c785] transition-colors"
+                    >
+                      <Tag className="h-3.5 w-3.5" />
+                      <span>Have a promo code?</span>
+                    </button>
+
+                    {showPromoInput && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <input
+                            value={couponCode}
+                            onChange={(event) => {
+                              setCouponCode(event.target.value.toUpperCase());
+                              if (promoError) setPromoError("");
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleApplyCoupon();
+                              }
+                            }}
+                            placeholder="ENTER CODE"
+                            className="h-10 min-w-0 flex-1 rounded-xl border border-white/15 bg-white/10 px-3 text-xs font-bold font-mono text-white placeholder:text-white/45 outline-none uppercase leading-none box-border"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleApplyCoupon}
+                            disabled={!couponCode.trim() || promoLoading}
+                            className="h-10 rounded-xl bg-[#d8b46a] px-5 text-xs font-bold text-[#481827] hover:bg-[#e5c785] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0 inline-flex items-center justify-center leading-none box-border"
+                          >
+                            {promoLoading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#481827] border-t-transparent" /> : "Apply"}
+                          </button>
+                        </div>
+                        {promoError && (
+                          <p className="text-[11px] font-bold text-rose-300">{promoError}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between rounded-xl border border-[#d8b46a]/40 bg-white/10 px-3 py-2.5 text-xs font-bold text-white">
+                      <span className="font-mono text-[#d8b46a]">CODE: {couponCode}</span>
+                      <button
+                        type="button"
+                        onClick={handleRemoveCoupon}
+                        className="text-[11px] font-semibold text-rose-300 hover:text-rose-100 transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    {promoMessage && (
+                      <p className="text-[10px] font-semibold text-emerald-300">{promoMessage}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between text-white/70">
+                  <span>Subtotal</span>
+                  <span className="font-semibold text-white">{formatCurrency(cartTotal)}</span>
+                </div>
+                {appliedDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-300 font-semibold">
+                    <span>Discount ({couponCode})</span>
+                    <span>-{formatCurrency(appliedDiscount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-white/70">
+                  <span>Delivery</span>
+                  <span className={isFreeShippingUnlocked ? "font-bold text-emerald-400" : "font-semibold text-[#d8b46a]"}>
+                    {isFreeShippingUnlocked ? "FREE" : selectedGovEn ? `${shippingCost} EGP` : "Select governorate"}
+                  </span>
+                </div>
+                <div className="flex items-end justify-between border-t border-white/15 pt-4">
+                  <span className="font-bold">Total</span>
+                  <span className="font-playfair text-2xl font-semibold">{formatCurrency(grandTotal)}</span>
+                </div>
+              </div>
               <button form="checkout-form" type="submit" disabled={loading} className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#d8b46a] px-5 py-3.5 text-sm font-bold text-[#481827] shadow-lg transition hover:bg-[#e5c785] disabled:cursor-not-allowed disabled:opacity-60">{loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#481827] border-t-transparent" /> : <><span>Place order</span><ArrowLeft className="h-4 w-4 rotate-180" /></>}</button>
               <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-white/60"><LockKeyhole className="h-3.5 w-3.5" /> Your details are kept private</div>
-            </section>
-
-            <section className="rounded-3xl border border-[#eadfd6] bg-white p-5 sm:p-6">
-              <div className="flex gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#d8b46a]/20 text-[#9a742b]"><PackageCheck className="h-5 w-5" /></div><div><h3 className="text-sm font-bold">Try before you pay</h3><p className="mt-1 text-xs leading-5 text-[#806e73]">Check the fit at your doorstep. If it is not right, return it with the courier and pay only the delivery fee.</p></div></div>
-              <div className="mt-4 flex items-center gap-2 border-t border-[#eadfd6] pt-4 text-[10px] font-bold uppercase tracking-[0.12em] text-[#942e3a]"><ShieldCheck className="h-4 w-4" /> Secure checkout</div>
             </section>
           </aside>
         </div>

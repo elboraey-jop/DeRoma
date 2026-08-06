@@ -224,10 +224,15 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
         {/* ELEMENT 2: Independent Wishlist Circle Button */}
         <Link
           href="/wishlist"
-          className="pointer-events-auto h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-full bg-[#D8B46A]/95 text-[#FFF9EB] backdrop-blur-xl border border-white/20 shadow-xl flex items-center justify-center hover:bg-[#B8934A] transition-all hover:scale-105 active:scale-95"
+          className="relative pointer-events-auto h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-full bg-[#D8B46A]/95 text-[#FFF9EB] backdrop-blur-xl border border-white/20 shadow-xl flex items-center justify-center hover:bg-[#B8934A] transition-all hover:scale-105 active:scale-95"
           aria-label="Wishlist"
         >
           <Heart className={`h-4 w-4 ${isWishlisted ? "fill-[#942E3A] text-[#942E3A]" : "text-stone-200"}`} />
+          {count > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#942E3A] text-[10px] font-extrabold text-[#FFF9EB] border border-white/20 shadow-md animate-in zoom-in-75 duration-200">
+              {count}
+            </span>
+          )}
         </Link>
 
         {/* ELEMENT 3: Independent Shopping Bag Floating Pill Button */}

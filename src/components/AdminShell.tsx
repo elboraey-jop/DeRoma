@@ -24,19 +24,45 @@ import {
 import { cn } from "@/lib/utils";
 import { logoutAdminAction } from "@/app/admin/actions";
 
-const navigation = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Products", href: "/admin/products", icon: ShoppingBag },
-  { label: "Reviews", href: "/admin/reviews", icon: MessageSquareQuote },
-  { label: "Orders", href: "/admin/orders", icon: ClipboardList },
-  { label: "Shipping", href: "/admin/shipping", icon: Truck },
-  { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-  { label: "Suppliers", href: "/admin/suppliers", icon: Boxes },
-  { label: "Team", href: "/admin/team", icon: Users },
-  { label: "Daily Log", href: "/admin/daily-log", icon: CalendarDays },
-  { label: "Customers", href: "/admin/customers", icon: Users },
-  { label: "Inventory", href: "/admin/inventory", icon: Package },
-  { label: "Promotions", href: "/admin/promotions", icon: Percent },
+interface NavItem {
+  label: string;
+  href: string;
+  icon: any;
+}
+
+interface NavGroup {
+  groupName: string;
+  items: NavItem[];
+}
+
+const navigationGroups: NavGroup[] = [
+  {
+    groupName: "DASHBOARD & METRICS",
+    items: [
+      { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+      { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+      { label: "Daily Log", href: "/admin/daily-log", icon: CalendarDays },
+      { label: "Team", href: "/admin/team", icon: Users },
+    ],
+  },
+  {
+    groupName: "OPERATIONS & CATALOG",
+    items: [
+      { label: "Orders", href: "/admin/orders", icon: ClipboardList },
+      { label: "Products", href: "/admin/products", icon: ShoppingBag },
+      { label: "Inventory", href: "/admin/inventory", icon: Package },
+      { label: "Suppliers", href: "/admin/suppliers", icon: Boxes },
+    ],
+  },
+  {
+    groupName: "CUSTOMER EXPERIENCE",
+    items: [
+      { label: "Customers", href: "/admin/customers", icon: Users },
+      { label: "Reviews", href: "/admin/reviews", icon: MessageSquareQuote },
+      { label: "Promotions", href: "/admin/promotions", icon: Percent },
+      { label: "Shipping", href: "/admin/shipping", icon: Truck },
+    ],
+  },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
@@ -63,34 +89,17 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </>
       )}
       <div className="min-w-0 flex-1 lg:pl-[250px]">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[#942E3A]/10 bg-[#f7f1e8]/95 px-4 backdrop-blur sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="rounded-xl border border-[#942E3A]/15 bg-white p-2 text-[#942E3A] lg:hidden"
-              aria-label="Open admin menu"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-            <div>
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
-                DeRoma back office
-              </p>
-              <p className="font-playfair text-lg font-bold text-[#942E3A]">
-                Admin workspace
-              </p>
-            </div>
-          </div>
-          <div className="hidden items-center gap-2 sm:flex">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#942E3A] text-xs font-bold text-[#FFF9EB]">
-              A
-            </div>
-            <div className="text-right">
-              <p className="text-xs font-bold text-[#942E3A]">Administrator</p>
-              <p className="text-[10px] text-[#6B1F2A]/60">Store owner</p>
-            </div>
-          </div>
-        </header>
+        {/* Mobile Sidebar Toggle Button */}
+        <div className="flex items-center p-3 sm:px-6 lg:hidden">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="flex items-center gap-2 rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2 text-xs font-bold text-[#942E3A] shadow-xs"
+            aria-label="Open admin menu"
+          >
+            <Menu className="h-4 w-4 text-[#D8B46A]" />
+            <span>Menu</span>
+          </button>
+        </div>
         <main className="mx-auto min-w-0 max-w-[1500px] p-3 sm:p-6 lg:p-8">
           {children}
         </main>
@@ -156,36 +165,43 @@ function AdminSidebar({
 
       <nav
         ref={navRef}
-        className="hide-scrollbar min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4"
+        className="hide-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4"
       >
-        {navigation.map((item) => {
-          const isActive =
-            item.href === "/admin"
-              ? pathname === "/admin"
-              : pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition-colors",
-                isActive
-                  ? "bg-[#FFF9EB] text-[#942E3A]"
-                  : "text-white/75 hover:bg-white/10 hover:text-white"
-              )}
-            >
-              <item.icon
-                className={cn(
-                  "h-4 w-4",
-                  isActive ? "text-[#942E3A]" : "text-[#D8B46A]"
-                )}
-              />
-              <span>{item.label}</span>
-              {isActive && <ChevronRight className="ml-auto h-3.5 w-3.5" />}
-            </Link>
-          );
-        })}
+        {navigationGroups.map((group) => (
+          <div key={group.groupName} className="space-y-1">
+            <div className="px-3 pb-1 text-[9px] font-extrabold uppercase tracking-[0.22em] text-[#D8B46A]/80">
+              {group.groupName}
+            </div>
+            {group.items.map((item) => {
+              const isActive =
+                item.href === "/admin"
+                  ? pathname === "/admin"
+                  : pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onClose}
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-colors",
+                    isActive
+                      ? "bg-[#FFF9EB] text-[#942E3A] font-bold shadow-xs"
+                      : "text-white/80 hover:bg-white/10 hover:text-white"
+                  )}
+                >
+                  <item.icon
+                    className={cn(
+                      "h-4 w-4 shrink-0",
+                      isActive ? "text-[#942E3A]" : "text-[#D8B46A]"
+                    )}
+                  />
+                  <span>{item.label}</span>
+                  {isActive && <ChevronRight className="ml-auto h-3.5 w-3.5" />}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="border-t border-white/10 p-4">

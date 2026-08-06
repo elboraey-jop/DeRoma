@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Outfit } from "next/font/google";
 import SiteChrome from "@/components/SiteChrome";
 import { CartProvider } from "@/lib/cartStore";
+import { ToastProvider } from "@/providers/ToastProvider";
 import CartDrawer from "@/components/CartDrawer";
 import SmoothScroll from "@/components/SmoothScroll";
 import SplashScreen from "@/components/SplashScreen";
@@ -26,11 +27,11 @@ export const metadata: Metadata = {
     default: "DeRoma Store | Premium Women's Shoes & Handcrafted Footwear",
     template: "%s | DeRoma Store",
   },
-  description: "Handcrafted boutique collection of elegant women's shoes with cushioned comfort, everyday support, and doorstep fitting guarantee.",
+  description: "Handcrafted boutique collection of elegant women's shoes with cushioned comfort, everyday support, and fast nationwide delivery.",
   keywords: ["women's shoes", "DeRoma shoes", "handcrafted footwear", "Egyptian boutique", "comfortable heels", "sneakers", "women's sneakers"],
   openGraph: {
     title: "DeRoma Store | Premium Women's Shoes",
-    description: "Handcrafted boutique collection of elegant women's shoes with cushioned comfort & doorstep fitting guarantee.",
+    description: "Handcrafted boutique collection of elegant women's shoes with cushioned comfort & fast nationwide delivery.",
     url: baseUrl,
     siteName: "DeRoma Store",
     images: [
@@ -88,13 +89,15 @@ export default function RootLayout({
         />
       </head>
       <body className={`${playfair.variable} ${outfit.variable} font-playfair antialiased`}>
-        <SmoothScroll />
-        <ScrollToTop />
-        <SplashScreen />
-        <CartProvider>
-          <SiteChrome>{children}</SiteChrome>
-          <CartDrawer />
-        </CartProvider>
+        <ToastProvider>
+          <SmoothScroll />
+          <ScrollToTop />
+          <SplashScreen />
+          <CartProvider>
+            <SiteChrome>{children}</SiteChrome>
+            <CartDrawer />
+          </CartProvider>
+        </ToastProvider>
       </body>
     </html>
   );

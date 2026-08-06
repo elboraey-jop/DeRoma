@@ -6,7 +6,7 @@ import { X, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Truck, Sparkles } from
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function CartDrawer() {
   const {
@@ -19,9 +19,34 @@ export default function CartDrawer() {
     cartCount,
   } = useCart();
 
-  const FREE_SHIPPING_THRESHOLD = 4000;
-  const progressToFreeShipping = Math.min(100, (cartTotal / FREE_SHIPPING_THRESHOLD) * 100);
-  const amountLeftForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - cartTotal);
+  const [shippingSettings, setShippingSettings] = useState<{
+    freeShippingEnabled: boolean;
+    freeShippingThreshold: number | null;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/shipping")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.settings) {
+          setShippingSettings(data.settings);
+        }
+      })
+      .catch(() => null);
+  }, [isCartOpen]);
+
+  const isFreeShippingActive = Boolean(
+    shippingSettings?.freeShippingEnabled &&
+      shippingSettings.freeShippingThreshold !== null &&
+      shippingSettings.freeShippingThreshold > 0
+  );
+  const freeShippingThreshold = shippingSettings?.freeShippingThreshold || 0;
+  const progressToFreeShipping = freeShippingThreshold > 0
+    ? Math.min(100, (cartTotal / freeShippingThreshold) * 100)
+    : 0;
+  const amountLeftForFreeShipping = freeShippingThreshold > 0
+    ? Math.max(0, freeShippingThreshold - cartTotal)
+    : 0;
 
   useEffect(() => {
     if (isCartOpen) {
@@ -75,24 +100,29 @@ export default function CartDrawer() {
             </div>
 
             {/* Free Shipping Progress Bar */}
-            <div className="bg-[#F2E7D5]/60 border-b border-[#D8B46A]/40 px-5 py-3.5 text-xs font-medium text-[#942E3A]">
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <Truck className="w-4 h-4 text-[#D8B46A]" />
-                  {amountLeftForFreeShipping > 0 ? (
-                    <span>Add <b>{formatCurrency(amountLeftForFreeShipping)}</b> more for <b>Free Delivery</b></span>
-                  ) : (
-                    <span className="font-bold text-[#942E3A]">🎉 You unlocked Free Express Delivery!</span>
-                  )}
+            {isFreeShippingActive && (
+              <div className="bg-[#F2E7D5]/60 border-b border-[#D8B46A]/40 px-5 py-3.5 text-xs font-medium text-[#942E3A]">
+                <div className="flex items-center justify-between mb-1.5 gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Truck className="w-4 h-4 text-[#D8B46A] shrink-0" />
+                    {amountLeftForFreeShipping > 0 ? (
+                      <span className="truncate">Add <b>{formatCurrency(amountLeftForFreeShipping)}</b> more for <b>Free Delivery</b></span>
+                    ) : (
+                      <span className="font-bold text-emerald-700 truncate">Free Express Delivery unlocked!</span>
+                    )}
+                  </div>
+                  <span className="font-numeric text-[10px] font-extrabold text-[#942E3A]/80 shrink-0">
+                    {formatCurrency(freeShippingThreshold)}
+                  </span>
+                </div>
+                <div className="w-full h-1.5 bg-[#942E3A]/15 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#D8B46A] transition-all duration-500 rounded-full"
+                    style={{ width: `${progressToFreeShipping}%` }}
+                  />
                 </div>
               </div>
-              <div className="w-full h-1.5 bg-[#942E3A]/15 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-[#D8B46A] transition-all duration-500 rounded-full"
-                  style={{ width: `${progressToFreeShipping}%` }}
-                />
-              </div>
-            </div>
+            )}
 
             {/* Cart Items List */}
             <div className="hide-scrollbar flex-1 overflow-y-auto px-4 py-4 space-y-3">
@@ -191,8 +221,12 @@ export default function CartDrawer() {
                     {formatCurrency(cartTotal)}
                   </span>
                 </div>
-                <p className="text-[10px] text-[#D8B46A]">
-                  Taxes and doorstep try-on options calculated at checkout.
+                <p className="text-[10px]">
+                  {isFreeShippingActive && amountLeftForFreeShipping === 0 ? (
+                    <span className="font-bold text-emerald-700">Free Delivery unlocked! Applied at checkout.</span>
+                  ) : (
+                    <span className="text-[#D8B46A]">Shipping calculated at checkout.</span>
+                  )}
                 </p>
 
                 <div className="flex items-center gap-2 pt-1">

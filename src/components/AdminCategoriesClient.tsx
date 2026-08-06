@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { useToast } from "@/providers/ToastProvider";
 import {
   createCatalogOptionAction,
   deleteCatalogOptionAction,
@@ -118,6 +119,7 @@ export default function AdminCategoriesClient({
   options: Option[];
   products: ProductPreview[];
 }) {
+  const { toast } = useToast();
   const [category, setCategory] = useState("shoes");
   const [search, setSearch] = useState("");
   const [optionType, setOptionType] = useState("brand");
@@ -361,7 +363,14 @@ export default function AdminCategoriesClient({
                 <span className="field-label">Display name</span>
                 <input required name="name" placeholder="e.g. Nike or Burgundy" className="admin-input mt-1" />
               </label>
-              <button type="submit" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#942E3A] px-4 py-3 text-xs font-bold text-[#FFF9EB] shadow-[0_8px_18px_rgba(148,46,58,0.14)] transition hover:-translate-y-0.5">
+
+              <button
+                type="submit"
+                onClick={() => {
+                  toast.success(`New option added to ${selected.label}!`, "CATEGORY UPDATED");
+                }}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#942E3A] px-4 py-3 text-xs font-bold text-[#FFF9EB] shadow-[0_8px_18px_rgba(148,46,58,0.14)] transition hover:-translate-y-0.5"
+              >
                 <Plus className="h-4 w-4 text-[#D8B46A]" /> Save to {selected.label}
               </button>
             </form>

@@ -2,13 +2,16 @@
 
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import { useToast } from "@/providers/ToastProvider";
 
 export default function AdminCopyButton({ value, label = "Copy phone number" }: { value: string; label?: string }) {
   const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
+      toast.success(`"${value}" copied to clipboard!`, "COPIED");
       window.setTimeout(() => setCopied(false), 1600);
     } catch { setCopied(false); }
   };

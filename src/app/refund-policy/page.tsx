@@ -10,7 +10,7 @@ const acceptedCases = [
 const declinedCases = [
   "Shoes used outdoors, damaged, stained, or missing original packaging.",
   "Requests submitted after the review window has passed.",
-  "Normal fit preference after confirmed doorstep try-on approval.",
+  "Normal fit preference after confirmed delivery.",
 ];
 
 const processSteps = [

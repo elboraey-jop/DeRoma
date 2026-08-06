@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useToast } from "@/providers/ToastProvider";
 
 export interface CartItem {
   productId: string;
@@ -31,6 +32,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setCartOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const { toast } = useToast();
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -70,11 +72,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       return [...prevCart, { ...newItem, quantity: qty }];
     });
+    toast.success(`${newItem.name} (${newItem.size}) added to your bag!`, "SHOPPING BAG");
     setCartOpen(true); // Open cart automatically when item is added
   };
 
   const removeItem = (variantId: string) => {
+    const targetItem = cart.find((i) => i.variantId === variantId);
     setCart((prevCart) => prevCart.filter((item) => item.variantId !== variantId));
+    if (targetItem) {
+      toast.info(`${targetItem.name} removed from your bag.`, "SHOPPING BAG");
+    }
   };
 
   const updateQuantity = (variantId: string, quantity: number) => {

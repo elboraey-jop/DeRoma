@@ -831,8 +831,8 @@ export default function HomeClient({ products }: { products: ProductWithVariants
               <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div className="flex flex-col items-center w-full">
-              <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Quick Fitting</p>
-              <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Try on sizes at your door</p>
+              <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Fast Delivery</p>
+              <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Express delivery across Egypt</p>
             </div>
           </StaggerItem>
 

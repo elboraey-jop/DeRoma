@@ -74,7 +74,13 @@ export async function updateOrderStatusAction(formData: FormData) {
 
 export async function createManualOrderAction(formData: FormData) {
   await requireAdmin();
-  const customerName = String(formData.get("customerName") || "").trim();
+  const customerFirstName = String(formData.get("customerFirstName") || "").trim();
+  const customerLastName = String(formData.get("customerLastName") || "").trim();
+  const customerNameInput = String(formData.get("customerName") || "").trim();
+
+  const firstName = customerFirstName || customerNameInput.split(" ")[0] || "";
+  const lastName = customerLastName || customerNameInput.split(" ").slice(1).join(" ") || "";
+  const customerName = `${firstName} ${lastName}`.trim() || customerNameInput;
   const customerPhone = String(formData.get("customerPhone") || "").trim();
   const customerPhone2 = String(formData.get("customerPhone2") || "").trim() || null;
   const customerEmail = String(formData.get("customerEmail") || "").trim().toLowerCase() || null;
@@ -88,7 +94,7 @@ export async function createManualOrderAction(formData: FormData) {
   const notesInput = String(formData.get("notes") || "").trim();
   const itemsInput = parseItems(formData.get("itemsJson"));
 
-  if (!customerName || !customerPhone || !governorate || !city || !address)
+  if ((!firstName && !customerName) || !customerPhone || !governorate || !city || !address)
     throw new Error("Customer and order details are required.");
   if (
     !Number.isFinite(shippingCost) ||
@@ -149,13 +155,15 @@ export async function createManualOrderAction(formData: FormData) {
 
     await tx.customer.upsert({
       where: { phone: customerPhone },
-      create: { name: customerName, phone: customerPhone, phone2: customerPhone2, email: customerEmail, governorate, city, address },
-      update: { name: customerName, phone2: customerPhone2, email: customerEmail, governorate, city, address },
+      create: { firstName, lastName, name: customerName, phone: customerPhone, phone2: customerPhone2, email: customerEmail, governorate, city, address },
+      update: { firstName, lastName, name: customerName, phone2: customerPhone2, email: customerEmail, governorate, city, address },
     });
     const notes = [orderSource && `Source: ${orderSource}`, notesInput].filter(Boolean).join("\n") || null;
     const createdOrder = await tx.order.create({
       data: {
         orderNumber: `DR-PENDING-${randomUUID()}`,
+        customerFirstName: firstName,
+        customerLastName: lastName,
         customerName,
         customerPhone,
         customerPhone2,

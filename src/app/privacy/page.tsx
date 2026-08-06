@@ -35,7 +35,7 @@ export default function PrivacyPage() {
               <h2 className="text-lg font-bold text-[#942E3A] font-playfair">1. Information We Collect</h2>
             </div>
             <p className="text-xs sm:text-sm text-[#6B1F2A] font-light leading-relaxed">
-              We collect necessary details when you place an order, including your name, phone number, shipping address, and delivery preferences. This information is solely used to process your order and coordinate the doorstep try-on delivery service.
+              We collect necessary details when you place an order, including your name, phone number, shipping address, and delivery preferences. This information is solely used to process your order and coordinate the express delivery service.
             </p>
           </div>
 

@@ -108,7 +108,7 @@ const MOCK_REVIEWS = [
     avatar: "F",
     rating: 4,
     date: "1 month ago",
-    comment: "Great quality and very stylish. Took a day to break in but now they're my go-to shoes. The doorstep fitting service was a nice touch!",
+    comment: "Great quality and very stylish. Took a day to break in but now they're my go-to shoes. The fast delivery service was a nice touch!",
   },
   {
     id: 4,
@@ -142,6 +142,32 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const isBag = product.category === "bags";
   const sizesForColor = product.variants;
   const currentColorImages = product.images;
+
+  const [shippingSettings, setShippingSettings] = useState<{
+    freeShippingEnabled: boolean;
+    freeShippingThreshold: number | null;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/shipping")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.settings) {
+          setShippingSettings(data.settings);
+        }
+      })
+      .catch(() => null);
+  }, []);
+
+  const isFreeShippingActive = Boolean(
+    shippingSettings?.freeShippingEnabled &&
+      shippingSettings.freeShippingThreshold !== null &&
+      shippingSettings.freeShippingThreshold > 0
+  );
+
+  const deliveryBannerText = isFreeShippingActive
+    ? `Free Express Delivery On Orders Over ${formatCurrency(shippingSettings!.freeShippingThreshold!)}`
+    : `Fast Express Delivery Across Egypt`;
 
   const activeVariant = isBag
     ? product.variants[0]
@@ -461,7 +487,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             {/* Delivery Guarantee Banner */}
             <div className="rounded-xl bg-[#F2E7D5]/50 border border-[#D8B46A]/40 p-3.5 flex items-center justify-center gap-3 text-[#942E3A] text-xs font-medium text-center">
               <Truck className="h-5 w-5 text-[#942E3A] shrink-0" />
-              <span>Free Express Delivery On Orders Over $150 & Doorstep fitting guarantee</span>
+              <span>{deliveryBannerText}</span>
             </div>
 
           </StaggerItem>
