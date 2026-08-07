@@ -2,7 +2,6 @@ import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import Link from "next/link";
 import {
-  ArrowLeft,
   ClipboardList,
   Sparkles,
   ArrowUpRight,
@@ -12,6 +11,7 @@ import {
   Search,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import AdminBackButton from "@/components/AdminBackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -49,13 +49,7 @@ export default async function StockAuditsPage() {
       {/* Header Banner */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#942E3A]/10 pb-5">
         <div className="flex items-center gap-3">
-          <Link
-            href="/admin/inventory"
-            className="rounded-xl border border-[#942E3A]/15 bg-white p-2.5 text-[#942E3A] transition hover:border-[#D8B46A] shadow-sm shrink-0"
-            aria-label="Back to Inventory"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
+          <AdminBackButton fallbackHref="/admin/inventory" ariaLabel="Back to Inventory" />
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#942E3A] text-[#FFF9EB] shadow-md">
               <ClipboardList className="h-5 w-5 text-[#D8B46A]" />

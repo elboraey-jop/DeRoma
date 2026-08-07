@@ -20,6 +20,7 @@ import {
   Send,
   X
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
 import { useWishlist } from "@/lib/wishlistStore";
@@ -129,9 +130,9 @@ const MOCK_REVIEWS = [
 ];
 
 export default function ProductDetailClient({ product, similarProducts, reviews = [] }: ProductDetailClientProps) {
+  const router = useRouter();
   const { addItem } = useCart();
   const [selectedSize, setSelectedSize] = useState("");
-  const [sizeUnit, setSizeUnit] = useState<"EU" | "US" | "CM">("EU");
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [added, setAdded] = useState(false);
@@ -204,6 +205,28 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
     setTimeout(() => setAdded(false), 2000);
   };
 
+  const handleBuyNow = () => {
+    if (!isBag && !selectedSize) {
+      alert("Please select your shoe size first.");
+      return;
+    }
+
+    if (!activeVariant) return;
+
+    addItem({
+      productId: product.id,
+      variantId: activeVariant.id,
+      name: product.name,
+      price: priceNum,
+      image: product.images[0],
+      color: product.color || "",
+      size: isBag ? "" : selectedSize,
+      quantity,
+    });
+
+    router.push("/checkout");
+  };
+
   const ratingBreakdown = [
     { stars: 5, percentage: 82 },
     { stars: 4, percentage: 12 },
@@ -238,8 +261,8 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
       <section className="pdp-shell mx-auto w-full max-w-[1400px] px-4 lg:px-6 mt-3 sm:mt-6">
         <StaggerContainer className="pdp-layout">
           
-          {/* Gallery Left (6 cols) */}
-          <StaggerItem direction="left" className="pdp-gallery flex flex-col gap-3 w-full">
+          {/* Gallery Left */}
+          <StaggerItem direction="left" className="pdp-gallery flex flex-col gap-3 w-full max-w-[480px] lg:max-w-[540px] mx-auto">
             {/* Main Image */}
             <div className="pdp-main-image relative w-full pt-[100%] rounded-2xl sm:rounded-[2rem] border border-[#942E3A]/20 overflow-hidden bg-[#F2E7D5]/20">
               {discountPercent && (
@@ -385,21 +408,8 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
 
             {/* Size Selector */}
             {!isBag && <div className="space-y-3 w-full">
-              <div className="flex items-center justify-center lg:justify-between gap-3">
+              <div className="flex items-center justify-center lg:justify-start gap-3">
                 <span className="text-xs font-bold text-[#942E3A]">Select Size (Women)</span>
-                <div className="flex items-center gap-0.5 bg-[#F2E7D5]/50 p-1 rounded-full text-[10px] font-bold">
-                  {(["EU", "US", "CM"] as const).map((unit) => (
-                    <button
-                      key={unit}
-                      onClick={() => setSizeUnit(unit)}
-                      className={`px-2.5 py-1 rounded-full transition-all ${
-                        sizeUnit === unit ? "bg-[#942E3A] text-white shadow-sm" : "text-[#942E3A]"
-                      }`}
-                    >
-                      {unit}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               {/* Size circles */}
@@ -433,7 +443,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
               </div>
             )}
 
-            {/* Quantity + Buy Now Row */}
+            {/* Quantity + Add To Cart Row */}
             <div className="flex items-center justify-center lg:justify-start gap-3 py-1 w-full">
               <div className="flex items-center rounded-full border border-[#D8B46A] bg-white h-11 px-2.5 shrink-0">
                 <button
@@ -450,30 +460,31 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                   <Plus className="h-3.5 w-3.5" />
                 </button>
               </div>
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-[#D8B46A] text-sm font-bold text-[#FFF9EB] hover:bg-[#B8934A] transition-all shadow-md active:scale-[0.98] min-w-0"
-              >
-                <ShoppingBag className="h-4 w-4" />
-                <span>Buy Now</span>
-              </button>
-            </div>
 
-            {/* Add to Cart + Wishlist Row */}
-            <div className="flex items-center justify-center lg:justify-start gap-3 pt-1">
               {added ? (
-                <button className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-600 text-xs font-bold text-white shadow-sm">
+                <button className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-600 text-sm font-bold text-white shadow-sm">
                   <Check className="h-4 w-4" />
                   <span>Added to Cart!</span>
                 </button>
               ) : (
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full border-2 border-[#942E3A] bg-white text-xs font-bold text-[#942E3A] hover:bg-[#F2E7D5] transition-colors"
+                  className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-[#D8B46A] text-sm font-bold text-[#FFF9EB] hover:bg-[#B8934A] transition-all shadow-md active:scale-[0.98] min-w-0"
                 >
+                  <ShoppingBag className="h-4 w-4" />
                   <span>Add To Cart</span>
                 </button>
               )}
+            </div>
+
+            {/* Buy Now + Wishlist Row */}
+            <div className="flex items-center justify-center lg:justify-start gap-3 pt-1">
+              <button
+                onClick={handleBuyNow}
+                className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-[#942E3A] text-sm font-bold text-white hover:bg-[#7a2430] transition-all shadow-md active:scale-[0.98] min-w-0"
+              >
+                <span>Buy Now</span>
+              </button>
 
               {/* Wishlist */}
               <button

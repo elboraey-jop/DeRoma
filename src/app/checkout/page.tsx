@@ -526,6 +526,7 @@ export default function CheckoutPage() {
                   {fieldErrors.governorate && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.governorate}</p>}
                   {isGovMenuOpen && (
                     <div
+                      data-lenis-prevent="true"
                       role="listbox"
                       aria-label="Governorate"
                       onWheel={(event) => event.stopPropagation()}
@@ -576,6 +577,7 @@ export default function CheckoutPage() {
                   {fieldErrors.city && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.city}</p>}
                   {isCenterMenuOpen && selectedGovEn && (
                     <div
+                      data-lenis-prevent="true"
                       role="listbox"
                       aria-label="City or center"
                       onWheel={(event) => event.stopPropagation()}

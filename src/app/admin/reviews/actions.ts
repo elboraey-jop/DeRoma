@@ -31,6 +31,7 @@ function reviewFields(formData: FormData) {
     body,
     status: String(formData.get("status") || "approved"),
     verifiedPurchase: formData.get("verifiedPurchase") === "on",
+    showOnHome: formData.get("showOnHome") === "on",
   };
 }
 
@@ -43,6 +44,7 @@ export async function createReviewAction(formData: FormData) {
   await prisma.review.create({ data: { productId, ...fields } });
   await syncProductRating(productId);
   revalidatePath("/admin/reviews");
+  revalidatePath("/");
   revalidatePath(`/shop/${productId}`);
 }
 
@@ -59,6 +61,7 @@ export async function updateReviewAction(formData: FormData) {
   await syncProductRating(productId);
   if (oldReview.productId !== productId) await syncProductRating(oldReview.productId);
   revalidatePath("/admin/reviews");
+  revalidatePath("/");
   revalidatePath(`/shop/${productId}`);
   revalidatePath(`/shop/${oldReview.productId}`);
 }
@@ -71,6 +74,18 @@ export async function updateReviewStatusAction(formData: FormData) {
   const review = await prisma.review.update({ where: { id }, data: { status } });
   await syncProductRating(review.productId);
   revalidatePath("/admin/reviews");
+  revalidatePath("/");
+  revalidatePath(`/shop/${review.productId}`);
+}
+
+export async function toggleShowOnHomeAction(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const showOnHome = formData.get("showOnHome") === "true";
+  if (!id) return;
+  const review = await prisma.review.update({ where: { id }, data: { showOnHome } });
+  revalidatePath("/admin/reviews");
+  revalidatePath("/");
   revalidatePath(`/shop/${review.productId}`);
 }
 
@@ -81,5 +96,6 @@ export async function deleteReviewAction(formData: FormData) {
   const review = await prisma.review.delete({ where: { id } });
   await syncProductRating(review.productId);
   revalidatePath("/admin/reviews");
+  revalidatePath("/");
   revalidatePath(`/shop/${review.productId}`);
 }

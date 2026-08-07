@@ -1,9 +1,9 @@
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
-import Link from "next/link";
-import { ArrowLeft, ClipboardCheck, PackageCheck, AlertTriangle } from "lucide-react";
+import { ClipboardCheck, PackageCheck, AlertTriangle } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { notFound } from "next/navigation";
+import AdminBackButton from "@/components/AdminBackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +37,7 @@ export default async function AuditDetailsPage({
       {/* Header */}
       <div className="flex flex-col gap-4 border-b border-[#942E3A]/10 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            href="/admin/inventory/audits"
-            className="rounded-xl border border-[#942E3A]/15 bg-white p-2.5 text-[#942E3A] transition hover:border-[#D8B46A] shadow-sm shrink-0"
-            aria-label="Back to Stock Audits Log"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
+          <AdminBackButton fallbackHref="/admin/inventory/audits" ariaLabel="Back to Stock Audits Log" />
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#942E3A] text-[#FFF9EB] shadow-md">
               <ClipboardCheck className="h-5 w-5 text-[#D8B46A]" />

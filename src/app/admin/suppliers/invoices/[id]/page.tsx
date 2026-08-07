@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowLeft, Package } from "lucide-react";
+import { Package } from "lucide-react";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import { formatCurrency } from "@/lib/utils";
+import AdminBackButton from "@/components/AdminBackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export default async function PurchaseInvoiceDetailsPage({ params }: { params: P
   return (
     <div className="mx-auto max-w-6xl space-y-5">
       <div className="flex items-center gap-3">
-        <Link href="/admin/suppliers" className="rounded-xl border border-[#942E3A]/15 bg-white p-2 text-[#942E3A]"><ArrowLeft className="h-4 w-4" /></Link>
+        <AdminBackButton fallbackHref="/admin/suppliers" />
         <div><p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">Purchase invoice</p><h1 className="mt-1 font-playfair text-3xl font-black">{invoice.invoiceNumber}</h1></div>
       </div>
       <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-7">

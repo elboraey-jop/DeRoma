@@ -1,119 +1,131 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, PackageSearch, RotateCcw, ShieldAlert, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, PackageSearch, RotateCcw, ShieldAlert, XCircle, ChevronRight } from "lucide-react";
 
 const acceptedCases = [
-  "Wrong size, wrong color, or wrong item delivered.",
-  "Manufacturing issue reported before outdoor wear.",
-  "Unused item returned in its original packaging and clean condition.",
+  "Wrong size, color, or wrong item.",
+  "Manufacturing defect reported early.",
+  "Unworn condition with tags & box.",
 ];
 
 const declinedCases = [
-  "Shoes used outdoors, damaged, stained, or missing original packaging.",
-  "Requests submitted after the review window has passed.",
-  "Normal fit preference after confirmed delivery.",
+  "Shoes worn outdoors, stained, or damaged.",
+  "Requests after 14 days from delivery.",
+  "Improper care or intentional force.",
 ];
 
 const processSteps = [
-  "Send your order number and clear product photos to support.",
-  "Our team reviews the request and confirms eligibility.",
-  "A courier pickup or replacement delivery is arranged when approved.",
+  "Send order # & photos to support.",
+  "Eligibility confirmed in hours.",
+  "Doorstep exchange arranged.",
 ];
 
 export default function RefundPolicyPage() {
   return (
-    <div className="min-h-screen bg-[#FFF9EB] px-4 py-12 text-[#942E3A] sm:px-6 lg:px-8" dir="ltr">
-      <div className="mx-auto max-w-[980px] space-y-10">
-        <Link href="/" className="inline-flex items-center gap-1 text-xs font-bold text-[#942E3A] transition-colors hover:text-[#6B1F2A]">
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span>Back to Home</span>
-        </Link>
+    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit py-4 sm:py-10 px-2.5 sm:px-6 lg:px-8" dir="ltr">
+      <div className="max-w-[900px] mx-auto space-y-4 sm:space-y-10">
+        
+        {/* Navigation & Header */}
+        <div className="space-y-2 sm:space-y-4">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-[#942E3A] hover:opacity-80 transition-opacity">
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Home</span>
+          </Link>
 
-        <section className="space-y-4 text-center">
-          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#942E3A]">Returns & Exchanges</span>
-          <h1 className="font-playfair text-4xl font-black tracking-tight text-[#942E3A] sm:text-5xl">
-            Simple help when the pair is not right
-          </h1>
-          <p className="mx-auto max-w-2xl text-sm font-light leading-relaxed text-[#6B1F2A] sm:text-base">
-            We want every order to arrive clean, correct, and comfortable. Here is how returns and exchanges are handled.
-          </p>
-        </section>
+          <div className="space-y-0.5 sm:space-y-1">
+            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#942E3A]">
+              Guarantee & Returns
+            </span>
+            <h1 className="text-xl sm:text-4xl font-black font-playfair tracking-tight text-[#942E3A]">
+              Refund & Exchange Policy
+            </h1>
+            <p className="text-[10px] sm:text-xs text-stone-500 font-light">14-day hassle-free exchanges for total peace of mind.</p>
+          </div>
+        </div>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-[#942E3A]/25 bg-white p-6 text-center shadow-xs">
-            <RotateCcw className="mx-auto mb-3 h-6 w-6 text-[#D8B46A]" />
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#942E3A]/70">Review Window</p>
-            <p className="mt-1 text-2xl font-black text-[#942E3A]">24 Hours</p>
+        {/* Quick Highlights Grid - 3 columns side-by-side on mobile! */}
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
+          <div className="bg-white border border-[#942E3A]/25 rounded-xl sm:rounded-2xl p-2 sm:p-5 text-center space-y-0.5 shadow-xs">
+            <RotateCcw className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-[#D8B46A] mx-auto" />
+            <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-[#942E3A]/70">Return Window</span>
+            <p className="text-xs sm:text-2xl font-black text-[#942E3A]">14 Days</p>
           </div>
-          <div className="rounded-2xl border border-[#942E3A]/25 bg-white p-6 text-center shadow-xs">
-            <PackageSearch className="mx-auto mb-3 h-6 w-6 text-[#D8B46A]" />
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#942E3A]/70">Condition</p>
-            <p className="mt-1 text-2xl font-black text-[#942E3A]">Unused</p>
-          </div>
-          <div className="rounded-2xl border border-[#942E3A]/25 bg-white p-6 text-center shadow-xs">
-            <ShieldAlert className="mx-auto mb-3 h-6 w-6 text-[#D8B46A]" />
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#942E3A]/70">Support</p>
-            <p className="mt-1 text-2xl font-black text-[#942E3A]">Fast Review</p>
-          </div>
-        </section>
 
-        <section className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-[#942E3A]/30 bg-white p-6 shadow-xs sm:p-8">
-            <div className="mb-5 flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-              <h2 className="font-playfair text-2xl font-extrabold text-[#942E3A]">Accepted Requests</h2>
+          <div className="bg-white border border-[#942E3A]/25 rounded-xl sm:rounded-2xl p-2 sm:p-5 text-center space-y-0.5 shadow-xs">
+            <PackageSearch className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-[#D8B46A] mx-auto" />
+            <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-[#942E3A]/70">Condition</span>
+            <p className="text-xs sm:text-2xl font-black text-[#942E3A]">Unworn</p>
+          </div>
+
+          <div className="bg-white border border-[#942E3A]/25 rounded-xl sm:rounded-2xl p-2 sm:p-5 text-center space-y-0.5 shadow-xs">
+            <ShieldAlert className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-[#D8B46A] mx-auto" />
+            <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-[#942E3A]/70">Inspection</span>
+            <p className="text-xs sm:text-2xl font-black text-[#942E3A]">Doorstep</p>
+          </div>
+        </div>
+
+        {/* Accepted vs Declined Grid - 2 columns side-by-side on mobile! */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-6">
+          <div className="bg-white border border-[#942E3A]/30 rounded-2xl p-3 sm:p-6 space-y-2 shadow-xs">
+            <div className="flex items-center gap-1.5 border-b border-[#942E3A]/15 pb-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-emerald-600 shrink-0" />
+              <h2 className="text-xs sm:text-lg font-bold font-playfair text-[#942E3A] truncate">Eligible</h2>
             </div>
-            <ul className="space-y-3 text-sm font-light leading-relaxed text-[#6B1F2A]">
-              {acceptedCases.map((item) => (
-                <li key={item} className="flex gap-3">
-                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+            <ul className="space-y-1.5 text-[10px] sm:text-xs text-[#6B1F2A] font-light leading-relaxed">
+              {acceptedCases.map((item, i) => (
+                <li key={i} className="flex gap-1.5">
+                  <span className="mt-1 w-1.5 h-1.5 shrink-0 rounded-full bg-emerald-500" />
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="rounded-3xl border border-[#942E3A]/30 bg-white p-6 shadow-xs sm:p-8">
-            <div className="mb-5 flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-[#942E3A]" />
-              <h2 className="font-playfair text-2xl font-extrabold text-[#942E3A]">Not Eligible</h2>
+          <div className="bg-white border border-[#942E3A]/30 rounded-2xl p-3 sm:p-6 space-y-2 shadow-xs">
+            <div className="flex items-center gap-1.5 border-b border-[#942E3A]/15 pb-1.5">
+              <XCircle className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-rose-600 shrink-0" />
+              <h2 className="text-xs sm:text-lg font-bold font-playfair text-[#942E3A] truncate">Not Eligible</h2>
             </div>
-            <ul className="space-y-3 text-sm font-light leading-relaxed text-[#6B1F2A]">
-              {declinedCases.map((item) => (
-                <li key={item} className="flex gap-3">
-                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#D8B46A]" />
+            <ul className="space-y-1.5 text-[10px] sm:text-xs text-[#6B1F2A] font-light leading-relaxed">
+              {declinedCases.map((item, i) => (
+                <li key={i} className="flex gap-1.5">
+                  <span className="mt-1 w-1.5 h-1.5 shrink-0 rounded-full bg-[#D8B46A]" />
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
           </div>
-        </section>
+        </div>
 
-        <section className="rounded-3xl border border-white/10 bg-[#942E3A] p-6 text-[#FFF9EB] shadow-lg sm:p-8">
-          <div className="grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-center">
+        {/* Process Steps */}
+        <div className="bg-[#942E3A] rounded-2xl sm:rounded-3xl p-3.5 sm:p-8 text-[#FFF9EB] space-y-3 shadow-md">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <h2 className="font-playfair text-2xl font-extrabold">How to request a return</h2>
-              <p className="mt-3 text-sm font-light leading-relaxed text-[#FFF9EB]/85">
-                Keep the package safe until the support team reviews your request. Approved exchanges depend on current stock availability.
-              </p>
-              <Link
-                href="/track"
-                className="mt-6 inline-flex items-center rounded-full bg-[#FFF9EB] px-5 py-2.5 text-xs font-bold text-[#942E3A] transition-colors hover:bg-white"
-              >
-                Check Order Status
-              </Link>
+              <h2 className="text-base sm:text-2xl font-extrabold font-playfair">3 Simple Steps to Exchange</h2>
+              <p className="text-[10px] sm:text-xs font-light text-[#FFF9EB]/80 mt-0.5">Doorstep courier exchange arranged upon verification.</p>
             </div>
-            <ol className="space-y-3">
-              {processSteps.map((step, index) => (
-                <li key={step} className="flex gap-3 rounded-2xl border border-[#D8B46A]/20 bg-white/8 p-4 text-sm font-light leading-relaxed">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#D8B46A] text-xs font-black text-[#942E3A]">
-                    {index + 1}
-                  </span>
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ol>
+            <Link
+              href="/about?tab=contact"
+              className="inline-flex items-center gap-1 rounded-full bg-[#FFF9EB] px-3.5 py-1.5 sm:px-5 sm:py-2.5 text-[10px] sm:text-xs font-bold text-[#942E3A] hover:bg-white transition-colors shrink-0 w-fit"
+            >
+              <span>Contact Support</span>
+              <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            </Link>
           </div>
-        </section>
+
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-3 pt-1">
+            {processSteps.map((step, idx) => (
+              <div key={idx} className="bg-white/10 border border-[#D8B46A]/20 rounded-xl p-2 sm:p-3 text-[9px] sm:text-xs font-light leading-snug flex flex-col sm:flex-row gap-1 sm:gap-2 items-start sm:items-center">
+                <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#D8B46A] text-[#942E3A] font-black text-[9px] sm:text-xs flex items-center justify-center shrink-0">
+                  {idx + 1}
+                </span>
+                <span>{step}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
     </div>
   );

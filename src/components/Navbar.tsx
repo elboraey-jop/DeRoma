@@ -7,6 +7,7 @@ import { ShoppingBag, Search, Heart, Menu, X, User, Home, Store, Info, ShieldChe
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
 import { useWishlist } from "@/lib/wishlistStore";
+import { logoutCustomerAction } from "@/app/auth-actions";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: boolean }) {
@@ -59,7 +60,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
   const navLinks: { label: string; href: string; icon: typeof Home; highlight?: boolean }[] = [
     { label: "Home", href: "/", icon: Home },
     { label: "Shop", href: "/shop", icon: Store },
-    { label: "About Us", href: "/about", icon: Info },
+    { label: "About Us & Contact", href: "/about", icon: Info },
     { label: "Our Privacy", href: "/privacy", icon: ShieldCheck },
     { label: "Track Order", href: "/track", icon: PackageSearch },
   ];
@@ -404,8 +405,11 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
                       </div>
                     </Link>
                     <button
-                      onClick={() => {
+                      onClick={async () => {
+                        await logoutCustomerAction();
                         localStorage.removeItem("isLoggedIn");
+                        localStorage.removeItem("customerName");
+                        localStorage.removeItem("customerEmail");
                         window.dispatchEvent(new Event("auth-change"));
                         setIsLoggedIn(false);
                         setIsOpen(false);

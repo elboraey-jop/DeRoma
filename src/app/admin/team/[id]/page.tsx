@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, Mail, ShieldCheck, UserMinus, UserRound } from "lucide-react";
+import { CalendarDays, Mail, ShieldCheck, UserMinus, UserRound } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import AdminChangeTeamPasswordModal from "@/components/AdminChangeTeamPasswordModal";
 import { removeTeamMemberAction } from "@/app/admin/team/actions";
+import AdminBackButton from "@/components/AdminBackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -19,9 +20,7 @@ export default async function TeamMemberPage({ params }: { params: Promise<{ id:
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/admin/team" className="rounded-xl border border-[#942E3A]/15 bg-white p-2 text-[#942E3A] transition hover:border-[#D8B46A]" aria-label="Back to team">
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
+        <AdminBackButton fallbackHref="/admin/team" ariaLabel="Back to team" />
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">Team account</p>
           <h1 className="mt-1 font-playfair text-3xl font-black">{displayName}</h1>

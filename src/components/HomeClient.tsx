@@ -21,7 +21,27 @@ import {
 } from "lucide-react";
 import ProductCard, { ProductWithVariants } from "./ProductCard";
 
-export default function HomeClient({ products }: { products: ProductWithVariants[] }) {
+import { useSiteSettings } from "@/providers/SiteSettingsProvider";
+
+export type HomeReviewItem = {
+  id?: string;
+  brand: string;
+  initials: string;
+  model: string;
+  rating: number;
+  quote: string;
+  name: string;
+  detail: string;
+};
+
+export default function HomeClient({
+  products,
+  dbHomeReviews = [],
+}: {
+  products: ProductWithVariants[];
+  dbHomeReviews?: HomeReviewItem[];
+}) {
+  const settings = useSiteSettings();
   const [activeSlide, setActiveSlide] = useState(0);
   const [direction, setDirection] = useState(1);
   const [activeReview, setActiveReview] = useState(0);
@@ -32,9 +52,23 @@ export default function HomeClient({ products }: { products: ProductWithVariants
   const scrollRef = useRef<HTMLDivElement>(null);
   const bestsellerScrollRef = useRef<HTMLDivElement>(null);
 
+  const forYouProducts = settings.forYouProductIds.length > 0
+    ? settings.forYouProductIds.map((id) => products.find((p) => p.id === id)).filter((p): p is ProductWithVariants => Boolean(p))
+    : products;
+
+  const bestsellerProducts = settings.bestSellerProductIds.length > 0
+    ? settings.bestSellerProductIds.map((id) => products.find((p) => p.id === id)).filter((p): p is ProductWithVariants => Boolean(p))
+    : products;
+
+  const displayForYouProducts = forYouProducts.length > 0 ? forYouProducts : products;
+  const displayBestsellerProducts = bestsellerProducts.length > 0 ? bestsellerProducts : products;
+
   const cardWidth = 246; // 230px card + 16px gap
-  const singleCopyWidth = products.length * cardWidth;
+  const singleCopyWidth = displayForYouProducts.length * cardWidth;
   const repeatCount = Math.max(8, Math.ceil(8000 / (singleCopyWidth || 1)));
+
+  const repeatedProducts = Array.from({ length: repeatCount }).flatMap(() => displayForYouProducts);
+  const repeatedBestsellerProducts = Array.from({ length: repeatCount }).flatMap(() => displayBestsellerProducts);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -114,23 +148,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.06 },
-    },
-  };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 120 } },
-  };
-
-  const heroCards = [
-    // CARD 1: RETRO SNEAKERS
+  const heroCards = settings.heroBanners.length > 0 ? settings.heroBanners : [
     {
-      id: 1,
+      id: "1",
       tag: "THE FEMININE EDIT",
       title: "Soft Sport Icons",
       desc: "Pastel runners and everyday silhouettes for easy comfort, soft colour, and feminine street style.",
@@ -138,9 +159,8 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       image: "/banners/hero-1-desktop.webp",
       mobileImage: "/banners/hero-1-mobile.webp"
     },
-    // CARD 2: PERFORMANCE SNEAKERS
     {
-      id: 2,
+      id: "2",
       tag: "NEW RELEASE",
       title: "Performance Running & Gym",
       desc: "Super-lightweight cushioned trainers from Asics & Nike engineered for gym workouts, daily running, and support.",
@@ -148,9 +168,8 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       image: "/banners/hero-2-desktop.webp",
       mobileImage: "/banners/hero-2-mobile.webp"
     },
-    // CARD 3: CHUNKY PLATFORMS
     {
-      id: 3,
+      id: "3",
       tag: "LIFESTYLE DROP",
       title: "Chunky & Platform Soles",
       desc: "Bold elevated profiles combined with soft memory foam footbeds for maximum casual comfort.",
@@ -208,82 +227,10 @@ export default function HomeClient({ products }: { products: ProductWithVariants
 
   const currentIndex = ((activeSlide % heroCards.length) + heroCards.length) % heroCards.length;
   const currentCard = heroCards[currentIndex];
-  const currentTheme = cardThemes[currentIndex];
+  const currentTheme = cardThemes[currentIndex % cardThemes.length];
 
-  const reviews = [
-    {
-      brand: "NEW BALANCE",
-      initials: "NB",
-      model: "530 Beige",
-      rating: 5,
-      quote: "The fit is perfect and the quality feels even better in person. DeRoma made choosing my everyday pair effortless.",
-      name: "Mariam A.",
-      detail: "Verified DeRoma customer",
-    },
-    {
-      brand: "ADIDAS",
-      initials: "AD",
-      model: "Handball Spezial",
-      rating: 4,
-      quote: "Exactly the pair I was looking for. The delivery was quick, the packaging was beautiful, and the shoes are so comfortable.",
-      name: "Youssef M.",
-      detail: "Verified DeRoma customer",
-    },
-    {
-      brand: "ASICS",
-      initials: "AS",
-      model: "Gel-Kayano 14",
-      rating: 5,
-      quote: "Finally found a stylish running shoe that feels light all day. The sizing guide was spot on.",
-      name: "Nour K.",
-      detail: "Verified DeRoma customer",
-    },
-    {
-      brand: "NIKE",
-      initials: "NK",
-      model: "V2K Run",
-      rating: 4,
-      quote: "The whole experience feels premium—from browsing the collection to wearing my new favourite sneakers.",
-      name: "Omar H.",
-      detail: "Verified DeRoma customer",
-    },
-    {
-      brand: "PUMA",
-      initials: "PM",
-      model: "Palermo Vintage",
-      rating: 3,
-      quote: "A beautiful everyday sneaker with a really easy-to-style colourway. I have been wearing it nonstop.",
-      name: "Salma R.",
-      detail: "Verified DeRoma customer",
-    },
-    {
-      brand: "ADIDAS",
-      initials: "AD",
-      model: "Campus 00s",
-      rating: 5,
-      quote: "The sizing advice helped me choose confidently, and the pair arrived exactly as pictured.",
-      name: "Jana E.",
-      detail: "Verified DeRoma customer",
-    },
-    {
-      brand: "NEW BALANCE",
-      initials: "NB",
-      model: "327 Burgundy",
-      rating: 4,
-      quote: "Super light, very comfortable, and the burgundy detail makes the whole outfit feel more special.",
-      name: "Farah S.",
-      detail: "Verified DeRoma customer",
-    },
-    {
-      brand: "NIKE",
-      initials: "NK",
-      model: "Court Vision Low",
-      rating: 3,
-      quote: "Clean design and a comfortable sole for daily wear. The delivery experience was smooth from start to finish.",
-      name: "Lina M.",
-      detail: "Verified DeRoma customer",
-    },
-  ];
+  const reviews = dbHomeReviews.length > 0 ? dbHomeReviews : settings.homeReviews;
+
 
   const activeReviewData = reviews[activeReview];
 
@@ -331,8 +278,8 @@ export default function HomeClient({ products }: { products: ProductWithVariants
     }),
   };
 
-  const filteredProducts = products;
-  const repeatedProducts = Array(repeatCount).fill(filteredProducts).flat();
+
+
 
   return (
     <div className="w-full flex flex-col space-y-8 pb-16 bg-[#FFF9EB] text-[#942E3A]" dir="ltr">
@@ -784,7 +731,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
       <section className="px-2 sm:px-4 lg:px-6">
         <ScrollReveal>
           <div className="mx-auto max-w-[94vw] lg:max-w-[1320px]">
-            {filteredProducts.length === 0 ? (
+            {displayForYouProducts.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-2xl border border-[#D8B46A] p-6">
                 <ShoppingBag className="h-8 w-8 text-[#D8B46A] mx-auto mb-2" />
                 <h3 className="text-sm font-bold text-[#942E3A]">No shoes found</h3>
@@ -890,7 +837,7 @@ export default function HomeClient({ products }: { products: ProductWithVariants
                 msOverflowStyle: "none"
               }}
             >
-              {products.slice(0, 4).map((product) => (
+              {displayBestsellerProducts.map((product) => (
                 <div
                   key={`bestseller-${product.id}`}
                   className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"

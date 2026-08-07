@@ -10,6 +10,7 @@ import {
   ShippingSettingsData,
   ShippingZoneData,
 } from "@/lib/shippingHelper";
+import { getCustomerSession } from "@/lib/userAuth";
 
 interface CheckoutItemInput {
   productId: string;
@@ -238,6 +239,8 @@ export async function createOrder(input: CreateOrderInput) {
     }
     const totalPrice = Math.max(0, subtotal - discountAmount + shippingCost);
 
+    const customerSession = await getCustomerSession();
+
     // 5. Database transaction (create order + deduct stock)
     const order = await prisma.$transaction(async (tx) => {
       if (promotion) {
@@ -273,6 +276,7 @@ export async function createOrder(input: CreateOrderInput) {
           lastName,
           name: fullCustomerName,
           phone: input.customerPhone,
+          email: customerSession?.email || null,
           phone2: input.customerPhone2 || null,
           governorate: input.governorate,
           city: input.city,
@@ -282,6 +286,7 @@ export async function createOrder(input: CreateOrderInput) {
           firstName,
           lastName,
           name: fullCustomerName,
+          email: customerSession?.email || undefined,
           phone2: input.customerPhone2 || null,
           governorate: input.governorate,
           city: input.city,
@@ -293,6 +298,7 @@ export async function createOrder(input: CreateOrderInput) {
       const newOrder = await tx.order.create({
         data: {
           orderNumber: `DR-PENDING-${randomUUID()}`,
+          userId: customerSession?.sub || null,
           customerFirstName: firstName,
           customerLastName: lastName,
           customerName: fullCustomerName,
@@ -431,3 +437,43 @@ export async function createOrder(input: CreateOrderInput) {
     };
   }
 }
+
+export async function submitContactMessageAction(input: {
+  name: string;
+  phone: string;
+  message: string;
+}) {
+  try {
+    const cleanName = (input.name || "").trim();
+    const cleanPhone = (input.phone || "").trim();
+    const cleanMessage = (input.message || "").trim();
+
+    if (!cleanName || cleanName.length < 2) {
+      return { success: false, error: "Please enter a valid name (at least 2 characters)." };
+    }
+    if (!cleanPhone || cleanPhone.length < 6) {
+      return { success: false, error: "Please enter a valid phone number." };
+    }
+    if (!cleanMessage || cleanMessage.length < 3) {
+      return { success: false, error: "Please enter your message text." };
+    }
+
+    const messageRecord = await (prisma as any).contactMessage.create({
+      data: {
+        name: cleanName,
+        phone: cleanPhone,
+        message: cleanMessage,
+        status: "unread",
+      },
+    });
+
+    return { success: true, messageId: messageRecord.id };
+  } catch (error) {
+    console.error("Error submitting contact message:", error);
+    return {
+      success: false,
+      error: "An error occurred while submitting your message. Please try again later.",
+    };
+  }
+}
+

@@ -1,157 +1,139 @@
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
-import { BarChart3, TrendingUp } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import AnalyticsDashboard, {
+  AnalyticsOrder,
+  AnalyticsProduct,
+  AnalyticsCustomer,
+  AnalyticsPromotion,
+  AnalyticsReview,
+} from "./AnalyticsDashboard";
 
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
   await requireAdmin();
-  let orders: Array<{ totalPrice: unknown; status: string; createdAt: Date }> =
-    [];
+
+  let ordersRaw: any[] = [];
+  let productsRaw: any[] = [];
+  let customersRaw: any[] = [];
+  let promotionsRaw: any[] = [];
+  let reviewsRaw: any[] = [];
+
   try {
-    orders = await prisma.order.findMany({
-      select: { totalPrice: true, status: true, createdAt: true },
-      orderBy: { createdAt: "asc" },
+    ordersRaw = await prisma.order.findMany({
+      include: {
+        items: {
+          include: {
+            product: {
+              select: {
+                category: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    productsRaw = await prisma.product.findMany({
+      include: {
+        variants: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    customersRaw = await prisma.customer.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
+    promotionsRaw = await prisma.promotion.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
+    reviewsRaw = await prisma.review.findMany({
+      orderBy: { createdAt: "desc" },
     });
   } catch (error) {
-    console.warn("Unable to load analytics", error);
+    console.error("Failed to fetch analytics data from Prisma:", error);
   }
-  const valid = orders.filter((order) => order.status !== "cancelled");
-  const revenue = valid.reduce(
-    (sum, order) => sum + Number(order.totalPrice),
-    0,
-  );
-  const averageOrder = valid.length ? revenue / valid.length : 0;
-  const statusCounts = ["pending", "shipped", "delivered", "cancelled"].map(
-    (status) => ({
-      status,
-      count: orders.filter((order) => order.status === status).length,
-    }),
-  );
-  const monthMap = new Map<string, number>();
-  for (const order of valid) {
-    const key = `${order.createdAt.getUTCFullYear()}-${String(order.createdAt.getUTCMonth() + 1).padStart(2, "0")}`;
-    monthMap.set(key, (monthMap.get(key) || 0) + Number(order.totalPrice));
-  }
-  const monthRows = [...monthMap.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .slice(-6);
-  const maxMonth = Math.max(...monthRows.map(([, value]) => value), 1);
+
+  // --- Data Serialization for Client Props ---
+  const orders: AnalyticsOrder[] = ordersRaw.map((o) => ({
+    id: o.id,
+    orderNumber: o.orderNumber,
+    customerName: o.customerName || `${o.customerFirstName || ""} ${o.customerLastName || ""}`.trim() || "Customer",
+    customerPhone: o.customerPhone,
+    governorate: o.governorate || "Cairo",
+    city: o.city || "Cairo",
+    paymentMethod: o.paymentMethod || "cod",
+    totalPrice: Number(o.totalPrice || 0),
+    subtotalPrice: Number(o.subtotalPrice || 0),
+    discountAmount: Number(o.discountAmount || 0),
+    shippingCost: Number(o.shippingCost || 0),
+    status: o.status,
+    createdAt: o.createdAt.toISOString(),
+    items: (o.items || []).map((it: any) => ({
+      productId: it.productId,
+      productName: it.productName,
+      size: it.size,
+      color: it.color,
+      quantity: Number(it.quantity || 1),
+      price: Number(it.price || 0),
+      unitCost: Number(it.unitCost || 0),
+      category: it.product?.category || "accessories",
+    })),
+  }));
+
+  const products: AnalyticsProduct[] = productsRaw.map((p) => ({
+    id: p.id,
+    name: p.name,
+    price: Number(p.price || 0),
+    compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+    category: p.category,
+    status: p.status,
+    rating: Number(p.rating || 0),
+    reviewsCount: Number(p.reviewsCount || 0),
+    createdAt: p.createdAt.toISOString(),
+    variants: (p.variants || []).map((v: any) => ({
+      id: v.id,
+      stock: Number(v.stock || 0),
+      size: v.size,
+    })),
+  }));
+
+  const customers: AnalyticsCustomer[] = customersRaw.map((c) => ({
+    id: c.id,
+    name: c.name || `${c.firstName || ""} ${c.lastName || ""}`.trim() || "Customer",
+    phone: c.phone,
+    governorate: c.governorate,
+    createdAt: c.createdAt.toISOString(),
+  }));
+
+  const promotions: AnalyticsPromotion[] = promotionsRaw.map((pr) => ({
+    id: pr.id,
+    code: pr.code,
+    name: pr.name,
+    type: pr.type,
+    value: Number(pr.value || 0),
+    usedCount: Number(pr.usedCount || 0),
+    active: pr.active,
+  }));
+
+  const reviews: AnalyticsReview[] = reviewsRaw.map((r) => ({
+    id: r.id,
+    productId: r.productId,
+    rating: Number(r.rating || 0),
+    status: r.status,
+    createdAt: r.createdAt.toISOString(),
+  }));
+
   return (
-    <div className="space-y-5">
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
-          Business intelligence
-        </p>
-        <h1 className="mt-1 font-playfair text-3xl font-black">Analytics</h1>
-        <p className="mt-1 text-xs text-[#6B1F2A]/65">
-          Understand revenue, order flow, and the operational health of the
-          boutique.
-        </p>
-      </div>
-      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-        <div className="rounded-2xl bg-[#942E3A] p-4 text-[#FFF9EB]">
-          <p className="text-[10px] uppercase tracking-wide text-[#D8B46A]">
-            Revenue
-          </p>
-          <p className="mt-2 font-playfair text-2xl font-black">
-            {formatCurrency(revenue)}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4">
-          <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
-            Valid orders
-          </p>
-          <p className="mt-2 font-playfair text-2xl font-black">
-            {valid.length}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4">
-          <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
-            Average order
-          </p>
-          <p className="mt-2 font-playfair text-2xl font-black">
-            {formatCurrency(averageOrder)}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-[#D8B46A]/35 bg-[#fff7df] p-4">
-          <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
-            Cancellation rate
-          </p>
-          <p className="mt-2 font-playfair text-2xl font-black">
-            {orders.length
-              ? Math.round(
-                  (orders.filter((o) => o.status === "cancelled").length /
-                    orders.length) *
-                    100,
-                )
-              : 0}
-            %
-          </p>
-        </div>
-      </div>
-      <div className="grid gap-5 xl:grid-cols-[1.3fr_0.7fr]">
-        <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-6">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-[#D8B46A]" />
-            <h2 className="font-playfair text-xl font-bold">
-              Revenue by month
-            </h2>
-          </div>
-          <div className="mt-6 flex h-56 items-end gap-3 border-b border-l border-[#942E3A]/10 px-3 pb-0 pt-4">
-            {monthRows.map(([month, value]) => (
-              <div
-                key={month}
-                className="flex h-full flex-1 flex-col items-center justify-end gap-2"
-              >
-                <div
-                  className="w-full max-w-12 rounded-t-xl bg-[#942E3A] transition-all"
-                  style={{ height: `${Math.max((value / maxMonth) * 85, 5)}%` }}
-                  title={formatCurrency(value)}
-                />
-                <span className="text-center text-[10px] font-bold text-[#6B1F2A]/60">
-                  {new Date(`${month}-01T00:00:00Z`).toLocaleDateString(
-                    "en-US",
-                    { month: "short", year: "2-digit", timeZone: "UTC" },
-                  )}
-                </span>
-              </div>
-            ))}
-            {monthRows.length === 0 && (
-              <p className="m-auto text-xs text-[#6B1F2A]/60">
-                Revenue data will appear after orders arrive.
-              </p>
-            )}
-          </div>
-        </section>
-        <section className="rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-6">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-[#D8B46A]" />
-            <h2 className="font-playfair text-xl font-bold">Order pipeline</h2>
-          </div>
-          <div className="mt-5 space-y-3">
-            {statusCounts.map((item) => (
-              <div key={item.status}>
-                <div className="flex justify-between text-xs">
-                  <span className="capitalize text-[#6B1F2A]">
-                    {item.status}
-                  </span>
-                  <strong className="text-[#942E3A]">{item.count}</strong>
-                </div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-[#FFF9EB]">
-                  <div
-                    className="h-full rounded-full bg-[#D8B46A]"
-                    style={{
-                      width: `${orders.length ? (item.count / orders.length) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-    </div>
+    <AnalyticsDashboard
+      orders={orders}
+      products={products}
+      customers={customers}
+      promotions={promotions}
+      reviews={reviews}
+    />
   );
 }

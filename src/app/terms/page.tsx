@@ -1,105 +1,293 @@
+"use client";
+
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, Clock, CreditCard, MapPin, PackageCheck, ShieldCheck, Truck } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  CreditCard,
+  MapPin,
+  PackageCheck,
+  ShieldCheck,
+  Truck,
+  ChevronRight,
+  Search,
+  X,
+} from "lucide-react";
+import { GOVERNORATES, CENTERS_BY_GOVERNORATE } from "@/lib/locations";
+import { formatCurrency } from "@/lib/utils";
+
+const GOVERNORATE_FEES: Record<string, number> = {
+  Cairo: 50,
+  Giza: 50,
+  Alexandria: 60,
+  Qalyubia: 70,
+  Sharqia: 70,
+  Dakahlia: 70,
+  Monufia: 70,
+  Gharbia: 70,
+  "Kafr El Sheikh": 70,
+  Damietta: 70,
+  "Port Said": 70,
+  Ismailia: 70,
+  Suez: 70,
+  Fayoum: 90,
+  "Beni Suef": 90,
+  Minya: 90,
+  Asyut: 90,
+  Sohag: 90,
+  Qena: 90,
+  Luxor: 90,
+  Aswan: 90,
+  "Red Sea": 120,
+  "New Valley": 120,
+  Matrouh: 120,
+  "North Sinai": 120,
+  "South Sinai": 120,
+};
 
 const shippingSteps = [
   {
-    title: "Order Confirmation",
-    text: "After checkout, our team confirms the order details, size, color, address, and preferred delivery window.",
+    title: "Confirmation",
+    text: "Verified by phone.",
     icon: PackageCheck,
   },
   {
     title: "Careful Packing",
-    text: "Every pair is checked, packed securely, and prepared for a neat doorstep handoff.",
+    text: "Inspected & sealed.",
     icon: ShieldCheck,
   },
   {
-    title: "Doorstep Delivery",
-    text: "Orders are delivered through our courier partners with updates available from the Track Order page.",
+    title: "Doorstep Inspection",
+    text: "COD door inspection.",
     icon: Truck,
   },
 ];
 
 const terms = [
-  "Product colors may vary slightly between screen displays and real lighting.",
-  "Order availability depends on current stock, size, and selected colorway.",
-  "Cash on delivery orders may require phone confirmation before dispatch.",
-  "Customers are responsible for entering accurate contact and shipping details.",
+  "Product colors may vary slightly depending on screen calibration & lighting.",
+  "Stock availability is updated live; items reserved upon checkout submission.",
+  "Cash on Delivery orders are verified via phone before dispatch.",
+  "Customers must provide valid Egyptian contact & shipping details.",
 ];
 
+type SearchResult = {
+  label: string;
+  governorate: string;
+  fee: number;
+  isCity: boolean;
+};
+
 export default function TermsPage() {
+  const [shippingSearch, setShippingSearch] = useState("");
+
+  const popularGovs = ["Cairo", "Giza", "Alexandria", "Gharbia", "Dakahlia", "Sharqia"];
+
+  const searchResults = useMemo<SearchResult[]>(() => {
+    const query = shippingSearch.trim().toLowerCase();
+    if (!query) return [];
+
+    const results: SearchResult[] = [];
+
+    // Search governorates
+    GOVERNORATES.forEach((gov) => {
+      if (gov.toLowerCase().includes(query)) {
+        results.push({
+          label: gov,
+          governorate: gov,
+          fee: GOVERNORATE_FEES[gov] ?? 70,
+          isCity: false,
+        });
+      }
+    });
+
+    // Search cities / centers
+    Object.entries(CENTERS_BY_GOVERNORATE).forEach(([gov, cities]) => {
+      cities.forEach((city) => {
+        if (city.toLowerCase().includes(query) && !results.some((r) => r.label.toLowerCase() === city.toLowerCase())) {
+          results.push({
+            label: city,
+            governorate: gov,
+            fee: GOVERNORATE_FEES[gov] ?? 70,
+            isCity: true,
+          });
+        }
+      });
+    });
+
+    return results.slice(0, 6);
+  }, [shippingSearch]);
+
   return (
-    <div className="min-h-screen bg-[#FFF9EB] px-4 py-12 text-[#942E3A] sm:px-6 lg:px-8" dir="ltr">
-      <div className="mx-auto max-w-[980px] space-y-10">
-        <Link href="/" className="inline-flex items-center gap-1 text-xs font-bold text-[#942E3A] transition-colors hover:text-[#6B1F2A]">
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span>Back to Home</span>
-        </Link>
+    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit py-3 sm:py-10 px-2.5 sm:px-6 lg:px-8" dir="ltr">
+      <div className="max-w-[900px] mx-auto space-y-3 sm:space-y-8">
+        
+        {/* Navigation & Header */}
+        <div className="space-y-1.5 sm:space-y-4">
+          <Link href="/" className="inline-flex items-center gap-1 text-xs font-bold text-[#942E3A] hover:opacity-80 transition-opacity">
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Home</span>
+          </Link>
 
-        <section className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
-          <div className="space-y-4">
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#942E3A]">Shipping & Service Terms</span>
-            <h1 className="font-playfair text-4xl font-black tracking-tight text-[#942E3A] sm:text-5xl">
-              Clear delivery for every DeRoma order
+          <div className="space-y-0.5">
+            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#942E3A]">
+              Delivery & Guidelines
+            </span>
+            <h1 className="text-xl sm:text-4xl font-black font-playfair tracking-tight text-[#942E3A]">
+              Terms & Shipping Policy
             </h1>
-            <p className="max-w-2xl text-sm font-light leading-relaxed text-[#6B1F2A] sm:text-base">
-              A quick guide to how orders are confirmed, shipped, paid for, and supported across Egypt.
-            </p>
+            <p className="text-[10px] sm:text-xs text-stone-500 font-light">Quick guide to order dispatch, delivery fees, and service terms across Egypt.</p>
+          </div>
+        </div>
+
+        {/* Quick Stats Grid - 2 columns side-by-side */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-4">
+          <div className="bg-white border border-[#942E3A]/25 rounded-xl sm:rounded-2xl p-2 sm:p-5 text-center space-y-0.5 shadow-xs">
+            <Clock className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-[#D8B46A] mx-auto" />
+            <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-[#942E3A]/70">Delivery Window</span>
+            <p className="text-xs sm:text-2xl font-black text-[#942E3A]">2 - 4 Days</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-[#942E3A]/25 bg-white p-5 shadow-xs">
-              <Clock className="mb-3 h-5 w-5 text-[#D8B46A]" />
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#942E3A]/70">Delivery Window</p>
-              <p className="mt-1 text-xl font-black text-[#942E3A]">2-5 Days</p>
-            </div>
-            <div className="rounded-2xl border border-[#942E3A]/25 bg-white p-5 shadow-xs">
-              <CreditCard className="mb-3 h-5 w-5 text-[#D8B46A]" />
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#942E3A]/70">Payment</p>
-              <p className="mt-1 text-xl font-black text-[#942E3A]">COD</p>
-            </div>
+          <div className="bg-white border border-[#942E3A]/25 rounded-xl sm:rounded-2xl p-2 sm:p-5 text-center space-y-0.5 shadow-xs">
+            <CreditCard className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-[#D8B46A] mx-auto" />
+            <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-[#942E3A]/70">Payment Method</span>
+            <p className="text-xs sm:text-2xl font-black text-[#942E3A]">Cash on Delivery</p>
           </div>
+        </div>
+
+        {/* Interactive Shipping Rate Search Calculator */}
+        <section className="bg-white border border-[#942E3A]/30 rounded-xl sm:rounded-3xl p-3 sm:p-6 shadow-xs space-y-2.5 sm:space-y-4">
+          <div className="flex items-center justify-between gap-1">
+            <div className="flex items-center gap-1.5">
+              <Truck className="w-4 h-4 text-[#942E3A] shrink-0" />
+              <h2 className="text-xs sm:text-lg font-bold font-playfair text-[#942E3A]">
+                Check Shipping Fee to Your Area
+              </h2>
+            </div>
+            <span className="text-[9px] sm:text-[10px] text-stone-400">Search city or gov</span>
+          </div>
+
+          {/* Search Bar Input */}
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 w-3.5 h-3.5 -translate-y-1/2 text-[#942E3A]" />
+            <input
+              type="text"
+              value={shippingSearch}
+              onChange={(e) => setShippingSearch(e.target.value)}
+              placeholder="Search your city or governorate (Cairo, Tanta, Mansoura, Alex)..."
+              className="w-full pl-8 pr-8 py-2 sm:py-2.5 rounded-xl border border-[#942E3A]/30 bg-[#FFF9EB]/40 text-[11px] sm:text-xs text-[#942E3A] outline-none focus:border-[#942E3A] focus:ring-1 focus:ring-[#942E3A]"
+            />
+            {shippingSearch && (
+              <button
+                onClick={() => setShippingSearch("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-[#942E3A]"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Search Results / Popular Tags */}
+          {shippingSearch.trim() ? (
+            <div className="space-y-1.5 pt-0.5">
+              {searchResults.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
+                  {searchResults.map((res, i) => (
+                    <div
+                      key={`${res.label}-${i}`}
+                      className="flex items-center justify-between p-2 sm:p-3 rounded-lg sm:rounded-xl border border-[#942E3A]/20 bg-[#FFF9EB]/30 hover:border-[#942E3A] transition-colors"
+                    >
+                      <div>
+                        <p className="text-[11px] sm:text-xs font-bold text-[#942E3A]">{res.label}</p>
+                        <p className="text-[9px] text-stone-500">
+                          {res.isCity ? `City · ${res.governorate}` : "Governorate"}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="block text-xs sm:text-sm font-black text-[#942E3A]">{formatCurrency(res.fee)}</span>
+                        <span className="text-[8px] sm:text-[9px] text-emerald-600 font-semibold">
+                          {res.governorate === "Cairo" || res.governorate === "Giza" ? "24–48 hrs" : "2–4 days"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-[11px] text-stone-400 py-2">
+                  No governorate or city found matching "{shippingSearch}".
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-1 pt-0.5">
+              <p className="text-[9px] font-semibold text-stone-400 uppercase tracking-wider">Popular Destinations:</p>
+              <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                {popularGovs.map((gov) => (
+                  <button
+                    key={gov}
+                    onClick={() => setShippingSearch(gov)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#942E3A]/20 bg-[#FFF9EB]/40 hover:bg-[#942E3A] hover:text-white text-[10px] sm:text-[11px] font-bold text-[#942E3A] transition-all"
+                  >
+                    <span>{gov}</span>
+                    <span className="text-[9px] opacity-80">({formatCurrency(GOVERNORATE_FEES[gov])})</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          {shippingSteps.map((step) => (
-            <div key={step.title} className="rounded-2xl border border-[#942E3A]/25 bg-white p-6 shadow-xs">
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF9EB] text-[#942E3A]">
-                <step.icon className="h-5 w-5" />
+        {/* Shipping Steps Horizontal - 3 Columns Side-by-Side on mobile! */}
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
+          {shippingSteps.map((step, idx) => (
+            <div key={step.title} className="bg-white border border-[#942E3A]/25 rounded-xl sm:rounded-2xl p-2 sm:p-4 space-y-0.5 sm:space-y-1 shadow-xs">
+              <div className="flex items-center justify-between">
+                <div className="w-5 h-5 sm:w-8 sm:h-8 rounded-full bg-[#FFF9EB] text-[#942E3A] flex items-center justify-center font-bold text-[9px] sm:text-xs">
+                  <step.icon className="w-3 h-3 sm:w-4 sm:h-4" />
+                </div>
+                <span className="text-[8px] sm:text-[10px] font-bold text-[#D8B46A]">0{idx + 1}</span>
               </div>
-              <h2 className="font-playfair text-lg font-bold text-[#942E3A]">{step.title}</h2>
-              <p className="mt-2 text-xs font-light leading-relaxed text-[#6B1F2A]">{step.text}</p>
+              <h3 className="text-[10px] sm:text-sm font-bold font-playfair text-[#942E3A] truncate">{step.title}</h3>
+              <p className="text-[9px] sm:text-xs text-[#6B1F2A] font-light leading-snug line-clamp-2">{step.text}</p>
             </div>
           ))}
-        </section>
+        </div>
 
-        <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-3xl border border-[#942E3A]/30 bg-[#942E3A] p-6 text-[#FFF9EB] shadow-lg sm:p-8">
-            <MapPin className="mb-4 h-6 w-6 text-[#D8B46A]" />
-            <h2 className="font-playfair text-2xl font-extrabold">Shipping Notes</h2>
-            <p className="mt-3 text-sm font-light leading-relaxed text-[#FFF9EB]/85">
-              Delivery timing can change based on governorate, courier capacity, holidays, and confirmation speed. Cairo and Mansoura orders are usually prioritized when stock is available locally.
-            </p>
+        {/* Detailed Sections Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-8">
+          
+          <div className="md:col-span-5 bg-[#942E3A] rounded-xl sm:rounded-3xl p-3 sm:p-8 text-[#FFF9EB] space-y-2.5 sm:space-y-4 shadow-md flex flex-col justify-between">
+            <div className="space-y-1 sm:space-y-3">
+              <MapPin className="w-4 h-4 sm:w-6 sm:h-6 text-[#D8B46A]" />
+              <h2 className="text-sm sm:text-xl font-extrabold font-playfair">Shipping Notes</h2>
+              <p className="text-[10px] sm:text-xs font-light leading-relaxed text-[#FFF9EB]/85">
+                Deliveries to Greater Cairo take 24–48 hours. Express shipping applies across all governorates with door inspection permitted upon arrival.
+              </p>
+            </div>
+
             <Link
               href="/track"
-              className="mt-6 inline-flex items-center rounded-full bg-[#FFF9EB] px-5 py-2.5 text-xs font-bold text-[#942E3A] transition-colors hover:bg-white"
+              className="inline-flex items-center justify-center gap-1 rounded-full bg-[#FFF9EB] px-3.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-bold text-[#942E3A] hover:bg-white transition-colors w-fit"
             >
-              Track an Order
+              <span>Track Active Order</span>
+              <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </Link>
           </div>
 
-          <div className="rounded-3xl border border-[#942E3A]/30 bg-white p-6 shadow-xs sm:p-8">
-            <h2 className="font-playfair text-2xl font-extrabold text-[#942E3A]">Terms of Service</h2>
-            <p className="mt-2 text-xs text-stone-500">Last Updated: July 2026</p>
-            <ul className="mt-6 space-y-3 text-sm font-light leading-relaxed text-[#6B1F2A]">
-              {terms.map((term) => (
-                <li key={term} className="flex gap-3">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#D8B46A]" />
+          <div className="md:col-span-7 bg-white border border-[#942E3A]/30 rounded-xl sm:rounded-3xl p-3 sm:p-8 space-y-1.5 sm:space-y-4 shadow-xs">
+            <h2 className="text-sm sm:text-xl font-extrabold font-playfair text-[#942E3A]">Terms of Service</h2>
+            <ul className="space-y-1 sm:space-y-2.5 text-[10px] sm:text-xs text-[#6B1F2A] font-light leading-relaxed">
+              {terms.map((term, i) => (
+                <li key={i} className="flex gap-1.5">
+                  <span className="mt-1 w-1.5 h-1.5 shrink-0 rounded-full bg-[#D8B46A]" />
                   <span>{term}</span>
                 </li>
               ))}
             </ul>
           </div>
-        </section>
+
+        </div>
+
       </div>
     </div>
   );

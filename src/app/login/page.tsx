@@ -6,6 +6,8 @@ import Link from "next/link";
 import { ArrowLeft, User, Lock, Mail, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
+import { loginCustomerAction, registerCustomerAction } from "@/app/auth-actions";
+
 export default function LoginPage() {
   const router = useRouter();
   const [isRegister, setIsRegister] = useState(false);
@@ -30,21 +32,28 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    // Simulate auth request delay
-    setTimeout(() => {
+    try {
+      const res = isRegister
+        ? await registerCustomerAction({ email, password, name: fullName })
+        : await loginCustomerAction({ email, password });
+
       setIsLoading(false);
+
+      if (!res.success) {
+        setError(res.error || "Authentication failed.");
+        return;
+      }
+
       localStorage.setItem("isLoggedIn", "true");
-      
-      // Set customer info
-      const nameToSave = isRegister ? fullName : (localStorage.getItem("customerName") || "Farida Ahmed");
-      localStorage.setItem("customerName", nameToSave);
-      localStorage.setItem("customerEmail", email);
-      
-      // Dispatch event to update navbar instantly
+      if (res.user?.name) localStorage.setItem("customerName", res.user.name);
+      if (res.user?.email) localStorage.setItem("customerEmail", res.user.email);
+
       window.dispatchEvent(new Event("auth-change"));
-      
-      router.push("/profile");
-    }, 1200);
+      router.push(isRegister ? "/profile?from=register" : "/profile?from=login");
+    } catch {
+      setIsLoading(false);
+      setError("An unexpected error occurred. Please try again.");
+    }
   };
 
   return (

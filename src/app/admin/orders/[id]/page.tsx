@@ -12,6 +12,7 @@ import { requireAdmin } from "@/lib/adminAuth";
 import { formatCurrency } from "@/lib/utils";
 import AdminPrintButton from "@/components/AdminPrintButton";
 import AdminStatusSelect from "@/components/AdminStatusSelect";
+import AdminBackButton from "@/components/AdminBackButton";
 import AdminCopyButton from "@/components/AdminCopyButton";
 
 const statusMessages: Record<string, string> = {
@@ -62,12 +63,7 @@ export default async function AdminOrderDetailsPage({
     <div className="mx-auto max-w-5xl space-y-5 print:max-w-none">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
-          <Link
-            href="/admin/orders"
-            className="rounded-xl border border-[#942E3A]/15 bg-white p-2 text-[#942E3A] print:hidden"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
+          <AdminBackButton fallbackHref="/admin/orders" />
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
               Order details

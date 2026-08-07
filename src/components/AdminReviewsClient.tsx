@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, CheckCircle2, ChevronDown, MessageSquareQuote, Pencil, Plus, Search, Star, Trash2, X } from "lucide-react";
-import { createReviewAction, deleteReviewAction, updateReviewAction, updateReviewStatusAction } from "@/app/admin/reviews/actions";
+import { Check, CheckCircle2, ChevronDown, Home, MessageSquareQuote, Pencil, Plus, Search, Star, Trash2, X } from "lucide-react";
+import { createReviewAction, deleteReviewAction, updateReviewAction, updateReviewStatusAction, toggleShowOnHomeAction } from "@/app/admin/reviews/actions";
 
 type Product = { id: string; name: string; images: string[]; category: string };
-type Review = { id: string; productId: string; customerName: string; customerPhone: string | null; rating: number; title: string | null; body: string; status: string; verifiedPurchase: boolean; createdAt: string; updatedAt: string; product: Product };
+type Review = { id: string; productId: string; customerName: string; customerPhone: string | null; rating: number; title: string | null; body: string; status: string; verifiedPurchase: boolean; showOnHome?: boolean; createdAt: string; updatedAt: string; product: Product };
 
 const statusStyles: Record<string, string> = { approved: "bg-[#e7f4ec] text-[#27663d]", pending: "bg-[#fff3d8] text-[#9a6a18]", rejected: "bg-[#fae9e8] text-[#a33b43]" };
 
@@ -65,7 +65,10 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
         <div><label className="field-label">Customer name</label><input name="customerName" required defaultValue={review?.customerName} placeholder="e.g. Nour Mohamed" className="field-input" /></div>
         <div className="grid gap-4 sm:grid-cols-2"><div><label className="field-label">Rating</label><RatingPicker value={rating} onChange={setRating} /></div><input type="hidden" name="status" value={review?.status || "approved"} /></div>
         <div><label className="field-label">Review</label><textarea name="body" required defaultValue={review?.body} placeholder="Write the customer's experience..." rows={4} className="field-input resize-none" /></div>
-        <label className="group flex cursor-pointer items-center gap-2.5 text-xs font-semibold text-[#6B1F2A]/75"><input type="checkbox" name="verifiedPurchase" defaultChecked={review?.verifiedPurchase} className="review-checkbox sr-only" /><span className="review-checkbox-box flex h-5 w-5 items-center justify-center rounded-md border border-[#942E3A]/20 bg-white transition group-hover:border-[#D8B46A]"><Check className="review-checkbox-icon h-3.5 w-3.5 text-[#fff9eb]" /></span> Verified purchase</label>
+        <div className="flex flex-wrap gap-5 pt-1">
+          <label className="group flex cursor-pointer items-center gap-2.5 text-xs font-semibold text-[#6B1F2A]/75"><input type="checkbox" name="verifiedPurchase" defaultChecked={review?.verifiedPurchase} className="review-checkbox sr-only" /><span className="review-checkbox-box flex h-5 w-5 items-center justify-center rounded-md border border-[#942E3A]/20 bg-white transition group-hover:border-[#D8B46A]"><Check className="review-checkbox-icon h-3.5 w-3.5 text-[#fff9eb]" /></span> Verified purchase</label>
+          <label className="group flex cursor-pointer items-center gap-2.5 text-xs font-semibold text-[#942E3A]"><input type="checkbox" name="showOnHome" defaultChecked={review?.showOnHome} className="review-checkbox sr-only" /><span className="review-checkbox-box flex h-5 w-5 items-center justify-center rounded-md border border-[#942E3A]/30 bg-white transition group-hover:border-[#D8B46A]"><Check className="review-checkbox-icon h-3.5 w-3.5 text-[#fff9eb]" /></span> Show on Home Page</label>
+        </div>
         <div className="flex justify-end gap-2 border-t border-[#942E3A]/10 pt-5"><button type="button" onClick={onClose} className="rounded-xl px-4 py-2.5 text-xs font-bold text-[#942E3A]/70 hover:bg-[#942E3A]/6">Cancel</button><button className="rounded-xl bg-[#942E3A] px-5 py-2.5 text-xs font-bold text-[#fff9eb] shadow-sm hover:bg-[#7e2531]">{review ? "Save changes" : "Add review"}</button></div>
       </form>
     </div>
@@ -74,18 +77,74 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
 
 export default function AdminReviewsClient({ reviews, products }: { reviews: Review[]; products: Product[] }) {
   const [filter, setFilter] = useState("all");
+  const [scopeFilter, setScopeFilter] = useState<"all" | "home">("all");
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<Review | undefined>();
   const [adding, setAdding] = useState(false);
-  const filtered = useMemo(() => reviews.filter((review) => (filter === "all" || review.status === filter) && `${review.customerName} ${review.product.name} ${review.body}`.toLowerCase().includes(query.toLowerCase())), [reviews, filter, query]);
+
+  const filtered = useMemo(() => reviews.filter((review) => {
+    const matchesScope = scopeFilter === "all" || review.showOnHome === true;
+    const matchesStatus = filter === "all" || review.status === filter;
+    const matchesQuery = `${review.customerName} ${review.product.name} ${review.body}`.toLowerCase().includes(query.toLowerCase());
+    return matchesScope && matchesStatus && matchesQuery;
+  }), [reviews, scopeFilter, filter, query]);
+
   const approved = reviews.filter((review) => review.status === "approved");
   const average = reviews.length ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1) : "0.0";
   const pending = reviews.filter((review) => review.status === "pending").length;
+  const homeCount = reviews.filter((review) => review.showOnHome).length;
+
   return <div className="space-y-7">
     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">Customer voice · reviews</p><h1 className="mt-2 font-playfair text-4xl font-black tracking-tight text-[#942E3A]">Reviews</h1><p className="mt-2 max-w-xl text-sm text-[#6B1F2A]/60">Keep a pulse on what customers love, and curate every story before it reaches your storefront.</p></div><button onClick={() => setAdding(true)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#942E3A] px-4 py-3 text-xs font-bold text-[#fff9eb] shadow-lg shadow-[#942E3A]/15 hover:bg-[#7e2531]"><Plus className="h-4 w-4" /> Add review</button></div>
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><div className="stat-card"><span className="stat-icon bg-[#fff1d4] text-[#bc812b]"><MessageSquareQuote className="h-4 w-4" /></span><div><p className="stat-label">Total reviews</p><p className="stat-value">{reviews.length}</p></div></div><div className="stat-card"><span className="stat-icon bg-[#fbe8e8] text-[#942E3A]"><Star className="h-4 w-4 fill-current" /></span><div><p className="stat-label">Average rating</p><p className="stat-value">{average}<span className="ml-1 text-sm font-normal text-[#942E3A]/45">/ 5</span></p></div></div><div className="stat-card"><span className="stat-icon bg-[#e7f4ec] text-[#27663d]"><CheckCircle2 className="h-4 w-4" /></span><div><p className="stat-label">Published</p><p className="stat-value">{approved.length}</p></div></div><div className="stat-card"><span className="stat-icon bg-[#fff3d8] text-[#9a6a18]"><MessageSquareQuote className="h-4 w-4" /></span><div><p className="stat-label">Awaiting review</p><p className="stat-value">{pending}</p></div></div></div>
-    <section className="rounded-[28px] border border-[#942E3A]/10 bg-white/80 p-4 shadow-sm sm:p-6"><div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center"><div><div className="flex items-center gap-2"><MessageSquareQuote className="h-5 w-5 text-[#D8B46A]" /><h2 className="font-playfair text-2xl font-bold text-[#942E3A]">Review inbox</h2></div><p className="mt-1 text-xs text-[#6B1F2A]/55">{filtered.length} {filtered.length === 1 ? "review" : "reviews"} in your workspace</p></div><div className="flex flex-col gap-2 sm:flex-row"><div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#942E3A]/40" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search reviews..." className="h-9 w-full rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] pl-9 pr-3 text-xs outline-none focus:border-[#D8B46A] sm:w-52" /></div><div className="flex rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] p-0.5">{[["all", "All"], ["pending", "Pending"], ["approved", "Published"]].map(([value, label]) => <button key={value} onClick={() => setFilter(value)} className={`rounded-lg px-3 py-2 text-[10px] font-bold transition ${filter === value ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"}`}>{label}</button>)}</div></div></div>
-      <div className="mt-6 grid gap-3 xl:grid-cols-2">{filtered.map((review) => <article key={review.id} className="group relative rounded-2xl border border-[#942E3A]/10 bg-[#fffdf8] p-4 transition hover:border-[#D8B46A]/70 hover:shadow-md sm:p-5"><div className="flex gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-lg font-bold text-[#fff9eb]">{review.customerName.charAt(0).toUpperCase()}</div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-x-2 gap-y-1"><h3 className="font-playfair text-base font-bold text-[#942E3A]">{review.customerName}</h3><span className="text-[#D8B46A]">·</span><Stars rating={review.rating} /></div><div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[#6B1F2A]/55"><span className="truncate font-semibold text-[#942E3A]/75">{review.product.name}</span><span>·</span><span>{new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>{review.verifiedPurchase && <span className="inline-flex items-center gap-1 font-bold text-[#27663d]"><Check className="h-3 w-3" /> Verified</span>}</div></div><span className={`h-fit rounded-full px-2.5 py-1 text-[9px] font-bold capitalize ${statusStyles[review.status] || statusStyles.pending}`}>{review.status === "approved" ? "Published" : review.status}</span></div><p className="mt-3 text-xs leading-6 text-[#6B1F2A]/75">{review.body}</p><div className="mt-4 flex items-center justify-between border-t border-[#942E3A]/8 pt-3"><form action={updateReviewStatusAction} className="flex items-center gap-2"><input type="hidden" name="id" value={review.id} /><StatusPicker value={review.status} /></form><div className="flex items-center gap-1"><button onClick={() => setEditing(review)} className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-[#942E3A]/70 hover:bg-[#942E3A]/8 hover:text-[#942E3A]"><Pencil className="h-3 w-3" /> Edit</button><form action={deleteReviewAction}><input type="hidden" name="id" value={review.id} /><button className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-[#a33b43]/70 hover:bg-[#fae9e8] hover:text-[#a33b43]" onClick={(event) => { if (!window.confirm("Delete this review permanently?")) event.preventDefault(); }}><Trash2 className="h-3 w-3" /> Delete</button></form></div></div></article>)}{filtered.length === 0 && <div className="col-span-full rounded-2xl border border-dashed border-[#942E3A]/15 py-16 text-center"><MessageSquareQuote className="mx-auto h-8 w-8 text-[#D8B46A]" /><p className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">No reviews found</p><p className="mt-1 text-xs text-[#6B1F2A]/55">Try another filter or add the first review.</p></div>}</div>
+    <section className="rounded-[28px] border border-[#942E3A]/10 bg-white/80 p-4 shadow-sm sm:p-6">
+      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+        <div>
+          <div className="flex items-center gap-2">
+            <MessageSquareQuote className="h-5 w-5 text-[#D8B46A]" />
+            <h2 className="font-playfair text-2xl font-bold text-[#942E3A]">Review inbox</h2>
+          </div>
+          <p className="mt-1 text-xs text-[#6B1F2A]/55">{filtered.length} {filtered.length === 1 ? "review" : "reviews"} in your workspace</p>
+        </div>
+
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+          {/* Scope Filter Tabs: All vs Home Page */}
+          <div className="flex rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] p-0.5">
+            <button
+              type="button"
+              onClick={() => setScopeFilter("all")}
+              className={`rounded-lg px-3 py-2 text-[10px] font-bold transition ${
+                scopeFilter === "all" ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"
+              }`}
+            >
+              All Reviews
+            </button>
+            <button
+              type="button"
+              onClick={() => setScopeFilter("home")}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-bold transition ${
+                scopeFilter === "home" ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"
+              }`}
+            >
+              <Home className="h-3 w-3" />
+              <span>Home Page Reviews ({homeCount})</span>
+            </button>
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#942E3A]/40" />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search reviews..." className="h-9 w-full rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] pl-9 pr-3 text-xs outline-none focus:border-[#D8B46A] sm:w-48" />
+          </div>
+
+          <div className="flex rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] p-0.5">
+            {[["all", "All"], ["pending", "Pending"], ["approved", "Published"]].map(([value, label]) => (
+              <button key={value} onClick={() => setFilter(value)} className={`rounded-lg px-3 py-2 text-[10px] font-bold transition ${filter === value ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"}`}>{label}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-3 xl:grid-cols-2">{filtered.map((review) => <article key={review.id} className="group relative rounded-2xl border border-[#942E3A]/10 bg-[#fffdf8] p-4 transition hover:border-[#D8B46A]/70 hover:shadow-md sm:p-5"><div className="flex gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-lg font-bold text-[#fff9eb]">{review.customerName.charAt(0).toUpperCase()}</div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-x-2 gap-y-1"><h3 className="font-playfair text-base font-bold text-[#942E3A]">{review.customerName}</h3><span className="text-[#D8B46A]">·</span><Stars rating={review.rating} /></div><div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[#6B1F2A]/55"><span className="truncate font-semibold text-[#942E3A]/75">{review.product.name}</span><span>·</span><span>{new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>{review.verifiedPurchase && <span className="inline-flex items-center gap-1 font-bold text-[#27663d]"><Check className="h-3 w-3" /> Verified</span>}</div></div><span className={`h-fit rounded-full px-2.5 py-1 text-[9px] font-bold capitalize ${statusStyles[review.status] || statusStyles.pending}`}>{review.status === "approved" ? "Published" : review.status}</span></div><p className="mt-3 text-xs leading-6 text-[#6B1F2A]/75">{review.body}</p><div className="mt-4 flex items-center justify-between border-t border-[#942E3A]/8 pt-3"><div className="flex items-center gap-2.5"><form action={updateReviewStatusAction} className="flex items-center gap-2"><input type="hidden" name="id" value={review.id} /><StatusPicker value={review.status} /></form><form action={toggleShowOnHomeAction} className="flex items-center"><input type="hidden" name="id" value={review.id} /><input type="hidden" name="showOnHome" value={String(!review.showOnHome)} /><button type="submit" className={`inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[10px] font-bold transition ${review.showOnHome ? "border-[#942E3A] bg-[#942E3A] text-white shadow-xs" : "border-[#942E3A]/20 bg-white text-[#942E3A]/70 hover:border-[#942E3A]"}`} title="Toggle show on Home Page"><Home className="h-3 w-3" /><span>Home Page</span><span className={`h-2 w-2 rounded-full ${review.showOnHome ? "bg-[#D8B46A]" : "bg-stone-300"}`} /></button></form></div><div className="flex items-center gap-1"><button onClick={() => setEditing(review)} className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-[#942E3A]/70 hover:bg-[#942E3A]/8 hover:text-[#942E3A]"><Pencil className="h-3 w-3" /> Edit</button><form action={deleteReviewAction}><input type="hidden" name="id" value={review.id} /><button className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-[#a33b43]/70 hover:bg-[#fae9e8] hover:text-[#a33b43]" onClick={(event) => { if (!window.confirm("Delete this review permanently?")) event.preventDefault(); }}><Trash2 className="h-3 w-3" /> Delete</button></form></div></div></article>)}{filtered.length === 0 && <div className="col-span-full rounded-2xl border border-dashed border-[#942E3A]/15 py-16 text-center"><MessageSquareQuote className="mx-auto h-8 w-8 text-[#D8B46A]" /><p className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">No reviews found</p><p className="mt-1 text-xs text-[#6B1F2A]/55">Try another filter or add the first review.</p></div>}</div>
     </section>
     {(adding || editing) && <ReviewForm review={editing} products={products} onClose={() => { setAdding(false); setEditing(undefined); }} />}
   </div>;

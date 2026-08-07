@@ -709,6 +709,12 @@ h6 {
   width: 100%;
 }
 
+.pdp-gallery {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .pdp-details {
   text-align: center;
   align-items: center;
@@ -751,9 +757,13 @@ h6 {
 @media (min-width: 1024px) {
   .pdp-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 540px) minmax(0, 1fr);
     gap: 48px;
     align-items: start;
+  }
+
+  .pdp-gallery {
+    max-width: 540px;
   }
 
   .pdp-details {

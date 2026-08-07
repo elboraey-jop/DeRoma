@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import AdminProductCreateForm from "@/components/AdminProductCreateForm";
 import AdminAddProductModal from "@/components/AdminAddProductModal";
+import AdminBackButton from "@/components/AdminBackButton";
 import { deleteProductAction } from "@/app/admin/products/[id]/actions";
 
 export const dynamic = "force-dynamic";
@@ -105,12 +106,7 @@ export default async function EditProductPage({
   return (
     <div className="mx-auto max-w-6xl space-y-5">
       <div className="flex items-center gap-3">
-        <Link
-          href="/admin/products"
-          className="rounded-xl border border-[#942E3A]/15 bg-white p-2 text-[#942E3A]"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
+        <AdminBackButton fallbackHref="/admin/products" />
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
             Catalog management

@@ -327,14 +327,58 @@ export function TrackSkeleton() {
 
 export function ProfileSkeleton() {
   return (
-    <div className="min-h-[70vh] bg-[#FFF9EB] px-4 py-10 sm:px-6 sm:py-16" dir="ltr">
-      <div className="mx-auto max-w-5xl animate-pulse space-y-6">
-        <div className="h-10 w-48 rounded bg-[#942E3A]/20" />
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          <div className="h-64 rounded-3xl bg-white" />
-          <div className="space-y-4 rounded-3xl bg-white p-6">
-            <div className="h-6 w-40 rounded bg-[#942E3A]/15" />
-            {[1, 2, 3, 4].map((i) => <div key={i} className="h-14 rounded-2xl bg-[#942E3A]/10" />)}
+    <div className="min-h-screen bg-[#FFF9EB] py-12 px-4 sm:px-6 lg:px-8" dir="ltr">
+      <div className="max-w-[1000px] mx-auto space-y-10 animate-pulse">
+        {/* Navigation & Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="h-4 w-28 rounded bg-[#942E3A]/20" />
+          <div className="h-8 w-24 rounded-full bg-[#942E3A]/15" />
+        </div>
+
+        {/* Heading */}
+        <div className="space-y-2">
+          <div className="h-3 w-28 rounded bg-[#942E3A]/20" />
+          <div className="h-9 w-64 rounded bg-[#942E3A]/30" />
+        </div>
+
+        {/* Dashboard Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1 rounded-3xl border border-[#942E3A]/20 bg-[#FFF9EB]/20 p-6 space-y-5">
+            <div className="h-5 w-32 rounded bg-[#942E3A]/20 pb-3 border-b border-[#942E3A]/10" />
+            <div className="space-y-4 pt-1">
+              <div className="space-y-1.5">
+                <div className="h-2.5 w-16 rounded bg-stone-300" />
+                <div className="h-4 w-3/4 rounded bg-[#942E3A]/15" />
+              </div>
+              <div className="space-y-1.5">
+                <div className="h-2.5 w-20 rounded bg-stone-300" />
+                <div className="h-4 w-full rounded bg-[#942E3A]/15" />
+              </div>
+              <div className="space-y-1.5">
+                <div className="h-2.5 w-24 rounded bg-stone-300" />
+                <div className="h-4 w-2/3 rounded bg-[#942E3A]/15" />
+              </div>
+              <div className="space-y-1.5">
+                <div className="h-2.5 w-28 rounded bg-stone-300" />
+                <div className="h-4 w-5/6 rounded bg-[#942E3A]/15" />
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-2 rounded-3xl border border-[#942E3A]/20 bg-[#FFF9EB]/20 p-6 space-y-5">
+            <div className="h-5 w-36 rounded bg-[#942E3A]/20 pb-3 border-b border-[#942E3A]/10" />
+            <div className="space-y-4 pt-1">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-28 rounded-2xl bg-white border border-[#942E3A]/15 p-5 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div className="h-4 w-24 rounded bg-[#942E3A]/20" />
+                    <div className="h-4 w-20 rounded-full bg-[#942E3A]/10" />
+                  </div>
+                  <div className="h-3 w-1/2 rounded bg-[#942E3A]/10" />
+                  <div className="h-4 w-1/3 rounded bg-[#942E3A]/15 pt-2" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

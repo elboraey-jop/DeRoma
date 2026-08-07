@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useTransition, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import AdminBackButton from "@/components/AdminBackButton";
 import {
   ArrowLeft,
   Search,
@@ -274,17 +274,13 @@ export default function AdminNewAuditClient({
       {/* Standard Admin Header & Back Button */}
       <div className="flex flex-col gap-4 border-b border-[#942E3A]/10 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            href={
+          <AdminBackButton
+            fallbackHref={
               isScopedCategory
                 ? `/admin/inventory/category/${initialCatParam.toLowerCase()}`
                 : "/admin/inventory/audits"
             }
-            className="rounded-xl border border-[#942E3A]/15 bg-white p-2.5 text-[#942E3A] transition hover:border-[#D8B46A] shadow-sm shrink-0"
-            aria-label="Back"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
+          />
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#942E3A] text-[#FFF9EB] shadow-md">
               <Sparkles className="h-5 w-5 text-[#D8B46A]" />

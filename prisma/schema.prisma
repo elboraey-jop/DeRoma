@@ -293,6 +293,7 @@ model Review {
   body             String
   status           String   @default("pending") // pending, approved, rejected
   verifiedPurchase Boolean  @default(false)
+  showOnHome       Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -331,4 +332,44 @@ model StockAuditItem {
   unitPrice     Decimal        @default(0)
   notes         String?
 }
+
+model SiteSettings {
+  id                   String   @id @default("default")
+  phone                String   @default("+20 102 345 6789")
+  whatsapp             String   @default("201023456789")
+  email                String   @default("support@deromastore.com")
+  instagram            String   @default("https://instagram.com")
+  facebook             String   @default("https://facebook.com")
+  tiktok               String   @default("https://tiktok.com")
+  address              String   @default("Samanoud, Gharbia Governorate, Egypt")
+  hours                String   @default("24/7 Available All Day")
+
+  aboutTitle           String   @default("The DeRoma Story")
+  aboutParagraph1      String   @default("Founded on the belief that athletic footwear can be as elegant as it is functional, DeRoma has redefined women's sports sneakers. By bringing together artisanal craftsmanship and athletic research, we offer silhouettes that shift smoothly from early workouts to active street steps.")
+  aboutParagraph2      String   @default("Our sneakers feature meticulously selected premium imported leathers, dynamic arch supports, and ultra-lightweight cushioned soles to ensure maximum wearability.")
+  aboutImage           String   @default("/products/deroma-new-balance-9060-pastel-pink.png")
+
+  heroBanners          Json     @default("[]")
+  homeReviews          Json     @default("[]")
+  forYouProductIds     String[] @default([])
+  bestSellerProductIds String[] @default([])
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String
+  message   String
+  status    String   @default("unread") // "unread", "read", "archived"
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+
 
