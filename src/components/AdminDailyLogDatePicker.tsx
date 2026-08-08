@@ -249,12 +249,12 @@ export default function AdminDailyLogDatePicker({
       <button
         type="button"
         onClick={() => setIsDropdownOpen((prev) => !prev)}
-        className="group flex items-center gap-2.5 rounded-2xl border border-[#942E3A]/20 bg-white px-4 py-2.5 text-xs font-semibold text-[#942E3A] shadow-sm transition hover:border-[#942E3A]/40 hover:bg-[#FFF9EB] focus:outline-none focus:ring-2 focus:ring-[#D8B46A]/30"
+        className="group flex items-center gap-1.5 sm:gap-2.5 rounded-xl sm:rounded-2xl border border-[#942E3A]/20 bg-white px-2.5 py-1.5 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-[#942E3A] shadow-xs transition hover:border-[#942E3A]/40 hover:bg-[#FFF9EB] focus:outline-none focus:ring-2 focus:ring-[#D8B46A]/30 shrink-0"
       >
-        <Calendar className="h-4 w-4 text-[#D8B46A] transition-transform group-hover:scale-110" />
-        <span className="font-bold text-[#942E3A]">{currentLabel}</span>
+        <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#D8B46A] transition-transform group-hover:scale-110 shrink-0" />
+        <span className="font-bold text-[#942E3A] truncate">{currentLabel}</span>
         <ChevronDown
-          className={`h-4 w-4 text-[#D8B46A] transition-transform duration-200 ${
+          className={`h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#D8B46A] transition-transform duration-200 shrink-0 ${
             isDropdownOpen ? "rotate-180" : ""
           }`}
         />

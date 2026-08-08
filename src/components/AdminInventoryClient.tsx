@@ -585,15 +585,15 @@ export default function AdminInventoryClient({
     <div className="space-y-6">
       {/* Page Header */}
       {!hideHeader && (
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
+            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
               Operations
             </p>
-            <h1 className="mt-1 font-playfair text-3xl font-black text-[#942E3A]">
+            <h1 className="mt-0.5 sm:mt-1 font-playfair text-2xl sm:text-3xl font-black text-[#942E3A]">
               Inventory Management
             </h1>
-            <p className="mt-1 text-xs text-[#6B1F2A]/65">
+            <p className="mt-1 hidden sm:block text-xs text-[#6B1F2A]/65">
               Monitor variant-level stock, run category audits, and perform bulk restocks.
             </p>
           </div>
@@ -601,9 +601,9 @@ export default function AdminInventoryClient({
           {/* Stock Audits Button */}
           <Link
             href="/admin/inventory/audits"
-            className="flex items-center gap-2 rounded-2xl bg-[#942E3A] px-5 py-2.5 text-xs font-bold text-[#FFF9EB] shadow-md transition hover:bg-[#802832] active:scale-95"
+            className="flex items-center gap-1.5 rounded-xl sm:rounded-2xl bg-[#942E3A] px-3 py-2 sm:px-5 sm:py-2.5 text-[11px] sm:text-xs font-bold text-[#FFF9EB] shadow-xs transition hover:bg-[#802832] shrink-0"
           >
-            <ClipboardList className="h-4 w-4 text-[#D8B46A]" />
+            <ClipboardList className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#D8B46A]" />
             <span>Stock Audits</span>
           </Link>
         </div>
@@ -611,39 +611,39 @@ export default function AdminInventoryClient({
 
       {/* KPI General Stats Grid */}
       {!hideHeader && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-          <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          <div className="rounded-xl sm:rounded-2xl border border-[#942E3A]/10 bg-white p-2.5 sm:p-4 shadow-xs">
+            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
               Total Products
             </p>
-            <p className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
+            <p className="mt-0.5 sm:mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A]">
               {totalProducts}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55">
+          <div className="rounded-xl sm:rounded-2xl border border-[#942E3A]/10 bg-white p-2.5 sm:p-4 shadow-xs">
+            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
               Total Variants
             </p>
-            <p className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
+            <p className="mt-0.5 sm:mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A]">
               {totalVariants}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55">
+          <div className="rounded-xl sm:rounded-2xl border border-[#942E3A]/10 bg-white p-2.5 sm:p-4 shadow-xs">
+            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
               Units in Stock
             </p>
-            <p className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
+            <p className="mt-0.5 sm:mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A]">
               {totalUnits.toLocaleString("en-US")}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#D8B46A]/40 bg-[#fff7df] p-4 shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55">
+          <div className="rounded-xl sm:rounded-2xl border border-[#D8B46A]/40 bg-[#fff7df] p-2.5 sm:p-4 shadow-xs">
+            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
               Stock Valuation
             </p>
-            <p className="mt-1 font-playfair text-xl font-black text-[#942E3A]">
+            <p className="mt-0.5 sm:mt-1 font-playfair text-base sm:text-xl font-black text-[#942E3A] truncate">
               {formatCurrency(totalValue)}
             </p>
           </div>
@@ -651,19 +651,19 @@ export default function AdminInventoryClient({
           <button
             type="button"
             onClick={() => setStatusFilter(statusFilter === "low" ? "all" : "low")}
-            className={`rounded-2xl border p-4 text-left shadow-sm transition ${
+            className={`rounded-xl sm:rounded-2xl border p-2.5 sm:p-4 text-left shadow-xs transition ${
               statusFilter === "low"
                 ? "border-[#D8B46A] bg-[#FFF9EB] ring-2 ring-[#D8B46A]/40"
                 : "border-[#D8B46A]/30 bg-white hover:bg-[#FFF9EB]/50"
             }`}
           >
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55">
+              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
                 Low Stock
               </p>
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500 shrink-0" />
             </div>
-            <p className="mt-1 font-playfair text-2xl font-black text-amber-700">
+            <p className="mt-0.5 sm:mt-1 font-playfair text-xl sm:text-2xl font-black text-amber-700">
               {lowStockCount}
             </p>
           </button>
@@ -671,19 +671,19 @@ export default function AdminInventoryClient({
           <button
             type="button"
             onClick={() => setStatusFilter(statusFilter === "out" ? "all" : "out")}
-            className={`rounded-2xl border p-4 text-left shadow-sm transition ${
+            className={`rounded-xl sm:rounded-2xl border p-2.5 sm:p-4 text-left shadow-xs transition ${
               statusFilter === "out"
                 ? "border-rose-300 bg-rose-50/90 ring-2 ring-rose-300"
                 : "border-rose-200 bg-rose-50/50 hover:bg-rose-50"
             }`}
           >
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-rose-700/65">
+              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-rose-700/65 truncate">
                 Out of Stock
               </p>
-              <XCircle className="h-4 w-4 text-rose-600" />
+              <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-rose-600 shrink-0" />
             </div>
-            <p className="mt-1 font-playfair text-2xl font-black text-rose-700">
+            <p className="mt-0.5 sm:mt-1 font-playfair text-xl sm:text-2xl font-black text-rose-700">
               {outOfStockCount}
             </p>
           </button>
@@ -693,16 +693,16 @@ export default function AdminInventoryClient({
       {/* 4 Big Category Overview Cards */}
       {!hideCategoryCards && (
         <div>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-playfair text-lg font-bold text-[#942E3A]">
+          <div className="mb-2.5 flex items-center justify-between">
+            <h2 className="font-playfair text-base sm:text-lg font-bold text-[#942E3A]">
               Catalog Categories Overview
             </h2>
-            <span className="text-xs text-[#6B1F2A]/60">
+            <span className="hidden sm:inline text-xs text-[#6B1F2A]/60">
               Click any card to inspect category inventory
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
             {categoryCards.map((cat) => {
               const Icon = cat.icon;
 
@@ -710,46 +710,46 @@ export default function AdminInventoryClient({
                 <Link
                   key={cat.slug}
                   href={`/admin/inventory/category/${cat.slug}`}
-                  className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-[#942E3A]/12 bg-white p-5 text-[#942E3A] transition-all shadow-sm hover:border-[#942E3A]/40 hover:shadow-lg hover:-translate-y-0.5"
+                  className="group flex flex-col justify-between overflow-hidden rounded-2xl sm:rounded-3xl border border-[#942E3A]/12 bg-white p-3.5 sm:p-5 text-[#942E3A] transition-all shadow-xs hover:border-[#942E3A]/40 hover:shadow-md"
                 >
                   <div>
                     {/* Top Bar */}
                     <div className="flex items-center justify-between">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FFF9EB] text-[#942E3A] border border-[#D8B46A]/30 transition group-hover:bg-[#942E3A] group-hover:text-[#FFF9EB]">
-                        <Icon className="h-5 w-5" />
+                      <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl sm:rounded-2xl bg-[#FFF9EB] text-[#942E3A] border border-[#D8B46A]/30 transition group-hover:bg-[#942E3A] group-hover:text-[#FFF9EB]">
+                        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                       </div>
-                      <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider rounded-xl px-2.5 py-1 bg-[#FFF9EB] text-[#942E3A] group-hover:bg-[#942E3A] group-hover:text-[#FFF9EB] transition">
+                      <span className="flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider rounded-lg sm:rounded-xl px-2 py-0.5 sm:px-2.5 sm:py-1 bg-[#FFF9EB] text-[#942E3A] group-hover:bg-[#942E3A] group-hover:text-[#FFF9EB] transition">
                         <span>Explore</span>
-                        <ArrowUpRight className="h-3 w-3" />
+                        <ArrowUpRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                       </span>
                     </div>
 
                     {/* Title & Valuation */}
-                    <h3 className="mt-4 font-playfair text-xl font-black">{cat.name}</h3>
-                    <p className="mt-0.5 text-xs font-semibold text-[#6B1F2A]/70">
+                    <h3 className="mt-2.5 sm:mt-4 font-playfair text-base sm:text-xl font-black truncate">{cat.name}</h3>
+                    <p className="mt-0.5 text-[10px] sm:text-xs font-semibold text-[#6B1F2A]/70 truncate">
                       Valuation: {formatCurrency(cat.totalValue)}
                     </p>
                   </div>
 
                   {/* Metrics Footer */}
-                  <div className="mt-5 border-t border-[#942E3A]/10 pt-3">
-                    <div className="grid grid-cols-4 text-center text-[10px]">
+                  <div className="mt-3 sm:mt-5 border-t border-[#942E3A]/10 pt-2 sm:pt-3">
+                    <div className="grid grid-cols-4 text-center text-[9px] sm:text-[10px]">
                       <div>
-                        <span className="block font-bold opacity-60">Products</span>
-                        <span className="font-playfair text-sm font-bold">{cat.productsCount}</span>
+                        <span className="block font-bold opacity-60 truncate">Prods</span>
+                        <span className="font-playfair text-xs sm:text-sm font-bold">{cat.productsCount}</span>
                       </div>
                       <div>
-                        <span className="block font-bold opacity-60">Variants</span>
-                        <span className="font-playfair text-sm font-bold">{cat.variantsCount}</span>
+                        <span className="block font-bold opacity-60 truncate">Vars</span>
+                        <span className="font-playfair text-xs sm:text-sm font-bold">{cat.variantsCount}</span>
                       </div>
                       <div>
-                        <span className="block font-bold opacity-60">Units</span>
-                        <span className="font-playfair text-sm font-bold">{cat.totalUnits}</span>
+                        <span className="block font-bold opacity-60 truncate">Units</span>
+                        <span className="font-playfair text-xs sm:text-sm font-bold">{cat.totalUnits}</span>
                       </div>
                       <div>
-                        <span className="block font-bold opacity-60">Out/Low</span>
+                        <span className="block font-bold opacity-60 truncate">Out/Low</span>
                         <span
-                          className={`font-playfair text-sm font-bold ${
+                          className={`font-playfair text-xs sm:text-sm font-bold ${
                             cat.outOfStockCount > 0 ? "text-rose-600" : ""
                           }`}
                         >
@@ -1011,8 +1011,8 @@ export default function AdminInventoryClient({
           )}
         </div>
 
-        {/* Table View (By Variant vs By Product) */}
-        <div className="mt-4 overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="mt-4 hidden sm:block overflow-x-auto">
           {viewMode === "variants" ? (
             /* Table 1: By Variant View */
             <table className="w-full min-w-[850px] text-left text-xs">
@@ -1325,6 +1325,222 @@ export default function AdminInventoryClient({
               </tbody>
             </table>
           )}
+        </div>
+
+        {/* Mobile Cards View (By Variant vs By Product) */}
+        <div className="space-y-2.5 sm:hidden mt-4">
+          <div className="flex items-center justify-between px-1 text-[11px] font-bold text-[#6B1F2A]/60">
+            <button
+              type="button"
+              onClick={viewMode === "variants" ? toggleSelectAllVariants : toggleSelectAllProducts}
+              className="flex items-center gap-1.5 text-[#942E3A]"
+            >
+              {(viewMode === "variants" ? isAllVariantsSelected : isAllProductsSelected) ? (
+                <CheckSquare className="h-4 w-4 text-[#942E3A]" />
+              ) : (
+                <Square className="h-4 w-4 text-[#942E3A]/40" />
+              )}
+              <span>Select All</span>
+            </button>
+            <span>
+              {viewMode === "variants" ? `${filteredRows.length} items` : `${productGroupRows.length} items`}
+            </span>
+          </div>
+
+          {viewMode === "variants" ? (
+            filteredRows.map((row) => {
+              const isSelected = selectedVariantIds.includes(row.variantId);
+              const isHealthy = row.stock > row.lowStockLimit;
+              const isLow = row.stock > 0 && row.stock <= row.lowStockLimit;
+              const isOut = row.stock === 0;
+
+              return (
+                <div
+                  key={row.variantId}
+                  className={`rounded-2xl border p-3 text-xs space-y-2.5 transition ${
+                    isSelected ? "border-[#942E3A] bg-[#FFF9EB]" : "border-[#942E3A]/12 bg-[#FFF9EB]/30"
+                  }`}
+                >
+                  {/* Top Row: Checkbox, Status Button, SKU */}
+                  <div className="flex items-center justify-between gap-2 border-b border-[#942E3A]/10 pb-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleSelectRow(row.variantId)}
+                        className="text-[#942E3A] p-0.5"
+                      >
+                        {isSelected ? (
+                          <CheckSquare className="h-4 w-4 text-[#942E3A]" />
+                        ) : (
+                          <Square className="h-4 w-4 text-[#942E3A]/30" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleProductStatus(row.productId, row.productStatus)}
+                        disabled={isPending}
+                        className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[10px] font-bold border ${
+                          row.productStatus === "active"
+                            ? "border-emerald-600/40 bg-emerald-50 text-emerald-800"
+                            : "border-gray-400/50 bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        <span className={`h-1.5 w-1.5 rounded-full ${row.productStatus === "active" ? "bg-emerald-600" : "bg-gray-500"}`} />
+                        <span className="capitalize">{row.productStatus}</span>
+                      </button>
+                    </div>
+                    <span className="font-mono text-[10px] font-semibold text-[#6B1F2A]/60 truncate">
+                      {row.sku || "—"}
+                    </span>
+                  </div>
+
+                  {/* Middle Row: Product Image, Name, Price, Category & Variant */}
+                  <div className="flex items-start gap-3">
+                    {row.image ? (
+                      <img
+                        src={row.image}
+                        alt=""
+                        className="h-11 w-11 shrink-0 rounded-xl bg-white border border-[#942E3A]/10 object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#FFF9EB] text-[#D8B46A] border border-[#D8B46A]/30">
+                        <Package className="h-5 w-5" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <Link
+                        href={`/admin/products/${row.productId}`}
+                        className="font-bold text-[#942E3A] hover:underline block truncate text-xs"
+                      >
+                        {row.product}
+                      </Link>
+                      <div className="flex items-center gap-2">
+                        <span className="font-extrabold text-[#942E3A] text-xs">
+                          {formatCurrency(row.price)}
+                        </span>
+                        <span className="rounded-md bg-[#FFF9EB] border border-[#D8B46A]/30 px-1.5 py-0.5 text-[9px] font-bold text-[#942E3A] capitalize">
+                          {row.category}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#6B1F2A]/80 font-medium">
+                        Variant: {row.category.toLowerCase() !== "perfumes" && row.color ? `${row.color} · ` : ""}
+                        <span className="font-bold">{row.size}</span>
+                        {row.subcategory && row.subcategory !== "General" && ` (${row.subcategory})`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: Stock Badge & Units */}
+                  <div className="flex items-center justify-between gap-2 border-t border-[#942E3A]/10 pt-2 text-[11px]">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                        isOut
+                          ? "bg-rose-100 text-rose-800"
+                          : isLow
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-emerald-100 text-emerald-800"
+                      }`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${isOut ? "bg-rose-600" : isLow ? "bg-amber-600" : "bg-emerald-600"}`} />
+                      {isOut ? "Out of stock" : isLow ? "Low stock" : "Healthy"}
+                    </span>
+
+                    <span className="font-mono font-bold text-[#942E3A]">
+                      {row.stock.toLocaleString("en-US")} <span className="font-sans text-[10px] text-[#6B1F2A]/50">units</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            productGroupRows.map((pRow) => {
+              const isSelected = pRow.variantIds.every((id) => selectedVariantIds.includes(id));
+
+              return (
+                <div
+                  key={pRow.productId}
+                  className={`rounded-2xl border p-3 text-xs space-y-2.5 transition ${
+                    isSelected ? "border-[#942E3A] bg-[#FFF9EB]" : "border-[#942E3A]/12 bg-[#FFF9EB]/30"
+                  }`}
+                >
+                  {/* Top Row: Checkbox & Product Status */}
+                  <div className="flex items-center justify-between gap-2 border-b border-[#942E3A]/10 pb-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleSelectProduct(pRow)}
+                        className="text-[#942E3A] p-0.5"
+                      >
+                        {isSelected ? (
+                          <CheckSquare className="h-4 w-4 text-[#942E3A]" />
+                        ) : (
+                          <Square className="h-4 w-4 text-[#942E3A]/30" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleProductStatus(pRow.productId, pRow.productStatus)}
+                        disabled={isPending}
+                        className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[10px] font-bold border ${
+                          pRow.productStatus === "active"
+                            ? "border-emerald-600/40 bg-emerald-50 text-emerald-800"
+                            : "border-gray-400/50 bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        <span className={`h-1.5 w-1.5 rounded-full ${pRow.productStatus === "active" ? "bg-emerald-600" : "bg-gray-500"}`} />
+                        <span className="capitalize">{pRow.productStatus}</span>
+                      </button>
+                    </div>
+
+                    <span className="rounded-md bg-[#FFF9EB] border border-[#D8B46A]/30 px-1.5 py-0.5 text-[9px] font-bold text-[#942E3A] capitalize">
+                      {pRow.category}
+                    </span>
+                  </div>
+
+                  {/* Middle Row: Product Image, Name, Price & Variants breakdown */}
+                  <div className="flex items-start gap-3">
+                    {pRow.image ? (
+                      <img
+                        src={pRow.image}
+                        alt=""
+                        className="h-11 w-11 shrink-0 rounded-xl bg-white border border-[#942E3A]/10 object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#FFF9EB] text-[#D8B46A] border border-[#D8B46A]/30">
+                        <Package className="h-5 w-5" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <Link
+                        href={`/admin/products/${pRow.productId}`}
+                        className="font-bold text-[#942E3A] hover:underline block truncate text-xs"
+                      >
+                        {pRow.product}
+                      </Link>
+                      <span className="font-extrabold text-[#942E3A] text-xs block">
+                        {formatCurrency(pRow.price)}
+                      </span>
+                      <p className="text-[10px] text-[#6B1F2A]/70 truncate">
+                        <span className="font-bold">{pRow.variantsCount} variants</span>
+                        {pRow.sizesList.length > 0 && ` (${pRow.sizesList.join(", ")})`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: Total Units */}
+                  <div className="flex items-center justify-between gap-2 border-t border-[#942E3A]/10 pt-2 text-[11px]">
+                    <span className="text-[10px] font-bold text-[#6B1F2A]/50 uppercase tracking-wide">
+                      Total Stock
+                    </span>
+                    <span className="font-mono font-bold text-[#942E3A]">
+                      {pRow.totalStock.toLocaleString("en-US")} <span className="font-sans text-[10px] text-[#6B1F2A]/50">units</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
 
           {filteredRows.length === 0 && (
             <div className="py-14 text-center text-xs text-[#6B1F2A]/60">
@@ -1332,7 +1548,6 @@ export default function AdminInventoryClient({
               <p className="mt-2 font-bold text-[#942E3A]">No inventory variants matched your search or filters.</p>
             </div>
           )}
-        </div>
       </section>
 
       {/* Bulk Restock Modal */}

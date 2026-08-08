@@ -731,22 +731,22 @@ function CustomColorPicker({
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className={cn(
-          "group flex h-11 w-full items-center justify-between gap-3 rounded-2xl border border-[#942E3A]/15 bg-white p-2.5 shadow-xs transition hover:border-[#D8B46A] hover:bg-[#FFF9EB]",
+          "group flex h-10 w-full items-center justify-between gap-1.5 rounded-xl sm:rounded-2xl border border-[#942E3A]/15 bg-white p-2 shadow-xs transition hover:border-[#D8B46A] hover:bg-[#FFF9EB]",
           isOpen && "border-[#D8B46A] bg-[#FFF9EB] ring-2 ring-[#D8B46A]/20"
         )}
       >
-        <div className="flex items-center gap-2.5 truncate">
+        <div className="flex items-center gap-1.5 truncate">
           <div
-            className="h-6 w-6 shrink-0 rounded-xl border border-black/15 shadow-inner transition-transform group-hover:scale-105"
+            className="h-5 w-5 shrink-0 rounded-lg sm:rounded-xl border border-black/15 shadow-inner transition-transform group-hover:scale-105"
             style={{ backgroundColor: value }}
           />
-          <span className="font-mono text-xs font-bold text-[#942E3A] uppercase tracking-wider">
+          <span className="font-mono text-[11px] font-bold text-[#942E3A] uppercase tracking-wider truncate">
             {value}
           </span>
         </div>
         <ChevronDown
           className={cn(
-            "h-4 w-4 shrink-0 text-[#D8B46A] transition-transform duration-200",
+            "h-3.5 w-3.5 shrink-0 text-[#D8B46A] transition-transform duration-200",
             isOpen && "rotate-180"
           )}
         />
@@ -936,17 +936,17 @@ export default function AdminPromotionsClient({
   }, [promotions, searchQuery, statusFilter, typeFilter, scopeFilter]);
 
   return (
-    <div className="space-y-6">
+    <div className="w-full min-w-0 max-w-full space-y-4 sm:space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
+      <div className="flex items-center justify-between gap-3 min-w-0">
+        <div className="min-w-0">
+          <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
             Growth & Marketing
           </p>
-          <h1 className="mt-1 font-playfair text-3xl font-black text-[#942E3A]">
+          <h1 className="mt-0.5 sm:mt-1 font-playfair text-2xl sm:text-3xl font-black text-[#942E3A] truncate">
             Promotions & Announcements
           </h1>
-          <p className="mt-1 text-xs text-[#6B1F2A]/65">
+          <p className="mt-1 hidden sm:block text-xs text-[#6B1F2A]/65">
             Manage coupon codes, targeted discounts, free shipping rules, and storefront top bar banners.
           </p>
         </div>
@@ -956,67 +956,67 @@ export default function AdminPromotionsClient({
           <button
             type="button"
             onClick={() => setIsCreatePromoOpen(true)}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-[#942E3A] px-5 py-3 text-xs font-bold text-[#FFF9EB] shadow-md transition hover:bg-[#802832] active:scale-95"
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-[#942E3A] px-3 py-2 text-[11px] font-bold text-[#FFF9EB] shadow-xs transition hover:bg-[#802832] shrink-0 sm:px-5 sm:py-3 sm:text-xs sm:rounded-2xl"
           >
-            <Plus className="h-4 w-4 text-[#D8B46A]" />
-            <span>Create Promo Code</span>
+            <Plus className="h-3.5 w-3.5 text-[#D8B46A] sm:h-4 sm:w-4" />
+            <span>Create Promo</span>
           </button>
         ) : null}
       </div>
 
       {/* KPI Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4 min-w-0">
+        <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3 shadow-xs sm:rounded-2xl sm:p-4 min-w-0">
+          <div className="flex items-center justify-between min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
               Total Rules
             </p>
-            <Tag className="h-4 w-4 text-[#D8B46A]" />
+            <Tag className="h-4 w-4 text-[#D8B46A] shrink-0 ml-1" />
           </div>
-          <p className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
+          <p className="mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A] truncate">
             {promotions.length}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55">
+        <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3 shadow-xs sm:rounded-2xl sm:p-4 min-w-0">
+          <div className="flex items-center justify-between min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
               Active Codes
             </p>
-            <Sparkles className="h-4 w-4 text-emerald-600" />
+            <Sparkles className="h-4 w-4 text-emerald-600 shrink-0 ml-1" />
           </div>
-          <p className="mt-1 font-playfair text-2xl font-black text-emerald-700">
+          <p className="mt-1 font-playfair text-xl sm:text-2xl font-black text-emerald-700 truncate">
             {activePromosCount}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55">
+        <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3 shadow-xs sm:rounded-2xl sm:p-4 min-w-0">
+          <div className="flex items-center justify-between min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
               Total Redemptions
             </p>
-            <TrendingUp className="h-4 w-4 text-[#942E3A]" />
+            <TrendingUp className="h-4 w-4 text-[#942E3A] shrink-0 ml-1" />
           </div>
-          <p className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
+          <p className="mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A] truncate">
             {totalRedemptions.toLocaleString("en-US")}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[#D8B46A]/40 bg-[#fff7df] p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55">
+        <div className="rounded-xl border border-[#D8B46A]/40 bg-[#fff7df] p-3 shadow-xs sm:rounded-2xl sm:p-4 min-w-0">
+          <div className="flex items-center justify-between min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
               Top Bar Status
             </p>
-            <Megaphone className="h-4 w-4 text-[#942E3A]" />
+            <Megaphone className="h-4 w-4 text-[#942E3A] shrink-0 ml-1" />
           </div>
-          <div className="mt-1 flex items-center gap-1.5">
+          <div className="mt-1 flex items-center gap-1.5 min-w-0">
             <span
               className={cn(
-                "h-2.5 w-2.5 rounded-full",
+                "h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full shrink-0",
                 activeAnnouncement ? "bg-emerald-500 animate-pulse" : "bg-stone-400"
               )}
             />
-            <span className="font-playfair text-sm font-black text-[#942E3A] truncate">
+            <span className="font-playfair text-xs sm:text-sm font-black text-[#942E3A] truncate">
               {activeAnnouncement ? "Active Banner" : "Disabled"}
             </span>
           </div>
@@ -1024,23 +1024,23 @@ export default function AdminPromotionsClient({
       </div>
 
       {/* Main Tab Navigation Bar */}
-      <div className="flex items-center justify-between border-b border-[#942E3A]/15 pb-3">
-        <div className="flex items-center gap-2 rounded-2xl border border-[#942E3A]/15 bg-[#FFF9EB] p-1.5 shadow-inner">
+      <div className="flex items-center justify-between border-b border-[#942E3A]/15 pb-3 min-w-0">
+        <div className="grid grid-cols-2 w-full sm:w-auto sm:flex sm:items-center gap-1.5 sm:gap-2 rounded-2xl border border-[#942E3A]/15 bg-[#FFF9EB] p-1.5 shadow-inner min-w-0">
           <button
             type="button"
             onClick={() => setActiveTab("promos")}
             className={cn(
-              "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all",
+              "flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-2 text-xs font-bold transition-all truncate min-w-0",
               activeTab === "promos"
                 ? "bg-[#942E3A] text-[#FFF9EB] shadow-md"
                 : "text-[#942E3A]/70 hover:bg-[#942E3A]/10 hover:text-[#942E3A]"
             )}
           >
-            <Tag className="h-4 w-4 text-[#D8B46A]" />
-            <span>Promo Codes & Coupons</span>
+            <Tag className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
+            <span className="truncate">Coupons</span>
             <span
               className={cn(
-                "rounded-full px-2 py-0.5 text-[10px] font-black",
+                "rounded-full px-1.5 py-0.5 text-[10px] font-black shrink-0",
                 activeTab === "promos"
                   ? "bg-[#FFF9EB] text-[#942E3A]"
                   : "bg-[#942E3A]/15 text-[#942E3A]"
@@ -1054,17 +1054,17 @@ export default function AdminPromotionsClient({
             type="button"
             onClick={() => setActiveTab("announcements")}
             className={cn(
-              "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all",
+              "flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-2 text-xs font-bold transition-all truncate min-w-0",
               activeTab === "announcements"
                 ? "bg-[#942E3A] text-[#FFF9EB] shadow-md"
                 : "text-[#942E3A]/70 hover:bg-[#942E3A]/10 hover:text-[#942E3A]"
             )}
           >
-            <Megaphone className="h-4 w-4 text-[#D8B46A]" />
-            <span>Announcement Bar</span>
+            <Megaphone className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
+            <span className="truncate">Announcement Bar</span>
             <span
               className={cn(
-                "rounded-full px-2 py-0.5 text-[10px] font-black",
+                "rounded-full px-1.5 py-0.5 text-[10px] font-black shrink-0",
                 activeTab === "announcements"
                   ? "bg-[#FFF9EB] text-[#942E3A]"
                   : "bg-[#942E3A]/15 text-[#942E3A]"
@@ -1080,11 +1080,11 @@ export default function AdminPromotionsClient({
       {/* TAB 1: PROMO CODES & DISCOUNTS */}
       {/* ========================================================================= */}
       {activeTab === "promos" && (
-        <div className="space-y-5 animate-in fade-in duration-200">
+        <div className="space-y-5 animate-in fade-in duration-200 min-w-0 w-full max-w-full">
           {/* Controls Bar: Search & Custom Filter Dropdowns */}
-          <div className="flex flex-col gap-3 rounded-3xl border border-[#942E3A]/10 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-3 rounded-3xl border border-[#942E3A]/10 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between min-w-0">
             {/* Search Input */}
-            <div className="relative flex-1">
+            <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B1F2A]/40" />
               <input
                 type="text"
@@ -1105,7 +1105,7 @@ export default function AdminPromotionsClient({
             </div>
 
             {/* Custom Filter Dropdowns */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
               <CustomSelect
                 value={statusFilter}
                 onChange={(val) => setStatusFilter(val as any)}
@@ -1128,7 +1128,7 @@ export default function AdminPromotionsClient({
 
           {/* Promo Rules Ledger Grid / List */}
           {filteredPromotions.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 min-w-0">
               {filteredPromotions.map((promo) => {
                 const now = new Date();
                 const isExpired = promo.endsAt ? new Date(promo.endsAt) < now : false;
@@ -1137,7 +1137,7 @@ export default function AdminPromotionsClient({
                   <div
                     key={promo.id}
                     className={cn(
-                      "group relative flex flex-col justify-between overflow-hidden rounded-3xl border bg-white p-5 shadow-sm transition-all hover:shadow-md",
+                      "group relative flex flex-col justify-between overflow-hidden rounded-3xl border bg-white p-5 shadow-sm transition-all hover:shadow-md min-w-0 max-w-full",
                       promo.active && !isExpired
                         ? "border-[#942E3A]/15 hover:border-[#942E3A]/40"
                         : "border-stone-200 bg-stone-50/50 opacity-80"
@@ -1145,31 +1145,31 @@ export default function AdminPromotionsClient({
                   >
                     <div>
                       {/* Card Header: Code Badge & Status */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
+                      <div className="flex items-start justify-between gap-2 min-w-0">
+                        <div className="min-w-0">
                           {promo.code ? (
                             <button
                               type="button"
                               onClick={() => handleCopyCode(promo.code!)}
                               title="Click to copy code"
-                              className="group/code inline-flex items-center gap-1.5 rounded-xl border border-[#D8B46A]/40 bg-[#FFF9EB] px-3 py-1 text-xs font-black tracking-wide text-[#942E3A] transition hover:bg-[#942E3A] hover:text-[#FFF9EB]"
+                              className="group/code inline-flex items-center gap-1.5 rounded-xl border border-[#D8B46A]/40 bg-[#FFF9EB] px-3 py-1 text-xs font-black tracking-wide text-[#942E3A] transition hover:bg-[#942E3A] hover:text-[#FFF9EB] truncate"
                             >
-                              <span>{promo.code}</span>
+                              <span className="truncate">{promo.code}</span>
                               {copiedCode === promo.code ? (
-                                <Check className="h-3.5 w-3.5 text-emerald-600" />
+                                <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                               ) : (
-                                <Copy className="h-3.5 w-3.5 opacity-60 group-hover/code:opacity-100" />
+                                <Copy className="h-3.5 w-3.5 opacity-60 group-hover/code:opacity-100 shrink-0" />
                               )}
                             </button>
                           ) : (
-                            <span className="inline-block rounded-xl border border-stone-200 bg-stone-100 px-3 py-1 text-xs font-bold text-stone-500">
+                            <span className="inline-block rounded-xl border border-stone-200 bg-stone-100 px-3 py-1 text-xs font-bold text-stone-500 truncate">
                               Automatic Discount
                             </span>
                           )}
                         </div>
 
                         {/* Status Toggle Form */}
-                        <form action={togglePromotionAction}>
+                        <form action={togglePromotionAction} className="shrink-0">
                           <input type="hidden" name="id" value={promo.id} />
                           <input type="hidden" name="active" value={String(promo.active)} />
                           <button
@@ -1185,7 +1185,7 @@ export default function AdminPromotionsClient({
                           >
                             <span
                               className={cn(
-                                "h-1.5 w-1.5 rounded-full",
+                                "h-1.5 w-1.5 rounded-full shrink-0",
                                 isExpired
                                   ? "bg-rose-500"
                                   : promo.active
@@ -1199,12 +1199,12 @@ export default function AdminPromotionsClient({
                       </div>
 
                       {/* Promo Title & Main Value */}
-                      <div className="mt-4">
-                        <h3 className="font-playfair text-lg font-black text-[#942E3A]">
+                      <div className="mt-4 min-w-0">
+                        <h3 className="font-playfair text-lg font-black text-[#942E3A] truncate">
                           {promo.name}
                         </h3>
-                        <div className="mt-1 flex items-center gap-2">
-                          <span className="font-playfair text-2xl font-black text-[#942E3A]">
+                        <div className="mt-1 flex items-center gap-2 min-w-0">
+                          <span className="font-playfair text-2xl font-black text-[#942E3A] truncate">
                             {promo.type === "percentage"
                               ? `${promo.value}% OFF`
                               : promo.type === "fixed"
@@ -1215,19 +1215,19 @@ export default function AdminPromotionsClient({
                       </div>
 
                       {/* Target & Scope Details */}
-                      <div className="mt-3 space-y-1.5 text-xs text-[#6B1F2A]/75 border-t border-[#942E3A]/10 pt-3">
-                        <div className="flex items-center gap-1.5">
+                      <div className="mt-3 space-y-1.5 text-xs text-[#6B1F2A]/75 border-t border-[#942E3A]/10 pt-3 min-w-0">
+                        <div className="flex items-center gap-1.5 min-w-0">
                           <Layers className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
-                          <span className="capitalize">
+                          <span className="capitalize truncate">
                             Applies to: <strong>{promo.scope}</strong>
                             {promo.targetValue ? ` (${promo.targetValue})` : ""}
                           </span>
                         </div>
 
                         {promo.minimumOrderValue ? (
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 min-w-0">
                             <Tag className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
-                            <span>
+                            <span className="truncate">
                               Min order: <strong>{formatCurrency(promo.minimumOrderValue)}</strong>
                             </span>
                           </div>
@@ -1236,8 +1236,8 @@ export default function AdminPromotionsClient({
 
                       {/* Usage Limit Progress */}
                       {promo.usageLimit ? (
-                        <div className="mt-3 space-y-1">
-                          <div className="flex items-center justify-between text-[10px] font-bold text-[#6B1F2A]/65">
+                        <div className="mt-3 space-y-1 min-w-0">
+                          <div className="flex items-center justify-between text-[10px] font-bold text-[#6B1F2A]/65 min-w-0">
                             <span>Usage Limit</span>
                             <span>
                               {promo.usedCount} / {promo.usageLimit} uses
@@ -1256,17 +1256,17 @@ export default function AdminPromotionsClient({
                           </div>
                         </div>
                       ) : (
-                        <p className="mt-2 text-[10px] text-[#6B1F2A]/55">
+                        <p className="mt-2 text-[10px] text-[#6B1F2A]/55 truncate">
                           Total Redemptions: <strong>{promo.usedCount}</strong> (Unlimited uses)
                         </p>
                       )}
                     </div>
 
                     {/* Footer: Date Schedule & Actions */}
-                    <div className="mt-4 flex items-center justify-between border-t border-[#942E3A]/10 pt-3 text-[10px] text-[#6B1F2A]/60">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3 text-[#D8B46A]" />
-                        <span>
+                    <div className="mt-4 flex items-center justify-between border-t border-[#942E3A]/10 pt-3 text-[10px] text-[#6B1F2A]/60 min-w-0">
+                      <div className="flex items-center gap-1 min-w-0">
+                        <Calendar className="h-3 w-3 text-[#D8B46A] shrink-0" />
+                        <span className="truncate">
                           {promo.endsAt
                             ? `Ends ${new Date(promo.endsAt).toLocaleDateString("en-US")}`
                             : "No expiration"}
@@ -1276,7 +1276,7 @@ export default function AdminPromotionsClient({
                       <button
                         type="button"
                         onClick={() => setDeleteConfirmId(promo.id)}
-                        className="rounded-lg p-1.5 text-stone-400 hover:bg-rose-50 hover:text-rose-600 transition"
+                        className="rounded-lg p-1.5 text-stone-400 hover:bg-rose-50 hover:text-rose-600 transition shrink-0"
                         title="Delete promotion"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -1287,7 +1287,7 @@ export default function AdminPromotionsClient({
               })}
             </div>
           ) : (
-            <div className="rounded-3xl border border-[#942E3A]/10 bg-white p-12 text-center shadow-sm">
+            <div className="rounded-3xl border border-[#942E3A]/10 bg-white p-12 text-center shadow-sm min-w-0">
               <Tag className="mx-auto h-10 w-10 text-[#D8B46A]/60" />
               <h3 className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">
                 No Promotions Found
@@ -1314,24 +1314,24 @@ export default function AdminPromotionsClient({
       {/* TAB 2: STOREFRONT ANNOUNCEMENT BAR */}
       {/* ========================================================================= */}
       {activeTab === "announcements" && (
-        <div className="space-y-6 animate-in fade-in duration-200">
+        <div className="w-full min-w-0 max-w-full space-y-4 sm:space-y-6 animate-in fade-in duration-200">
           {/* Top Live Preview Card */}
-          <div className="rounded-3xl border border-[#D8B46A]/35 bg-[#fff7df] p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-[#942E3A]" />
-                <h3 className="font-playfair text-base font-bold text-[#942E3A]">
+          <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-[#D8B46A]/35 bg-[#fff7df] p-3.5 shadow-xs sm:rounded-3xl sm:p-5">
+            <div className="flex items-center justify-between mb-2 sm:mb-3 min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <Eye className="h-4 w-4 text-[#942E3A] shrink-0" />
+                <h3 className="font-playfair text-sm sm:text-base font-bold text-[#942E3A] truncate">
                   Live Storefront Preview
                 </h3>
               </div>
-              <span className="text-[10px] font-bold text-[#6B1F2A]/60">
+              <span className="hidden sm:block text-[10px] font-bold text-[#6B1F2A]/60 shrink-0">
                 Interactive real-time preview
               </span>
             </div>
 
             {/* Dynamic Storefront Banner Bar */}
             <div
-              className="relative overflow-hidden rounded-xl px-4 py-3 text-center text-xs font-semibold shadow-md transition-all duration-300"
+              className="relative w-full min-w-0 max-w-full overflow-hidden rounded-xl px-3 py-2.5 text-center text-xs font-semibold shadow-xs transition-all duration-300 sm:px-4 sm:py-3"
               style={{ backgroundColor: previewBg, color: previewTextColor }}
             >
               {previewMoving ? (
@@ -1339,30 +1339,30 @@ export default function AdminPromotionsClient({
                   <span>{previewText}</span>
                 </div>
               ) : (
-                <span>{previewText}</span>
+                <span className="block truncate sm:whitespace-normal">{previewText}</span>
               )}
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-12">
+          <div className="grid w-full min-w-0 max-w-full gap-4 lg:grid-cols-12 sm:gap-6">
             {/* Left: Create / Edit Form (7 cols) */}
-            <div className="lg:col-span-7 rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-6">
-              <div className="flex items-center gap-2 border-b border-[#942E3A]/10 pb-4">
-                <Megaphone className="h-5 w-5 text-[#D8B46A]" />
-                <div>
-                  <h2 className="font-playfair text-xl font-bold text-[#942E3A]">
+            <div className="w-full min-w-0 max-w-full lg:col-span-7 rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-xs sm:rounded-3xl sm:p-6">
+              <div className="flex items-center gap-2 border-b border-[#942E3A]/10 pb-3 sm:pb-4 min-w-0">
+                <Megaphone className="h-4 w-4 sm:h-5 sm:w-5 text-[#D8B46A] shrink-0" />
+                <div className="min-w-0">
+                  <h2 className="font-playfair text-lg sm:text-xl font-bold text-[#942E3A] truncate">
                     Publish Announcement
                   </h2>
-                  <p className="text-xs text-[#6B1F2A]/65">
+                  <p className="text-[11px] text-[#6B1F2A]/65 sm:text-xs truncate">
                     Only one banner is active on the storefront at a time.
                   </p>
                 </div>
               </div>
 
-              <form action={createAnnouncementAction} className="mt-5 space-y-4">
+              <form action={createAnnouncementAction} className="mt-4 space-y-4 sm:mt-5 w-full min-w-0 max-w-full">
                 {/* Announcement Message */}
-                <div>
-                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
+                <div className="min-w-0">
+                  <label className="mb-1.5 block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
                     Banner Text Message *
                   </label>
                   <textarea
@@ -1372,16 +1372,16 @@ export default function AdminPromotionsClient({
                     value={previewText}
                     onChange={(e) => setPreviewText(e.target.value)}
                     placeholder="e.g. Free delivery on orders over 2500 EGP | Code: FREESHIP"
-                    className="w-full rounded-2xl border border-[#942E3A]/15 bg-[#FFF9EB]/40 p-3 text-xs text-[#942E3A] outline-none transition focus:border-[#942E3A] focus:bg-white focus:ring-2 focus:ring-[#942E3A]/10"
+                    className="w-full min-w-0 max-w-full rounded-xl sm:rounded-2xl border border-[#942E3A]/15 bg-[#FFF9EB]/40 p-2.5 text-xs text-[#942E3A] outline-none transition focus:border-[#942E3A] focus:bg-white focus:ring-2 focus:ring-[#942E3A]/10"
                   />
                 </div>
 
                 {/* Preset Themes Selector */}
-                <div>
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
+                <div className="min-w-0">
+                  <label className="mb-1.5 block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
                     Aesthetic Theme Presets
                   </label>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 min-w-0">
                     {COLOR_PRESETS.map((preset) => (
                       <button
                         key={preset.name}
@@ -1390,10 +1390,10 @@ export default function AdminPromotionsClient({
                           setPreviewBg(preset.bg);
                           setPreviewTextColor(preset.text);
                         }}
-                        className="flex items-center gap-2 rounded-xl border border-[#942E3A]/10 p-2 text-left text-[11px] transition hover:border-[#D8B46A] hover:shadow-xs"
+                        className="flex items-center gap-1.5 rounded-xl border border-[#942E3A]/10 p-1.5 text-left text-[10px] sm:p-2 sm:text-[11px] transition hover:border-[#D8B46A] hover:shadow-xs min-w-0"
                       >
                         <div
-                          className="h-4 w-4 shrink-0 rounded-full border border-black/10"
+                          className="h-3.5 w-3.5 shrink-0 rounded-full border border-black/10 sm:h-4 sm:w-4"
                           style={{ backgroundColor: preset.bg }}
                         />
                         <span className="truncate font-semibold text-[#942E3A]">
@@ -1404,9 +1404,8 @@ export default function AdminPromotionsClient({
                   </div>
                 </div>
 
-                {/* Custom Color Inputs */}
                 {/* Custom Color Pickers */}
-                <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-3 pt-1 min-w-0">
                   <CustomColorPicker
                     name="backgroundColor"
                     label="Background Color"
@@ -1422,20 +1421,20 @@ export default function AdminPromotionsClient({
                 </div>
 
                 {/* Moving Ticker Checkbox */}
-                <div className="rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB]/50 p-3">
-                  <label className="flex items-center gap-3 cursor-pointer">
+                <div className="rounded-xl sm:rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB]/50 p-3 min-w-0">
+                  <label className="flex items-start gap-2.5 cursor-pointer min-w-0">
                     <input
                       type="checkbox"
                       name="moving"
                       checked={previewMoving}
                       onChange={(e) => setPreviewMoving(e.target.checked)}
-                      className="h-4 w-4 accent-[#942E3A]"
+                      className="mt-0.5 h-4 w-4 accent-[#942E3A] shrink-0"
                     />
-                    <div>
-                      <span className="text-xs font-bold text-[#942E3A]">
+                    <div className="min-w-0">
+                      <span className="text-xs font-bold text-[#942E3A] block truncate">
                         Enable Moving Marquee Ticker
                       </span>
-                      <p className="text-[10px] text-[#6B1F2A]/60">
+                      <p className="text-[10px] text-[#6B1F2A]/60 leading-tight">
                         Makes the banner message continuously slide across the top bar.
                       </p>
                     </div>
@@ -1443,9 +1442,9 @@ export default function AdminPromotionsClient({
                 </div>
 
                 {/* Date Schedule (Custom DeRoma Date-Time Pickers) */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-3 min-w-0">
+                  <div className="min-w-0">
+                    <label className="mb-1 block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70 truncate">
                       Starts At (Optional)
                     </label>
                     <CustomDateTimePicker
@@ -1454,8 +1453,8 @@ export default function AdminPromotionsClient({
                       align="left"
                     />
                   </div>
-                  <div>
-                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
+                  <div className="min-w-0">
+                    <label className="mb-1 block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70 truncate">
                       Ends At (Optional)
                     </label>
                     <CustomDateTimePicker
@@ -1468,7 +1467,7 @@ export default function AdminPromotionsClient({
 
                 <button
                   type="submit"
-                  className="w-full rounded-2xl bg-[#942E3A] py-3.5 text-xs font-bold text-[#FFF9EB] shadow-md transition hover:bg-[#802832] active:scale-95"
+                  className="w-full rounded-xl sm:rounded-2xl bg-[#942E3A] py-3 text-xs font-bold text-[#FFF9EB] shadow-md transition hover:bg-[#802832] active:scale-95"
                 >
                   Publish Announcement Banner
                 </button>
@@ -1476,24 +1475,24 @@ export default function AdminPromotionsClient({
             </div>
 
             {/* Right: Announcement History Log (5 cols) */}
-            <div className="lg:col-span-5 rounded-3xl border border-[#942E3A]/10 bg-white p-5 shadow-sm sm:p-6">
-              <h3 className="font-playfair text-lg font-bold text-[#942E3A] border-b border-[#942E3A]/10 pb-3">
+            <div className="w-full min-w-0 max-w-full lg:col-span-5 rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-xs sm:rounded-3xl sm:p-6">
+              <h3 className="font-playfair text-base sm:text-lg font-bold text-[#942E3A] border-b border-[#942E3A]/10 pb-2.5 sm:pb-3 truncate">
                 Banner History & Drafts
               </h3>
 
-              <div className="mt-4 space-y-3 max-h-[520px] overflow-y-auto pr-1">
+              <div className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3 max-h-[520px] overflow-y-auto pr-1 min-w-0">
                 {announcements.map((item) => (
                   <div
                     key={item.id}
                     className={cn(
-                      "rounded-2xl border p-3.5 transition",
+                      "rounded-xl sm:rounded-2xl border p-3 transition min-w-0 max-w-full overflow-hidden",
                       item.active
                         ? "border-emerald-300 bg-emerald-50/40 ring-1 ring-emerald-300"
                         : "border-stone-200 bg-white hover:bg-stone-50"
                     )}
                   >
                     <div
-                      className="rounded-lg px-3 py-2 text-xs font-semibold shadow-xs truncate"
+                      className="w-full min-w-0 max-w-full rounded-lg px-2.5 py-1.5 text-xs font-semibold shadow-xs truncate"
                       style={{
                         backgroundColor: item.backgroundColor,
                         color: item.textColor,
@@ -1502,8 +1501,8 @@ export default function AdminPromotionsClient({
                       {item.text}
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between text-[10px]">
-                      <span className="text-stone-500">
+                    <div className="mt-2.5 flex items-center justify-between text-[10px] min-w-0">
+                      <span className="text-stone-500 truncate">
                         {new Date(item.createdAt).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
@@ -1511,7 +1510,7 @@ export default function AdminPromotionsClient({
                         })}
                       </span>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 shrink-0 ml-1">
                         {/* Toggle Active Switch */}
                         <form action={toggleAnnouncementAction}>
                           <input type="hidden" name="id" value={item.id} />
@@ -1519,7 +1518,7 @@ export default function AdminPromotionsClient({
                           <button
                             type="submit"
                             className={cn(
-                              "rounded-full px-2.5 py-0.5 font-bold transition",
+                              "rounded-full px-2 py-0.5 font-bold transition text-[9px] sm:text-[10px]",
                               item.active
                                 ? "bg-emerald-100 text-emerald-800"
                                 : "bg-stone-100 text-stone-600 hover:bg-stone-200"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -556,6 +557,22 @@ function ReviewsSection({
   const [reviewName, setReviewName] = useState("");
   const [reviewComment, setReviewComment] = useState("");
   const [reviews, setReviews] = useState<ProductReviewView[]>(storedReviews.length ? storedReviews : MOCK_REVIEWS);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (showReviewForm) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showReviewForm]);
 
   const scrollLeft = () => {
     const container = document.getElementById("reviews-carousel");
@@ -709,95 +726,99 @@ function ReviewsSection({
       </div>
 
       {/* Write a Review Modal */}
-      <AnimatePresence>
-        {showReviewForm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm px-0 sm:px-4"
-            onClick={() => setShowReviewForm(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="w-full sm:max-w-md bg-[#FFF9EB] rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl border border-[#D8B46A]/30 max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-extrabold text-[#942E3A] font-playfair">Write a Review</h3>
-                <button
-                  onClick={() => setShowReviewForm(false)}
-                  className="h-8 w-8 rounded-full bg-[#F2E7D5] flex items-center justify-center text-[#942E3A] hover:bg-[#D8B46A]/30 transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Star Rating Picker */}
-              <div className="mb-5">
-                <label className="text-xs font-bold text-[#942E3A] mb-2 block">Your Rating</label>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onMouseEnter={() => setHoverRating(star)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      onClick={() => setNewReviewRating(star)}
-                      className="transition-transform hover:scale-110"
-                    >
-                      <Star
-                        className={`h-7 w-7 ${
-                          star <= (hoverRating || newReviewRating)
-                            ? "fill-amber-400 text-amber-400"
-                            : "fill-stone-200 text-stone-200"
-                        } transition-colors`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Name Input */}
-              <div className="mb-4">
-                <label className="text-xs font-bold text-[#942E3A] mb-1.5 block">Your Name</label>
-                <input
-                  type="text"
-                  value={reviewName}
-                  onChange={(e) => setReviewName(e.target.value)}
-                  placeholder="Enter your name"
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#D8B46A]/40 bg-white text-sm text-[#942E3A] placeholder:text-[#D8B46A]/50 focus:outline-none focus:ring-2 focus:ring-[#942E3A]/30 focus:border-[#942E3A] transition-all"
-                />
-              </div>
-
-              {/* Comment Input */}
-              <div className="mb-6">
-                <label className="text-xs font-bold text-[#942E3A] mb-1.5 block">Your Review</label>
-                <textarea
-                  value={reviewComment}
-                  onChange={(e) => setReviewComment(e.target.value)}
-                  placeholder="Share your experience with this product..."
-                  rows={4}
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#D8B46A]/40 bg-white text-sm text-[#942E3A] placeholder:text-[#D8B46A]/50 focus:outline-none focus:ring-2 focus:ring-[#942E3A]/30 focus:border-[#942E3A] transition-all resize-none"
-                />
-              </div>
-
-              {/* Submit Button */}
-              <button
-                onClick={handleSubmitReview}
-                disabled={!reviewName.trim() || !reviewComment.trim() || newReviewRating === 0}
-                className="w-full flex items-center justify-center gap-2 h-12 rounded-full bg-[#942E3A] text-sm font-bold text-white hover:bg-[#7a2430] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {showReviewForm && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                onClick={() => setShowReviewForm(false)}
               >
-                <Send className="h-4 w-4" />
-                Submit Review
-              </button>
-            </motion.div>
-          </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                  className="w-full sm:max-w-md bg-[#FFF9EB] rounded-3xl p-5 sm:p-6 shadow-2xl border border-[#D8B46A]/30 max-h-[90vh] overflow-y-auto relative my-auto"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-extrabold text-[#942E3A] font-playfair">Write a Review</h3>
+                    <button
+                      onClick={() => setShowReviewForm(false)}
+                      className="h-8 w-8 rounded-full bg-[#F2E7D5] flex items-center justify-center text-[#942E3A] hover:bg-[#D8B46A]/30 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  {/* Star Rating Picker */}
+                  <div className="mb-5">
+                    <label className="text-xs font-bold text-[#942E3A] mb-2 block">Your Rating</label>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onMouseEnter={() => setHoverRating(star)}
+                          onMouseLeave={() => setHoverRating(0)}
+                          onClick={() => setNewReviewRating(star)}
+                          className="transition-transform hover:scale-110"
+                        >
+                          <Star
+                            className={`h-7 w-7 ${
+                              star <= (hoverRating || newReviewRating)
+                                ? "fill-amber-400 text-amber-400"
+                                : "fill-stone-200 text-stone-200"
+                            } transition-colors`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Name Input */}
+                  <div className="mb-4">
+                    <label className="text-xs font-bold text-[#942E3A] mb-1.5 block">Your Name</label>
+                    <input
+                      type="text"
+                      value={reviewName}
+                      onChange={(e) => setReviewName(e.target.value)}
+                      placeholder="Enter your name"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#D8B46A]/40 bg-white text-sm text-[#942E3A] placeholder:text-[#D8B46A]/50 focus:outline-none focus:ring-2 focus:ring-[#942E3A]/30 focus:border-[#942E3A] transition-all"
+                    />
+                  </div>
+
+                  {/* Comment Input */}
+                  <div className="mb-6">
+                    <label className="text-xs font-bold text-[#942E3A] mb-1.5 block">Your Review</label>
+                    <textarea
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      placeholder="Share your experience with this product..."
+                      rows={4}
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#D8B46A]/40 bg-white text-sm text-[#942E3A] placeholder:text-[#D8B46A]/50 focus:outline-none focus:ring-2 focus:ring-[#942E3A]/30 focus:border-[#942E3A] transition-all resize-none"
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    onClick={handleSubmitReview}
+                    disabled={!reviewName.trim() || !reviewComment.trim() || newReviewRating === 0}
+                    className="w-full flex items-center justify-center gap-2 h-12 rounded-full bg-[#942E3A] text-sm font-bold text-white hover:bg-[#7a2430] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Send className="h-4 w-4" />
+                    Submit Review
+                  </button>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </section>
   );
 }

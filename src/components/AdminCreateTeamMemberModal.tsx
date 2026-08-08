@@ -19,8 +19,8 @@ export default function AdminCreateTeamMemberModal() {
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-xl bg-[#942E3A] px-4 py-3 text-xs font-bold text-[#FFF9EB] shadow-sm transition hover:bg-[#7e2732]">
-        <UserPlus className="h-4 w-4 text-[#D8B46A]" /> Add team member
+      <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-[#942E3A] px-2.5 py-2 sm:px-4 sm:py-3 text-[11px] sm:text-xs font-bold text-[#FFF9EB] shadow-xs transition hover:bg-[#7e2732] shrink-0">
+        <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#D8B46A] shrink-0" /> Add team member
       </button>
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/55 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>

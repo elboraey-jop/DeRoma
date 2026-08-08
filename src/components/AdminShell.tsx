@@ -132,8 +132,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       )}
 
       <div className="min-w-0 flex-1 lg:pl-[250px]">
-        {/* Mobile Header / Top Bar */}
-        <div className="flex items-center justify-between p-3 sm:px-6 lg:hidden">
+        {/* Mobile Header / Top Bar (Fixed on Mobile) */}
+        <div className="fixed top-0 left-0 right-0 z-30 flex h-14 items-center justify-between border-b border-[#942E3A]/10 bg-[#f7f1e8]/95 px-3 backdrop-blur-md shadow-2xs sm:px-6 lg:hidden">
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="flex items-center gap-2 rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2 text-xs font-bold text-[#942E3A] shadow-xs"
@@ -146,7 +146,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           {/* Mobile Top Bar Notification Icon (Top Right) */}
           <button
             onClick={() => setIsNotificationsOpen(true)}
-            className="relative flex items-center justify-center rounded-xl border border-[#942E3A]/15 bg-white p-2.5 text-[#942E3A] shadow-xs hover:bg-[#FFF9EB] transition-colors"
+            className="relative flex items-center justify-center rounded-xl border border-[#942E3A]/15 bg-white p-2 text-[#942E3A] shadow-xs hover:bg-[#FFF9EB] transition-colors"
             aria-label="Notifications"
           >
             <Bell className="h-4 w-4 text-[#942E3A]" />
@@ -158,7 +158,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </button>
         </div>
 
-        <main className="mx-auto min-w-0 max-w-[1500px] p-3 sm:p-6 lg:p-8">
+        <main className="mx-auto min-w-0 max-w-[1500px] p-3 pt-16 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>

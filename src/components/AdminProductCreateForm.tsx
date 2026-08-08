@@ -1138,9 +1138,43 @@ export default function AdminProductCreateForm({
         <input key={id} type="hidden" name="relatedProductIds" value={id} />
       ))}
 
-      <div className="sticky top-3 z-20 rounded-3xl border border-[#942E3A]/10 bg-[#FFF9EB]/95 p-2 shadow-[0_12px_30px_rgba(67,25,31,0.1)] backdrop-blur sm:p-3">
+      <div className="sticky top-3 z-20 rounded-2xl sm:rounded-3xl border border-[#942E3A]/10 bg-[#FFF9EB]/95 p-1.5 sm:p-3 shadow-[0_12px_30px_rgba(67,25,31,0.1)] backdrop-blur">
+        {/* Mobile: 1-Row Swipeable Horizontal Bar */}
+        <div className="flex overflow-x-auto gap-1.5 no-scrollbar sm:hidden">
+          {steps.map((step, index) => {
+            const isActive = activeStep === index;
+            const isComplete = activeStep > index;
+            return (
+              <button
+                key={step.label}
+                type="button"
+                onClick={() => setActiveStep(index)}
+                className={`group flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-left transition shrink-0 ${
+                  isActive
+                    ? "bg-[#942E3A] text-[#FFF9EB] shadow-xs font-bold"
+                    : "text-[#942E3A]/70 hover:bg-white bg-white/50"
+                }`}
+              >
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-black ${
+                    isActive
+                      ? "bg-[#D8B46A] text-[#942E3A]"
+                      : isComplete
+                        ? "bg-[#942E3A]/10 text-[#942E3A]"
+                        : "bg-white/80 text-[#942E3A]/60"
+                  }`}
+                >
+                  {isComplete ? <Check className="h-3 w-3" /> : index + 1}
+                </span>
+                <span className="text-[11px] whitespace-nowrap">{step.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Desktop: Grid */}
         <div
-          className={`grid grid-cols-3 gap-1 ${isEdit ? "sm:grid-cols-6" : "sm:grid-cols-5"}`}
+          className={`hidden sm:grid gap-1 ${isEdit ? "sm:grid-cols-6" : "sm:grid-cols-5"}`}
         >
           {steps.map((step, index) => {
             const isActive = activeStep === index;
@@ -1150,20 +1184,32 @@ export default function AdminProductCreateForm({
                 key={step.label}
                 type="button"
                 onClick={() => setActiveStep(index)}
-                className={`group rounded-2xl px-2 py-2.5 text-left transition sm:px-3 ${isActive ? "bg-[#942E3A] text-[#FFF9EB] shadow-[0_6px_15px_rgba(148,46,58,0.16)]" : "text-[#942E3A]/65 hover:bg-white"}`}
+                className={`group rounded-2xl px-3 py-2.5 text-left transition ${
+                  isActive
+                    ? "bg-[#942E3A] text-[#FFF9EB] shadow-[0_6px_15px_rgba(148,46,58,0.16)]"
+                    : "text-[#942E3A]/65 hover:bg-white"
+                }`}
               >
                 <span className="flex items-center gap-2">
                   <span
-                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${isActive ? "bg-[#D8B46A] text-[#942E3A]" : isComplete ? "bg-[#942E3A]/10 text-[#942E3A]" : "bg-white text-[#942E3A]/55"}`}
+                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${
+                      isActive
+                        ? "bg-[#D8B46A] text-[#942E3A]"
+                        : isComplete
+                          ? "bg-[#942E3A]/10 text-[#942E3A]"
+                          : "bg-white text-[#942E3A]/55"
+                    }`}
                   >
                     {isComplete ? <Check className="h-3.5 w-3.5" /> : index + 1}
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate text-[10px] font-bold sm:text-xs">
+                    <span className="block truncate text-xs font-bold">
                       {step.label}
                     </span>
                     <span
-                      className={`hidden truncate text-[9px] sm:block ${isActive ? "text-[#FFF9EB]/60" : "text-[#6B1F2A]/45"}`}
+                      className={`block truncate text-[9px] ${
+                        isActive ? "text-[#FFF9EB]/60" : "text-[#6B1F2A]/45"
+                      }`}
                     >
                       {step.caption}
                     </span>
@@ -2317,19 +2363,19 @@ export default function AdminProductCreateForm({
         </section>
       )}
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between gap-2">
         <Link
           href="/admin/products"
-          className="rounded-xl border border-[#942E3A]/15 bg-white px-5 py-3 text-center text-xs font-bold text-[#942E3A]"
+          className="rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-center text-xs font-bold text-[#942E3A] shrink-0"
         >
           Cancel
         </Link>
-        <div className="flex gap-2 sm:ml-auto">
+        <div className="flex gap-2">
           {activeStep > 0 && (
             <button
               type="button"
               onClick={() => setActiveStep((step) => step - 1)}
-              className="inline-flex items-center gap-2 rounded-xl border border-[#942E3A]/15 bg-white px-4 py-3 text-xs font-bold text-[#942E3A]"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-xs font-bold text-[#942E3A]"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Back
             </button>
@@ -2338,17 +2384,17 @@ export default function AdminProductCreateForm({
             <button
               type="button"
               onClick={() => setActiveStep((step) => step + 1)}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#942E3A] px-5 py-3 text-xs font-bold text-[#FFF9EB]"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB]"
             >
-              {isEdit ? "Next section" : "Continue"}{" "}
+              {isEdit ? "Next" : "Continue"}{" "}
               <ArrowRight className="h-3.5 w-3.5 text-[#D8B46A]" />
             </button>
           ) : (
             <button
               type="submit"
-              className="rounded-xl bg-[#942E3A] px-6 py-3 text-xs font-bold text-[#FFF9EB]"
+              className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB]"
             >
-              {isEdit ? "Update product" : "Create complete product"}
+              {isEdit ? "Update product" : "Create product"}
             </button>
           )}
         </div>

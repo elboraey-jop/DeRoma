@@ -177,28 +177,28 @@ export default function AdminCustomerModal({
       </button>
       {open && (
         <div
-          className="fixed inset-0 z-50 flex h-dvh items-center justify-center overflow-hidden bg-[#2c1018]/55 p-4"
+          className="fixed inset-0 z-50 flex h-dvh items-center justify-center bg-[#2c1018]/55 p-3 sm:p-4"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setOpen(false);
           }}
         >
-          <div className="hide-scrollbar max-h-[calc(100dvh-2rem)] w-full max-w-2xl overscroll-contain overflow-y-auto rounded-3xl border border-[#D8B46A]/35 bg-[#FFFDFC] p-5 shadow-2xl sm:p-7">
-            <div className="flex items-start justify-between gap-4">
+          <div className="max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[#D8B46A]/35 bg-[#FFFDFC] p-4 shadow-2xl sm:rounded-3xl sm:p-7">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#D8B46A]">
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.22em] text-[#D8B46A]">
                   Customer profile
                 </p>
-                <h2 className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
+                <h2 className="mt-0.5 sm:mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A]">
                   {editing ? "Edit customer" : "Add new customer"}
                 </h2>
-                <p className="mt-1 text-xs text-[#6B1F2A]/60">
+                <p className="mt-0.5 text-[11px] text-[#6B1F2A]/60 sm:mt-1 sm:text-xs">
                   Save the customer contact and delivery details.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-full p-2 text-[#942E3A] hover:bg-[#942E3A]/10"
+                className="rounded-full p-1.5 text-[#942E3A] hover:bg-[#942E3A]/10 shrink-0"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -206,7 +206,7 @@ export default function AdminCustomerModal({
             </div>
             <form
               action={editing ? updateCustomerAction : createCustomerAction}
-              className="mt-6 grid gap-3 sm:grid-cols-2"
+              className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-6 sm:gap-3"
             >
               <input type="hidden" name="id" value={customer?.id || ""} />
               <input
@@ -282,7 +282,7 @@ export default function AdminCustomerModal({
                 disabled={!governorate}
                 onChange={setCity}
               />
-              <label className="sm:col-span-2">
+              <label className="col-span-2">
                 <span className="field-label">Address *</span>
                 <input
                   required
@@ -291,26 +291,26 @@ export default function AdminCustomerModal({
                   className="admin-input"
                 />
               </label>
-              <label className="sm:col-span-2">
+              <label className="col-span-2">
                 <span className="field-label">Notes</span>
                 <textarea
                   name="notes"
-                  rows={3}
+                  rows={2}
                   defaultValue={customer?.notes || ""}
                   className="admin-input resize-y"
                 />
               </label>
-              <div className="flex flex-col-reverse gap-2 pt-2 sm:col-span-2 sm:flex-row sm:justify-end">
+              <div className="col-span-2 flex items-center justify-between gap-2 pt-2 sm:justify-end">
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="rounded-xl border border-[#942E3A]/15 bg-white px-5 py-3 text-xs font-bold text-[#942E3A]"
+                  className="rounded-xl border border-[#942E3A]/15 bg-white px-4 py-2.5 text-xs font-bold text-[#942E3A] sm:px-5 sm:py-3"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-[#942E3A] px-5 py-3 text-xs font-bold text-[#FFF9EB]"
+                  className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB] sm:px-5 sm:py-3"
                 >
                   {editing ? "Save changes" : "Create customer"}
                 </button>

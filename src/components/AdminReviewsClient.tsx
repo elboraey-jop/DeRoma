@@ -94,58 +94,150 @@ export default function AdminReviewsClient({ reviews, products }: { reviews: Rev
   const pending = reviews.filter((review) => review.status === "pending").length;
   const homeCount = reviews.filter((review) => review.showOnHome).length;
 
-  return <div className="space-y-7">
-    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">Customer voice · reviews</p><h1 className="mt-2 font-playfair text-4xl font-black tracking-tight text-[#942E3A]">Reviews</h1><p className="mt-2 max-w-xl text-sm text-[#6B1F2A]/60">Keep a pulse on what customers love, and curate every story before it reaches your storefront.</p></div><button onClick={() => setAdding(true)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#942E3A] px-4 py-3 text-xs font-bold text-[#fff9eb] shadow-lg shadow-[#942E3A]/15 hover:bg-[#7e2531]"><Plus className="h-4 w-4" /> Add review</button></div>
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><div className="stat-card"><span className="stat-icon bg-[#fff1d4] text-[#bc812b]"><MessageSquareQuote className="h-4 w-4" /></span><div><p className="stat-label">Total reviews</p><p className="stat-value">{reviews.length}</p></div></div><div className="stat-card"><span className="stat-icon bg-[#fbe8e8] text-[#942E3A]"><Star className="h-4 w-4 fill-current" /></span><div><p className="stat-label">Average rating</p><p className="stat-value">{average}<span className="ml-1 text-sm font-normal text-[#942E3A]/45">/ 5</span></p></div></div><div className="stat-card"><span className="stat-icon bg-[#e7f4ec] text-[#27663d]"><CheckCircle2 className="h-4 w-4" /></span><div><p className="stat-label">Published</p><p className="stat-value">{approved.length}</p></div></div><div className="stat-card"><span className="stat-icon bg-[#fff3d8] text-[#9a6a18]"><MessageSquareQuote className="h-4 w-4" /></span><div><p className="stat-label">Awaiting review</p><p className="stat-value">{pending}</p></div></div></div>
-    <section className="rounded-[28px] border border-[#942E3A]/10 bg-white/80 p-4 shadow-sm sm:p-6">
-      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+  return (
+    <div className="space-y-4 sm:space-y-7">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
-            <MessageSquareQuote className="h-5 w-5 text-[#D8B46A]" />
-            <h2 className="font-playfair text-2xl font-bold text-[#942E3A]">Review inbox</h2>
-          </div>
-          <p className="mt-1 text-xs text-[#6B1F2A]/55">{filtered.length} {filtered.length === 1 ? "review" : "reviews"} in your workspace</p>
+          <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">Customer voice · reviews</p>
+          <h1 className="mt-0.5 sm:mt-1 font-playfair text-2xl sm:text-4xl font-black tracking-tight text-[#942E3A]">Reviews</h1>
+          <p className="mt-1 hidden sm:block max-w-xl text-sm text-[#6B1F2A]/60">Keep a pulse on what customers love, and curate every story before it reaches your storefront.</p>
         </div>
+        <button onClick={() => setAdding(true)} className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#942E3A] px-3 py-2 text-[11px] font-bold text-[#fff9eb] shadow-xs hover:bg-[#7e2531] shrink-0 sm:px-4 sm:py-3 sm:text-xs"><Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Add review</button>
+      </div>
 
-        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
-          {/* Scope Filter Tabs: All vs Home Page */}
-          <div className="flex rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] p-0.5">
-            <button
-              type="button"
-              onClick={() => setScopeFilter("all")}
-              className={`rounded-lg px-3 py-2 text-[10px] font-bold transition ${
-                scopeFilter === "all" ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"
-              }`}
-            >
-              All Reviews
-            </button>
-            <button
-              type="button"
-              onClick={() => setScopeFilter("home")}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-bold transition ${
-                scopeFilter === "home" ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"
-              }`}
-            >
-              <Home className="h-3 w-3" />
-              <span>Home Page Reviews ({homeCount})</span>
-            </button>
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
+        <div className="stat-card p-3 sm:p-4 rounded-xl sm:rounded-2xl">
+          <span className="stat-icon bg-[#fff1d4] text-[#bc812b]"><MessageSquareQuote className="h-4 w-4" /></span>
+          <div>
+            <p className="stat-label text-[9px] sm:text-[10px]">Total reviews</p>
+            <p className="stat-value text-xl sm:text-2xl">{reviews.length}</p>
           </div>
-
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#942E3A]/40" />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search reviews..." className="h-9 w-full rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] pl-9 pr-3 text-xs outline-none focus:border-[#D8B46A] sm:w-48" />
+        </div>
+        <div className="stat-card p-3 sm:p-4 rounded-xl sm:rounded-2xl">
+          <span className="stat-icon bg-[#fbe8e8] text-[#942E3A]"><Star className="h-4 w-4 fill-current" /></span>
+          <div>
+            <p className="stat-label text-[9px] sm:text-[10px]">Average rating</p>
+            <p className="stat-value text-xl sm:text-2xl">{average}<span className="ml-1 text-xs font-normal text-[#942E3A]/45">/ 5</span></p>
           </div>
-
-          <div className="flex rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] p-0.5">
-            {[["all", "All"], ["pending", "Pending"], ["approved", "Published"]].map(([value, label]) => (
-              <button key={value} onClick={() => setFilter(value)} className={`rounded-lg px-3 py-2 text-[10px] font-bold transition ${filter === value ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"}`}>{label}</button>
-            ))}
+        </div>
+        <div className="stat-card p-3 sm:p-4 rounded-xl sm:rounded-2xl">
+          <span className="stat-icon bg-[#e7f4ec] text-[#27663d]"><CheckCircle2 className="h-4 w-4" /></span>
+          <div>
+            <p className="stat-label text-[9px] sm:text-[10px]">Published</p>
+            <p className="stat-value text-xl sm:text-2xl">{approved.length}</p>
+          </div>
+        </div>
+        <div className="stat-card p-3 sm:p-4 rounded-xl sm:rounded-2xl">
+          <span className="stat-icon bg-[#fff3d8] text-[#9a6a18]"><MessageSquareQuote className="h-4 w-4" /></span>
+          <div>
+            <p className="stat-label text-[9px] sm:text-[10px]">Awaiting review</p>
+            <p className="stat-value text-xl sm:text-2xl">{pending}</p>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 xl:grid-cols-2">{filtered.map((review) => <article key={review.id} className="group relative rounded-2xl border border-[#942E3A]/10 bg-[#fffdf8] p-4 transition hover:border-[#D8B46A]/70 hover:shadow-md sm:p-5"><div className="flex gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-lg font-bold text-[#fff9eb]">{review.customerName.charAt(0).toUpperCase()}</div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-x-2 gap-y-1"><h3 className="font-playfair text-base font-bold text-[#942E3A]">{review.customerName}</h3><span className="text-[#D8B46A]">·</span><Stars rating={review.rating} /></div><div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[#6B1F2A]/55"><span className="truncate font-semibold text-[#942E3A]/75">{review.product.name}</span><span>·</span><span>{new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>{review.verifiedPurchase && <span className="inline-flex items-center gap-1 font-bold text-[#27663d]"><Check className="h-3 w-3" /> Verified</span>}</div></div><span className={`h-fit rounded-full px-2.5 py-1 text-[9px] font-bold capitalize ${statusStyles[review.status] || statusStyles.pending}`}>{review.status === "approved" ? "Published" : review.status}</span></div><p className="mt-3 text-xs leading-6 text-[#6B1F2A]/75">{review.body}</p><div className="mt-4 flex items-center justify-between border-t border-[#942E3A]/8 pt-3"><div className="flex items-center gap-2.5"><form action={updateReviewStatusAction} className="flex items-center gap-2"><input type="hidden" name="id" value={review.id} /><StatusPicker value={review.status} /></form><form action={toggleShowOnHomeAction} className="flex items-center"><input type="hidden" name="id" value={review.id} /><input type="hidden" name="showOnHome" value={String(!review.showOnHome)} /><button type="submit" className={`inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[10px] font-bold transition ${review.showOnHome ? "border-[#942E3A] bg-[#942E3A] text-white shadow-xs" : "border-[#942E3A]/20 bg-white text-[#942E3A]/70 hover:border-[#942E3A]"}`} title="Toggle show on Home Page"><Home className="h-3 w-3" /><span>Home Page</span><span className={`h-2 w-2 rounded-full ${review.showOnHome ? "bg-[#D8B46A]" : "bg-stone-300"}`} /></button></form></div><div className="flex items-center gap-1"><button onClick={() => setEditing(review)} className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-[#942E3A]/70 hover:bg-[#942E3A]/8 hover:text-[#942E3A]"><Pencil className="h-3 w-3" /> Edit</button><form action={deleteReviewAction}><input type="hidden" name="id" value={review.id} /><button className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-[#a33b43]/70 hover:bg-[#fae9e8] hover:text-[#a33b43]" onClick={(event) => { if (!window.confirm("Delete this review permanently?")) event.preventDefault(); }}><Trash2 className="h-3 w-3" /> Delete</button></form></div></div></article>)}{filtered.length === 0 && <div className="col-span-full rounded-2xl border border-dashed border-[#942E3A]/15 py-16 text-center"><MessageSquareQuote className="mx-auto h-8 w-8 text-[#D8B46A]" /><p className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">No reviews found</p><p className="mt-1 text-xs text-[#6B1F2A]/55">Try another filter or add the first review.</p></div>}</div>
-    </section>
-    {(adding || editing) && <ReviewForm review={editing} products={products} onClose={() => { setAdding(false); setEditing(undefined); }} />}
-  </div>;
+      <section className="rounded-2xl border border-[#942E3A]/10 bg-white/80 p-4 shadow-xs sm:rounded-[28px] sm:p-6">
+        <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
+          <div>
+            <div className="flex items-center gap-2">
+              <MessageSquareQuote className="h-4 w-4 sm:h-5 sm:w-5 text-[#D8B46A]" />
+              <h2 className="font-playfair text-lg sm:text-2xl font-bold text-[#942E3A]">Review inbox</h2>
+            </div>
+            <p className="mt-0.5 text-[11px] text-[#6B1F2A]/55 sm:mt-1 sm:text-xs">{filtered.length} {filtered.length === 1 ? "review" : "reviews"} in your workspace</p>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center flex-wrap">
+            {/* Scope Filter Tabs: All vs Home Page */}
+            <div className="flex rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] p-0.5">
+              <button
+                type="button"
+                onClick={() => setScopeFilter("all")}
+                className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition ${
+                  scopeFilter === "all" ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"
+                }`}
+              >
+                All Reviews
+              </button>
+              <button
+                type="button"
+                onClick={() => setScopeFilter("home")}
+                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition ${
+                  scopeFilter === "home" ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"
+                }`}
+              >
+                <Home className="h-3 w-3" />
+                <span>Home ({homeCount})</span>
+              </button>
+            </div>
+
+            <div className="relative flex-1 sm:flex-none">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#942E3A]/40" />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search reviews..." className="h-8 w-full rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] pl-8 pr-3 text-xs outline-none focus:border-[#D8B46A] sm:h-9 sm:w-48" />
+            </div>
+
+            <div className="flex rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] p-0.5">
+              {[["all", "All"], ["pending", "Pending"], ["approved", "Published"]].map(([value, label]) => (
+                <button key={value} onClick={() => setFilter(value)} className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition ${filter === value ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"}`}>{label}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 grid min-w-0 gap-3 xl:grid-cols-2 sm:mt-6">
+          {filtered.map((review) => (
+            <article key={review.id} className="group relative w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-[#942E3A]/10 bg-[#fffdf8] p-3.5 transition hover:border-[#D8B46A]/70 shadow-xs sm:p-5">
+              <div className="flex gap-2.5 sm:gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-base font-bold text-[#fff9eb] sm:h-10 sm:w-10 sm:text-lg">
+                  {review.customerName.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <h3 className="font-playfair text-sm font-bold text-[#942E3A] sm:text-base truncate">{review.customerName}</h3>
+                    <span className="text-[#D8B46A]">·</span>
+                    <Stars rating={review.rating} />
+                  </div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-[#6B1F2A]/55 sm:mt-1 sm:gap-2">
+                    <span className="truncate font-semibold text-[#942E3A]/75">{review.product.name}</span>
+                    <span>·</span>
+                    <span>{new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                    {review.verifiedPurchase && <span className="inline-flex items-center gap-0.5 font-bold text-[#27663d]"><Check className="h-3 w-3" /> Verified</span>}
+                  </div>
+                </div>
+                <span className={`h-fit rounded-full px-2 py-0.5 text-[9px] font-bold capitalize shrink-0 sm:px-2.5 sm:py-1 ${statusStyles[review.status] || statusStyles.pending}`}>
+                  {review.status === "approved" ? "Published" : review.status}
+                </span>
+              </div>
+              <p className="mt-2.5 text-xs leading-5 text-[#6B1F2A]/75 sm:mt-3 sm:leading-6 break-words">{review.body}</p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[#942E3A]/8 pt-2.5 sm:mt-4 sm:pt-3 min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
+                  <form action={updateReviewStatusAction} className="flex items-center gap-2 shrink-0">
+                    <input type="hidden" name="id" value={review.id} />
+                    <StatusPicker value={review.status} />
+                  </form>
+                  <form action={toggleShowOnHomeAction} className="flex items-center shrink-0">
+                    <input type="hidden" name="id" value={review.id} />
+                    <input type="hidden" name="showOnHome" value={String(!review.showOnHome)} />
+                    <button type="submit" className={`inline-flex items-center gap-1 rounded-xl border px-2 py-1.5 text-[10px] font-bold transition sm:px-2.5 ${review.showOnHome ? "border-[#942E3A] bg-[#942E3A] text-white shadow-xs" : "border-[#942E3A]/20 bg-white text-[#942E3A]/70 hover:border-[#942E3A]"}`} title="Toggle show on Home Page">
+                      <Home className="h-3 w-3" />
+                      <span>Home</span>
+                      <span className={`h-2 w-2 rounded-full ${review.showOnHome ? "bg-[#D8B46A]" : "bg-stone-300"}`} />
+                    </button>
+                  </form>
+                </div>
+                <div className="flex items-center gap-1 shrink-0 ml-auto sm:ml-0">
+                  <button onClick={() => setEditing(review)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-bold text-[#942E3A]/70 hover:bg-[#942E3A]/8 hover:text-[#942E3A]"><Pencil className="h-3 w-3" /> Edit</button>
+                  <form action={deleteReviewAction}>
+                    <input type="hidden" name="id" value={review.id} />
+                    <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-bold text-[#a33b43]/70 hover:bg-[#fae9e8] hover:text-[#a33b43]" onClick={(event) => { if (!window.confirm("Delete this review permanently?")) event.preventDefault(); }}><Trash2 className="h-3 w-3" /> Delete</button>
+                  </form>
+                </div>
+              </div>
+            </article>
+          ))}
+          {filtered.length === 0 && <div className="col-span-full rounded-2xl border border-dashed border-[#942E3A]/15 py-12 text-center sm:py-16"><MessageSquareQuote className="mx-auto h-8 w-8 text-[#D8B46A]" /><p className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">No reviews found</p><p className="mt-1 text-xs text-[#6B1F2A]/55">Try another filter or add the first review.</p></div>}
+        </div>
+      </section>
+      {(adding || editing) && <ReviewForm review={editing} products={products} onClose={() => { setAdding(false); setEditing(undefined); }} />}
+    </div>
+  );
 }
