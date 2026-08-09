@@ -1094,13 +1094,13 @@ export function AdminI18nProvider({ children }: { children: React.ReactNode }) {
 
   const formatPrice = (amount: number | string): string => {
     const num = typeof amount === "string" ? parseFloat(amount) : amount;
-    if (isNaN(num)) return lang === "ar" ? "0 ج.م" : "EGP 0";
+    if (isNaN(num)) return "EGP 0";
     const formattedNum = new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(num);
 
-    return lang === "ar" ? `${formattedNum} ج.م` : `EGP ${formattedNum}`;
+    return `EGP ${formattedNum}`;
   };
 
   return (
@@ -1134,7 +1134,7 @@ export function useAdminI18n() {
       t: (path: string, fallback?: string) => fallback || path,
       formatPrice: (amount: number | string) => {
         const num = typeof amount === "string" ? parseFloat(amount) : amount;
-        return `${isNaN(num) ? 0 : new Intl.NumberFormat("en-US").format(num)} ج.م`;
+        return `EGP ${isNaN(num) ? 0 : new Intl.NumberFormat("en-US").format(num)}`;
       },
       formatNumber: (val: number | string) => {
         const num = typeof val === "string" ? parseFloat(val) : val;

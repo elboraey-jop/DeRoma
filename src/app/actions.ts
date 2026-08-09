@@ -233,7 +233,7 @@ export async function createOrder(input: CreateOrderInput) {
     if (promotion && !meetsMinimum)
       return {
         success: false,
-        error: `الحد الأدنى لاستخدام الكود هو ${Number(promotion.minimumOrderValue)} ج.م.`,
+        error: `الحد الأدنى لاستخدام الكود هو EGP ${Number(promotion.minimumOrderValue)}.`,
       };
     if (promotion && promotion.type !== "free_shipping" && promotionBase <= 0)
       return {
@@ -366,7 +366,7 @@ export async function createOrder(input: CreateOrderInput) {
           <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.color}</td>
           <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.size}</td>
           <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: left;">${item.price * item.quantity} ج.م</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: left;">EGP ${item.price * item.quantity}</td>
         </tr>
       `,
           )
@@ -402,9 +402,9 @@ export async function createOrder(input: CreateOrderInput) {
           </table>
 
           <div style="margin-top: 20px; text-align: left; padding: 15px; background-color: #f2d4d7; border-radius: 8px;">
-            <p style="margin: 5px 0;"><strong>الإجمالي الفرعي:</strong> ${subtotal} ج.م</p>
-            <p style="margin: 5px 0;"><strong>تكلفة الشحن (${input.governorate}):</strong> ${shippingCost} ج.م</p>
-            <h3 style="margin: 10px 0 0 0; color: #942E3A;"><strong>الإجمالي الكلي:</strong> ${totalPrice} ج.م</h3>
+            <p style="margin: 5px 0;"><strong>الإجمالي الفرعي:</strong> EGP ${subtotal}</p>
+            <p style="margin: 5px 0;"><strong>تكلفة الشحن (${input.governorate}):</strong> EGP ${shippingCost}</p>
+            <h3 style="margin: 10px 0 0 0; color: #942E3A;"><strong>الإجمالي الكلي:</strong> EGP ${totalPrice}</h3>
           </div>
 
           <div style="margin-top: 30px; font-size: 11px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 15px;">
@@ -493,4 +493,3 @@ export async function submitContactMessageAction(input: {
     };
   }
 }
-
