@@ -29,12 +29,12 @@ import {
   ChevronDown,
   RotateCcw,
 } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
 import {
   updateVariantStockAction,
   bulkRestockVariantsAction,
   bulkUpdateProductsStatusAction,
 } from "@/app/admin/inventory/actions";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 export interface InventoryRow {
   variantId: string;
@@ -248,6 +248,9 @@ export default function AdminInventoryClient({
   hideHeader?: boolean;
   hideCategoryCards?: boolean;
 }) {
+  const { lang, t, formatPrice, formatNumber } = useAdminI18n();
+  const isRtl = lang === "ar";
+
   const searchParams = useSearchParams();
   const [viewMode, setViewMode] = useState<"variants" | "products">("variants");
   const [searchQuery, setSearchQuery] = useState("");
@@ -588,13 +591,13 @@ export default function AdminInventoryClient({
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
-              Operations
+              {isRtl ? "العمليات والمخزن" : "Operations"}
             </p>
             <h1 className="mt-0.5 sm:mt-1 font-playfair text-2xl sm:text-3xl font-black text-[#942E3A]">
-              Inventory Management
+              {t("inventory.title")}
             </h1>
             <p className="mt-1 hidden sm:block text-xs text-[#6B1F2A]/65">
-              Monitor variant-level stock, run category audits, and perform bulk restocks.
+              {t("inventory.subtitle")}
             </p>
           </div>
 
@@ -604,7 +607,7 @@ export default function AdminInventoryClient({
             className="flex items-center gap-1.5 rounded-xl sm:rounded-2xl bg-[#942E3A] px-3 py-2 sm:px-5 sm:py-2.5 text-[11px] sm:text-xs font-bold text-[#FFF9EB] shadow-xs transition hover:bg-[#802832] shrink-0"
           >
             <ClipboardList className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#D8B46A]" />
-            <span>Stock Audits</span>
+            <span>{isRtl ? "جلسات الجرد" : "Stock Audits"}</span>
           </Link>
         </div>
       )}
@@ -614,37 +617,37 @@ export default function AdminInventoryClient({
         <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3 xl:grid-cols-6">
           <div className="rounded-xl sm:rounded-2xl border border-[#942E3A]/10 bg-white p-2.5 sm:p-4 shadow-xs">
             <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
-              Total Products
+              {t("dashboard.activeProducts")}
             </p>
             <p className="mt-0.5 sm:mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A]">
-              {totalProducts}
+              {formatNumber(totalProducts)}
             </p>
           </div>
 
           <div className="rounded-xl sm:rounded-2xl border border-[#942E3A]/10 bg-white p-2.5 sm:p-4 shadow-xs">
             <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
-              Total Variants
+              {t("inventory.totalVariants")}
             </p>
             <p className="mt-0.5 sm:mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A]">
-              {totalVariants}
+              {formatNumber(totalVariants)}
             </p>
           </div>
 
           <div className="rounded-xl sm:rounded-2xl border border-[#942E3A]/10 bg-white p-2.5 sm:p-4 shadow-xs">
             <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
-              Units in Stock
+              {isRtl ? "إجمالي القطع بالمخزن" : "Units in Stock"}
             </p>
             <p className="mt-0.5 sm:mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A]">
-              {totalUnits.toLocaleString("en-US")}
+              {formatNumber(totalUnits)}
             </p>
           </div>
 
           <div className="rounded-xl sm:rounded-2xl border border-[#D8B46A]/40 bg-[#fff7df] p-2.5 sm:p-4 shadow-xs">
             <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
-              Stock Valuation
+              {isRtl ? "قيمة المخزون الإجمالية" : "Stock Valuation"}
             </p>
             <p className="mt-0.5 sm:mt-1 font-playfair text-base sm:text-xl font-black text-[#942E3A] truncate">
-              {formatCurrency(totalValue)}
+              {formatPrice(totalValue)}
             </p>
           </div>
 
@@ -727,7 +730,7 @@ export default function AdminInventoryClient({
                     {/* Title & Valuation */}
                     <h3 className="mt-2.5 sm:mt-4 font-playfair text-base sm:text-xl font-black truncate">{cat.name}</h3>
                     <p className="mt-0.5 text-[10px] sm:text-xs font-semibold text-[#6B1F2A]/70 truncate">
-                      Valuation: {formatCurrency(cat.totalValue)}
+                      Valuation: {formatPrice(cat.totalValue)}
                     </p>
                   </div>
 
@@ -1091,7 +1094,7 @@ export default function AdminInventoryClient({
                               <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition text-[#D8B46A]" />
                             </Link>
                             <div className="mt-0.5 text-[10px] text-[#6B1F2A]/60 font-semibold">
-                              {formatCurrency(row.price)}
+                              {formatPrice(row.price)}
                             </div>
                           </div>
                         </div>
@@ -1258,7 +1261,7 @@ export default function AdminInventoryClient({
                               <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition text-[#D8B46A]" />
                             </Link>
                             <div className="mt-0.5 text-[10px] text-[#6B1F2A]/60 font-semibold">
-                              {formatCurrency(pRow.price)}
+                              {formatPrice(pRow.price)}
                             </div>
                           </div>
                         </div>
@@ -1416,7 +1419,7 @@ export default function AdminInventoryClient({
                       </Link>
                       <div className="flex items-center gap-2">
                         <span className="font-extrabold text-[#942E3A] text-xs">
-                          {formatCurrency(row.price)}
+                          {formatPrice(row.price)}
                         </span>
                         <span className="rounded-md bg-[#FFF9EB] border border-[#D8B46A]/30 px-1.5 py-0.5 text-[9px] font-bold text-[#942E3A] capitalize">
                           {row.category}
@@ -1518,7 +1521,7 @@ export default function AdminInventoryClient({
                         {pRow.product}
                       </Link>
                       <span className="font-extrabold text-[#942E3A] text-xs block">
-                        {formatCurrency(pRow.price)}
+                        {formatPrice(pRow.price)}
                       </span>
                       <p className="text-[10px] text-[#6B1F2A]/70 truncate">
                         <span className="font-bold">{pRow.variantsCount} variants</span>

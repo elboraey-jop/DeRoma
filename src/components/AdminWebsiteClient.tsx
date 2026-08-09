@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { HeroBanner, HomeReview, SiteSettingsData } from "@/lib/siteSettings";
 import { updateSiteSettingsAction } from "@/app/admin/website/actions";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 interface SimpleProduct {
   id: string;
@@ -274,6 +275,9 @@ export default function AdminWebsiteClient({
   initialSettings,
   products,
 }: AdminWebsiteClientProps) {
+  const { lang, t, formatPrice } = useAdminI18n();
+  const isRtl = lang === "ar";
+
   const [activeTab, setActiveTab] = useState<"home" | "contact" | "about">("home");
   const [homeSubTab, setHomeSubTab] = useState<"banners" | "products">("banners");
   const [settings, setSettings] = useState<SiteSettingsData>(initialSettings);
@@ -284,10 +288,10 @@ export default function AdminWebsiteClient({
     setIsSaving(true);
     try {
       await updateSiteSettingsAction(settings);
-      toast.success("Website settings saved successfully!");
+      toast.success(isRtl ? "تم حفظ إعدادات الموقع بنجاح!" : "Website settings saved successfully!");
     } catch (error) {
       console.error("Failed to save site settings", error);
-      toast.error("Failed to save website settings.");
+      toast.error(isRtl ? "حدث خطأ أثناء حفظ الإعدادات." : "Failed to save website settings.");
     } finally {
       setIsSaving(false);
     }

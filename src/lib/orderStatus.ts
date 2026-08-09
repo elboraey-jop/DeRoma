@@ -10,6 +10,18 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
   returned: "Returned",
 };
 
+export const ORDER_STATUS_LABELS_AR: Record<string, string> = {
+  pending: "قيد الانتظار",
+  pending_payment: "بانتظار الدفع",
+  paid: "تم الدفع",
+  confirmed: "مؤكد",
+  preparing: "جاري التجهيز",
+  shipped: "تم الشحن",
+  delivered: "تم التوصيل",
+  cancelled: "ملغى",
+  returned: "مسترجع",
+};
+
 export const COD_STATUS_PATH = ["pending", "confirmed", "preparing", "shipped", "delivered"];
 export const PREPAID_STATUS_PATH = ["pending_payment", "paid", "preparing", "shipped", "delivered"];
 
@@ -30,6 +42,9 @@ export function getSelectableStatuses(status: string, paymentMethod?: string | n
   return [status, ...getAllowedNextStatuses(status, paymentMethod)];
 }
 
-export function getStatusLabel(status: string) {
+export function getStatusLabel(status: string, lang: "ar" | "en" = "ar") {
+  if (lang === "ar") {
+    return ORDER_STATUS_LABELS_AR[status] || ORDER_STATUS_LABELS[status] || status;
+  }
   return ORDER_STATUS_LABELS[status] || status;
 }

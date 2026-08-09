@@ -5,9 +5,17 @@ import HomeClient from "@/components/HomeClient";
 export const revalidate = 60; // Cache page for 60 seconds
 
 export default async function HomePage() {
-  const [products, rawHomeReviews] = await Promise.all([
-    getActiveProducts(),
-    prisma.review.findMany({
+  let products: any[] = [];
+  let rawHomeReviews: any[] = [];
+
+  try {
+    products = await getActiveProducts();
+  } catch (e) {
+    console.error("HomePage getActiveProducts error:", e);
+  }
+
+  try {
+    rawHomeReviews = await prisma.review.findMany({
       where: {
         status: "approved",
         showOnHome: true,
@@ -21,8 +29,11 @@ export default async function HomePage() {
         },
       },
       orderBy: { createdAt: "desc" },
-    }),
-  ]);
+    });
+  } catch (e) {
+    console.error("HomePage reviews query error:", e);
+  }
+
 
   const dbHomeReviews = rawHomeReviews.map((r) => ({
     id: r.id,
@@ -32,7 +43,8 @@ export default async function HomePage() {
     rating: r.rating,
     quote: r.body,
     name: r.customerName,
-    detail: r.verifiedPurchase ? "Verified DeRoma customer" : "DeRoma customer",
+    detail: "DeRoma Customer",
+
   }));
 
   return (

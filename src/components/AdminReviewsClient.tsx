@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, CheckCircle2, ChevronDown, Home, MessageSquareQuote, Pencil, Plus, Search, Star, Trash2, X } from "lucide-react";
 import { createReviewAction, deleteReviewAction, updateReviewAction, updateReviewStatusAction, toggleShowOnHomeAction } from "@/app/admin/reviews/actions";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 type Product = { id: string; name: string; images: string[]; category: string };
 type Review = { id: string; productId: string; customerName: string; customerPhone: string | null; rating: number; title: string | null; body: string; status: string; verifiedPurchase: boolean; showOnHome?: boolean; createdAt: string; updatedAt: string; product: Product };
@@ -18,9 +19,12 @@ function RatingPicker({ value, onChange }: { value: number; onChange: (value: nu
 }
 
 function StatusPicker({ value }: { value: string }) {
+  const { lang } = useAdminI18n();
   const [status, setStatus] = useState(value);
   const [open, setOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
+  const isRtl = lang === "ar";
+
   useEffect(() => {
     if (!open) return;
     const closeOnOutside = (event: PointerEvent) => {
@@ -29,12 +33,61 @@ function StatusPicker({ value }: { value: string }) {
     document.addEventListener("pointerdown", closeOnOutside);
     return () => document.removeEventListener("pointerdown", closeOnOutside);
   }, [open]);
-  const options = [{ value: "approved", label: "Published" }, { value: "pending", label: "Pending" }, { value: "rejected", label: "Rejected" }];
+
+  const options = [
+    { value: "approved", label: isRtl ? "منشورة" : "Published" },
+    { value: "pending", label: isRtl ? "بانتظار الموافقة" : "Pending" },
+    { value: "rejected", label: isRtl ? "مرفوضة" : "Rejected" },
+  ];
   const current = options.find((option) => option.value === status) || options[0];
-  return <div ref={pickerRef} className="relative"><input type="hidden" name="status" value={status} /><button type="button" onClick={() => setOpen((currentOpen) => !currentOpen)} className="inline-flex min-w-[92px] items-center justify-between gap-2 rounded-xl border border-[#942E3A]/10 bg-white px-2.5 py-2 text-[10px] font-bold text-[#942E3A] shadow-sm transition hover:border-[#D8B46A]" aria-haspopup="listbox" aria-expanded={open}><span>{current.label}</span><ChevronDown className={`h-3 w-3 text-[#D8B46A] transition-transform ${open ? "rotate-180" : ""}`} /></button>{open && <div className="absolute left-0 top-[calc(100%+6px)] z-30 min-w-full overflow-hidden rounded-xl border border-[#D8B46A]/45 bg-[#fffdf8] p-1 shadow-[0_14px_30px_rgba(67,25,31,0.16)]" role="listbox">{options.map((option) => <button key={option.value} type="button" role="option" aria-selected={status === option.value} onClick={(event) => { const form = event.currentTarget.form; setStatus(option.value); setOpen(false); window.setTimeout(() => form?.requestSubmit(), 0); }} className={`block w-full rounded-lg px-3 py-2 text-left text-[10px] font-bold transition ${status === option.value ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A] hover:bg-[#fff1d4]"}`}>{option.label}</button>)}</div>}</div>;
+
+  return (
+    <div ref={pickerRef} className="relative">
+      <input type="hidden" name="status" value={status} />
+      <button
+        type="button"
+        onClick={() => setOpen((currentOpen) => !currentOpen)}
+        className="inline-flex min-w-[92px] items-center justify-between gap-2 rounded-xl border border-[#942E3A]/10 bg-white px-2.5 py-2 text-[10px] font-bold text-[#942E3A] shadow-xs transition hover:border-[#D8B46A]"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span>{current.label}</span>
+        <ChevronDown className={`h-3 w-3 text-[#D8B46A] transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div
+          className={`absolute top-[calc(100%+6px)] z-30 min-w-full overflow-hidden rounded-xl border border-[#D8B46A]/45 bg-[#fffdf8] p-1 shadow-[0_14px_30px_rgba(67,25,31,0.16)] ${
+            isRtl ? "right-0 text-right" : "left-0 text-left"
+          }`}
+          role="listbox"
+        >
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="option"
+              aria-selected={status === option.value}
+              onClick={(event) => {
+                const form = event.currentTarget.form;
+                setStatus(option.value);
+                setOpen(false);
+                window.setTimeout(() => form?.requestSubmit(), 0);
+              }}
+              className={`block w-full rounded-lg px-3 py-2 text-[10px] font-bold transition ${
+                status === option.value ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A] hover:bg-[#fff1d4]"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function ReviewForm({ review, products, onClose }: { review?: Review; products: Product[]; onClose: () => void }) {
+  const { lang, t } = useAdminI18n();
   const action = review ? updateReviewAction : createReviewAction;
   const [selectedProductId, setSelectedProductId] = useState(review?.productId || "");
   const [productMenuOpen, setProductMenuOpen] = useState(false);
@@ -42,12 +95,15 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
   const [rating, setRating] = useState(review?.rating || 5);
   const [productSearch, setProductSearch] = useState("");
   const [productCategory, setProductCategory] = useState("all");
+  const isRtl = lang === "ar";
+
   const selectedProduct = products.find((product) => product.id === selectedProductId);
   const productCategories = ["all", ...Array.from(new Set(products.map((product) => product.category))).sort()];
   const visibleProducts = products.filter((product) =>
     (productCategory === "all" || product.category === productCategory) &&
     product.name.toLowerCase().includes(productSearch.toLowerCase()),
   );
+
   useEffect(() => {
     if (!productMenuOpen) return;
     const closeOnOutside = (event: PointerEvent) => {
@@ -56,26 +112,160 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
     document.addEventListener("pointerdown", closeOnOutside);
     return () => document.removeEventListener("pointerdown", closeOnOutside);
   }, [productMenuOpen]);
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/45 p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-    <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] bg-[#fffdf8] p-5 shadow-2xl sm:p-7">
-      <div className="flex items-start justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#D8B46A]">Customer voice</p><h2 className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">{review ? "Edit review" : "Add a review"}</h2><p className="mt-1 text-xs text-[#6B1F2A]/60">Capture the customer story and choose where it appears.</p></div><button onClick={onClose} className="rounded-full p-2 text-[#942E3A]/60 hover:bg-[#942E3A]/8" aria-label="Close"><X className="h-5 w-5" /></button></div>
-      <form action={action} className="mt-6 space-y-4" onSubmit={onClose}>
-        {review && <input type="hidden" name="id" value={review.id} />}
-        <div><label className="field-label">Product</label><input type="hidden" name="productId" value={selectedProductId} required /><div ref={productMenuRef} className="relative"><button type="button" onClick={() => setProductMenuOpen((open) => !open)} className="field-input flex items-center justify-between text-left"><span className={selectedProduct ? "text-[#6B1F2A]" : "text-[#6B1F2A]/55"}>{selectedProduct?.name || "Choose a product"}</span><ChevronDown className={`h-4 w-4 text-[#942E3A]/50 transition-transform ${productMenuOpen ? "rotate-180" : ""}`} /></button>{productMenuOpen && <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 overflow-hidden rounded-2xl border border-[#942E3A]/12 bg-[#fffdf8] shadow-xl" onWheel={(event) => event.stopPropagation()}><div className="border-b border-[#942E3A]/10 bg-[#fffaf0] p-2.5"><div className="relative"><Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#942E3A]/40" /><input autoFocus value={productSearch} onChange={(event) => setProductSearch(event.target.value)} placeholder="Search products..." className="h-9 w-full rounded-xl border border-[#942E3A]/10 bg-white pl-9 pr-3 text-xs text-[#6B1F2A] outline-none focus:border-[#D8B46A]" onClick={(event) => event.stopPropagation()} /></div><div className="mt-2 flex gap-1 overflow-x-auto pb-0.5"><button type="button" onClick={() => setProductCategory("all")} className={`shrink-0 rounded-lg px-2.5 py-1.5 text-[10px] font-bold capitalize ${productCategory === "all" ? "bg-[#942E3A] text-[#fff9eb]" : "bg-white text-[#942E3A]/60"}`}>All</button>{productCategories.filter((category) => category !== "all").map((category) => <button type="button" key={category} onClick={() => setProductCategory(category)} className={`shrink-0 rounded-lg px-2.5 py-1.5 text-[10px] font-bold capitalize ${productCategory === category ? "bg-[#942E3A] text-[#fff9eb]" : "bg-white text-[#942E3A]/60"}`}>{category}</button>)}</div></div><div className="max-h-52 overflow-y-auto overscroll-contain p-1.5">{visibleProducts.map((product) => <button type="button" key={product.id} onClick={() => { setSelectedProductId(product.id); setProductMenuOpen(false); }} className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition hover:bg-[#fff1d4] ${selectedProductId === product.id ? "bg-[#fff1d4]" : ""}`}><span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f7e9d8] text-xs font-bold text-[#942E3A]">{product.images[0] ? <img src={product.images[0]} alt="" className="h-full w-full object-cover" /> : product.name.charAt(0)}</span><span className="min-w-0"><span className="block truncate text-xs font-bold text-[#942E3A]">{product.name}</span><span className="mt-0.5 block text-[10px] capitalize text-[#6B1F2A]/50">{product.category}</span></span>{selectedProductId === product.id && <Check className="ml-auto h-4 w-4 shrink-0 text-[#942E3A]" />}</button>)}{visibleProducts.length === 0 && <p className="px-3 py-5 text-center text-xs text-[#6B1F2A]/55">No products match your search.</p>}</div></div>}</div></div>
-        <div><label className="field-label">Customer name</label><input name="customerName" required defaultValue={review?.customerName} placeholder="e.g. Nour Mohamed" className="field-input" /></div>
-        <div className="grid gap-4 sm:grid-cols-2"><div><label className="field-label">Rating</label><RatingPicker value={rating} onChange={setRating} /></div><input type="hidden" name="status" value={review?.status || "approved"} /></div>
-        <div><label className="field-label">Review</label><textarea name="body" required defaultValue={review?.body} placeholder="Write the customer's experience..." rows={4} className="field-input resize-none" /></div>
-        <div className="flex flex-wrap gap-5 pt-1">
-          <label className="group flex cursor-pointer items-center gap-2.5 text-xs font-semibold text-[#6B1F2A]/75"><input type="checkbox" name="verifiedPurchase" defaultChecked={review?.verifiedPurchase} className="review-checkbox sr-only" /><span className="review-checkbox-box flex h-5 w-5 items-center justify-center rounded-md border border-[#942E3A]/20 bg-white transition group-hover:border-[#D8B46A]"><Check className="review-checkbox-icon h-3.5 w-3.5 text-[#fff9eb]" /></span> Verified purchase</label>
-          <label className="group flex cursor-pointer items-center gap-2.5 text-xs font-semibold text-[#942E3A]"><input type="checkbox" name="showOnHome" defaultChecked={review?.showOnHome} className="review-checkbox sr-only" /><span className="review-checkbox-box flex h-5 w-5 items-center justify-center rounded-md border border-[#942E3A]/30 bg-white transition group-hover:border-[#D8B46A]"><Check className="review-checkbox-icon h-3.5 w-3.5 text-[#fff9eb]" /></span> Show on Home Page</label>
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/45 p-4 backdrop-blur-xs" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] bg-[#fffdf8] p-5 shadow-2xl sm:p-7 text-right">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#D8B46A]">
+              {isRtl ? "صوت ومراجعات العملاء" : "Customer voice"}
+            </p>
+            <h2 className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
+              {review ? (isRtl ? "تعديل المراجعة" : "Edit review") : (isRtl ? "إضافة تقييم جديد" : "Add a review")}
+            </h2>
+            <p className="mt-1 text-xs text-[#6B1F2A]/60">
+              {isRtl ? "تسجيل مراجعة العميل وتحديد المنتجات ومكان النشر." : "Capture the customer story and choose where it appears."}
+            </p>
+          </div>
+          <button onClick={onClose} className="rounded-full p-2 text-[#942E3A]/60 hover:bg-[#942E3A]/8" aria-label="Close">
+            <X className="h-5 w-5" />
+          </button>
         </div>
-        <div className="flex justify-end gap-2 border-t border-[#942E3A]/10 pt-5"><button type="button" onClick={onClose} className="rounded-xl px-4 py-2.5 text-xs font-bold text-[#942E3A]/70 hover:bg-[#942E3A]/6">Cancel</button><button className="rounded-xl bg-[#942E3A] px-5 py-2.5 text-xs font-bold text-[#fff9eb] shadow-sm hover:bg-[#7e2531]">{review ? "Save changes" : "Add review"}</button></div>
-      </form>
+
+        <form action={action} className="mt-6 space-y-4" onSubmit={onClose}>
+          {review && <input type="hidden" name="id" value={review.id} />}
+
+          <div>
+            <label className="field-label">{t("reviews.product")}</label>
+            <input type="hidden" name="productId" value={selectedProductId} required />
+            <div ref={productMenuRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setProductMenuOpen((open) => !open)}
+                className={`field-input flex items-center justify-between ${isRtl ? "text-right" : "text-left"}`}
+              >
+                <span className={selectedProduct ? "text-[#6B1F2A]" : "text-[#6B1F2A]/55"}>
+                  {selectedProduct?.name || (isRtl ? "اختر المنتج" : "Choose a product")}
+                </span>
+                <ChevronDown className={`h-4 w-4 text-[#942E3A]/50 transition-transform ${productMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {productMenuOpen && (
+                <div
+                  className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 overflow-hidden rounded-2xl border border-[#942E3A]/12 bg-[#fffdf8] shadow-xl"
+                  onWheel={(event) => event.stopPropagation()}
+                >
+                  <div className="border-b border-[#942E3A]/10 bg-[#fffaf0] p-2.5">
+                    <div className="relative">
+                      <Search className={`absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#942E3A]/40 ${isRtl ? "right-3" : "left-3"}`} />
+                      <input
+                        autoFocus
+                        value={productSearch}
+                        onChange={(event) => setProductSearch(event.target.value)}
+                        placeholder={t("common.search")}
+                        className={`h-9 w-full rounded-xl border border-[#942E3A]/10 bg-white text-xs text-[#6B1F2A] outline-none focus:border-[#D8B46A] ${isRtl ? "pr-9 pl-3 text-right" : "pl-9 pr-3 text-left"}`}
+                        onClick={(event) => event.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="max-h-52 overflow-y-auto overscroll-contain p-1.5">
+                    {visibleProducts.map((product) => (
+                      <button
+                        type="button"
+                        key={product.id}
+                        onClick={() => {
+                          setSelectedProductId(product.id);
+                          setProductMenuOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-right transition hover:bg-[#fff1d4] ${selectedProductId === product.id ? "bg-[#fff1d4]" : ""}`}
+                      >
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f7e9d8] text-xs font-bold text-[#942E3A]">
+                          {product.images[0] ? <img src={product.images[0]} alt="" className="h-full w-full object-cover" /> : product.name.charAt(0)}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-xs font-bold text-[#942E3A]">{product.name}</span>
+                        </span>
+                        {selectedProductId === product.id && <Check className="h-4 w-4 shrink-0 text-[#942E3A]" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="field-label">{t("reviews.customer")}</label>
+            <input
+              name="customerName"
+              required
+              defaultValue={review?.customerName}
+              placeholder={isRtl ? "اسم العميل" : "e.g. Nour Mohamed"}
+              className={`field-input ${isRtl ? "text-right" : "text-left"}`}
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="field-label">{t("reviews.rating")}</label>
+              <RatingPicker value={rating} onChange={setRating} />
+            </div>
+            <input type="hidden" name="status" value={review?.status || "approved"} />
+          </div>
+
+          <div>
+            <label className="field-label">{t("reviews.reviewText")}</label>
+            <textarea
+              name="body"
+              required
+              defaultValue={review?.body}
+              placeholder={isRtl ? "اكتب تعليق أو تجربة العميل..." : "Write the customer's experience..."}
+              rows={4}
+              className={`field-input resize-none ${isRtl ? "text-right" : "text-left"}`}
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-5 pt-1">
+            <label className="group flex cursor-pointer items-center gap-2.5 text-xs font-semibold text-[#6B1F2A]/75">
+              <input type="checkbox" name="verifiedPurchase" defaultChecked={review?.verifiedPurchase} className="review-checkbox sr-only" />
+              <span className="review-checkbox-box flex h-5 w-5 items-center justify-center rounded-md border border-[#942E3A]/20 bg-white transition group-hover:border-[#D8B46A]">
+                <Check className="review-checkbox-icon h-3.5 w-3.5 text-[#fff9eb]" />
+              </span>
+              <span>{isRtl ? "شراء مؤكد" : "Verified purchase"}</span>
+            </label>
+
+            <label className="group flex cursor-pointer items-center gap-2.5 text-xs font-semibold text-[#942E3A]">
+              <input type="checkbox" name="showOnHome" defaultChecked={review?.showOnHome} className="review-checkbox sr-only" />
+              <span className="review-checkbox-box flex h-5 w-5 items-center justify-center rounded-md border border-[#942E3A]/30 bg-white transition group-hover:border-[#D8B46A]">
+                <Check className="review-checkbox-icon h-3.5 w-3.5 text-[#fff9eb]" />
+              </span>
+              <span>{isRtl ? "عرض في الصفحة الرئيسية" : "Show on Home Page"}</span>
+            </label>
+          </div>
+
+          <div className="flex justify-end gap-2 border-t border-[#942E3A]/10 pt-5">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl px-4 py-2.5 text-xs font-bold text-[#942E3A]/70 hover:bg-[#942E3A]/6"
+            >
+              {t("common.cancel")}
+            </button>
+            <button className="rounded-xl bg-[#942E3A] px-5 py-2.5 text-xs font-bold text-[#fff9eb] shadow-xs hover:bg-[#7e2531]">
+              {review ? t("common.save") : (isRtl ? "إضافة التقييم" : "Add review")}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>;
+  );
 }
 
 export default function AdminReviewsClient({ reviews, products }: { reviews: Review[]; products: Product[] }) {
+  const { lang, t, formatNumber } = useAdminI18n();
+  const isRtl = lang === "ar";
   const [filter, setFilter] = useState("all");
   const [scopeFilter, setScopeFilter] = useState<"all" | "home">("all");
   const [query, setQuery] = useState("");
@@ -98,40 +288,52 @@ export default function AdminReviewsClient({ reviews, products }: { reviews: Rev
     <div className="space-y-4 sm:space-y-7">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">Customer voice · reviews</p>
-          <h1 className="mt-0.5 sm:mt-1 font-playfair text-2xl sm:text-4xl font-black tracking-tight text-[#942E3A]">Reviews</h1>
-          <p className="mt-1 hidden sm:block max-w-xl text-sm text-[#6B1F2A]/60">Keep a pulse on what customers love, and curate every story before it reaches your storefront.</p>
+          <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">
+            {isRtl ? "صوت وآراء العملاء" : "Customer voice · reviews"}
+          </p>
+          <h1 className="mt-0.5 sm:mt-1 font-playfair text-2xl sm:text-4xl font-black tracking-tight text-[#942E3A]">
+            {t("reviews.title")}
+          </h1>
+          <p className="mt-1 hidden sm:block max-w-xl text-xs sm:text-sm text-[#6B1F2A]/60">
+            {t("reviews.subtitle")}
+          </p>
         </div>
-        <button onClick={() => setAdding(true)} className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#942E3A] px-3 py-2 text-[11px] font-bold text-[#fff9eb] shadow-xs hover:bg-[#7e2531] shrink-0 sm:px-4 sm:py-3 sm:text-xs"><Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Add review</button>
+        <button
+          onClick={() => setAdding(true)}
+          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#942E3A] px-3 py-2 text-[11px] font-bold text-[#fff9eb] shadow-xs hover:bg-[#7e2531] shrink-0 sm:px-4 sm:py-3 sm:text-xs"
+        >
+          <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span>{isRtl ? "إضافة تقييم" : "Add review"}</span>
+        </button>
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
         <div className="stat-card p-3 sm:p-4 rounded-xl sm:rounded-2xl">
           <span className="stat-icon bg-[#fff1d4] text-[#bc812b]"><MessageSquareQuote className="h-4 w-4" /></span>
           <div>
-            <p className="stat-label text-[9px] sm:text-[10px]">Total reviews</p>
-            <p className="stat-value text-xl sm:text-2xl">{reviews.length}</p>
+            <p className="stat-label text-[9px] sm:text-[10px]">{t("common.total")}</p>
+            <p className="stat-value text-xl sm:text-2xl">{formatNumber(reviews.length)}</p>
           </div>
         </div>
         <div className="stat-card p-3 sm:p-4 rounded-xl sm:rounded-2xl">
           <span className="stat-icon bg-[#fbe8e8] text-[#942E3A]"><Star className="h-4 w-4 fill-current" /></span>
           <div>
-            <p className="stat-label text-[9px] sm:text-[10px]">Average rating</p>
-            <p className="stat-value text-xl sm:text-2xl">{average}<span className="ml-1 text-xs font-normal text-[#942E3A]/45">/ 5</span></p>
+            <p className="stat-label text-[9px] sm:text-[10px]">{t("reviews.rating")}</p>
+            <p className="stat-value text-xl sm:text-2xl">{formatNumber(average)}<span className="ml-1 text-xs font-normal text-[#942E3A]/45">/ 5</span></p>
           </div>
         </div>
         <div className="stat-card p-3 sm:p-4 rounded-xl sm:rounded-2xl">
           <span className="stat-icon bg-[#e7f4ec] text-[#27663d]"><CheckCircle2 className="h-4 w-4" /></span>
           <div>
-            <p className="stat-label text-[9px] sm:text-[10px]">Published</p>
-            <p className="stat-value text-xl sm:text-2xl">{approved.length}</p>
+            <p className="stat-label text-[9px] sm:text-[10px]">{isRtl ? "منشورة بالمتجر" : "Published"}</p>
+            <p className="stat-value text-xl sm:text-2xl">{formatNumber(approved.length)}</p>
           </div>
         </div>
         <div className="stat-card p-3 sm:p-4 rounded-xl sm:rounded-2xl">
           <span className="stat-icon bg-[#fff3d8] text-[#9a6a18]"><MessageSquareQuote className="h-4 w-4" /></span>
           <div>
-            <p className="stat-label text-[9px] sm:text-[10px]">Awaiting review</p>
-            <p className="stat-value text-xl sm:text-2xl">{pending}</p>
+            <p className="stat-label text-[9px] sm:text-[10px]">{t("reviews.pendingApproval")}</p>
+            <p className="stat-value text-xl sm:text-2xl">{formatNumber(pending)}</p>
           </div>
         </div>
       </div>
@@ -141,13 +343,16 @@ export default function AdminReviewsClient({ reviews, products }: { reviews: Rev
           <div>
             <div className="flex items-center gap-2">
               <MessageSquareQuote className="h-4 w-4 sm:h-5 sm:w-5 text-[#D8B46A]" />
-              <h2 className="font-playfair text-lg sm:text-2xl font-bold text-[#942E3A]">Review inbox</h2>
+              <h2 className="font-playfair text-lg sm:text-2xl font-bold text-[#942E3A]">
+                {isRtl ? "صندوق مراجعة التقييمات" : "Review inbox"}
+              </h2>
             </div>
-            <p className="mt-0.5 text-[11px] text-[#6B1F2A]/55 sm:mt-1 sm:text-xs">{filtered.length} {filtered.length === 1 ? "review" : "reviews"} in your workspace</p>
+            <p className="mt-0.5 text-[11px] text-[#6B1F2A]/55 sm:mt-1 sm:text-xs">
+              {formatNumber(filtered.length)} {isRtl ? "تقييم مسجل" : "reviews in your workspace"}
+            </p>
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center flex-wrap">
-            {/* Scope Filter Tabs: All vs Home Page */}
             <div className="flex rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] p-0.5">
               <button
                 type="button"
@@ -156,7 +361,7 @@ export default function AdminReviewsClient({ reviews, products }: { reviews: Rev
                   scopeFilter === "all" ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"
                 }`}
               >
-                All Reviews
+                {t("common.all")}
               </button>
               <button
                 type="button"
@@ -166,19 +371,18 @@ export default function AdminReviewsClient({ reviews, products }: { reviews: Rev
                 }`}
               >
                 <Home className="h-3 w-3" />
-                <span>Home ({homeCount})</span>
+                <span>{isRtl ? "الرئيسية" : "Home"} ({formatNumber(homeCount)})</span>
               </button>
             </div>
 
             <div className="relative flex-1 sm:flex-none">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#942E3A]/40" />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search reviews..." className="h-8 w-full rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] pl-8 pr-3 text-xs outline-none focus:border-[#D8B46A] sm:h-9 sm:w-48" />
-            </div>
-
-            <div className="flex rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] p-0.5">
-              {[["all", "All"], ["pending", "Pending"], ["approved", "Published"]].map(([value, label]) => (
-                <button key={value} onClick={() => setFilter(value)} className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition ${filter === value ? "bg-[#942E3A] text-[#fff9eb]" : "text-[#942E3A]/60 hover:text-[#942E3A]"}`}>{label}</button>
-              ))}
+              <Search className={`absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#942E3A]/40 ${isRtl ? "right-3" : "left-3"}`} />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder={t("common.search")}
+                className={`h-8 w-full rounded-xl border border-[#942E3A]/12 bg-[#fffdf8] text-xs outline-none focus:border-[#D8B46A] sm:h-9 sm:w-48 ${isRtl ? "pr-8 pl-3 text-right" : "pl-8 pr-3 text-left"}`}
+              />
             </div>
           </div>
         </div>
@@ -199,12 +403,12 @@ export default function AdminReviewsClient({ reviews, products }: { reviews: Rev
                   <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-[#6B1F2A]/55 sm:mt-1 sm:gap-2">
                     <span className="truncate font-semibold text-[#942E3A]/75">{review.product.name}</span>
                     <span>·</span>
-                    <span>{new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                    {review.verifiedPurchase && <span className="inline-flex items-center gap-0.5 font-bold text-[#27663d]"><Check className="h-3 w-3" /> Verified</span>}
+                    <span>{new Date(review.createdAt).toLocaleDateString(isRtl ? "ar-EG" : "en-US", { month: "short", day: "numeric" })}</span>
+                    {review.verifiedPurchase && <span className="inline-flex items-center gap-0.5 font-bold text-[#27663d]"><Check className="h-3 w-3" /> {isRtl ? "مؤكد" : "Verified"}</span>}
                   </div>
                 </div>
                 <span className={`h-fit rounded-full px-2 py-0.5 text-[9px] font-bold capitalize shrink-0 sm:px-2.5 sm:py-1 ${statusStyles[review.status] || statusStyles.pending}`}>
-                  {review.status === "approved" ? "Published" : review.status}
+                  {review.status === "approved" ? (isRtl ? "منشورة" : "Published") : review.status}
                 </span>
               </div>
               <p className="mt-2.5 text-xs leading-5 text-[#6B1F2A]/75 sm:mt-3 sm:leading-6 break-words">{review.body}</p>
@@ -219,22 +423,22 @@ export default function AdminReviewsClient({ reviews, products }: { reviews: Rev
                     <input type="hidden" name="showOnHome" value={String(!review.showOnHome)} />
                     <button type="submit" className={`inline-flex items-center gap-1 rounded-xl border px-2 py-1.5 text-[10px] font-bold transition sm:px-2.5 ${review.showOnHome ? "border-[#942E3A] bg-[#942E3A] text-white shadow-xs" : "border-[#942E3A]/20 bg-white text-[#942E3A]/70 hover:border-[#942E3A]"}`} title="Toggle show on Home Page">
                       <Home className="h-3 w-3" />
-                      <span>Home</span>
+                      <span>{isRtl ? "الرئيسية" : "Home"}</span>
                       <span className={`h-2 w-2 rounded-full ${review.showOnHome ? "bg-[#D8B46A]" : "bg-stone-300"}`} />
                     </button>
                   </form>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 ml-auto sm:ml-0">
-                  <button onClick={() => setEditing(review)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-bold text-[#942E3A]/70 hover:bg-[#942E3A]/8 hover:text-[#942E3A]"><Pencil className="h-3 w-3" /> Edit</button>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button onClick={() => setEditing(review)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-bold text-[#942E3A]/70 hover:bg-[#942E3A]/8 hover:text-[#942E3A]"><Pencil className="h-3 w-3" /> {t("common.edit")}</button>
                   <form action={deleteReviewAction}>
                     <input type="hidden" name="id" value={review.id} />
-                    <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-bold text-[#a33b43]/70 hover:bg-[#fae9e8] hover:text-[#a33b43]" onClick={(event) => { if (!window.confirm("Delete this review permanently?")) event.preventDefault(); }}><Trash2 className="h-3 w-3" /> Delete</button>
+                    <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-bold text-[#a33b43]/70 hover:bg-[#fae9e8] hover:text-[#a33b43]" onClick={(event) => { if (!window.confirm(isRtl ? "هل أنت تأكد من حذف هذا التقييم نهائياً؟" : "Delete this review permanently?")) event.preventDefault(); }}><Trash2 className="h-3 w-3" /> {t("common.delete")}</button>
                   </form>
                 </div>
               </div>
             </article>
           ))}
-          {filtered.length === 0 && <div className="col-span-full rounded-2xl border border-dashed border-[#942E3A]/15 py-12 text-center sm:py-16"><MessageSquareQuote className="mx-auto h-8 w-8 text-[#D8B46A]" /><p className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">No reviews found</p><p className="mt-1 text-xs text-[#6B1F2A]/55">Try another filter or add the first review.</p></div>}
+          {filtered.length === 0 && <div className="col-span-full rounded-2xl border border-dashed border-[#942E3A]/15 py-12 text-center sm:py-16"><MessageSquareQuote className="mx-auto h-8 w-8 text-[#D8B46A]" /><p className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">{t("common.noResults")}</p></div>}
         </div>
       </section>
       {(adding || editing) && <ReviewForm review={editing} products={products} onClose={() => { setAdding(false); setEditing(undefined); }} />}

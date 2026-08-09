@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import { ArrowRight, CalendarDays, ShieldCheck, Users, UserRoundPlus } from "lucide-react";
 import AdminCreateTeamMemberModal from "@/components/AdminCreateTeamMemberModal";
+import AdminPageTranslationBoundary from "@/components/AdminPageTranslationBoundary";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ export default async function TeamPage() {
   ];
 
   return (
+    <AdminPageTranslationBoundary>
     <div className="space-y-4 sm:space-y-6">
       {/* Header section */}
       <div className="flex items-center justify-between gap-3">
@@ -127,5 +129,6 @@ export default async function TeamPage() {
         </p>
       </div>
     </div>
+    </AdminPageTranslationBoundary>
   );
 }

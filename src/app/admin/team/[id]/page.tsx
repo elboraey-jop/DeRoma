@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/adminAuth";
 import AdminChangeTeamPasswordModal from "@/components/AdminChangeTeamPasswordModal";
 import { removeTeamMemberAction } from "@/app/admin/team/actions";
 import AdminBackButton from "@/components/AdminBackButton";
+import AdminPageTranslationBoundary from "@/components/AdminPageTranslationBoundary";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default async function TeamMemberPage({ params }: { params: Promise<{ id:
   const isSelf = member.id === current.id;
 
   return (
+    <AdminPageTranslationBoundary>
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <AdminBackButton fallbackHref="/admin/team" ariaLabel="Back to team" />
@@ -77,5 +79,6 @@ export default async function TeamMemberPage({ params }: { params: Promise<{ id:
         </section>
       )}
     </div>
+    </AdminPageTranslationBoundary>
   );
 }

@@ -302,15 +302,24 @@ export default async function TrackOrderPage({ searchParams }: PageProps) {
                 </div>
 
                 <div className="rounded-3xl border border-[#942E3A]/25 bg-[#942E3A] p-6 text-[#FFF9EB] shadow-lg">
-                  <h3 className="mb-5 flex items-center gap-2 font-playfair text-xl font-extrabold">
+                  <h3 className="mb-3 flex items-center gap-2 font-playfair text-xl font-extrabold">
                     <Phone className="h-5 w-5 text-[#D8B46A]" />
-                    Need Support?
+                    Need Support or Cancellation?
                   </h3>
                   <p className="text-sm font-light leading-relaxed text-[#FFF9EB]/85">
-                    Keep your order reference ready when contacting support so the team can help faster.
+                    If you wish to cancel or modify your order, please contact our support team directly on WhatsApp with your order reference.
                   </p>
-                  <p className="mt-4 text-sm font-bold text-[#D8B46A]">support@deromastore.com</p>
+                  <a
+                    href={`https://wa.me/201023456789?text=${encodeURIComponent(`Hello DeRoma support, I would like to inquire about/cancel order: ${order.orderNumber}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#D8B46A] px-5 py-2.5 text-xs font-bold text-[#942E3A] shadow-sm transition hover:bg-[#c4a159]"
+                  >
+                    <Phone className="h-4 w-4" />
+                    <span>Contact via WhatsApp</span>
+                  </a>
                 </div>
+
               </div>
 
               <div className="rounded-3xl border border-[#942E3A]/25 bg-white p-6 shadow-xs">

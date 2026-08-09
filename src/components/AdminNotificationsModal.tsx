@@ -12,16 +12,17 @@ import {
   Star,
   RefreshCw,
   ChevronRight,
+  ChevronLeft,
   CheckCircle2,
   Layers,
   Check,
-  Trash2,
 } from "lucide-react";
 import {
   getAdminNotificationsAction,
   NotificationCategory,
   NotificationSummary,
 } from "@/app/admin/notifications-actions";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 export default function AdminNotificationsModal({
   isOpen,
@@ -35,12 +36,14 @@ export default function AdminNotificationsModal({
   onUpdateSummary?: (summary: NotificationSummary) => void;
 }) {
   const router = useRouter();
+  const { lang, t, formatNumber } = useAdminI18n();
+  const isRtl = lang === "ar";
+
   const [rawData, setRawData] = useState<NotificationSummary | null>(initialData || null);
   const [activeTab, setActiveTab] = useState<NotificationCategory>("all");
   const [isLoading, setIsLoading] = useState(false);
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
-  // Load dismissed notifications from localStorage on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem("dismissed_admin_notifications");
@@ -80,7 +83,6 @@ export default function AdminNotificationsModal({
     }
   }, [isOpen]);
 
-  // Compute active data by filtering out dismissed IDs
   const data = useMemo(() => {
     if (!rawData) return null;
     const activeItems = rawData.items.filter((item) => !dismissedIds.includes(item.id));
@@ -128,12 +130,11 @@ export default function AdminNotificationsModal({
         onClick={onClose}
       />
 
-      {/* Modal Card - Centered in screen with fixed max-height & flex layout */}
+      {/* Modal Card */}
       <div
         onWheel={(e) => e.stopPropagation()}
         className="relative w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden rounded-3xl border border-[#942E3A]/20 bg-[#fffdf8] text-[#942E3A] shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-200"
       >
-        
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-[#942E3A]/10 bg-white px-5 py-4 sm:px-6 shrink-0">
           <div className="flex items-center gap-2.5">
@@ -143,16 +144,18 @@ export default function AdminNotificationsModal({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="font-playfair text-lg sm:text-xl font-bold text-[#942E3A]">
-                  Notifications Hub
+                  {t("common.notifications")}
                 </h2>
                 {data && data.totalCount > 0 ? (
                   <span className="rounded-full bg-[#942E3A] px-2 py-0.5 text-[10px] font-extrabold text-[#FFF9EB]">
-                    {data.totalCount} active
+                    {formatNumber(data.totalCount)} {isRtl ? "نشطة" : "active"}
                   </span>
                 ) : null}
               </div>
               <p className="text-[11px] text-[#6B1F2A]/65">
-                Real-time alerts for orders, inventory, messages & reviews.
+                {isRtl
+                  ? "تنبيهات فورية ومباشرة للطلبات، المخزون، والرسائل والتقييمات"
+                  : "Real-time alerts for orders, inventory, messages & reviews."}
               </p>
             </div>
           </div>
@@ -161,11 +164,11 @@ export default function AdminNotificationsModal({
             {data && data.totalCount > 0 && (
               <button
                 onClick={handleDismissAll}
-                className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB] px-2.5 py-1.5 text-[11px] font-bold text-[#942E3A] hover:bg-[#942E3A] hover:text-white transition-all mr-1"
-                title="Dismiss all active notifications"
+                className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB] px-2.5 py-1.5 text-[11px] font-bold text-[#942E3A] hover:bg-[#942E3A] hover:text-white transition-all"
+                title={t("common.markAllAsRead")}
               >
                 <CheckCircle2 className="h-3.5 w-3.5 text-[#D8B46A]" />
-                <span>Mark All Read</span>
+                <span>{t("common.markAllAsRead")}</span>
               </button>
             )}
 
@@ -173,11 +176,11 @@ export default function AdminNotificationsModal({
               onClick={fetchNotifications}
               disabled={isLoading}
               className="rounded-xl p-2 text-[#942E3A]/60 hover:bg-[#942E3A]/8 transition-colors"
-              title="Refresh Notifications"
+              title={isRtl ? "تحديث الإشعارات" : "Refresh Notifications"}
             >
               <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin text-[#D8B46A]" : ""}`} />
             </button>
-            
+
             <button
               onClick={onClose}
               className="rounded-xl p-2 text-[#942E3A]/60 hover:bg-[#942E3A]/8 transition-colors"
@@ -188,7 +191,7 @@ export default function AdminNotificationsModal({
           </div>
         </div>
 
-        {/* Category Tabs Filter - Smooth horizontal scroll */}
+        {/* Category Tabs Filter */}
         <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-[#942E3A]/10 bg-[#FFF9EB]/70 px-4 py-3 hide-scrollbar shrink-0">
           <button
             onClick={() => setActiveTab("all")}
@@ -199,7 +202,9 @@ export default function AdminNotificationsModal({
             }`}
           >
             <Layers className="h-3.5 w-3.5 shrink-0" />
-            <span>All {data ? `(${data.totalCount})` : ""}</span>
+            <span>
+              {t("common.all")} {data ? `(${formatNumber(data.totalCount)})` : ""}
+            </span>
           </button>
 
           <button
@@ -211,7 +216,9 @@ export default function AdminNotificationsModal({
             }`}
           >
             <ClipboardList className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-            <span>Orders {data ? `(${data.ordersCount})` : ""}</span>
+            <span>
+              {t("navigation.orders")} {data ? `(${formatNumber(data.ordersCount)})` : ""}
+            </span>
           </button>
 
           <button
@@ -223,7 +230,9 @@ export default function AdminNotificationsModal({
             }`}
           >
             <AlertTriangle className="h-3.5 w-3.5 text-red-500 shrink-0" />
-            <span>Stock {data ? `(${data.stockCount})` : ""}</span>
+            <span>
+              {t("navigation.inventory")} {data ? `(${formatNumber(data.stockCount)})` : ""}
+            </span>
           </button>
 
           <button
@@ -235,7 +244,9 @@ export default function AdminNotificationsModal({
             }`}
           >
             <MessageSquare className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-            <span>Messages {data ? `(${data.messagesCount})` : ""}</span>
+            <span>
+              {t("navigation.messages")} {data ? `(${formatNumber(data.messagesCount)})` : ""}
+            </span>
           </button>
 
           <button
@@ -247,13 +258,14 @@ export default function AdminNotificationsModal({
             }`}
           >
             <Star className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-            <span>Reviews {data ? `(${data.reviewsCount})` : ""}</span>
+            <span>
+              {t("navigation.reviews")} {data ? `(${formatNumber(data.reviewsCount)})` : ""}
+            </span>
           </button>
         </div>
 
-        {/* Notifications Scrollable List - Added min-h-0 to enable flexbox scroll */}
+        {/* Notifications Scrollable List */}
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-2.5">
-          {/* Skeleton Loader when loading */}
           {isLoading && (!data || data.items.length === 0) ? (
             <div className="space-y-2.5">
               {[1, 2, 3, 4, 5].map((n) => (
@@ -275,10 +287,9 @@ export default function AdminNotificationsModal({
           ) : filteredItems.length === 0 ? (
             <div className="py-12 text-center space-y-2">
               <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500/70" />
-              <h3 className="text-sm font-bold text-[#942E3A]">All clear!</h3>
-              <p className="text-xs text-[#6B1F2A]/60 max-w-xs mx-auto">
-                No active notifications in this category right now.
-              </p>
+              <h3 className="text-sm font-bold text-[#942E3A]">
+                {t("common.noNotifications")}
+              </h3>
             </div>
           ) : (
             filteredItems.map((item) => {
@@ -332,16 +343,19 @@ export default function AdminNotificationsModal({
                     </p>
                   </div>
 
-                  {/* Actions: Mark as Read (Dismiss) single item */}
                   <div className="flex items-center gap-1 shrink-0 self-center">
                     <button
                       onClick={(e) => handleDismissSingle(item.id, e)}
                       className="rounded-xl border border-stone-200 bg-stone-50 p-1.5 text-stone-400 opacity-70 hover:opacity-100 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all"
-                      title="Mark as read / Dismiss"
+                      title={isRtl ? "تحديد كمقروء" : "Mark as read"}
                     >
                       <Check className="h-3.5 w-3.5" />
                     </button>
-                    <ChevronRight className="h-4 w-4 text-[#942E3A]/30 transition-transform group-hover:translate-x-0.5 group-hover:text-[#942E3A]" />
+                    {isRtl ? (
+                      <ChevronLeft className="h-4 w-4 text-[#942E3A]/30 transition-transform group-hover:-translate-x-0.5 group-hover:text-[#942E3A]" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 text-[#942E3A]/30 transition-transform group-hover:translate-x-0.5 group-hover:text-[#942E3A]" />
+                    )}
                   </div>
                 </div>
               );
@@ -349,10 +363,10 @@ export default function AdminNotificationsModal({
           )}
         </div>
 
-        {/* Modal Footer with Mark All Read Action */}
+        {/* Modal Footer */}
         <div className="flex items-center justify-between border-t border-[#942E3A]/10 bg-white px-5 py-3 text-center shrink-0">
           <p className="text-[11px] text-stone-400 font-medium">
-            Clicking any notification opens its page.
+            {isRtl ? "الضغط على أي إشعار ينقلك لصفحته المباشرة" : "Clicking any notification opens its page."}
           </p>
 
           {data && data.totalCount > 0 && (
@@ -361,11 +375,10 @@ export default function AdminNotificationsModal({
               className="inline-flex items-center gap-1 rounded-lg border border-[#942E3A]/15 bg-[#FFF9EB] px-2.5 py-1 text-[11px] font-bold text-[#942E3A] hover:bg-[#942E3A] hover:text-white transition-all"
             >
               <CheckCircle2 className="h-3 w-3 text-[#D8B46A]" />
-              <span>Mark All Read</span>
+              <span>{t("common.markAllAsRead")}</span>
             </button>
           )}
         </div>
-
       </div>
     </div>
   );

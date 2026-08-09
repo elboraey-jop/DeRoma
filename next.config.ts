@@ -29,15 +29,43 @@ const securityHeaders = [
   {
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(), geolocation=()'
+  },
+  {
+    key: 'Content-Security-Policy',
+    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'none';"
   }
 ];
 
+
 const nextConfig: NextConfig = {
+  compress: true,
+  reactStrictMode: true,
+  experimental: {
+    optimizePackageImports: ["lucide-react", "framer-motion", "clsx", "tailwind-merge"],
+  },
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        source: "/banners/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
       },
     ];
   },
@@ -64,4 +92,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
 

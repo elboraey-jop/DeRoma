@@ -2,11 +2,17 @@
 
 import { redirect } from "next/navigation";
 import { loginAdmin, logoutAdmin } from "@/lib/adminAuth";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export async function loginAdminAction(_previousState: { error: string } | null, formData: FormData) {
-  const email = String(formData.get("email") || "");
+  const email = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
   if (!email || !password) return { error: "Enter your email and password." };
+
+  const rateCheck = checkRateLimit(`admin_login_${email}`, 5, 300);
+  if (!rateCheck.success) {
+    return { error: "Too many failed login attempts. Please wait 5 minutes before trying again." };
+  }
 
   try {
     const result = await loginAdmin(email, password);
@@ -18,6 +24,7 @@ export async function loginAdminAction(_previousState: { error: string } | null,
 
   redirect("/admin");
 }
+
 
 export async function logoutAdminAction() {
   await logoutAdmin();

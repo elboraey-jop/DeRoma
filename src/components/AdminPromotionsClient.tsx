@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { useToast } from "@/providers/ToastProvider";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 import {
   createPromotionAction,
   togglePromotionAction,
@@ -849,6 +850,8 @@ export default function AdminPromotionsClient({
   promotions: SerializedPromotion[];
   announcements: SerializedAnnouncementBar[];
 }) {
+  const { lang, t, formatPrice, formatNumber } = useAdminI18n();
+  const isRtl = lang === "ar";
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"promos" | "announcements">("promos");
 
@@ -941,13 +944,13 @@ export default function AdminPromotionsClient({
       <div className="flex items-center justify-between gap-3 min-w-0">
         <div className="min-w-0">
           <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
-            Growth & Marketing
+            {isRtl ? "التسويق والمبيعات" : "Growth & Marketing"}
           </p>
           <h1 className="mt-0.5 sm:mt-1 font-playfair text-2xl sm:text-3xl font-black text-[#942E3A] truncate">
-            Promotions & Announcements
+            {t("promotions.title")}
           </h1>
           <p className="mt-1 hidden sm:block text-xs text-[#6B1F2A]/65">
-            Manage coupon codes, targeted discounts, free shipping rules, and storefront top bar banners.
+            {t("promotions.subtitle")}
           </p>
         </div>
 
@@ -959,7 +962,7 @@ export default function AdminPromotionsClient({
             className="flex items-center justify-center gap-1.5 rounded-xl bg-[#942E3A] px-3 py-2 text-[11px] font-bold text-[#FFF9EB] shadow-xs transition hover:bg-[#802832] shrink-0 sm:px-5 sm:py-3 sm:text-xs sm:rounded-2xl"
           >
             <Plus className="h-3.5 w-3.5 text-[#D8B46A] sm:h-4 sm:w-4" />
-            <span>Create Promo</span>
+            <span>{isRtl ? "إنشاء كود خصم" : "Create Promo"}</span>
           </button>
         ) : null}
       </div>
@@ -969,43 +972,43 @@ export default function AdminPromotionsClient({
         <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3 shadow-xs sm:rounded-2xl sm:p-4 min-w-0">
           <div className="flex items-center justify-between min-w-0">
             <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
-              Total Rules
+              {isRtl ? "إجمالي العروض" : "Total Rules"}
             </p>
             <Tag className="h-4 w-4 text-[#D8B46A] shrink-0 ml-1" />
           </div>
           <p className="mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A] truncate">
-            {promotions.length}
+            {formatNumber(promotions.length)}
           </p>
         </div>
 
         <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3 shadow-xs sm:rounded-2xl sm:p-4 min-w-0">
           <div className="flex items-center justify-between min-w-0">
             <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
-              Active Codes
+              {isRtl ? "الكوبونات النشطة" : "Active Codes"}
             </p>
             <Sparkles className="h-4 w-4 text-emerald-600 shrink-0 ml-1" />
           </div>
           <p className="mt-1 font-playfair text-xl sm:text-2xl font-black text-emerald-700 truncate">
-            {activePromosCount}
+            {formatNumber(activePromosCount)}
           </p>
         </div>
 
         <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3 shadow-xs sm:rounded-2xl sm:p-4 min-w-0">
           <div className="flex items-center justify-between min-w-0">
             <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
-              Total Redemptions
+              {isRtl ? "إجمالي الاستخدامات" : "Total Redemptions"}
             </p>
             <TrendingUp className="h-4 w-4 text-[#942E3A] shrink-0 ml-1" />
           </div>
           <p className="mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A] truncate">
-            {totalRedemptions.toLocaleString("en-US")}
+            {formatNumber(totalRedemptions)}
           </p>
         </div>
 
         <div className="rounded-xl border border-[#D8B46A]/40 bg-[#fff7df] p-3 shadow-xs sm:rounded-2xl sm:p-4 min-w-0">
           <div className="flex items-center justify-between min-w-0">
             <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
-              Top Bar Status
+              {isRtl ? "شريط التنبيهات العلوي" : "Top Bar Status"}
             </p>
             <Megaphone className="h-4 w-4 text-[#942E3A] shrink-0 ml-1" />
           </div>
@@ -1017,7 +1020,7 @@ export default function AdminPromotionsClient({
               )}
             />
             <span className="font-playfair text-xs sm:text-sm font-black text-[#942E3A] truncate">
-              {activeAnnouncement ? "Active Banner" : "Disabled"}
+              {activeAnnouncement ? (isRtl ? "شريط نشط" : "Active Banner") : (isRtl ? "معطل" : "Disabled")}
             </span>
           </div>
         </div>
@@ -1037,7 +1040,7 @@ export default function AdminPromotionsClient({
             )}
           >
             <Tag className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
-            <span className="truncate">Coupons</span>
+            <span className="truncate">{isRtl ? "كوبونات الخصم" : "Coupons"}</span>
             <span
               className={cn(
                 "rounded-full px-1.5 py-0.5 text-[10px] font-black shrink-0",
@@ -1046,7 +1049,7 @@ export default function AdminPromotionsClient({
                   : "bg-[#942E3A]/15 text-[#942E3A]"
               )}
             >
-              {promotions.length}
+              {formatNumber(promotions.length)}
             </span>
           </button>
 

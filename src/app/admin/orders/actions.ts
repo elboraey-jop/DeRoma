@@ -39,7 +39,9 @@ export async function updateOrderStatusAction(formData: FormData) {
     if (!getAllowedNextStatuses(order.status, order.paymentMethod).includes(status))
       throw new Error("This order can only move to its next step or be cancelled.");
 
-    if (order.status !== "cancelled" && status === "cancelled") {
+    const isRestockedStatus = (s: string) => s === "cancelled" || s === "returned";
+
+    if (!isRestockedStatus(order.status) && isRestockedStatus(status)) {
       for (const item of order.items) {
         await tx.productVariant.update({
           where: { id: item.variantId },
@@ -48,7 +50,7 @@ export async function updateOrderStatusAction(formData: FormData) {
       }
     }
 
-    if (order.status === "cancelled" && status !== "cancelled") {
+    if (isRestockedStatus(order.status) && !isRestockedStatus(status)) {
       for (const item of order.items) {
         const reserved = await tx.productVariant.updateMany({
           where: { id: item.variantId, stock: { gte: item.quantity } },
@@ -62,6 +64,7 @@ export async function updateOrderStatusAction(formData: FormData) {
     await tx.order.update({ where: { id }, data: { status } });
     return order.items.map((item) => item.productId);
   });
+
 
   revalidatePath("/admin");
   revalidatePath("/admin/orders");

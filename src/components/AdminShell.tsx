@@ -8,6 +8,7 @@ import {
   Bell,
   Boxes,
   CalendarDays,
+  ChevronLeft,
   ChevronRight,
   ClipboardList,
   DollarSign,
@@ -31,52 +32,64 @@ import {
   getAdminNotificationsAction,
   NotificationSummary,
 } from "@/app/admin/notifications-actions";
+import { AdminI18nProvider, useAdminI18n } from "@/providers/AdminI18nContext";
+import AdminLangToggle from "@/components/AdminLangToggle";
 
 interface NavItem {
-  label: string;
+  key: string;
   href: string;
   icon: any;
 }
 
 interface NavGroup {
-  groupName: string;
+  groupKey: string;
   items: NavItem[];
 }
 
 const navigationGroups: NavGroup[] = [
   {
-    groupName: "DASHBOARD & METRICS",
+    groupKey: "navigation.dashboardMetrics",
     items: [
-      { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-      { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-      { label: "Daily Log", href: "/admin/daily-log", icon: CalendarDays },
-      { label: "Team", href: "/admin/team", icon: Users },
+      { key: "navigation.dashboard", href: "/admin", icon: LayoutDashboard },
+      { key: "navigation.analytics", href: "/admin/analytics", icon: BarChart3 },
+      { key: "navigation.financials", href: "/admin/financials", icon: DollarSign },
+      { key: "navigation.dailyLog", href: "/admin/daily-log", icon: CalendarDays },
+      { key: "navigation.team", href: "/admin/team", icon: Users },
     ],
   },
   {
-    groupName: "OPERATIONS & CATALOG",
+    groupKey: "navigation.operationsCatalog",
     items: [
-      { label: "Orders", href: "/admin/orders", icon: ClipboardList },
-      { label: "Products", href: "/admin/products", icon: ShoppingBag },
-      { label: "Inventory", href: "/admin/inventory", icon: Package },
-      { label: "Suppliers", href: "/admin/suppliers", icon: Boxes },
+      { key: "navigation.orders", href: "/admin/orders", icon: ClipboardList },
+      { key: "navigation.products", href: "/admin/products", icon: ShoppingBag },
+      { key: "navigation.inventory", href: "/admin/inventory", icon: Package },
+      { key: "navigation.suppliers", href: "/admin/suppliers", icon: Boxes },
     ],
   },
   {
-    groupName: "CUSTOMER EXPERIENCE",
+    groupKey: "navigation.customerExperience",
     items: [
-      { label: "Website CMS", href: "/admin/website", icon: Globe },
-      { label: "Messages", href: "/admin/messages", icon: MessageSquare },
-      { label: "Customers", href: "/admin/customers", icon: Users },
-      { label: "Reviews", href: "/admin/reviews", icon: MessageSquareQuote },
-      { label: "Promotions", href: "/admin/promotions", icon: Percent },
-      { label: "Shipping", href: "/admin/shipping", icon: Truck },
+      { key: "navigation.website", href: "/admin/website", icon: Globe },
+      { key: "navigation.messages", href: "/admin/messages", icon: MessageSquare },
+      { key: "navigation.customers", href: "/admin/customers", icon: Users },
+      { key: "navigation.reviews", href: "/admin/reviews", icon: MessageSquareQuote },
+      { key: "navigation.promotions", href: "/admin/promotions", icon: Percent },
+      { key: "navigation.shipping", href: "/admin/shipping", icon: Truck },
     ],
   },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
+  return (
+    <AdminI18nProvider>
+      <AdminShellContent>{children}</AdminShellContent>
+    </AdminI18nProvider>
+  );
+}
+
+function AdminShellContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { lang, t, formatNumber } = useAdminI18n();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notifSummary, setNotifSummary] = useState<NotificationSummary | null>(null);
@@ -100,11 +113,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   if (pathname === "/admin/login") return <>{children}</>;
 
   const totalUnread = notifSummary?.totalCount || 0;
+  const isRtl = lang === "ar";
 
   return (
-    <div className="flex min-h-screen bg-[#f7f1e8]">
+    <div data-admin-shell className="flex min-h-screen bg-[#f7f1e8]">
       {/* Desktop Sidebar */}
-      <div className="fixed inset-y-0 left-0 z-40 hidden lg:block">
+      <div className="z-40 hidden h-screen w-64 shrink-0 lg:sticky lg:top-0 lg:block">
         <AdminSidebar
           pathname={pathname}
           notifSummary={notifSummary}
@@ -120,7 +134,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             onClick={() => setIsSidebarOpen(false)}
             aria-label="Close admin menu"
           />
-          <div className="fixed inset-y-0 left-0 z-50 lg:hidden">
+          <div className={cn("fixed inset-y-0 z-50 lg:hidden", isRtl ? "right-0" : "left-0")}>
             <AdminSidebar
               pathname={pathname}
               onClose={() => setIsSidebarOpen(false)}
@@ -131,7 +145,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </>
       )}
 
-      <div className="min-w-0 flex-1 lg:pl-[250px]">
+      <div className="min-w-0 flex-1 overflow-x-hidden">
         {/* Mobile Header / Top Bar (Fixed on Mobile) */}
         <div className="fixed top-0 left-0 right-0 z-30 flex h-14 items-center justify-between border-b border-[#942E3A]/10 bg-[#f7f1e8]/95 px-3 backdrop-blur-md shadow-2xs sm:px-6 lg:hidden">
           <button
@@ -140,10 +154,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             aria-label="Open admin menu"
           >
             <Menu className="h-4 w-4 text-[#D8B46A]" />
-            <span>Menu</span>
+            <span>{t("common.menu")}</span>
           </button>
 
-          {/* Mobile Top Bar Notification Icon (Top Right) */}
+          {/* Mobile Top Bar Notification Icon */}
           <button
             onClick={() => setIsNotificationsOpen(true)}
             className="relative flex items-center justify-center rounded-xl border border-[#942E3A]/15 bg-white p-2 text-[#942E3A] shadow-xs hover:bg-[#FFF9EB] transition-colors"
@@ -152,13 +166,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             <Bell className="h-4 w-4 text-[#942E3A]" />
             {totalUnread > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#D8B46A] px-1 text-[9px] font-black text-[#942E3A] shadow-2xs">
-                {totalUnread > 99 ? "99+" : totalUnread}
+                {totalUnread > 99 ? "99+" : formatNumber(totalUnread)}
               </span>
             )}
           </button>
         </div>
 
-        <main className="mx-auto min-w-0 max-w-[1500px] p-3 pt-16 sm:p-6 lg:p-8">
+        <main className="mx-auto w-full min-w-0 max-w-full overflow-x-hidden p-3 pt-16 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
@@ -185,33 +199,32 @@ function AdminSidebar({
   notifSummary: NotificationSummary | null;
   onOpenNotifications: () => void;
 }) {
-  const asideRef = useRef<HTMLElement>(null);
+  const { lang, t, formatNumber } = useAdminI18n();
   const navRef = useRef<HTMLElement>(null);
+  const isRtl = lang === "ar";
 
   useEffect(() => {
-    const aside = asideRef.current;
     const nav = navRef.current;
-    if (!aside || !nav) return;
+    if (!nav) return;
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      if (nav.scrollHeight > nav.clientHeight) {
-        nav.scrollTop += e.deltaY;
-      }
+      e.stopPropagation();
+      nav.scrollTop += e.deltaY;
     };
 
-    aside.addEventListener("wheel", handleWheel, { passive: false });
-    return () => aside.removeEventListener("wheel", handleWheel);
+    // Keep wheel scrolling scoped to the navigation list instead of the page.
+    nav.addEventListener("wheel", handleWheel, { passive: false });
+    return () => nav.removeEventListener("wheel", handleWheel);
   }, []);
 
   const totalUnread = notifSummary?.totalCount || 0;
 
   return (
     <aside
-      ref={asideRef}
-      className="flex h-full min-h-0 w-[250px] shrink-0 flex-col bg-[#942E3A] text-[#FFF9EB] overscroll-contain"
+      className="flex h-full min-h-0 w-64 shrink-0 flex-col bg-[#942E3A] text-[#FFF9EB] overscroll-contain"
     >
-      {/* Sidebar Header with Brand & Notification Bell (Top Right of Sidebar Header) */}
+      {/* Sidebar Header with Brand & Notification Bell */}
       <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
         <Link
           href="/admin"
@@ -225,20 +238,20 @@ function AdminSidebar({
         </Link>
 
         <div className="flex items-center gap-1">
-          {/* Notification Bell Icon (Top Right Header area) */}
+          {/* Notification Bell Icon */}
           <button
             onClick={() => {
               if (onClose) onClose();
               onOpenNotifications();
             }}
             className="relative rounded-full p-2 text-[#D8B46A] hover:bg-white/10 transition-colors"
-            title="Notifications"
+            title={t("common.notifications")}
             aria-label="Open notifications"
           >
             <Bell className="h-4.5 w-4.5" />
             {totalUnread > 0 && (
               <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#D8B46A] px-1 text-[9px] font-black text-[#942E3A] ring-2 ring-[#942E3A]">
-                {totalUnread > 99 ? "99+" : totalUnread}
+                {totalUnread > 99 ? "99+" : formatNumber(totalUnread)}
               </span>
             )}
           </button>
@@ -260,15 +273,16 @@ function AdminSidebar({
         className="hide-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-4"
       >
         {navigationGroups.map((group) => (
-          <div key={group.groupName} className="space-y-1">
+          <div key={group.groupKey} className="space-y-1">
             <div className="px-3 pb-1 text-[9px] font-extrabold uppercase tracking-[0.22em] text-[#D8B46A]/80">
-              {group.groupName}
+              {t(group.groupKey)}
             </div>
             {group.items.map((item) => {
               const isActive =
                 item.href === "/admin"
                   ? pathname === "/admin"
                   : pathname.startsWith(item.href);
+              const label = t(item.key);
               return (
                 <Link
                   key={item.href}
@@ -287,8 +301,14 @@ function AdminSidebar({
                       isActive ? "text-[#942E3A]" : "text-[#D8B46A]"
                     )}
                   />
-                  <span>{item.label}</span>
-                  {isActive && <ChevronRight className="ml-auto h-3.5 w-3.5" />}
+                  <span>{label}</span>
+                  {isActive && (
+                    isRtl ? (
+                      <ChevronLeft className="mr-auto h-3.5 w-3.5" />
+                    ) : (
+                      <ChevronRight className="ml-auto h-3.5 w-3.5" />
+                    )
+                  )}
                 </Link>
               );
             })}
@@ -296,21 +316,29 @@ function AdminSidebar({
         ))}
       </nav>
 
-      <div className="border-t border-white/10 p-4">
+      <div className="border-t border-white/10 p-4 space-y-2">
+        {/* Language Switcher Toggle Button - Placed directly above Sign Out */}
+        <AdminLangToggle />
+
         <Link
           href="/"
           className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-white/70 hover:bg-white/10 hover:text-white"
         >
-          <ChevronRight className="h-4 w-4 rotate-180 text-[#D8B46A]" />
-          View storefront
+          {isRtl ? (
+            <ChevronRight className="h-4 w-4 text-[#D8B46A]" />
+          ) : (
+            <ChevronLeft className="h-4 w-4 text-[#D8B46A]" />
+          )}
+          <span>{t("common.viewStorefront")}</span>
         </Link>
+
         <form action={logoutAdminAction} className="mt-1">
           <button
             type="submit"
             className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-white/70 hover:bg-white/10 hover:text-white"
           >
             <Settings className="h-4 w-4 text-[#D8B46A]" />
-            Sign out
+            <span>{t("common.signOut")}</span>
           </button>
         </form>
       </div>

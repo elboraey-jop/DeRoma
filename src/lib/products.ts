@@ -1,3 +1,4 @@
+import { cache } from "react";
 import prisma from "@/lib/prisma";
 import { ProductWithVariants } from "@/components/ProductCard";
 import {
@@ -62,7 +63,7 @@ export const FALLBACK_PRODUCTS: ProductWithVariants[] = CATALOG_PRODUCTS.map(
   toProductWithVariants,
 );
 
-export async function getActiveProducts(): Promise<ProductWithVariants[]> {
+export const getActiveProducts = cache(async function getActiveProducts(): Promise<ProductWithVariants[]> {
   try {
     const dbProducts = await prisma.product.findMany({
       where: { status: "active" },
@@ -95,9 +96,9 @@ export async function getActiveProducts(): Promise<ProductWithVariants[]> {
   }
 
   return FALLBACK_PRODUCTS;
-}
+});
 
-export async function getProductById(
+export const getProductById = cache(async function getProductById(
   id: string,
 ): Promise<ProductWithVariants | null> {
   const fallbackProduct = FALLBACK_PRODUCTS.find((p) => p.id === id);
@@ -132,4 +133,5 @@ export async function getProductById(
   }
 
   return fallbackProduct || null;
-}
+});
+

@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Filter, PackagePlus, Search, SlidersHorizontal } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
 import AdminProductStatusSelect from "@/components/AdminProductStatusSelect";
 import AdminProductDiscountModal from "@/components/AdminProductDiscountModal";
 import AdminAddProductModal from "@/components/AdminAddProductModal";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 interface ProductRow {
   id: string;
@@ -30,14 +30,6 @@ interface ProductRow {
   }[];
 }
 
-const categories = [
-  { key: "all", label: "All products" },
-  { key: "shoes", label: "Shoes" },
-  { key: "bags", label: "Bags" },
-  { key: "perfumes", label: "Perfumes" },
-  { key: "accessories", label: "Accessories" },
-];
-
 export default function AdminProductsClient({
   products,
   suppliers,
@@ -45,8 +37,20 @@ export default function AdminProductsClient({
   products: ProductRow[];
   suppliers: { id: string; name: string }[];
 }) {
+  const { lang, t, formatPrice, formatNumber } = useAdminI18n();
+  const isRtl = lang === "ar";
+
+  const categories = [
+    { key: "all", label: isRtl ? "جميع المنتجات" : "All products" },
+    { key: "shoes", label: isRtl ? "أحذية" : "Shoes" },
+    { key: "bags", label: isRtl ? "حقائب" : "Bags" },
+    { key: "perfumes", label: isRtl ? "عطور" : "Perfumes" },
+    { key: "accessories", label: isRtl ? "إكسسوارات" : "Accessories" },
+  ];
+
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
+
   const filtered = useMemo(
     () =>
       products.filter((product) => {
@@ -65,36 +69,40 @@ export default function AdminProductsClient({
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
-            Catalog management
+            {isRtl ? "إدارة الكتالوج والتشكيلة" : "Catalog management"}
           </p>
           <h1 className="mt-1 font-playfair text-3xl font-black text-[#942E3A]">
-            Products
+            {t("products.title")}
           </h1>
           <p className="mt-1 text-xs text-[#6B1F2A]/65">
-            Manage your collection, pricing, visibility, and inventory.
+            {t("products.subtitle")}
           </p>
         </div>
         <div className="flex gap-2">
           <Link
             href="/admin/products/categories"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-xs font-bold text-[#942E3A]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-xs font-bold text-[#942E3A] hover:bg-[#FFF9EB] transition-colors"
           >
-            <SlidersHorizontal className="h-4 w-4 text-[#D8B46A]" /> Categories
+            <SlidersHorizontal className="h-4 w-4 text-[#D8B46A]" />
+            <span>{t("products.categories")}</span>
           </Link>
           <button
             type="button"
             onClick={() =>
               window.dispatchEvent(new CustomEvent("open-add-product"))
             }
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#942E3A] px-3 py-2.5 text-xs font-bold text-[#FFF9EB]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#942E3A] px-3 py-2.5 text-xs font-bold text-[#FFF9EB] hover:bg-[#7e2732] transition-colors"
           >
-            <PackagePlus className="h-4 w-4 text-[#D8B46A]" /> Add product
+            <PackagePlus className="h-4 w-4 text-[#D8B46A]" />
+            <span>{t("products.addProduct")}</span>
           </button>
         </div>
       </div>
+
       <AdminAddProductModal products={products} suppliers={suppliers} />
+
       <nav
-        className="flex w-fit gap-1 rounded-2xl border border-[#942E3A]/10 bg-white p-1 shadow-sm"
+        className="flex w-fit gap-1 rounded-2xl border border-[#942E3A]/10 bg-white p-1 shadow-xs"
         aria-label="Product management tabs"
       >
         <Link
@@ -102,50 +110,53 @@ export default function AdminProductsClient({
           aria-current="page"
           className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB]"
         >
-          Products
+          {t("navigation.products")}
         </Link>
         <Link
           href="/admin/products/categories"
           className="rounded-xl px-4 py-2.5 text-xs font-bold text-[#942E3A]/65 hover:bg-[#FFF9EB] hover:text-[#942E3A]"
         >
-          Categories & options
+          {isRtl ? "الأقسام والخيارات" : "Categories & options"}
         </Link>
       </nav>
+
+      {/* Stats row */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
-            Total
+        <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3 shadow-xs">
+          <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55 font-bold">
+            {t("common.all")}
           </p>
-          <p className="mt-1 font-playfair text-2xl font-black">
-            {products.length}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
-            Shoes
-          </p>
-          <p className="mt-1 font-playfair text-2xl font-black">
-            {products.filter((p) => p.category === "shoes").length}
+          <p className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
+            {formatNumber(products.length)}
           </p>
         </div>
-        <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
-            Archived
+        <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3 shadow-xs">
+          <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55 font-bold">
+            {isRtl ? "أحذية" : "Shoes"}
           </p>
-          <p className="mt-1 font-playfair text-2xl font-black">
-            {products.filter((p) => p.status === "archived").length}
+          <p className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
+            {formatNumber(products.filter((p) => p.category === "shoes").length)}
           </p>
         </div>
-        <div className="rounded-2xl border border-[#D8B46A]/35 bg-[#fff7df] p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
-            Low stock
+        <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3 shadow-xs">
+          <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55 font-bold">
+            {t("products.statusArchived")}
           </p>
-          <p className="mt-1 font-playfair text-2xl font-black">
-            {products.filter((p) => p.stock <= (p.lowStockLimit ?? 2)).length}
+          <p className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
+            {formatNumber(products.filter((p) => p.status === "archived").length)}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-[#D8B46A]/35 bg-[#fff7df] p-3 shadow-xs">
+          <p className="text-[10px] uppercase tracking-wide text-[#6B1F2A]/55 font-bold">
+            {t("dashboard.lowStockAlert")}
+          </p>
+          <p className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
+            {formatNumber(products.filter((p) => p.stock <= (p.lowStockLimit ?? 2)).length)}
           </p>
         </div>
       </div>
-      <div className="rounded-3xl border border-[#942E3A]/10 bg-white p-4 shadow-sm sm:p-5">
+
+      <div className="rounded-3xl border border-[#942E3A]/10 bg-white p-4 shadow-xs sm:p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex gap-1 overflow-x-auto pb-1">
             {categories.map((item) => (
@@ -153,32 +164,38 @@ export default function AdminProductsClient({
                 key={item.key}
                 type="button"
                 onClick={() => setCategory(item.key)}
-                className={`whitespace-nowrap rounded-full px-3 py-2 text-[10px] font-bold transition-colors ${category === item.key ? "bg-[#942E3A] text-[#FFF9EB]" : "bg-[#FFF9EB] text-[#942E3A]/70 hover:text-[#942E3A]"}`}
+                className={`whitespace-nowrap rounded-full px-3 py-2 text-[10px] font-bold transition-colors ${
+                  category === item.key
+                    ? "bg-[#942E3A] text-[#FFF9EB]"
+                    : "bg-[#FFF9EB] text-[#942E3A]/70 hover:text-[#942E3A]"
+                }`}
               >
                 {item.label}
               </button>
             ))}
           </div>
           <label className="relative block lg:w-64">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
+            <Search className={`pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A] ${isRtl ? "right-3" : "left-3"}`} />
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search products"
-              className="w-full rounded-xl border border-[#942E3A]/10 bg-[#FFF9EB]/60 py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#942E3A]"
+              placeholder={t("common.search")}
+              className={`w-full rounded-xl border border-[#942E3A]/10 bg-[#FFF9EB]/60 py-2.5 text-xs outline-none focus:border-[#942E3A] ${isRtl ? "pr-9 pl-3 text-right" : "pl-9 pr-3 text-left"}`}
             />
           </label>
         </div>
+
+        {/* Desktop Table View */}
         <div className="hide-scrollbar mt-4 hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[700px] text-left text-xs">
+          <table className="w-full min-w-[700px] text-xs">
             <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
               <tr>
-                <th className="pb-3 font-bold">Product</th>
-                <th className="pb-3 font-bold">Category</th>
-                <th className="pb-3 font-bold">Price</th>
-                <th className="pb-3 font-bold">Stock</th>
-                <th className="pb-3 font-bold">Status</th>
-                <th className="pb-3 text-right font-bold">Discount</th>
+                <th className={`pb-3 font-bold ${isRtl ? "text-right" : "text-left"}`}>{t("products.productName")}</th>
+                <th className={`pb-3 font-bold ${isRtl ? "text-right" : "text-left"}`}>{t("products.category")}</th>
+                <th className={`pb-3 font-bold ${isRtl ? "text-right" : "text-left"}`}>{t("products.price")}</th>
+                <th className={`pb-3 font-bold ${isRtl ? "text-right" : "text-left"}`}>{t("products.stock")}</th>
+                <th className={`pb-3 font-bold ${isRtl ? "text-right" : "text-left"}`}>{t("common.status")}</th>
+                <th className={`pb-3 font-bold ${isRtl ? "text-left" : "text-right"}`}>{t("products.discounts")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#942E3A]/8">
@@ -208,10 +225,10 @@ export default function AdminProductsClient({
                     {product.category}
                   </td>
                   <td className="py-3 font-bold text-[#942E3A]">
-                    {formatCurrency(product.price)}
+                    {formatPrice(product.price)}
                     {product.compareAtPrice && (
-                      <span className="ml-1 text-[10px] font-normal text-[#6B1F2A]/45 line-through">
-                        {formatCurrency(product.compareAtPrice)}
+                      <span className={`text-[10px] font-normal text-[#6B1F2A]/45 line-through ${isRtl ? "mr-1" : "ml-1"}`}>
+                        {formatPrice(product.compareAtPrice)}
                       </span>
                     )}
                   </td>
@@ -221,11 +238,11 @@ export default function AdminProductsClient({
                         product.stock === 0
                           ? "font-bold text-red-600"
                           : product.stock <= 2
-                            ? "font-bold text-amber-600"
-                            : "text-[#6B1F2A]"
+                          ? "font-bold text-amber-600"
+                          : "text-[#6B1F2A]"
                       }
                     >
-                      {product.stock}
+                      {formatNumber(product.stock)}
                     </span>
                   </td>
                   <td className="py-3">
@@ -234,7 +251,7 @@ export default function AdminProductsClient({
                       status={product.status}
                     />
                   </td>
-                  <td className="py-3 text-right">
+                  <td className={`py-3 ${isRtl ? "text-left" : "text-right"}`}>
                     <AdminProductDiscountModal
                       productId={product.id}
                       productName={product.name}
@@ -249,18 +266,17 @@ export default function AdminProductsClient({
           {filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Filter className="h-7 w-7 text-[#D8B46A]" />
-              <p className="mt-2 text-sm font-bold">No products found</p>
-              <p className="mt-1 text-xs text-[#6B1F2A]/60">
-                Try another category or search term.
-              </p>
+              <p className="mt-2 text-sm font-bold">{t("common.noResults")}</p>
             </div>
           )}
         </div>
+
+        {/* Mobile View Cards */}
         <div className="mt-4 grid grid-cols-2 gap-3 md:hidden">
           {filtered.map((product) => (
             <article
               key={product.id}
-              className="min-w-0 overflow-hidden rounded-2xl border border-[#942E3A]/10 bg-[#FFFDFC] shadow-[0_5px_18px_rgba(67,25,31,0.06)]"
+              className="min-w-0 overflow-hidden rounded-2xl border border-[#942E3A]/10 bg-[#FFFDFC] shadow-xs"
             >
               <Link
                 href={`/admin/products/${product.id}`}
@@ -284,16 +300,16 @@ export default function AdminProductsClient({
                 <div className="mt-1 flex items-center justify-between gap-1 text-[10px] text-[#6B1F2A]/65">
                   <span className="capitalize">{product.category}</span>
                   <span className="font-bold text-[#942E3A]">
-                    Stock {product.stock}
+                    {t("products.stock")} {formatNumber(product.stock)}
                   </span>
                 </div>
                 <div className="mt-2 flex flex-wrap items-baseline gap-1">
                   <span className="text-xs font-black text-[#942E3A]">
-                    {formatCurrency(product.price)}
+                    {formatPrice(product.price)}
                   </span>
                   {product.compareAtPrice && (
                     <span className="text-[9px] text-[#6B1F2A]/45 line-through">
-                      {formatCurrency(product.compareAtPrice)}
+                      {formatPrice(product.compareAtPrice)}
                     </span>
                   )}
                 </div>
@@ -317,10 +333,7 @@ export default function AdminProductsClient({
           {filtered.length === 0 && (
             <div className="col-span-2 flex flex-col items-center justify-center py-12 text-center">
               <Filter className="h-7 w-7 text-[#D8B46A]" />
-              <p className="mt-2 text-sm font-bold">No products found</p>
-              <p className="mt-1 text-xs text-[#6B1F2A]/60">
-                Try another category or search term.
-              </p>
+              <p className="mt-2 text-sm font-bold">{t("common.noResults")}</p>
             </div>
           )}
         </div>

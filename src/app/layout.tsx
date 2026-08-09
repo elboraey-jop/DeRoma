@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Outfit } from "next/font/google";
+import { Playfair_Display, Outfit, Cairo } from "next/font/google";
 import SiteChrome from "@/components/SiteChrome";
 import { CartProvider } from "@/lib/cartStore";
 import { ToastProvider } from "@/providers/ToastProvider";
@@ -7,17 +7,28 @@ import CartDrawer from "@/components/CartDrawer";
 import SmoothScroll from "@/components/SmoothScroll";
 import SplashScreen from "@/components/SplashScreen";
 import ScrollToTop from "@/components/ScrollToTop";
+import RoutePrefetcher from "@/components/RoutePrefetcher";
 import "./globals.css";
+
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
+  display: "swap",
 });
+
+const cairo = Cairo({
+  variable: "--font-cairo",
+  subsets: ["arabic", "latin"],
+  display: "swap",
+});
+
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deromastore.com";
 
@@ -83,13 +94,17 @@ export default function RootLayout({
   return (
     <html lang="en" dir="ltr">
       <head>
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
       </head>
-      <body className={`${playfair.variable} ${outfit.variable} font-playfair antialiased`}>
+
+      <body className={`${playfair.variable} ${outfit.variable} ${cairo.variable} font-playfair antialiased`}>
         <ToastProvider>
+          <RoutePrefetcher />
           <SmoothScroll />
           <ScrollToTop />
           <SplashScreen />
@@ -99,6 +114,7 @@ export default function RootLayout({
           </CartProvider>
         </ToastProvider>
       </body>
+
     </html>
   );
 }

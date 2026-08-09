@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import AdminBackButton from "@/components/AdminBackButton";
 import AdminManualOrderForm from "@/components/AdminManualOrderForm";
+import AdminPageTranslationBoundary from "@/components/AdminPageTranslationBoundary";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,7 @@ export default async function NewManualOrderPage() {
   ]);
 
   return (
+    <AdminPageTranslationBoundary>
     <div className="mx-auto max-w-6xl space-y-5">
       <div className="flex items-center gap-3">
         <AdminBackButton fallbackHref="/admin/orders" />
@@ -82,5 +84,6 @@ export default async function NewManualOrderPage() {
         } : null}
       />
     </div>
+    </AdminPageTranslationBoundary>
   );
 }

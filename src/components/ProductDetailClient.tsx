@@ -87,48 +87,8 @@ function getColorHex(colorName: string): string {
 }
 
 // Mock reviews data
-const MOCK_REVIEWS = [
-  {
-    id: 1,
-    name: "Sarah Ahmed",
-    avatar: "S",
-    rating: 5,
-    date: "2 weeks ago",
-    comment: "Absolutely love these shoes! Super comfortable and the color is exactly as shown. I wore them all day without any discomfort. Highly recommend!",
-  },
-  {
-    id: 2,
-    name: "Nour Mohamed",
-    avatar: "N",
-    rating: 5,
-    date: "1 month ago",
-    comment: "Best sneakers I've ever bought! The quality is amazing and they fit perfectly. The cushioning is so soft, perfect for my daily walks.",
-  },
-  {
-    id: 3,
-    name: "Fatma Hassan",
-    avatar: "F",
-    rating: 4,
-    date: "1 month ago",
-    comment: "Great quality and very stylish. Took a day to break in but now they're my go-to shoes. The fast delivery service was a nice touch!",
-  },
-  {
-    id: 4,
-    name: "Mariam Ali",
-    avatar: "M",
-    rating: 5,
-    date: "2 months ago",
-    comment: "I ordered two pairs in different colors! The delivery was fast and the quality exceeded my expectations. Will definitely order again.",
-  },
-  {
-    id: 5,
-    name: "Yasmin Khaled",
-    avatar: "Y",
-    rating: 5,
-    date: "3 months ago",
-    comment: "These are so lightweight and comfortable. I get compliments every time I wear them. The packaging was also very premium.",
-  },
-];
+
+
 
 export default function ProductDetailClient({ product, similarProducts, reviews = [] }: ProductDetailClientProps) {
   const router = useRouter();
@@ -171,9 +131,12 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
     ? `Free Express Delivery On Orders Over ${formatCurrency(shippingSettings!.freeShippingThreshold!)}`
     : `Fast Express Delivery Across Egypt`;
 
+  const isTotalSoldOut = product.variants.length > 0 && product.variants.every((v) => v.stock <= 0);
+
   const activeVariant = isBag
     ? product.variants[0]
     : product.variants.find((v) => v.size === selectedSize);
+
 
   const priceNum = Number(activeVariant?.price ?? product.price);
   const compareAtPriceNum = activeVariant?.compareAtPrice != null
@@ -265,12 +228,19 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
           {/* Gallery Left */}
           <StaggerItem direction="left" className="pdp-gallery flex flex-col gap-3 w-full max-w-[480px] lg:max-w-[540px] mx-auto">
             {/* Main Image */}
-            <div className="pdp-main-image relative w-full pt-[100%] rounded-2xl sm:rounded-[2rem] border border-[#942E3A]/20 overflow-hidden bg-[#F2E7D5]/20">
-              {discountPercent && (
+            <div className={`pdp-main-image relative w-full pt-[100%] rounded-2xl sm:rounded-[2rem] border border-[#942E3A]/20 overflow-hidden bg-[#F2E7D5]/20 ${
+              isTotalSoldOut ? "grayscale opacity-80" : ""
+            }`}>
+              {isTotalSoldOut ? (
+                <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-15 rounded-full bg-red-700 px-3 py-1 text-[11px] sm:text-xs font-black text-white uppercase tracking-wider shadow-md">
+                  SOLD OUT
+                </span>
+              ) : discountPercent ? (
                 <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-15 rounded-full bg-[#942E3A] px-3 py-1 text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider shadow-sm">
                   -{discountPercent}% OFF
                 </span>
-              )}
+              ) : null}
+
               
               <AnimatePresence mode="wait">
                 <motion.div
@@ -444,57 +414,80 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
               </div>
             )}
 
-            {/* Quantity + Add To Cart Row */}
-            <div className="flex items-center justify-center lg:justify-start gap-3 py-1 w-full">
-              <div className="flex items-center rounded-full border border-[#D8B46A] bg-white h-11 px-2.5 shrink-0">
+            {/* Quantity + Add To Cart & Buy Now Rows */}
+            {isTotalSoldOut ? (
+              <div className="flex items-center justify-between gap-3 py-2 w-full">
+                <div className="flex-1 flex h-13 items-center justify-center gap-2 rounded-full bg-stone-400 text-sm font-extrabold text-white uppercase tracking-wider shadow-inner cursor-not-allowed border border-stone-500">
+                  <span>OUT OF STOCK / SOLD OUT</span>
+                </div>
+
+                {/* Wishlist */}
                 <button
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="p-1.5 text-[#D8B46A] hover:text-[#942E3A] transition-colors"
+                  onClick={() => toggle(product.id)}
+                  className="h-13 w-13 rounded-full border border-[#D8B46A] bg-white flex items-center justify-center text-[#D8B46A] hover:bg-[#F2E7D5] transition-colors shrink-0 shadow-sm"
                 >
-                  <Minus className="h-3.5 w-3.5" />
-                </button>
-                <span className="font-numeric w-8 text-center text-xs font-bold text-[#942E3A]">{quantity}</span>
-                <button
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className="p-1.5 text-[#D8B46A] hover:text-[#942E3A] transition-colors"
-                >
-                  <Plus className="h-3.5 w-3.5" />
+                  <Heart className={`h-5 w-5 ${isWishlisted ? "fill-[#942E3A] text-[#942E3A]" : "text-[#D8B46A]"}`} />
                 </button>
               </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-center lg:justify-start gap-3 py-1 w-full">
+                  <div className="flex items-center rounded-full border border-[#D8B46A] bg-white h-11 px-2.5 shrink-0">
+                    <button
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="p-1.5 text-[#D8B46A] hover:text-[#942E3A] transition-colors"
+                    >
+                      <Minus className="h-3.5 w-3.5" />
+                    </button>
+                    <span className="font-numeric w-8 text-center text-xs font-bold text-[#942E3A]">{quantity}</span>
+                    <button
+                      onClick={() => {
+                        const maxStock = activeVariant?.stock ?? 99;
+                        setQuantity((q) => Math.min(maxStock, q + 1));
+                      }}
+                      disabled={Boolean(activeVariant && quantity >= activeVariant.stock)}
+                      className="p-1.5 text-[#D8B46A] hover:text-[#942E3A] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
 
-              {added ? (
-                <button className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-600 text-sm font-bold text-white shadow-sm">
-                  <Check className="h-4 w-4" />
-                  <span>Added to Cart!</span>
-                </button>
-              ) : (
-                <button
-                  onClick={handleAddToCart}
-                  className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-[#D8B46A] text-sm font-bold text-[#FFF9EB] hover:bg-[#B8934A] transition-all shadow-md active:scale-[0.98] min-w-0"
-                >
-                  <ShoppingBag className="h-4 w-4" />
-                  <span>Add To Cart</span>
-                </button>
-              )}
-            </div>
+                  {added ? (
+                    <button className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-600 text-sm font-bold text-white shadow-sm">
+                      <Check className="h-4 w-4" />
+                      <span>Added to Cart!</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleAddToCart}
+                      className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-[#D8B46A] text-sm font-bold text-[#FFF9EB] hover:bg-[#B8934A] transition-all shadow-md active:scale-[0.98] min-w-0"
+                    >
+                      <ShoppingBag className="h-4 w-4" />
+                      <span>Add To Cart</span>
+                    </button>
+                  )}
+                </div>
 
-            {/* Buy Now + Wishlist Row */}
-            <div className="flex items-center justify-center lg:justify-start gap-3 pt-1">
-              <button
-                onClick={handleBuyNow}
-                className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-[#942E3A] text-sm font-bold text-white hover:bg-[#7a2430] transition-all shadow-md active:scale-[0.98] min-w-0"
-              >
-                <span>Buy Now</span>
-              </button>
+                {/* Buy Now + Wishlist Row */}
+                <div className="flex items-center justify-center lg:justify-start gap-3 pt-1">
+                  <button
+                    onClick={handleBuyNow}
+                    className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-[#942E3A] text-sm font-bold text-white hover:bg-[#7a2430] transition-all shadow-md active:scale-[0.98] min-w-0"
+                  >
+                    <span>Buy Now</span>
+                  </button>
 
-              {/* Wishlist */}
-              <button
-                onClick={() => toggle(product.id)}
-                className="h-12 w-12 rounded-full border border-[#D8B46A] bg-white flex items-center justify-center text-[#D8B46A] hover:bg-[#F2E7D5] transition-colors shrink-0 shadow-sm"
-              >
-                <Heart className={`h-5 w-5 ${isWishlisted ? "fill-[#942E3A] text-[#942E3A]" : "text-[#D8B46A]"}`} />
-              </button>
-            </div>
+                  {/* Wishlist */}
+                  <button
+                    onClick={() => toggle(product.id)}
+                    className="h-12 w-12 rounded-full border border-[#D8B46A] bg-white flex items-center justify-center text-[#D8B46A] hover:bg-[#F2E7D5] transition-colors shrink-0 shadow-sm"
+                  >
+                    <Heart className={`h-5 w-5 ${isWishlisted ? "fill-[#942E3A] text-[#942E3A]" : "text-[#D8B46A]"}`} />
+                  </button>
+                </div>
+              </>
+            )}
+
 
             {/* Delivery Guarantee Banner */}
             <div className="rounded-xl bg-[#F2E7D5]/50 border border-[#D8B46A]/40 p-3.5 flex items-center justify-center gap-3 text-[#942E3A] text-xs font-medium text-center">
@@ -556,7 +549,8 @@ function ReviewsSection({
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewName, setReviewName] = useState("");
   const [reviewComment, setReviewComment] = useState("");
-  const [reviews, setReviews] = useState<ProductReviewView[]>(storedReviews.length ? storedReviews : MOCK_REVIEWS);
+  const [reviews, setReviews] = useState<ProductReviewView[]>(storedReviews);
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -667,62 +661,69 @@ function ReviewsSection({
         </div>
 
         {/* Horizontal Swipeable Reviews Carousel */}
-        <div className="relative">
-          {/* Navigation Arrows */}
-          <button
-            onClick={scrollLeft}
-            className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white border border-[#D8B46A] shadow-md flex items-center justify-center text-[#942E3A] hover:bg-[#F2E7D5] transition-colors hidden md:flex"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            onClick={scrollRight}
-            className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white border border-[#D8B46A] shadow-md flex items-center justify-center text-[#942E3A] hover:bg-[#F2E7D5] transition-colors hidden md:flex"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
+        {reviews.length === 0 ? (
+          <div className="rounded-2xl border border-[#D8B46A]/25 bg-white/70 p-8 text-center text-xs font-bold text-[#942E3A]">
+            No reviews yet for this product. Be the first to share your experience!
+          </div>
+        ) : (
+          <div className="relative">
+            {/* Navigation Arrows */}
+            <button
+              onClick={scrollLeft}
+              className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white border border-[#D8B46A] shadow-md flex items-center justify-center text-[#942E3A] hover:bg-[#F2E7D5] transition-colors hidden md:flex"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              onClick={scrollRight}
+              className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white border border-[#D8B46A] shadow-md flex items-center justify-center text-[#942E3A] hover:bg-[#F2E7D5] transition-colors hidden md:flex"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
 
-          {/* Scrollable Row */}
-          <div
-            id="reviews-carousel"
-            className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {reviews.map((review) => (
-              <div
-                key={review.id}
-                className="min-w-[280px] max-w-[280px] sm:min-w-[300px] sm:max-w-[300px] flex-shrink-0 snap-start p-4 rounded-xl bg-white/70 border border-[#D8B46A]/20 hover:border-[#D8B46A]/40 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  {/* Avatar */}
-                  <div className="h-10 w-10 rounded-full bg-[#942E3A] flex items-center justify-center text-white font-bold text-sm shrink-0">
-                    {review.avatar}
-                  </div>
-                  <div>
-                    <span className="text-sm font-bold text-[#942E3A]">{review.name}</span>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <div className="flex text-amber-400">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-3 w-3 ${
-                              i < review.rating ? "fill-amber-400 text-amber-400" : "fill-stone-200 text-stone-200"
-                            }`}
-                          />
-                        ))}
+            {/* Scrollable Row */}
+            <div
+              id="reviews-carousel"
+              className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="min-w-[280px] max-w-[280px] sm:min-w-[300px] sm:max-w-[300px] flex-shrink-0 snap-start p-4 rounded-xl bg-white/70 border border-[#D8B46A]/20 hover:border-[#D8B46A]/40 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Avatar */}
+                    <div className="h-10 w-10 rounded-full bg-[#942E3A] flex items-center justify-center text-white font-bold text-sm shrink-0">
+                      {review.avatar}
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-[#942E3A]">{review.name}</span>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex text-amber-400">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-3 w-3 ${
+                                i < review.rating ? "fill-amber-400 text-amber-400" : "fill-stone-200 text-stone-200"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[10px] text-[#D8B46A]">{review.date}</span>
                       </div>
-                      <span className="text-[10px] text-[#D8B46A]">{review.date}</span>
                     </div>
                   </div>
-                </div>
 
-                <p className="text-xs text-[#942E3A]/80 leading-relaxed mt-3 line-clamp-4">
-                  {review.comment}
-                </p>
-              </div>
-            ))}
+                  <p className="text-xs text-[#942E3A]/80 leading-relaxed mt-3 line-clamp-4">
+                    {review.comment}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
       </div>
 
       {/* Write a Review Modal */}

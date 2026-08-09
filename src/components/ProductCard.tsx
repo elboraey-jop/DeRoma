@@ -152,20 +152,28 @@ export default function ProductCard({
     setTimeout(() => setAdded(false), 2000);
   };
 
+  const isTotalSoldOut = sizesForProduct.length > 0 && sizesForProduct.every((v) => v.stock <= 0);
+
   return (
     <motion.div
-      whileHover={mobileOptimized ? undefined : { y: -5, transition: { duration: 0.25, ease: "easeOut" } }}
-      className="product-card-shell group relative flex h-[330px] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_30px_rgba(148,46,58,0.06)] hover:shadow-[0_18px_38px_rgba(148,46,58,0.13)] sm:h-[380px] sm:max-w-[230px] sm:rounded-[1.65rem] transition-shadow duration-300"
+      whileHover={mobileOptimized || isTotalSoldOut ? undefined : { y: -5, transition: { duration: 0.25, ease: "easeOut" } }}
+      className={`product-card-shell group relative flex h-[330px] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_30px_rgba(148,46,58,0.06)] hover:shadow-[0_18px_38px_rgba(148,46,58,0.13)] sm:h-[380px] sm:max-w-[230px] sm:rounded-[1.65rem] transition-all duration-300 ${
+        isTotalSoldOut ? "opacity-75 grayscale bg-stone-100" : ""
+      }`}
     >
       {/* Top Product Image Container */}
       <div className="relative h-[71%] sm:h-[72%] w-full shrink-0 overflow-hidden bg-[#FFF9EB]">
         
-        {/* Discount Badge */}
-        {discountPercent && (
+        {/* Badges */}
+        {isTotalSoldOut ? (
+          <span className="product-card-badge-number absolute left-2 top-2 z-15 rounded-full bg-red-700 px-2 py-0.5 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
+            Sold Out
+          </span>
+        ) : discountPercent ? (
           <span className="product-card-badge-number absolute left-2 top-2 z-10 rounded-full bg-[#D8B46A] px-2 py-0.5 text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-white shadow-xs">
             -{discountPercent}%
           </span>
-        )}
+        ) : null}
 
         {/* Shimmer Image Placeholder */}
         {imageLoading && (
@@ -189,28 +197,33 @@ export default function ProductCard({
       </div>
 
       {/* Card Details */}
-      <div className="relative z-10 -mt-7 flex flex-1 flex-col rounded-t-[1.15rem] bg-[#942E3A] px-2.5 pb-2 pt-2 text-[#FFF9EB] sm:-mt-9 sm:rounded-t-[1.35rem] sm:px-3 sm:pb-2.5 sm:pt-2.5">
+      <div
+        className={`relative z-10 -mt-7 flex flex-1 flex-col rounded-t-[1.15rem] px-2.5 pb-2 pt-2 text-[#6B1F2A] sm:-mt-9 sm:rounded-t-[1.35rem] sm:px-3 sm:pb-2.5 sm:pt-2.5 ${
+          isTotalSoldOut ? "bg-stone-700 text-stone-200" : "bg-[#E2D0C4] text-[#6B1F2A]"
+        }`}
+        style={!isTotalSoldOut ? { backgroundColor: "#E2D0C4" } : undefined}
+      >
         <div className="relative mb-0.5 min-h-[1.75rem]">
           <div className="absolute left-0 top-0 flex items-center gap-0.5 text-xs font-semibold text-amber-500">
             <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
-            <span className="product-card-badge-number text-[#FFF9EB] text-[10px] font-medium sm:text-[11px]">
+            <span className="product-card-badge-number text-[#6B1F2A] text-[10px] font-medium sm:text-[11px]">
               {product.rating ? product.rating.toFixed(1) : "4.8"}
             </span>
           </div>
 
-          <Link href={`/shop/${product.id}`} className="block px-8 sm:px-9 text-center transition-colors group-hover:text-white">
-            <h3 className="product-card-name text-[10px] font-extrabold leading-[1.15] tracking-tight text-[#FFF9EB] line-clamp-2 sm:text-[11px]">
+          <Link href={`/shop/${product.id}`} className="block px-8 sm:px-9 text-center transition-colors group-hover:text-[#942E3A]">
+            <h3 className="product-card-name text-[10px] font-extrabold leading-[1.15] tracking-tight text-[#6B1F2A] line-clamp-2 sm:text-[11px]">
               {product.name}
             </h3>
           </Link>
         </div>
 
         <div className="mb-1 flex flex-row items-baseline justify-center gap-1.5 leading-none">
-          <span className="font-numeric text-[15px] font-semibold text-white sm:text-[18px]">
+          <span className="font-numeric text-[15px] font-semibold text-[#6B1F2A] sm:text-[18px]">
             {formatCurrency(priceNum)}
           </span>
           {compareAtPriceNum && (
-            <span className="font-numeric text-[9px] font-normal text-[#FFF9EB]/65 line-through sm:text-[10px]">
+            <span className="font-numeric text-[9px] font-normal text-[#6B1F2A]/55 line-through sm:text-[10px]">
               {formatCurrency(compareAtPriceNum)}
             </span>
           )}
@@ -227,12 +240,12 @@ export default function ProductCard({
                 onClick={() => setSelectedSize(variant.size)}
                 whileHover={!mobileOptimized && !isOutOfStock ? { scale: 1.1 } : undefined}
                 whileTap={!mobileOptimized && !isOutOfStock ? { scale: 0.9 } : undefined}
-                className={`product-card-badge-number relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
+                  className={`product-card-badge-number relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
                   isOutOfStock
-                    ? "border-white/20 bg-white/10 text-white/40 after:absolute after:left-1 after:right-1 after:top-[48%] after:h-[1.2px] after:bg-white/30 after:content-['']"
+                    ? "border-[#6B1F2A]/25 bg-[#FFF9EB]/35 text-[#6B1F2A]/45 after:absolute after:left-1 after:right-1 after:top-[48%] after:h-[1.2px] after:bg-[#6B1F2A]/35 after:content-['']"
                     : isSelected
-                    ? "border-[#D8B46A] bg-[#D8B46A] text-white"
-                    : "border-white/60 bg-[#FFF9EB] text-[#942E3A] hover:border-white"
+                    ? "border-[#942E3A] bg-[#942E3A] text-[#FFF9EB]"
+                    : "border-[#942E3A]/30 bg-[#FFF9EB]/65 text-[#6B1F2A] hover:border-[#942E3A]/65"
                 }`}
               >
                 <span className="relative -top-0.5">{variant.size}</span>
@@ -242,41 +255,47 @@ export default function ProductCard({
         </div>}
 
         {/* Action Buttons */}
-        <div className="mt-auto border-t border-white/35 pt-1">
-          <div className="flex items-center gap-1.5">
-            <motion.button
-              onClick={handleAddSelected}
-              disabled={!selectedVariant}
-              whileHover={mobileOptimized ? undefined : { scale: 1.1 }}
-              whileTap={mobileOptimized ? undefined : { scale: 0.9 }}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#D8B46A] text-white shadow-xs transition-all hover:bg-[#FFF9EB] hover:text-[#942E3A] disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:w-8"
-              aria-label="Add to cart"
-            >
-              {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
-            </motion.button>
+        <div className="mt-auto border-t border-[#942E3A]/20 pt-1">
+          {isTotalSoldOut ? (
+            <div className="flex h-7 sm:h-8 w-full items-center justify-center rounded-full bg-stone-500 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-white shadow-inner">
+              Sold Out
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <motion.button
+                onClick={handleAddSelected}
+                disabled={!selectedVariant}
+                whileHover={mobileOptimized ? undefined : { scale: 1.1 }}
+                whileTap={mobileOptimized ? undefined : { scale: 0.9 }}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#D8B46A] text-[#6B1F2A] shadow-xs transition-all hover:bg-[#942E3A] hover:text-[#FFF9EB] disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:w-8"
+                aria-label="Add to cart"
+              >
+                {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
+              </motion.button>
 
-            <motion.button
-              onClick={() => toggle(product.id)}
-              whileHover={mobileOptimized ? undefined : { scale: 1.1 }}
-              whileTap={mobileOptimized ? undefined : { scale: 0.9 }}
-              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-transparent shadow-xs transition-all hover:bg-white hover:text-[#D8B46A] sm:h-8 sm:w-8 border ${
-                isWishlisted ? "border-[#D8B46A] text-[#D8B46A]" : "border-white/70 text-white"
-              }`}
-              aria-label="Add to wishlist"
-            >
-              <Heart className={`h-3.5 w-3.5 ${isWishlisted ? "fill-[#D8B46A]" : ""}`} />
-            </motion.button>
+              <motion.button
+                onClick={() => toggle(product.id)}
+                whileHover={mobileOptimized ? undefined : { scale: 1.1 }}
+                whileTap={mobileOptimized ? undefined : { scale: 0.9 }}
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-transparent shadow-xs transition-all hover:bg-[#FFF9EB] hover:text-[#942E3A] sm:h-8 sm:w-8 border ${
+                  isWishlisted ? "border-[#942E3A] text-[#942E3A]" : "border-[#942E3A]/45 text-[#6B1F2A]"
+                }`}
+                aria-label="Add to wishlist"
+              >
+                <Heart className={`h-3.5 w-3.5 ${isWishlisted ? "fill-[#942E3A]" : ""}`} />
+              </motion.button>
 
-            <motion.button
-              onClick={handleAddSelected}
-              disabled={!selectedVariant}
-              whileHover={mobileOptimized ? undefined : { scale: 1.03 }}
-              whileTap={mobileOptimized ? undefined : { scale: 0.97 }}
-              className="flex h-7 flex-1 items-center justify-center rounded-full bg-[#FFF9EB] px-3 text-[9px] font-black text-[#942E3A] shadow-xs transition-all hover:bg-[#D8B46A] hover:text-white disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:text-[10px]"
-            >
-              Buy Now
-            </motion.button>
-          </div>
+              <motion.button
+                onClick={handleAddSelected}
+                disabled={!selectedVariant}
+                whileHover={mobileOptimized ? undefined : { scale: 1.03 }}
+                whileTap={mobileOptimized ? undefined : { scale: 0.97 }}
+                className="flex h-7 flex-1 items-center justify-center rounded-full bg-[#942E3A] px-3 text-[9px] font-black text-[#FFF9EB] shadow-xs transition-all hover:bg-[#6B1F2A] hover:text-[#FFF9EB] disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:text-[10px]"
+              >
+                Buy Now
+              </motion.button>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

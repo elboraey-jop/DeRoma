@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
  TrendingUp,
  ShoppingCart,
@@ -69,6 +69,7 @@ import {
  Legend,
 } from "recharts";
 import { formatCurrency } from "@/lib/utils";
+import { localizeLegacyAdminDom, useAdminI18n } from "@/providers/AdminI18nContext";
 
 // --- Types ---
 export interface AnalyticsOrder {
@@ -169,6 +170,11 @@ export default function AnalyticsDashboard({
  promotions,
  reviews,
 }: AnalyticsDashboardProps) {
+  // Keep analytics labels reactive to the shared admin language toggle.
+  const { lang, t, formatPrice, formatNumber } = useAdminI18n();
+  const isRtl = lang === "ar";
+  const analyticsRootRef = useRef<HTMLDivElement>(null);
+
  // State for active tab, date range filter, category filter, and tooltip popover
  const [activeTab, setActiveTab] = useState<
  "overview" | "website" | "products" | "customers" | "orders" | "promotions"
@@ -187,6 +193,23 @@ export default function AnalyticsDashboard({
   const [viewMonth, setViewMonth] = useState<number>(new Date().getMonth());
 
  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+
+  useEffect(() => {
+    if (!isRtl || !analyticsRootRef.current) return;
+    const root = analyticsRootRef.current;
+    let applying = false;
+    const applyTranslations = () => {
+      if (applying) return;
+      applying = true;
+      observer.disconnect();
+      localizeLegacyAdminDom(root);
+      observer.observe(root, { childList: true, subtree: true, characterData: true });
+      applying = false;
+    };
+    const observer = new MutationObserver(applyTranslations);
+    applyTranslations();
+    return () => observer.disconnect();
+  }, [isRtl, activeTab]);
 
   // Calendar day grid calculations for custom range modal
   const calendarDays = useMemo(() => {
@@ -1276,24 +1299,23 @@ export default function AnalyticsDashboard({
  );
 
  return (
- <div className="space-y-6 text-[#1A1A1A]">
+ <div ref={analyticsRootRef} data-analytics-dashboard className="space-y-6 text-[#1A1A1A]">
  {/* Header Banner */}
  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#942E3A]/10 pb-4">
  <div>
  <div className="flex items-center gap-2">
  <p className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#D8B46A]">
- Boutique Intelligence & Insights
+ {isRtl ? "مركز التحليلات المتقدمة" : "Boutique Intelligence & Insights"}
  </p>
  <span className="bg-[#942E3A]/10 text-[#942E3A] text-[10px] font-bold px-2 py-0.5 rounded-full">
- Live Feed
+ {isRtl ? "مباشر" : "Live Feed"}
  </span>
  </div>
  <h1 className="mt-1 font-playfair text-3xl font-black text-[#6B1F2A]">
- DeRoma Analytics Master Dashboard
+ {isRtl ? "لوحة تحليلات دي روما الشاملة" : "DeRoma Analytics Master Dashboard"}
  </h1>
  <p className="mt-0.5 text-xs text-[#6B1F2A]/70">
- Real-time business performance, conversion metrics, product trends
- and operational health.
+ {isRtl ? "متابعة مباشرة لأداء المتجر، التحويلات المالية، حركة المنتجات والعمليات." : "Real-time business performance, conversion metrics, product trends and operational health."}
  </p>
  </div>
 
@@ -1313,7 +1335,7 @@ export default function AnalyticsDashboard({
                     : "text-gray-600 hover:text-[#942E3A] hover:bg-gray-50"
                 }`}
               >
-                {range}
+                {range === "7d" ? (isRtl ? "7d" : "7d") : range === "30d" ? (isRtl ? "30d" : "30d") : range === "90d" ? (isRtl ? "90d" : "90d") : (isRtl ? "الكل" : "all")}
               </button>
             ))}
             <button
@@ -1330,7 +1352,7 @@ export default function AnalyticsDashboard({
             >
               {dateRange === "custom" && customStartDate && customEndDate
                 ? `${customStartDate.substring(5)} to ${customEndDate.substring(5)}`
-                : "Custom"}
+                : (isRtl ? "مخصص" : "Custom")}
             </button>
           </div>
  </div>
@@ -1341,32 +1363,32 @@ export default function AnalyticsDashboard({
  {[
  {
  id: "overview",
- label: "Overview & Sales",
+ label: isRtl ? "الأداء المالي والمبيعات" : "Overview & Sales",
  icon: TrendingUp,
  },
  {
  id: "website",
- label: "Website & Conversion",
+ label: isRtl ? "حركة الموقع والتحويل" : "Website & Conversion",
  icon: Globe,
  },
  {
  id: "products",
- label: "Products & Inventory",
+ label: isRtl ? "المنتجات والمخزون" : "Products & Inventory",
  icon: Package,
  },
  {
  id: "customers",
- label: "Customer Intelligence",
+ label: isRtl ? "تحليلات العملاء" : "Customer Intelligence",
  icon: Users,
  },
  {
  id: "orders",
- label: "Orders & Operations",
+ label: isRtl ? "العمليات والشحن" : "Orders & Operations",
  icon: ShoppingBag,
  },
  {
  id: "promotions",
- label: "Promotions & Discounts",
+ label: isRtl ? "العروض والخصومات" : "Promotions & Discounts",
  icon: Tag,
  },
  ].map((tab) => {

@@ -10,7 +10,6 @@ import {
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import { formatCurrency } from "@/lib/utils";
-import AdminPrintButton from "@/components/AdminPrintButton";
 import AdminStatusSelect from "@/components/AdminStatusSelect";
 import AdminBackButton from "@/components/AdminBackButton";
 import AdminCopyButton from "@/components/AdminCopyButton";
@@ -82,7 +81,6 @@ export default async function AdminOrderDetailsPage({
           >
             <MessageCircle className="h-4 w-4" /> WhatsApp
           </a>
-          <AdminPrintButton />
         </div>
       </div>
       <div className="grid gap-5 lg:grid-cols-[1.3fr_0.7fr]">

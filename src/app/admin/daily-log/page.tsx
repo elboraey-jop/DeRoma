@@ -5,6 +5,7 @@ import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 import AdminDailyLogDatePicker, { DatePreset } from "@/components/AdminDailyLogDatePicker";
 import AdminStatusSelect from "@/components/AdminStatusSelect";
+import AdminPageTranslationBoundary from "@/components/AdminPageTranslationBoundary";
 
 export const dynamic = "force-dynamic";
 
@@ -163,8 +164,9 @@ export default async function DailyLogPage({
   }
 
   const revenue = orders
-    .filter((order) => order.status !== "cancelled")
+    .filter((order) => order.status !== "cancelled" && order.status !== "returned")
     .reduce((sum, order) => sum + Number(order.totalPrice), 0);
+
 
   const isSingleDay = startDate === endDate;
   const isMultipleDays = !isSingleDay;
@@ -174,6 +176,7 @@ export default async function DailyLogPage({
     : `${new Date(`${startDate}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} – ${new Date(`${endDate}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
 
   return (
+    <AdminPageTranslationBoundary>
     <div className="space-y-4 sm:space-y-6">
       {/* Header section */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -387,5 +390,6 @@ export default async function DailyLogPage({
         </div>
       </section>
     </div>
+    </AdminPageTranslationBoundary>
   );
 }

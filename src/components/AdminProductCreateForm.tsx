@@ -23,6 +23,7 @@ import { createSupplierWithResultAction } from "@/app/admin/suppliers/actions";
 import AdminImageGalleryField from "@/components/AdminImageGalleryField";
 import { AdminCatalogProductPicker } from "@/components/AdminProcurementPickers";
 import { useToast } from "@/providers/ToastProvider";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 type CatalogOption = {
   category: string;
@@ -886,6 +887,8 @@ export default function AdminProductCreateForm({
   redirectTo?: string;
   initialProduct?: EditProduct;
 }) {
+  const { lang, t, formatPrice, formatNumber } = useAdminI18n();
+  const isRtl = lang === "ar";
   const { toast } = useToast();
   const isEdit = Boolean(initialProduct);
   const steps = isEdit

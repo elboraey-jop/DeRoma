@@ -12,6 +12,8 @@ import {
 } from "@/lib/shippingHelper";
 import { getCustomerSession } from "@/lib/userAuth";
 
+import { checkRateLimit, sanitizeInput } from "@/lib/rateLimit";
+
 interface CheckoutItemInput {
   productId: string;
   variantId: string;
@@ -31,6 +33,7 @@ interface CreateOrderInput {
   couponCode?: string;
   items: CheckoutItemInput[];
 }
+
 
 // Governorate Shipping Fees mapping
 const SHIPPING_FEES: Record<string, number> = {
@@ -65,11 +68,19 @@ const SHIPPING_FEES: Record<string, number> = {
 export async function createOrder(input: CreateOrderInput) {
   try {
     // 1. Validation
-    const cleanFirstName = (input.customerFirstName || input.customerName.split(" ")[0] || "").trim();
-    const cleanLastName = (input.customerLastName || input.customerName.split(" ").slice(1).join(" ") || "").trim();
     const cleanPhone = (input.customerPhone || "").replace(/[\s\-\+]/g, "").replace(/^20/, "");
     const cleanPhone2 = input.customerPhone2 ? input.customerPhone2.replace(/[\s\-\+]/g, "").replace(/^20/, "") : null;
     const egPhoneRegex = /^01[0125]\d{8}$/;
+
+    // Rate Limiting (max 5 orders per phone per 10 minutes)
+    const rateCheck = checkRateLimit(`order_${cleanPhone}`, 5, 600);
+    if (!rateCheck.success) {
+      return { success: false, error: "تم إرسال عدد كبير من الطلبات بنفس الرقم. الرجاء الانتظار قليلاً وتكرار المحاولة." };
+    }
+
+    const cleanFirstName = sanitizeInput((input.customerFirstName || input.customerName.split(" ")[0] || "").trim());
+    const cleanLastName = sanitizeInput((input.customerLastName || input.customerName.split(" ").slice(1).join(" ") || "").trim());
+
 
     if (!cleanFirstName || cleanFirstName.length < 2) {
       return { success: false, error: "الاسم الأول يجب أن يتكون من حرفين على الأقل." };
@@ -444,9 +455,14 @@ export async function submitContactMessageAction(input: {
   message: string;
 }) {
   try {
-    const cleanName = (input.name || "").trim();
     const cleanPhone = (input.phone || "").trim();
-    const cleanMessage = (input.message || "").trim();
+    const rateCheck = checkRateLimit(`contact_${cleanPhone}`, 3, 300);
+    if (!rateCheck.success) {
+      return { success: false, error: "Too many messages sent. Please wait a few minutes before trying again." };
+    }
+
+    const cleanName = sanitizeInput((input.name || "").trim());
+    const cleanMessage = sanitizeInput((input.message || "").trim());
 
     if (!cleanName || cleanName.length < 2) {
       return { success: false, error: "Please enter a valid name (at least 2 characters)." };
@@ -466,6 +482,7 @@ export async function submitContactMessageAction(input: {
         status: "unread",
       },
     });
+
 
     return { success: true, messageId: messageRecord.id };
   } catch (error) {
