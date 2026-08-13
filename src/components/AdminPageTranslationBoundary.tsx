@@ -16,24 +16,20 @@ export default function AdminPageTranslationBoundary({ children }: { children: R
       applying = true;
       observer.disconnect();
       localizeLegacyAdminDom(root);
-      observer.observe(root, { childList: true, subtree: true, characterData: true });
+      observer.observe(root, { childList: true, subtree: true });
       applying = false;
     };
-    let frameOne = 0;
-    let frameTwo = 0;
+    let frame = 0;
     const scheduleApply = () => {
-      window.cancelAnimationFrame(frameOne);
-      window.cancelAnimationFrame(frameTwo);
-      frameOne = window.requestAnimationFrame(() => {
-        frameTwo = window.requestAnimationFrame(apply);
-      });
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(apply);
     };
     const observer = new MutationObserver(scheduleApply);
     scheduleApply();
+    observer.observe(root, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
-      window.cancelAnimationFrame(frameOne);
-      window.cancelAnimationFrame(frameTwo);
+      window.cancelAnimationFrame(frame);
     };
   }, [lang]);
 

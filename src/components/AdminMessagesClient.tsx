@@ -72,7 +72,7 @@ export default function AdminMessagesClient({
 
   // Delete message
   const handleDelete = async (id: string) => {
-    if (!confirm(isRtl ? "هل أنت تأكد من إزالة هذه الرسالة؟" : "Are you sure you want to delete this message?")) return;
+    if (!confirm(isRtl ? "هل أنت متأكد من حذف هذه الرسالة؟" : "Are you sure you want to delete this message?")) return;
     setLoadingId(id);
     await deleteMessageAction(id);
     setLoadingId(null);
@@ -100,8 +100,8 @@ export default function AdminMessagesClient({
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-        <div>
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+        <div className="min-w-0 text-right">
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
             {isRtl ? "خدمة العملاء والاتصال" : "Customer care"}
           </p>
@@ -115,11 +115,11 @@ export default function AdminMessagesClient({
       </div>
 
       {/* Stats KPI */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-4">
         <button
           type="button"
           onClick={() => setFilterStatus("all")}
-          className={`flex items-center justify-between rounded-2xl border p-3 text-left transition shadow-2xs ${
+          className={`flex min-w-0 items-center justify-between rounded-2xl border p-3 ${isRtl ? "text-right" : "text-left"} transition shadow-2xs ${
             filterStatus === "all"
               ? "border-[#942E3A] bg-[#942E3A] text-white"
               : "border-[#942E3A]/10 bg-white text-[#942E3A] hover:bg-[#FFF9EB]"
@@ -139,7 +139,7 @@ export default function AdminMessagesClient({
         <button
           type="button"
           onClick={() => setFilterStatus("unread")}
-          className={`flex items-center justify-between rounded-2xl border p-3 text-left transition shadow-2xs ${
+          className={`flex min-w-0 items-center justify-between rounded-2xl border p-3 ${isRtl ? "text-right" : "text-left"} transition shadow-2xs ${
             filterStatus === "unread"
               ? "border-[#942E3A] bg-[#942E3A] text-white"
               : "border-[#D8B46A]/40 bg-[#fff7df] text-[#942E3A] hover:bg-[#fff0c7]"
@@ -159,7 +159,7 @@ export default function AdminMessagesClient({
         <button
           type="button"
           onClick={() => setFilterStatus("read")}
-          className={`flex items-center justify-between rounded-2xl border p-3 text-left transition shadow-2xs ${
+          className={`flex min-w-0 items-center justify-between rounded-2xl border p-3 ${isRtl ? "text-right" : "text-left"} transition shadow-2xs ${
             filterStatus === "read"
               ? "border-[#942E3A] bg-[#942E3A] text-white"
               : "border-[#942E3A]/10 bg-white text-[#942E3A] hover:bg-[#FFF9EB]"
@@ -178,8 +178,8 @@ export default function AdminMessagesClient({
       </div>
 
       {/* Messages List & Filter Header */}
-      <div className="rounded-3xl border border-[#942E3A]/10 bg-white p-4 shadow-xs sm:p-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-[#942E3A]/10">
+      <div className="overflow-hidden rounded-3xl border border-[#942E3A]/10 bg-white p-4 shadow-xs sm:p-6">
+        <div className="flex flex-col gap-3 border-b border-[#942E3A]/10 pb-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-[#D8B46A]" />
             <h2 className="font-playfair text-lg font-bold text-[#942E3A]">
@@ -204,7 +204,7 @@ export default function AdminMessagesClient({
             return (
               <div
                 key={msg.id}
-                className={`rounded-2xl border p-4 transition-all shadow-2xs ${
+                className={`min-w-0 rounded-2xl border p-3.5 transition-all shadow-2xs sm:p-4 ${
                   isUnread
                     ? "border-[#D8B46A]/50 bg-[#fff9eb]/60"
                     : "border-[#942E3A]/10 bg-white"
@@ -223,8 +223,8 @@ export default function AdminMessagesClient({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3 text-xs text-[#6B1F2A]/70 pt-0.5">
-                      <div className="flex items-center gap-1 font-semibold text-[#942E3A]">
-                        <span>{msg.phone}</span>
+                      <div className="flex items-center gap-1 font-semibold text-[#942E3A]" dir="ltr">
+                        <span className="whitespace-nowrap">{msg.phone}</span>
                         <button
                           type="button"
                           onClick={() => handleCopyPhone(msg.id, msg.phone)}
@@ -245,7 +245,7 @@ export default function AdminMessagesClient({
                         rel="noreferrer"
                         className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white hover:bg-emerald-700 transition"
                       >
-                        <MessageCircle className="h-3 w-3" /> WhatsApp
+                        <MessageCircle className="h-3 w-3" /> {isRtl ? "واتساب" : "WhatsApp"}
                       </a>
                     </div>
                   </div>
@@ -273,13 +273,13 @@ export default function AdminMessagesClient({
                   </div>
                 </div>
 
-                <div className="mt-3 rounded-xl bg-white p-3 border border-[#942E3A]/10 text-xs leading-relaxed text-[#481827]">
+                <div dir="auto" className="mt-3 break-words whitespace-pre-wrap rounded-xl border border-[#942E3A]/10 bg-white p-3 text-start text-xs leading-relaxed text-[#481827]">
                   {msg.message}
                 </div>
 
                 <div className="mt-2 flex items-center justify-between text-[10px] text-stone-400">
                   <span>
-                    {new Date(msg.createdAt).toLocaleString(isRtl ? "ar-EG" : "en-US", {
+                    {new Date(msg.createdAt).toLocaleString(isRtl ? "ar-EG-u-nu-latn" : "en-US", {
                       dateStyle: "medium",
                       timeStyle: "short",
                     })}

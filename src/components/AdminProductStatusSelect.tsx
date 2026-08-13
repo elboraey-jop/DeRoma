@@ -17,10 +17,12 @@ export default function AdminProductStatusSelect({
   productId,
   status,
   compact = false,
+  isRtl = false,
 }: {
   productId: string;
   status: string;
   compact?: boolean;
+  isRtl?: boolean;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -65,6 +67,8 @@ export default function AdminProductStatusSelect({
     };
   }, [isOpen]);
 
+  const labelFor = (value: string) => value === "archived" ? (isRtl ? "مؤرشف" : "Archive") : (isRtl ? "نشط" : "Active");
+
   const chooseStatus = (nextStatus: string) => {
     const statusInput = formRef.current?.elements.namedItem("status");
     if (statusInput instanceof HTMLInputElement) statusInput.value = nextStatus;
@@ -82,10 +86,10 @@ export default function AdminProductStatusSelect({
         onClick={() => setIsOpen((open) => !open)}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-label={`Update product status, currently ${labelForStatus(status)}`}
+        aria-label={isRtl ? `تحديث حالة المنتج، الحالية ${labelFor(status)}` : `Update product status, currently ${labelForStatus(status)}`}
         className={`group inline-flex items-center justify-between rounded-full border border-[#D8B46A]/70 bg-[#FFF9EB] font-bold text-[#942E3A] shadow-[0_3px_10px_rgba(148,46,58,0.08)] outline-none transition-all hover:-translate-y-0.5 hover:border-[#942E3A] focus:ring-2 focus:ring-[#D8B46A]/50 ${compact ? "min-w-[72px] gap-1 px-2 py-1 text-[9px]" : "min-w-[92px] gap-1.5 px-2.5 py-1.5 text-[10px]"}`}
       >
-        <span>{labelForStatus(status)}</span>
+        <span>{labelFor(status)}</span>
         <ChevronDown className={`h-3.5 w-3.5 text-[#D8B46A] transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
       {isOpen && (
@@ -97,7 +101,7 @@ export default function AdminProductStatusSelect({
           className="fixed z-[100] overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-2 shadow-[0_16px_40px_rgba(67,25,31,0.2)] ring-1 ring-[#942E3A]/5"
         >
           <div className="border-b border-[#942E3A]/10 px-3 pb-2 pt-1 text-[9px] font-bold uppercase tracking-[0.18em] text-[#D8B46A]">
-            Product visibility
+            {isRtl ? "حالة ظهور المنتج" : "Product visibility"}
           </div>
           <div className="mt-1 space-y-0.5">
             {options.map((option) => (
@@ -109,7 +113,7 @@ export default function AdminProductStatusSelect({
                 onClick={() => chooseStatus(option.value)}
                 className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-bold transition-colors ${option.value === status ? "bg-[#942E3A] text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
               >
-                <span>{option.label}</span>
+                <span>{labelFor(option.value)}</span>
                 {option.value === status && <Check className="h-3.5 w-3.5 text-[#D8B46A]" />}
               </button>
             ))}

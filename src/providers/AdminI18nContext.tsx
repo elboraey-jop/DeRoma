@@ -77,6 +77,7 @@ const LEGACY_ARABIC_LABELS: Record<string, string> = {
   "Total": "الإجمالي",
   "No orders found for this date range.": "لا توجد طلبات في هذا النطاق الزمني.",
   "Customer intelligence": "بيانات العملاء",
+  "A living view of customer history, repeat orders, and value.": "عرض حي لسجل العملاء والطلبات المتكررة وقيمة العملاء.",
   "Customers": "العملاء",
   "Repeat buyers": "العملاء المتكررون",
   "Customer value": "قيمة العملاء",
@@ -85,6 +86,8 @@ const LEGACY_ARABIC_LABELS: Record<string, string> = {
   "Last order": "آخر طلب",
   "Lifetime value": "القيمة الإجمالية",
   "No customers yet.": "لا يوجد عملاء بعد.",
+  "No orders yet": "لا توجد طلبات بعد",
+  "No orders": "لا توجد طلبات",
   "Failed to load customers data.": "تعذر تحميل بيانات العملاء.",
   "Latest address": "آخر عنوان",
   "Contact shortcuts": "اختصارات التواصل",
@@ -845,6 +848,7 @@ const DAILY_LOG_ARABIC_LABELS: Record<string, string> = {
   "Pending": "قيد الانتظار",
   "Pending Orders": "الطلبات قيد الانتظار",
   "Orders on": "الطلبات في",
+  "from": "من",
   "Orders from": "الطلبات من",
   "order": "طلب",
   "orders": "طلبات",
@@ -978,6 +982,10 @@ export function localizeLegacyAdminDom(root: HTMLElement) {
     if (itemsCount) localized = `وحدات ${itemsCount[1]}`;
     const orderCount = trimmed.match(/^orders (.+)$/i);
     if (orderCount) localized = `طلبات ${orderCount[1]}`;
+    const customerOrderCount = trimmed.match(/^(\d+) orders?$/i);
+    if (customerOrderCount) localized = `${customerOrderCount[1]} طلب`;
+    const lastCustomerOrder = trimmed.match(/^Last:\s*(.+)$/i);
+    if (lastCustomerOrder) localized = `آخر طلب: ${lastCustomerOrder[1]}`;
     const accountCount = trimmed.match(/^accounts (.+)$/i);
     if (accountCount) localized = `حسابات ${accountCount[1]}`;
     const ordersOn = trimmed.match(/^Orders on (.+)$/);
@@ -1031,29 +1039,26 @@ export function AdminI18nProvider({ children }: { children: React.ReactNode }) {
       applying = true;
       observer.disconnect();
       localizeLegacyAdminDom(root);
-      observer.observe(root, { childList: true, subtree: true, characterData: true });
+      observer.observe(root, { childList: true, subtree: true });
       applying = false;
     };
-    let frameOne = 0;
-    let frameTwo = 0;
+    let frame = 0;
     const scheduleApply = () => {
-      window.cancelAnimationFrame(frameOne);
-      window.cancelAnimationFrame(frameTwo);
-      frameOne = window.requestAnimationFrame(() => {
-        frameTwo = window.requestAnimationFrame(apply);
-      });
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(apply);
     };
-    const observer = new MutationObserver(scheduleApply);
+    const observer = new MutationObserver((records) => {
+      const onlySvgChanges = records.length > 0 && records.every((record) => {
+        const target = record.target;
+        return target instanceof Element && Boolean(target.closest("svg"));
+      });
+      if (!onlySvgChanges) scheduleApply();
+    });
     scheduleApply();
-    // Server/client navigation can replace a page subtree after the first
-    // mutation batch. Keep a lightweight sync pass while Arabic is active so
-    // late-rendered labels cannot remain in English.
-    const syncTimer = window.setInterval(scheduleApply, 250);
+    observer.observe(root, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
-      window.cancelAnimationFrame(frameOne);
-      window.cancelAnimationFrame(frameTwo);
-      window.clearInterval(syncTimer);
+      window.cancelAnimationFrame(frame);
     };
   }, [isMounted, lang]);
 

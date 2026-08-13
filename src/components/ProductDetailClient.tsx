@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,7 +19,11 @@ import {
   ChevronUp,
   Sparkles,
   Send,
-  X
+  X,
+  Maximize2,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
@@ -96,6 +100,10 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [galleryZoom, setGalleryZoom] = useState(1);
+  const [galleryMounted, setGalleryMounted] = useState(false);
+  const galleryTouchStartX = useRef<number | null>(null);
   const [added, setAdded] = useState(false);
   const { has, toggle } = useWishlist();
   const isWishlisted = has(product.id);
@@ -104,6 +112,59 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const isBag = product.category === "bags";
   const sizesForColor = product.variants;
   const currentColorImages = product.images;
+
+  useEffect(() => {
+    setGalleryMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isGalleryOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsGalleryOpen(false);
+        setGalleryZoom(1);
+      }
+      if (event.key === "ArrowLeft") {
+        setActiveImageIndex((index) => (index - 1 + currentColorImages.length) % currentColorImages.length);
+        setGalleryZoom(1);
+      }
+      if (event.key === "ArrowRight") {
+        setActiveImageIndex((index) => (index + 1) % currentColorImages.length);
+        setGalleryZoom(1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isGalleryOpen, currentColorImages.length]);
+
+  const openGallery = (index: number) => {
+    setActiveImageIndex(index);
+    setGalleryZoom(1);
+    setIsGalleryOpen(true);
+  };
+
+  const closeGallery = () => {
+    setIsGalleryOpen(false);
+    setGalleryZoom(1);
+  };
+
+  const changeGalleryImage = (direction: -1 | 1) => {
+    if (currentColorImages.length < 2) return;
+    setActiveImageIndex((index) => (index + direction + currentColorImages.length) % currentColorImages.length);
+    setGalleryZoom(1);
+  };
+
+  const adjustGalleryZoom = (amount: number) => {
+    setGalleryZoom((zoom) => Math.min(3, Math.max(1, Number((zoom + amount).toFixed(2)))));
+  };
   const stockRemainingLabel = lang === "ar" ? "المتبقي" : "Remaining";
   const stockLeftLabel = lang === "ar" ? "متبقي" : "left";
 
@@ -261,9 +322,21 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
           {/* Gallery Left */}
           <StaggerItem direction="left" className="pdp-gallery flex flex-col gap-3 w-full max-w-[480px] lg:max-w-[540px] mx-auto">
             {/* Main Image */}
-            <div className={`pdp-main-image relative w-full pt-[100%] rounded-2xl sm:rounded-[2rem] border border-[#942E3A]/20 overflow-hidden bg-[#F2E7D5]/20 ${
+            <div
+              className={`pdp-main-image group relative w-full pt-[100%] rounded-2xl sm:rounded-[2rem] border border-[#942E3A]/20 overflow-hidden bg-[#F2E7D5]/20 cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D8B46A] focus-visible:ring-offset-2 ${
               isTotalSoldOut ? "grayscale opacity-80" : ""
-            }`}>
+              }`}
+              role="button"
+              tabIndex={0}
+              aria-label={lang === "ar" ? "فتح معرض صور المنتج" : "Open product image gallery"}
+              onClick={() => openGallery(activeImageIndex)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  openGallery(activeImageIndex);
+                }
+              }}
+            >
               {isTotalSoldOut ? (
                 <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-15 rounded-full bg-red-700 px-3 py-1 text-[11px] sm:text-xs font-black text-white uppercase tracking-wider shadow-md">
                   {t("productCard.soldOut")}
@@ -294,6 +367,11 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                   />
                 </motion.div>
               </AnimatePresence>
+
+              <span className="pointer-events-none absolute bottom-3 left-3 z-10 flex items-center gap-1.5 rounded-full bg-[#1f1114]/75 px-3 py-1.5 text-[10px] font-bold text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                <Maximize2 className="h-3.5 w-3.5" />
+                {lang === "ar" ? "اضغط للتكبير" : "Click to enlarge"}
+              </span>
             </div>
 
             {/* Thumbnail Row */}
@@ -305,6 +383,8 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                     <button
                       key={img}
                       onClick={() => setActiveImageIndex(index)}
+                      aria-label={lang === "ar" ? `عرض الصورة ${index + 1}` : `View image ${index + 1}`}
+                      aria-current={isActive ? "true" : undefined}
                       className={`relative h-[60px] w-[60px] sm:h-20 sm:w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
                         isActive
                           ? "border-[#942E3A] shadow-sm"
@@ -575,6 +655,157 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             </div>
           </section>
         </ScrollReveal>
+      )}
+
+      {galleryMounted && createPortal(
+        <AnimatePresence>
+          {isGalleryOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100000] flex items-center justify-center bg-[#160d10]/90 p-2 backdrop-blur-md sm:p-6"
+              role="dialog"
+              aria-modal="true"
+              aria-label={lang === "ar" ? "معرض صور المنتج" : "Product image gallery"}
+              onClick={closeGallery}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: 12 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 12 }}
+                transition={{ type: "spring", damping: 28, stiffness: 260 }}
+                className="flex max-h-[calc(100dvh-1rem)] w-full max-w-6xl flex-col overflow-hidden rounded-[1.5rem] border border-white/15 bg-[#241417]/95 p-3 text-white shadow-2xl sm:max-h-[calc(100dvh-3rem)] sm:rounded-[2rem] sm:p-5"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="flex items-center justify-between gap-3 px-1 pb-3 sm:px-2 sm:pb-4">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold sm:text-base">{product.name}</p>
+                    <p className="mt-0.5 text-[10px] font-medium text-white/55 sm:text-xs">
+                      {activeImageIndex + 1} / {currentColorImages.length}
+                    </p>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                    <button
+                      type="button"
+                      onClick={() => adjustGalleryZoom(-0.25)}
+                      disabled={galleryZoom <= 1}
+                      aria-label={lang === "ar" ? "تصغير الصورة" : "Zoom out"}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-35"
+                    >
+                      <ZoomOut className="h-4 w-4" />
+                    </button>
+                    <span className="hidden min-w-11 text-center text-[11px] font-bold text-white/70 sm:inline-block">
+                      {Math.round(galleryZoom * 100)}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => adjustGalleryZoom(0.25)}
+                      disabled={galleryZoom >= 3}
+                      aria-label={lang === "ar" ? "تكبير الصورة" : "Zoom in"}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-35"
+                    >
+                      <ZoomIn className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGalleryZoom(1)}
+                      disabled={galleryZoom === 1}
+                      aria-label={lang === "ar" ? "إعادة ضبط التكبير" : "Reset zoom"}
+                      className="hidden h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-35 sm:flex"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={closeGallery}
+                      aria-label={lang === "ar" ? "إغلاق المعرض" : "Close gallery"}
+                      className="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#241417] transition hover:bg-[#F2E7D5] sm:ml-2"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[1.1rem] bg-black/20"
+                  onWheel={(event) => {
+                    event.preventDefault();
+                    adjustGalleryZoom(event.deltaY < 0 ? 0.25 : -0.25);
+                  }}
+                  onTouchStart={(event) => {
+                    galleryTouchStartX.current = event.touches[0]?.clientX ?? null;
+                  }}
+                  onTouchEnd={(event) => {
+                    const startX = galleryTouchStartX.current;
+                    const endX = event.changedTouches[0]?.clientX;
+                    galleryTouchStartX.current = null;
+                    if (startX === null || endX === undefined || Math.abs(endX - startX) < 45) return;
+                    changeGalleryImage(endX < startX ? 1 : -1);
+                  }}
+                  onDoubleClick={() => setGalleryZoom((zoom) => zoom === 1 ? 2 : 1)}
+                >
+                  <Image
+                    src={currentColorImages[activeImageIndex] || currentColorImages[0]}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 90vw"
+                    className="select-none object-contain p-2 transition-transform duration-200 sm:p-6"
+                    style={{ transform: `scale(${galleryZoom})` }}
+                    draggable={false}
+                  />
+
+                  {currentColorImages.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => changeGalleryImage(-1)}
+                        aria-label={lang === "ar" ? "الصورة السابقة" : "Previous image"}
+                        className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/45 text-white shadow-lg backdrop-blur-sm transition hover:bg-black/65 sm:left-4 sm:h-12 sm:w-12"
+                      >
+                        <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => changeGalleryImage(1)}
+                        aria-label={lang === "ar" ? "الصورة التالية" : "Next image"}
+                        className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/45 text-white shadow-lg backdrop-blur-sm transition hover:bg-black/65 sm:right-4 sm:h-12 sm:w-12"
+                      >
+                        <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+                      </button>
+                    </>
+                  )}
+
+                  <span className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/45 px-3 py-1.5 text-[10px] font-medium text-white/75 backdrop-blur-sm sm:bottom-4 sm:text-xs">
+                    {lang === "ar" ? "اسحب للتنقل • اضغط مرتين للتكبير" : "Swipe to navigate • Double-click to zoom"}
+                  </span>
+                </div>
+
+                {currentColorImages.length > 1 && (
+                  <div className="mt-3 flex shrink-0 gap-2 overflow-x-auto px-1 pb-1 sm:mt-4 sm:justify-center sm:gap-2.5" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                    {currentColorImages.map((img, index) => (
+                      <button
+                        type="button"
+                        key={`${img}-${index}`}
+                        onClick={() => {
+                          setActiveImageIndex(index);
+                          setGalleryZoom(1);
+                        }}
+                        aria-label={lang === "ar" ? `عرض الصورة ${index + 1}` : `View image ${index + 1}`}
+                        aria-current={index === activeImageIndex ? "true" : undefined}
+                        className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 transition sm:h-16 sm:w-16 ${index === activeImageIndex ? "border-[#D8B46A] opacity-100" : "border-transparent opacity-50 hover:opacity-100"}`}
+                      >
+                        <Image src={img} alt="" fill sizes="64px" className="object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
     </div>
   );

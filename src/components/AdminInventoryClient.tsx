@@ -93,9 +93,11 @@ const CATEGORY_OPTIONS = [
 function AdminCategorySelect({
   value,
   onChange,
+  isRtl,
 }: {
   value: string;
   onChange: (value: string) => void;
+  isRtl: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -110,9 +112,14 @@ function AdminCategorySelect({
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
-  const selectedLabel =
-    CATEGORY_OPTIONS.find((opt) => opt.id === value.toLowerCase())?.label ||
-    "All Categories";
+  const categoryNames: Record<string, string> = {
+    "All Categories": "كل الفئات",
+    Shoes: "أحذية",
+    Perfumes: "عطور",
+    Bags: "حقائب",
+    Accessories: "إكسسوارات",
+  };
+  const selectedLabel = CATEGORY_OPTIONS.find((opt) => opt.id === value.toLowerCase())?.label || "All Categories";
 
   return (
     <div ref={ref} className="relative shrink-0 text-left">
@@ -121,7 +128,7 @@ function AdminCategorySelect({
         onClick={() => setIsOpen((prev) => !prev)}
         className="group flex h-10 min-w-[140px] items-center justify-between gap-2 rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2 text-xs font-bold text-[#942E3A] shadow-sm transition hover:border-[#D8B46A] hover:bg-[#FFF9EB]"
       >
-        <span className="truncate">{selectedLabel}</span>
+        <span className="truncate">{isRtl ? categoryNames[selectedLabel] || selectedLabel : selectedLabel}</span>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-[#D8B46A] transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -148,7 +155,7 @@ function AdminCategorySelect({
                       : "text-[#6B1F2A] hover:bg-[#F2DFC0]/60 hover:text-[#942E3A]"
                   }`}
                 >
-                  <span>{opt.label}</span>
+                  <span>{isRtl ? categoryNames[opt.label] || opt.label : opt.label}</span>
                   {isSelected && <Check className="h-3.5 w-3.5 text-[#D8B46A]" />}
                 </button>
               );
@@ -165,11 +172,13 @@ function AdminFilterDropdown({
   value,
   options,
   onChange,
+  isRtl,
 }: {
   label: string;
   value: string;
   options: { id: string; label: string }[];
   onChange: (value: string) => void;
+  isRtl: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -184,10 +193,22 @@ function AdminFilterDropdown({
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
-  const selectedLabel =
-    value === "all"
-      ? `All ${label}s`
-      : options.find((opt) => opt.id.toLowerCase() === value.toLowerCase())?.label || value;
+  const labelMap: Record<string, string> = {
+    Status: "الحالة",
+    Brand: "العلامة التجارية",
+    Size: "المقاس",
+    Color: "اللون",
+    Type: "النوع",
+    Active: "نشط",
+    Archived: "مؤرشف",
+    "All Statuses": "كل الحالات",
+    "All Brands": "كل العلامات التجارية",
+    "All Sizes": "كل المقاسات",
+    "All Colors": "كل الألوان",
+    "All Types": "كل الأنواع",
+  };
+  const rawSelectedLabel = value === "all" ? `All ${label}s` : options.find((opt) => opt.id.toLowerCase() === value.toLowerCase())?.label || value;
+  const selectedLabel = isRtl ? labelMap[rawSelectedLabel] || rawSelectedLabel : rawSelectedLabel;
 
   return (
     <div ref={ref} className="relative shrink-0 text-left">
@@ -227,7 +248,7 @@ function AdminFilterDropdown({
                       : "text-[#6B1F2A] hover:bg-[#F2DFC0]/60 hover:text-[#942E3A]"
                   }`}
                 >
-                  <span className="truncate">{opt.label}</span>
+                  <span className="truncate">{isRtl ? labelMap[opt.label] || opt.label : opt.label}</span>
                   {isSelected && <Check className="h-3.5 w-3.5 text-[#D8B46A] shrink-0 ml-1.5" />}
                 </button>
               );
@@ -353,10 +374,10 @@ export default function AdminInventoryClient({
   // Category Overview Cards calculation
   const categoryCards: CategoryStats[] = useMemo(() => {
     const cats = [
-      { slug: "shoes", name: "Shoes", icon: Footprints },
-      { slug: "perfumes", name: "Perfumes", icon: Sparkle },
-      { slug: "bags", name: "Bags", icon: ShoppingBag },
-      { slug: "accessories", name: "Accessories", icon: Gem },
+      { slug: "shoes", name: isRtl ? "أحذية" : "Shoes", icon: Footprints },
+      { slug: "perfumes", name: isRtl ? "عطور" : "Perfumes", icon: Sparkle },
+      { slug: "bags", name: isRtl ? "حقائب" : "Bags", icon: ShoppingBag },
+      { slug: "accessories", name: isRtl ? "إكسسوارات" : "Accessories", icon: Gem },
     ];
 
     return cats.map((cat) => {
@@ -381,7 +402,7 @@ export default function AdminInventoryClient({
         coverImage: firstImage,
       };
     });
-  }, [rows]);
+  }, [rows, isRtl]);
 
   // Filtered rows
   const filteredRows = useMemo(() => {
@@ -585,7 +606,7 @@ export default function AdminInventoryClient({
   };
 
   return (
-    <div className="space-y-6">
+    <div dir={isRtl ? "rtl" : "ltr"} className="space-y-6 text-start">
       {/* Page Header */}
       {!hideHeader && (
         <div className="flex items-center justify-between gap-3">
@@ -662,7 +683,7 @@ export default function AdminInventoryClient({
           >
             <div className="flex items-center justify-between">
               <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/55 truncate">
-                Low Stock
+                {isRtl ? "مخزون منخفض" : "Low Stock"}
               </p>
               <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500 shrink-0" />
             </div>
@@ -682,7 +703,7 @@ export default function AdminInventoryClient({
           >
             <div className="flex items-center justify-between">
               <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-rose-700/65 truncate">
-                Out of Stock
+                {isRtl ? "نفد المخزون" : "Out of Stock"}
               </p>
               <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-rose-600 shrink-0" />
             </div>
@@ -698,10 +719,10 @@ export default function AdminInventoryClient({
         <div>
           <div className="mb-2.5 flex items-center justify-between">
             <h2 className="font-playfair text-base sm:text-lg font-bold text-[#942E3A]">
-              Catalog Categories Overview
+              {isRtl ? "نظرة عامة على فئات الكتالوج" : "Catalog Categories Overview"}
             </h2>
             <span className="hidden sm:inline text-xs text-[#6B1F2A]/60">
-              Click any card to inspect category inventory
+              {isRtl ? "اضغط على أي بطاقة لاستعراض مخزون الفئة" : "Click any card to inspect category inventory"}
             </span>
           </div>
 
@@ -722,7 +743,7 @@ export default function AdminInventoryClient({
                         <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                       </div>
                       <span className="flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider rounded-lg sm:rounded-xl px-2 py-0.5 sm:px-2.5 sm:py-1 bg-[#FFF9EB] text-[#942E3A] group-hover:bg-[#942E3A] group-hover:text-[#FFF9EB] transition">
-                        <span>Explore</span>
+                        <span>{isRtl ? "استعراض" : "Explore"}</span>
                         <ArrowUpRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                       </span>
                     </div>
@@ -730,7 +751,7 @@ export default function AdminInventoryClient({
                     {/* Title & Valuation */}
                     <h3 className="mt-2.5 sm:mt-4 font-playfair text-base sm:text-xl font-black truncate">{cat.name}</h3>
                     <p className="mt-0.5 text-[10px] sm:text-xs font-semibold text-[#6B1F2A]/70 truncate">
-                      Valuation: {formatPrice(cat.totalValue)}
+                      {isRtl ? "قيمة المخزون: " : "Valuation: "}{formatPrice(cat.totalValue)}
                     </p>
                   </div>
 
@@ -738,19 +759,19 @@ export default function AdminInventoryClient({
                   <div className="mt-3 sm:mt-5 border-t border-[#942E3A]/10 pt-2 sm:pt-3">
                     <div className="grid grid-cols-4 text-center text-[9px] sm:text-[10px]">
                       <div>
-                        <span className="block font-bold opacity-60 truncate">Prods</span>
+                <span className="block font-bold opacity-60 truncate">{isRtl ? "منتجات" : "Prods"}</span>
                         <span className="font-playfair text-xs sm:text-sm font-bold">{cat.productsCount}</span>
                       </div>
                       <div>
-                        <span className="block font-bold opacity-60 truncate">Vars</span>
+                        <span className="block font-bold opacity-60 truncate">{isRtl ? "متغيرات" : "Vars"}</span>
                         <span className="font-playfair text-xs sm:text-sm font-bold">{cat.variantsCount}</span>
                       </div>
                       <div>
-                        <span className="block font-bold opacity-60 truncate">Units</span>
+                        <span className="block font-bold opacity-60 truncate">{isRtl ? "وحدات" : "Units"}</span>
                         <span className="font-playfair text-xs sm:text-sm font-bold">{cat.totalUnits}</span>
                       </div>
                       <div>
-                        <span className="block font-bold opacity-60 truncate">Out/Low</span>
+                        <span className="block font-bold opacity-60 truncate">{isRtl ? "نفد/منخفض" : "Out/Low"}</span>
                         <span
                           className={`font-playfair text-xs sm:text-sm font-bold ${
                             cat.outOfStockCount > 0 ? "text-rose-600" : ""
@@ -775,12 +796,12 @@ export default function AdminInventoryClient({
             <div className="flex items-center gap-2.5">
               <Package className="h-5 w-5 text-[#D8B46A]" />
               <h2 className="font-playfair text-xl font-bold text-[#942E3A]">
-                Stock Ledger
+                {isRtl ? "سجل المخزون" : "Stock Ledger"}
               </h2>
               <span className="rounded-full border border-[#D8B46A]/30 bg-[#FFF9EB] px-3 py-0.5 text-[10px] font-bold text-[#942E3A]">
                 {viewMode === "variants"
-                  ? `${filteredRows.length} variants found`
-                  : `${productGroupRows.length} products found`}
+                  ? (isRtl ? `${filteredRows.length} متغير` : `${filteredRows.length} variants found`)
+                  : (isRtl ? `${productGroupRows.length} منتج` : `${productGroupRows.length} products found`)}
               </span>
             </div>
 
@@ -793,7 +814,7 @@ export default function AdminInventoryClient({
                   className="flex items-center gap-1 text-xs font-bold text-[#942E3A] hover:underline mr-2"
                 >
                   <X className="h-3.5 w-3.5" />
-                  Reset category filter
+                      {isRtl ? "إعادة ضبط فلتر الفئة" : "Reset category filter"}
                 </button>
               )}
 
@@ -808,7 +829,7 @@ export default function AdminInventoryClient({
                   }`}
                 >
                   <Layers className="h-3.5 w-3.5" />
-                  <span>By Variant</span>
+                  <span>{isRtl ? "حسب المتغير" : "By Variant"}</span>
                 </button>
 
                 <button
@@ -821,7 +842,7 @@ export default function AdminInventoryClient({
                   }`}
                 >
                   <Package className="h-3.5 w-3.5" />
-                  <span>By Product</span>
+                  <span>{isRtl ? "حسب المنتج" : "By Product"}</span>
                 </button>
               </div>
             </div>
@@ -838,7 +859,7 @@ export default function AdminInventoryClient({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search product, SKU..."
+                  placeholder={isRtl ? "ابحث عن المنتج أو SKU..." : "Search product, SKU..."}
                   className="w-full rounded-xl border border-[#942E3A]/15 bg-white py-2 pl-8 pr-2.5 text-xs text-[#942E3A] outline-none transition placeholder:text-[#6B1F2A]/35 focus:border-[#942E3A] focus:ring-2 focus:ring-[#D8B46A]/20"
                 />
               </div>
@@ -849,10 +870,12 @@ export default function AdminInventoryClient({
                   <AdminCategorySelect
                     value={selectedCategory}
                     onChange={(val) => setSelectedCategory(val)}
+                    isRtl={isRtl}
                   />
                   <AdminFilterDropdown
                     label="Status"
                     value={productStatusFilter}
+                    isRtl={isRtl}
                     options={[
                       { id: "all", label: "All Statuses" },
                       { id: "active", label: "Active" },
@@ -871,6 +894,7 @@ export default function AdminInventoryClient({
                     <AdminFilterDropdown
                       label="Brand"
                       value={selectedBrand}
+                      isRtl={isRtl}
                       options={[
                         { id: "all", label: "All Brands" },
                         ...availableBrands.map((b) => ({ id: b, label: b })),
@@ -884,6 +908,7 @@ export default function AdminInventoryClient({
                     <AdminFilterDropdown
                       label="Size"
                       value={selectedSize}
+                      isRtl={isRtl}
                       options={[
                         { id: "all", label: "All Sizes" },
                         ...availableSizes.map((s) => ({ id: s, label: `Size ${s}` })),
@@ -897,6 +922,7 @@ export default function AdminInventoryClient({
                     <AdminFilterDropdown
                       label="Color"
                       value={selectedColor}
+                      isRtl={isRtl}
                       options={[
                         { id: "all", label: "All Colors" },
                         ...availableColors.map((c) => ({ id: c, label: c })),
@@ -910,6 +936,7 @@ export default function AdminInventoryClient({
                     <AdminFilterDropdown
                       label="Type"
                       value={selectedSubcategory}
+                      isRtl={isRtl}
                       options={[
                         { id: "all", label: "All Types" },
                         ...availableSubcategories.map((sub) => ({ id: sub, label: sub })),
@@ -922,6 +949,7 @@ export default function AdminInventoryClient({
                   <AdminFilterDropdown
                     label="Status"
                     value={productStatusFilter}
+                    isRtl={isRtl}
                     options={[
                       { id: "all", label: "All Statuses" },
                       { id: "active", label: "Active" },
@@ -937,7 +965,7 @@ export default function AdminInventoryClient({
                       className="flex items-center gap-1 rounded-xl border border-[#942E3A]/20 bg-white px-2.5 py-2 text-[10px] font-bold text-[#942E3A] hover:bg-[#FFF9EB] transition"
                     >
                       <RotateCcw className="h-3 w-3 text-[#D8B46A]" />
-                      <span>Reset Filters</span>
+                      <span>{isRtl ? "إعادة ضبط الفلاتر" : "Reset Filters"}</span>
                     </button>
                   )}
                 </div>
@@ -958,12 +986,12 @@ export default function AdminInventoryClient({
                   }`}
                 >
                   {tab === "all"
-                    ? "All"
+                    ? (isRtl ? "الكل" : "All")
                     : tab === "healthy"
-                    ? "Healthy"
+                    ? (isRtl ? "سليم" : "Healthy")
                     : tab === "low"
-                    ? "Low"
-                    : "Out"}
+                    ? (isRtl ? "منخفض" : "Low")
+                    : (isRtl ? "نفد" : "Out")}
                 </button>
               ))}
             </div>
@@ -977,7 +1005,7 @@ export default function AdminInventoryClient({
                   {selectedVariantIds.length}
                 </span>
                 <span className="text-xs font-bold text-[#942E3A]">
-                  Variants Selected
+                  {isRtl ? "متغيرات محددة" : "Variants Selected"}
                 </span>
               </div>
 
@@ -989,7 +1017,7 @@ export default function AdminInventoryClient({
                   className="flex items-center gap-1.5 rounded-xl border border-emerald-600/30 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  <span>Set Active</span>
+                  <span>{isRtl ? "تفعيل" : "Set Active"}</span>
                 </button>
 
                 <button
@@ -999,7 +1027,7 @@ export default function AdminInventoryClient({
                   className="flex items-center gap-1.5 rounded-xl border border-rose-600/30 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-800 hover:bg-rose-100 transition"
                 >
                   <Archive className="h-3.5 w-3.5" />
-                  <span>Archive</span>
+                  <span>{isRtl ? "أرشفة" : "Archive"}</span>
                 </button>
 
                 <button
@@ -1007,7 +1035,7 @@ export default function AdminInventoryClient({
                   onClick={() => setSelectedVariantIds([])}
                   className="text-xs font-semibold text-[#6B1F2A]/60 hover:underline px-2"
                 >
-                  Deselect All
+                  {isRtl ? "إلغاء تحديد الكل" : "Deselect All"}
                 </button>
               </div>
             </div>

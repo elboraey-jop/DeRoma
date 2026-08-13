@@ -88,7 +88,7 @@ export default function AdminStatusSelect({
         onClick={() => setIsOpen((open) => !open)}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-label={`Update order status, currently ${getStatusLabel(status, lang)}`}
+        aria-label={lang === "ar" ? `تحديث حالة الطلب، الحالية ${getStatusLabel(status, lang)}` : `Update order status, currently ${getStatusLabel(status, lang)}`}
         className="group inline-flex min-w-[88px] items-center justify-between gap-1.5 rounded-full border border-[#D8B46A]/70 bg-[#FFF9EB] px-2 py-1.5 text-[9px] font-bold text-[#942E3A] shadow-[0_3px_10px_rgba(148,46,58,0.08)] outline-none transition-all hover:-translate-y-0.5 hover:border-[#942E3A] hover:shadow-[0_6px_14px_rgba(148,46,58,0.14)] focus:ring-2 focus:ring-[#D8B46A]/50 sm:min-w-[122px] sm:gap-3 sm:px-3 sm:py-2 sm:text-[10px]"
       >
         <span>{getStatusLabel(status, lang)}</span>
@@ -98,7 +98,7 @@ export default function AdminStatusSelect({
         <div
           ref={menuRef}
           role="listbox"
-          aria-label="Available order statuses"
+          aria-label={lang === "ar" ? "حالات الطلب المتاحة" : "Available order statuses"}
           style={menuStyle}
           className="fixed z-[100] overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-2 shadow-[0_16px_40px_rgba(67,25,31,0.2)] ring-1 ring-[#942E3A]/5 text-right"
         >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect, useRef } from "react";
+import { useState, useTransition } from "react";
 import { formatCurrency } from "@/lib/utils";
 import {
   DollarSign,
@@ -38,7 +38,7 @@ import {
 } from "@/app/admin/financials/actions";
 import AdminDailyLogDatePicker, { DatePreset } from "@/components/AdminDailyLogDatePicker";
 import Link from "next/link";
-import { localizeLegacyAdminDom, useAdminI18n } from "@/providers/AdminI18nContext";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 interface ExpenseItem {
   id: string;
@@ -210,7 +210,7 @@ export default function FinancialsClient({
         setIsAddExpenseOpen(false);
         form.reset();
       } catch (err: any) {
-        setErrorMsg(err.message || "Failed to save expense.");
+        setErrorMsg(err.message || (isRtl ? "تعذر حفظ المصروف." : "Failed to save expense."));
       }
     });
   };
@@ -227,18 +227,18 @@ export default function FinancialsClient({
         setIsTransferOpen(false);
         form.reset();
       } catch (err: any) {
-        setErrorMsg(err.message || "Failed to process transfer.");
+        setErrorMsg(err.message || (isRtl ? "تعذر تنفيذ التحويل." : "Failed to process transfer."));
       }
     });
   };
 
   const handleDeleteExpense = (id: string) => {
-    if (!confirm("Are you sure you want to delete this expense entry?")) return;
+    if (!confirm(isRtl ? "هل أنت متأكد من حذف هذا المصروف؟" : "Are you sure you want to delete this expense entry?")) return;
     startTransition(async () => {
       try {
         await deleteExpenseAction(id);
       } catch (err: any) {
-        alert(err.message || "Failed to delete expense.");
+        alert(err.message || (isRtl ? "تعذر حذف المصروف." : "Failed to delete expense."));
       }
     });
   };
@@ -262,31 +262,13 @@ export default function FinancialsClient({
         setIsSettlementModalOpen(false);
         setSettlementNotes("");
       } catch (err: any) {
-        setErrorMsg(err.message || "Failed to process settlement.");
+        setErrorMsg(err.message || (isRtl ? "تعذر تنفيذ التسوية." : "Failed to process settlement."));
       }
     });
   };
 
   const { lang, t, formatPrice, formatNumber } = useAdminI18n();
   const isRtl = lang === "ar";
-  const financialsRootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isRtl || !financialsRootRef.current) return;
-    const root = financialsRootRef.current;
-    let applying = false;
-    const applyTranslations = () => {
-      if (applying) return;
-      applying = true;
-      observer.disconnect();
-      localizeLegacyAdminDom(root);
-      observer.observe(root, { childList: true, subtree: true, characterData: true });
-      applying = false;
-    };
-    const observer = new MutationObserver(applyTranslations);
-    applyTranslations();
-    return () => observer.disconnect();
-  }, [isRtl, activeTab]);
 
   // Filtered Expenses
   const filteredExpenses = expenses.filter((exp) => {
@@ -312,7 +294,7 @@ export default function FinancialsClient({
   });
 
   return (
-    <div ref={financialsRootRef} data-financials-dashboard className="space-y-5">
+    <div dir={isRtl ? "rtl" : "ltr"} data-financials-dashboard className="space-y-5 text-start">
       {/* Top Title & Global Date Picker Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -373,7 +355,7 @@ export default function FinancialsClient({
           }`}
         >
           <Activity className="h-4 w-4 text-[#D8B46A]" />
-          <span>Cash Flow</span>
+          <span>{isRtl ? "التدفق النقدي" : "Cash Flow"}</span>
         </button>
 
         <button
@@ -385,7 +367,7 @@ export default function FinancialsClient({
           }`}
         >
           <Receipt className="h-4 w-4 text-[#D8B46A]" />
-          <span>Expenses</span>
+          <span>{isRtl ? "المصروفات" : "Expenses"}</span>
           {expenses.length > 0 && (
             <span className="rounded-full bg-[#D8B46A] px-1.5 py-0.2 text-[9px] font-black text-[#942E3A]">
               {expenses.length}
@@ -402,7 +384,7 @@ export default function FinancialsClient({
           }`}
         >
           <ShieldCheck className="h-4 w-4 text-[#D8B46A]" />
-          <span>Weekly Settlement</span>
+          <span>{isRtl ? "التسوية الأسبوعية" : "Weekly Settlement"}</span>
         </button>
 
         <button
@@ -414,7 +396,7 @@ export default function FinancialsClient({
           }`}
         >
           <ShoppingBag className="h-4 w-4 text-[#D8B46A]" />
-          <span>Order Profitability</span>
+          <span>{isRtl ? "ربحية الطلبات" : "Order Profitability"}</span>
         </button>
 
         <button
@@ -426,7 +408,7 @@ export default function FinancialsClient({
           }`}
         >
           <Calculator className="h-4 w-4 text-[#D8B46A]" />
-          <span>Projections & Restock</span>
+          <span>{isRtl ? "التوقعات وإعادة التخزين" : "Projections & Restock"}</span>
         </button>
       </div>
 
@@ -444,7 +426,7 @@ export default function FinancialsClient({
                 className="flex items-center gap-1.5 rounded-xl border border-[#942E3A]/20 bg-white px-3 py-1.5 text-xs font-bold text-[#942E3A] hover:bg-[#FFF9EB] transition shadow-xs"
               >
                 <ArrowRightLeft className="h-3.5 w-3.5 text-[#D8B46A]" />
-                <span>Transfer Between Accounts</span>
+                <span>{isRtl ? "تحويل بين الحسابات" : "Transfer Between Accounts"}</span>
               </button>
             </div>
 
@@ -454,7 +436,7 @@ export default function FinancialsClient({
                 <div className="absolute top-0 left-0 h-1 w-full bg-[#942E3A]" />
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/60">
-                    Sales Treasury (Sales Revenue)
+                    {isRtl ? "خزينة المبيعات (إيرادات المبيعات)" : "Sales Treasury (Sales Revenue)"}
                   </span>
                   <div className="rounded-lg bg-[#FFF9EB] p-2 text-[#942E3A]">
                     <ShoppingBag className="h-5 w-5" />
@@ -464,7 +446,7 @@ export default function FinancialsClient({
                   {formatCurrency(summary.totalSales)}
                 </p>
                 <p className="mt-1 text-[10px] text-[#6B1F2A]/65">
-                  Total sales volume from {summary.deliveredOrdersCount} completed orders
+                  {isRtl ? `إجمالي مبيعات ${summary.deliveredOrdersCount} طلبات مكتملة` : `Total sales volume from ${summary.deliveredOrdersCount} completed orders`}
                 </p>
               </div>
 
@@ -473,7 +455,7 @@ export default function FinancialsClient({
                 <div className="absolute top-0 left-0 h-1 w-full bg-[#D8B46A]" />
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/60">
-                    Net Profit Treasury (Net Profit)
+                    {isRtl ? "خزينة صافي الربح (صافي الربح)" : "Net Profit Treasury (Net Profit)"}
                   </span>
                   <div className="rounded-lg bg-[#D8B46A]/20 p-2 text-[#942E3A]">
                     <TrendingUp className="h-5 w-5" />
@@ -483,8 +465,8 @@ export default function FinancialsClient({
                   {formatCurrency(summary.netProfit)}
                 </p>
                 <div className="mt-1 flex items-center justify-between text-[10px] text-[#6B1F2A]/70">
-                  <span>Profit Margin: <strong className="text-[#942E3A]">{summary.profitMargin}%</strong></span>
-                  <span>After discounts & expenses</span>
+                  <span>{isRtl ? "هامش الربح: " : "Profit Margin: "}<strong className="text-[#942E3A]">{summary.profitMargin}%</strong></span>
+                  <span>{isRtl ? "بعد الخصومات والمصروفات" : "After discounts & expenses"}</span>
                 </div>
               </div>
 
@@ -492,7 +474,7 @@ export default function FinancialsClient({
               <div className="rounded-2xl border border-[#942E3A]/20 bg-[#942E3A] p-4 text-[#FFF9EB] shadow-xs relative overflow-hidden">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">
-                    Total Liquidity Treasury (Total Capital)
+                    {isRtl ? "خزينة السيولة الإجمالية (إجمالي رأس المال)" : "Total Liquidity Treasury (Total Capital)"}
                   </span>
                   <div className="rounded-lg bg-white/10 p-2 text-[#D8B46A]">
                     <Wallet className="h-5 w-5" />
@@ -505,7 +487,7 @@ export default function FinancialsClient({
                 {/* Sub-accounts breakdown inside Total Safe */}
                 <div className="mt-3 grid grid-cols-3 gap-1.5 border-t border-white/15 pt-2.5 text-center text-[10px]">
                   <div className="rounded-lg bg-white/10 p-1.5">
-                    <span className="block opacity-75 text-[9px]">Cash on Hand</span>
+                    <span className="block opacity-75 text-[9px]">{isRtl ? "النقدية المتاحة" : "Cash on Hand"}</span>
                     <strong className="text-[#FFF9EB] font-bold">{formatCurrency(paymentAccounts.cashOnHand)}</strong>
                   </div>
                   <div className="rounded-lg bg-white/10 p-1.5">
@@ -513,7 +495,7 @@ export default function FinancialsClient({
                     <strong className="text-[#FFF9EB] font-bold">{formatCurrency(paymentAccounts.instapayVisa)}</strong>
                   </div>
                   <div className="rounded-lg bg-white/10 p-1.5">
-                    <span className="block opacity-75 text-[9px]">E-Wallets</span>
+                    <span className="block opacity-75 text-[9px]">{isRtl ? "المحافظ الإلكترونية" : "E-Wallets"}</span>
                     <strong className="text-[#FFF9EB] font-bold">{formatCurrency(paymentAccounts.wallet)}</strong>
                   </div>
                 </div>
@@ -524,28 +506,28 @@ export default function FinancialsClient({
           {/* Health Indicators Grid */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3 shadow-xs">
-              <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">Avg Order Value (AOV)</span>
+              <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "متوسط قيمة الطلب (AOV)" : "Avg Order Value (AOV)"}</span>
               <p className="mt-1 font-playfair text-base sm:text-xl font-black text-[#942E3A]">
                 {formatCurrency(summary.avgOrderValue)}
               </p>
             </div>
 
             <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3 shadow-xs">
-              <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">Avg Profit Per Order</span>
+              <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "متوسط ربح الطلب" : "Avg Profit Per Order"}</span>
               <p className="mt-1 font-playfair text-base sm:text-xl font-black text-[#942E3A]">
                 {formatCurrency(summary.avgProfitPerOrder)}
               </p>
             </div>
 
             <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3 shadow-xs">
-              <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">Gross Profit Margin %</span>
+              <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "هامش إجمالي الربح %" : "Gross Profit Margin %"}</span>
               <p className="mt-1 font-playfair text-base sm:text-xl font-black text-[#942E3A]">
                 {summary.grossMarginPct}%
               </p>
             </div>
 
             <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3 shadow-xs">
-              <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">COGS Ratio %</span>
+              <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "نسبة تكلفة المنتجات %" : "COGS Ratio %"}</span>
               <p className="mt-1 font-playfair text-base sm:text-xl font-black text-[#942E3A]">
                 {summary.totalSales > 0 ? Math.round((summary.totalCOGS / summary.totalSales) * 100) : 0}%
               </p>
@@ -1060,20 +1042,20 @@ export default function FinancialsClient({
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-[#D8B46A]" />
                 <h3 className="font-playfair text-base font-bold text-[#942E3A]">
-                  Low Stock Restock Estimator
+                  {isRtl ? "تقدير إعادة تخزين المنتجات منخفضة المخزون" : "Low Stock Restock Estimator"}
                 </h3>
               </div>
               <p className="text-xs text-[#6B1F2A]/70">
-                Estimated cash required to replenish items currently at or below their low stock limit.
+                {isRtl ? "النقدية التقديرية المطلوبة لإعادة تخزين المنتجات التي وصلت إلى حد المخزون المنخفض أو أقل." : "Estimated cash required to replenish items currently at or below their low stock limit."}
               </p>
 
               <div className="rounded-xl bg-[#FFF9EB] p-3 space-y-2 text-xs">
                 <div className="flex justify-between">
-                  <span>Low Stock Items Count:</span>
-                  <strong>{inventoryStats.lowStockItemsCount} items</strong>
+                  <span>{isRtl ? "عدد المنتجات منخفضة المخزون:" : "Low Stock Items Count:"}</span>
+                  <strong>{inventoryStats.lowStockItemsCount} {isRtl ? "منتج" : "items"}</strong>
                 </div>
                 <div className="flex justify-between border-t border-[#D8B46A]/30 pt-2 text-[#942E3A] font-bold">
-                  <span>Estimated Replenishment Cost:</span>
+                  <span>{isRtl ? "تكلفة إعادة التخزين التقديرية:" : "Estimated Replenishment Cost:"}</span>
                   <strong className="text-base">{formatCurrency(inventoryStats.lowStockReplenishmentCost)}</strong>
                 </div>
               </div>
@@ -1082,7 +1064,7 @@ export default function FinancialsClient({
                 href="/admin/inventory"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#942E3A] hover:underline"
               >
-                <span>View Inventory Management</span>
+                <span>{isRtl ? "عرض إدارة المخزون" : "View Inventory Management"}</span>
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             </div>
@@ -1092,20 +1074,20 @@ export default function FinancialsClient({
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-[#D8B46A]" />
                 <h3 className="font-playfair text-base font-bold text-[#942E3A]">
-                  Sales Run-Rate Projections
+                  {isRtl ? "توقعات معدل المبيعات" : "Sales Run-Rate Projections"}
                 </h3>
               </div>
               <p className="text-xs text-[#6B1F2A]/70">
-                Projected monthly revenue based on active average order velocity.
+                {isRtl ? "الإيرادات الشهرية المتوقعة بناءً على متوسط معدل الطلبات النشطة." : "Projected monthly revenue based on active average order velocity."}
               </p>
 
               <div className="rounded-xl bg-[#FFF9EB] p-3 space-y-2 text-xs">
                 <div className="flex justify-between">
-                  <span>Current Period Sales:</span>
+                  <span>{isRtl ? "مبيعات الفترة الحالية:" : "Current Period Sales:"}</span>
                   <strong>{formatCurrency(summary.totalSales)}</strong>
                 </div>
                 <div className="flex justify-between border-t border-[#D8B46A]/30 pt-2 text-[#942E3A] font-bold">
-                  <span>Projected Monthly Run-Rate:</span>
+                  <span>{isRtl ? "معدل التشغيل الشهري المتوقع:" : "Projected Monthly Run-Rate:"}</span>
                   <strong className="text-base">{formatCurrency(summary.totalSales * 1.25)}</strong>
                 </div>
               </div>
@@ -1116,7 +1098,7 @@ export default function FinancialsClient({
 
       {/* ADD EXPENSE MODAL */}
       {isAddExpenseOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/60 backdrop-blur-xs p-4 text-left">
+        <div dir={isRtl ? "rtl" : "ltr"} className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/60 backdrop-blur-xs p-4 text-start">
           <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
             <div className="flex items-center justify-between border-b border-[#942E3A]/10 pb-3">
               <h3 className="font-playfair text-base font-bold text-[#942E3A]">Add New Expense</h3>
@@ -1222,7 +1204,7 @@ export default function FinancialsClient({
 
       {/* ACCOUNT TRANSFER MODAL */}
       {isTransferOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/60 backdrop-blur-xs p-4 text-left">
+        <div dir={isRtl ? "rtl" : "ltr"} className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/60 backdrop-blur-xs p-4 text-start">
           <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
             <div className="flex items-center justify-between border-b border-[#942E3A]/10 pb-3">
               <h3 className="font-playfair text-base font-bold text-[#942E3A]">Transfer Between Accounts</h3>
@@ -1321,7 +1303,7 @@ export default function FinancialsClient({
 
       {/* SETTLEMENT CONFIRMATION MODAL */}
       {isSettlementModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/60 backdrop-blur-xs p-4 text-left">
+        <div dir={isRtl ? "rtl" : "ltr"} className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/60 backdrop-blur-xs p-4 text-start">
           <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
             <div className="flex items-center justify-between border-b border-[#942E3A]/10 pb-3">
               <h3 className="font-playfair text-base font-bold text-[#942E3A]">Confirm Period Settlement</h3>

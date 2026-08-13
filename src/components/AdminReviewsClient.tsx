@@ -10,12 +10,23 @@ type Review = { id: string; productId: string; customerName: string; customerPho
 
 const statusStyles: Record<string, string> = { approved: "bg-[#e7f4ec] text-[#27663d]", pending: "bg-[#fff3d8] text-[#9a6a18]", rejected: "bg-[#fae9e8] text-[#a33b43]" };
 
-function Stars({ rating, large = false }: { rating: number; large?: boolean }) {
-  return <span className={`inline-flex items-center gap-0.5 ${large ? "text-base" : "text-xs"}`} aria-label={`${rating} out of 5 stars`}>{[1, 2, 3, 4, 5].map((star) => <Star key={star} className={star <= rating ? "fill-[#D8B46A] text-[#D8B46A]" : "text-[#d9c8b8]"} />)}</span>;
+const reviewStatusLabels: Record<string, { ar: string; en: string }> = {
+  approved: { ar: "منشورة", en: "Published" },
+  pending: { ar: "بانتظار الموافقة", en: "Pending" },
+  rejected: { ar: "مرفوضة", en: "Rejected" },
+};
+
+function getReviewStatusLabel(status: string, isRtl: boolean) {
+  const label = reviewStatusLabels[status];
+  return label ? (isRtl ? label.ar : label.en) : status;
 }
 
-function RatingPicker({ value, onChange }: { value: number; onChange: (value: number) => void }) {
-  return <div className="flex items-center gap-1.5" role="radiogroup" aria-label="Rating"><input type="hidden" name="rating" value={value} />{[1, 2, 3, 4, 5].map((star) => <button key={star} type="button" role="radio" aria-checked={value === star} aria-label={`${star} out of 5 stars`} onClick={() => onChange(star)} className="rounded-lg p-1 transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#D8B46A]/50"><Star className={`h-7 w-7 transition ${star <= value ? "fill-[#D8B46A] text-[#D8B46A]" : "text-[#d9c8b8] hover:text-[#D8B46A]/70"}`} /></button>)}</div>;
+function Stars({ rating, large = false, isRtl = false }: { rating: number; large?: boolean; isRtl?: boolean }) {
+  return <span className={`inline-flex items-center gap-0.5 ${large ? "text-base" : "text-xs"}`} aria-label={isRtl ? `${rating} من 5 نجوم` : `${rating} out of 5 stars`}>{[1, 2, 3, 4, 5].map((star) => <Star key={star} className={star <= rating ? "fill-[#D8B46A] text-[#D8B46A]" : "text-[#d9c8b8]"} />)}</span>;
+}
+
+function RatingPicker({ value, onChange, isRtl }: { value: number; onChange: (value: number) => void; isRtl: boolean }) {
+  return <div className="flex items-center gap-1.5" role="radiogroup" aria-label={isRtl ? "التقييم" : "Rating"}><input type="hidden" name="rating" value={value} />{[1, 2, 3, 4, 5].map((star) => <button key={star} type="button" role="radio" aria-checked={value === star} aria-label={isRtl ? `${star} من 5 نجوم` : `${star} out of 5 stars`} onClick={() => onChange(star)} className="rounded-lg p-1 transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#D8B46A]/50"><Star className={`h-7 w-7 transition ${star <= value ? "fill-[#D8B46A] text-[#D8B46A]" : "text-[#d9c8b8] hover:text-[#D8B46A]/70"}`} /></button>)}</div>;
 }
 
 function StatusPicker({ value }: { value: string }) {
@@ -128,7 +139,7 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
               {isRtl ? "تسجيل مراجعة العميل وتحديد المنتجات ومكان النشر." : "Capture the customer story and choose where it appears."}
             </p>
           </div>
-          <button onClick={onClose} className="rounded-full p-2 text-[#942E3A]/60 hover:bg-[#942E3A]/8" aria-label="Close">
+          <button onClick={onClose} className="rounded-full p-2 text-[#942E3A]/60 hover:bg-[#942E3A]/8" aria-label={isRtl ? "إغلاق" : "Close"}>
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -210,7 +221,7 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="field-label">{t("reviews.rating")}</label>
-              <RatingPicker value={rating} onChange={setRating} />
+              <RatingPicker value={rating} onChange={setRating} isRtl={isRtl} />
             </div>
             <input type="hidden" name="status" value={review?.status || "approved"} />
           </div>
@@ -266,6 +277,7 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
 export default function AdminReviewsClient({ reviews, products }: { reviews: Review[]; products: Product[] }) {
   const { lang, t, formatNumber } = useAdminI18n();
   const isRtl = lang === "ar";
+  const reviewDateLocale = isRtl ? "ar-EG-u-nu-latn" : "en-US";
   const [filter, setFilter] = useState("all");
   const [scopeFilter, setScopeFilter] = useState<"all" | "home">("all");
   const [query, setQuery] = useState("");
@@ -398,17 +410,17 @@ export default function AdminReviewsClient({ reviews, products }: { reviews: Rev
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                     <h3 className="font-playfair text-sm font-bold text-[#942E3A] sm:text-base truncate">{review.customerName}</h3>
                     <span className="text-[#D8B46A]">·</span>
-                    <Stars rating={review.rating} />
+                    <Stars rating={review.rating} isRtl={isRtl} />
                   </div>
                   <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-[#6B1F2A]/55 sm:mt-1 sm:gap-2">
                     <span className="truncate font-semibold text-[#942E3A]/75">{review.product.name}</span>
                     <span>·</span>
-                    <span>{new Date(review.createdAt).toLocaleDateString(isRtl ? "ar-EG" : "en-US", { month: "short", day: "numeric" })}</span>
+                    <span>{new Date(review.createdAt).toLocaleDateString(reviewDateLocale, { month: "short", day: "numeric" })}</span>
                     {review.verifiedPurchase && <span className="inline-flex items-center gap-0.5 font-bold text-[#27663d]"><Check className="h-3 w-3" /> {isRtl ? "مؤكد" : "Verified"}</span>}
                   </div>
                 </div>
                 <span className={`h-fit rounded-full px-2 py-0.5 text-[9px] font-bold capitalize shrink-0 sm:px-2.5 sm:py-1 ${statusStyles[review.status] || statusStyles.pending}`}>
-                  {review.status === "approved" ? (isRtl ? "منشورة" : "Published") : review.status}
+                  {getReviewStatusLabel(review.status, isRtl)}
                 </span>
               </div>
               <p className="mt-2.5 text-xs leading-5 text-[#6B1F2A]/75 sm:mt-3 sm:leading-6 break-words">{review.body}</p>
@@ -421,7 +433,7 @@ export default function AdminReviewsClient({ reviews, products }: { reviews: Rev
                   <form action={toggleShowOnHomeAction} className="flex items-center shrink-0">
                     <input type="hidden" name="id" value={review.id} />
                     <input type="hidden" name="showOnHome" value={String(!review.showOnHome)} />
-                    <button type="submit" className={`inline-flex items-center gap-1 rounded-xl border px-2 py-1.5 text-[10px] font-bold transition sm:px-2.5 ${review.showOnHome ? "border-[#942E3A] bg-[#942E3A] text-white shadow-xs" : "border-[#942E3A]/20 bg-white text-[#942E3A]/70 hover:border-[#942E3A]"}`} title="Toggle show on Home Page">
+                    <button type="submit" className={`inline-flex items-center gap-1 rounded-xl border px-2 py-1.5 text-[10px] font-bold transition sm:px-2.5 ${review.showOnHome ? "border-[#942E3A] bg-[#942E3A] text-white shadow-xs" : "border-[#942E3A]/20 bg-white text-[#942E3A]/70 hover:border-[#942E3A]"}`} title={isRtl ? "تبديل العرض في الصفحة الرئيسية" : "Toggle show on Home Page"}>
                       <Home className="h-3 w-3" />
                       <span>{isRtl ? "الرئيسية" : "Home"}</span>
                       <span className={`h-2 w-2 rounded-full ${review.showOnHome ? "bg-[#D8B46A]" : "bg-stone-300"}`} />

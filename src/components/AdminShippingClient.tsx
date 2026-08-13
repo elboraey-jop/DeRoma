@@ -73,47 +73,49 @@ export default function AdminShippingClient({
       </div>
 
       {/* Tabs Bar */}
-      <div className="flex items-center gap-2 border-b border-[#D8B46A]/30 pb-3">
-        <button
-          type="button"
-          onClick={() => setActiveTab("zones")}
-          className={cn(
-            "inline-flex items-center gap-2.5 rounded-full px-5 py-2.5 text-xs font-bold transition-all",
-            activeTab === "zones"
-              ? "bg-[#942E3A] text-white shadow-md shadow-[#942E3A]/20"
-              : "bg-white text-[#942E3A] border border-[#D8B46A]/30 hover:bg-[#FFF9EB]"
-          )}
-        >
-          <Truck className={cn("h-4 w-4", activeTab === "zones" ? "text-[#D8B46A]" : "text-[#942E3A]")} />
-          <span>{isRtl ? "مناطق ومحافظات التوصيل" : "Delivery Zones"}</span>
-          <span
+      <div className="flex items-center justify-between border-b border-[#942E3A]/15 pb-3 min-w-0">
+        <div className="grid grid-cols-2 w-full sm:w-auto sm:flex sm:items-center gap-1.5 sm:gap-2 rounded-2xl border border-[#942E3A]/15 bg-[#FFF9EB] p-1.5 shadow-inner min-w-0">
+          <button
+            type="button"
+            onClick={() => setActiveTab("zones")}
             className={cn(
-              "rounded-full px-2 py-0.5 text-[10px] font-black",
+              "flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-2 text-xs font-bold transition-all truncate min-w-0",
               activeTab === "zones"
-                ? "bg-[#D8B46A] text-[#2C1018]"
-                : "bg-[#F2E7D5] text-[#942E3A]"
+                ? "bg-[#942E3A] text-[#FFF9EB] shadow-md"
+                : "text-[#942E3A]/70 hover:bg-[#942E3A]/10 hover:text-[#942E3A]"
             )}
           >
-            {formatNumber(zones.length)}
-          </span>
-        </button>
+            <Truck className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
+            <span className="truncate">{isRtl ? "مناطق ومحافظات التوصيل" : "Delivery Zones"}</span>
+            <span
+              className={cn(
+                "rounded-full px-1.5 py-0.5 text-[10px] font-black shrink-0",
+                activeTab === "zones"
+                  ? "bg-[#FFF9EB] text-[#942E3A]"
+                  : "bg-[#942E3A]/15 text-[#942E3A]"
+              )}
+            >
+              {formatNumber(zones.length)}
+            </span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("freeship")}
-          className={cn(
-            "inline-flex items-center gap-2.5 rounded-full px-5 py-2.5 text-xs font-bold transition-all",
-            activeTab === "freeship"
-              ? "bg-[#942E3A] text-white shadow-md shadow-[#942E3A]/20"
-              : "bg-white text-[#942E3A] border border-[#D8B46A]/30 hover:bg-[#FFF9EB]"
-          )}
-        >
-          <Gift className={cn("h-4 w-4", activeTab === "freeship" ? "text-[#D8B46A]" : "text-[#942E3A]")} />
-          <span>{isRtl ? "قواعد الشحن المجاني" : "Free Shipping Rules"}</span>
-          {isFreeShipActive && (
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          )}
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("freeship")}
+            className={cn(
+              "flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-2 text-xs font-bold transition-all truncate min-w-0",
+              activeTab === "freeship"
+                ? "bg-[#942E3A] text-[#FFF9EB] shadow-md"
+                : "text-[#942E3A]/70 hover:bg-[#942E3A]/10 hover:text-[#942E3A]"
+            )}
+          >
+            <Gift className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
+            <span className="truncate">{isRtl ? "قواعد الشحن المجاني" : "Free Shipping Rules"}</span>
+            {isFreeShipActive && (
+              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Tab 1: Delivery Zones */}

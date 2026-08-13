@@ -47,6 +47,10 @@ export default function AdminProductsClient({
     { key: "perfumes", label: isRtl ? "عطور" : "Perfumes" },
     { key: "accessories", label: isRtl ? "إكسسوارات" : "Accessories" },
   ];
+  const categoryLabel = (value: string) => {
+    if (!isRtl) return value;
+    return ({ shoes: "أحذية", bags: "حقائب", perfumes: "عطور", accessories: "إكسسوارات" } as Record<string, string>)[value.toLowerCase()] || value;
+  };
 
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -65,9 +69,9 @@ export default function AdminProductsClient({
   );
 
   return (
-    <div className="space-y-5">
+    <div dir={isRtl ? "rtl" : "ltr"} className="space-y-5 text-start">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-        <div>
+        <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
             {isRtl ? "إدارة الكتالوج والتشكيلة" : "Catalog management"}
           </p>
@@ -103,7 +107,7 @@ export default function AdminProductsClient({
 
       <nav
         className="flex w-fit gap-1 rounded-2xl border border-[#942E3A]/10 bg-white p-1 shadow-xs"
-        aria-label="Product management tabs"
+        aria-label={isRtl ? "تبويبات إدارة المنتجات" : "Product management tabs"}
       >
         <Link
           href="/admin/products"
@@ -212,6 +216,7 @@ export default function AdminProductsClient({
                           <img
                             src={product.image}
                             alt=""
+                            onError={(event) => { event.currentTarget.style.display = "none"; }}
                             className="h-full w-full object-cover"
                           />
                         ) : null}
@@ -222,7 +227,7 @@ export default function AdminProductsClient({
                     </Link>
                   </td>
                   <td className="py-3 capitalize text-[#6B1F2A]">
-                    {product.category}
+                    {categoryLabel(product.category)}
                   </td>
                   <td className="py-3 font-bold text-[#942E3A]">
                     {formatPrice(product.price)}
@@ -249,6 +254,7 @@ export default function AdminProductsClient({
                     <AdminProductStatusSelect
                       productId={product.id}
                       status={product.status}
+                      isRtl={isRtl}
                     />
                   </td>
                   <td className={`py-3 ${isRtl ? "text-left" : "text-right"}`}>
@@ -257,6 +263,7 @@ export default function AdminProductsClient({
                       productName={product.name}
                       price={product.price}
                       compareAtPrice={product.compareAtPrice}
+                      isRtl={isRtl}
                     />
                   </td>
                 </tr>
@@ -285,10 +292,11 @@ export default function AdminProductsClient({
               >
                 <div className="flex h-28 items-center justify-center overflow-hidden rounded-xl bg-[#FFF9EB]">
                   {product.image ? (
-                    <img
-                      src={product.image}
-                      alt=""
-                      className="h-full w-full object-cover"
+                          <img
+                            src={product.image}
+                            alt=""
+                            onError={(event) => { event.currentTarget.style.display = "none"; }}
+                            className="h-full w-full object-cover"
                     />
                   ) : (
                     <PackagePlus className="h-7 w-7 text-[#D8B46A]" />
@@ -298,7 +306,7 @@ export default function AdminProductsClient({
                   {product.name}
                 </h3>
                 <div className="mt-1 flex items-center justify-between gap-1 text-[10px] text-[#6B1F2A]/65">
-                  <span className="capitalize">{product.category}</span>
+                  <span className="capitalize">{categoryLabel(product.category)}</span>
                   <span className="font-bold text-[#942E3A]">
                     {t("products.stock")} {formatNumber(product.stock)}
                   </span>
@@ -319,6 +327,7 @@ export default function AdminProductsClient({
                   productId={product.id}
                   status={product.status}
                   compact
+                  isRtl={isRtl}
                 />
                 <AdminProductDiscountModal
                   productId={product.id}
@@ -326,6 +335,7 @@ export default function AdminProductsClient({
                   price={product.price}
                   compareAtPrice={product.compareAtPrice}
                   compact
+                  isRtl={isRtl}
                 />
               </div>
             </article>

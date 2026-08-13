@@ -11,12 +11,14 @@ export default function AdminProductDiscountModal({
   price,
   compareAtPrice,
   compact = false,
+  isRtl = false,
 }: {
   productId: string;
   productName: string;
   price: number;
   compareAtPrice: number | null;
   compact?: boolean;
+  isRtl?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [discountType, setDiscountType] = useState("percentage");
@@ -39,7 +41,7 @@ export default function AdminProductDiscountModal({
         onClick={() => setIsOpen(true)}
         className={`inline-flex items-center font-bold text-[#942E3A] hover:underline ${compact ? "gap-1 text-[10px]" : "gap-1.5"}`}
       >
-        <Tag className={compact ? "h-3 w-3 text-[#D8B46A]" : "h-3.5 w-3.5 text-[#D8B46A]"} /> Discount
+        <Tag className={compact ? "h-3 w-3 text-[#D8B46A]" : "h-3.5 w-3.5 text-[#D8B46A]"} /> {isRtl ? "خصم" : "Discount"}
       </button>
       {isOpen && (
         <div
@@ -58,10 +60,10 @@ export default function AdminProductDiscountModal({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-                  Product discount
+                  {isRtl ? "خصم المنتج" : "Product discount"}
                 </p>
                 <h2 id={`discount-title-${productId}`} className="mt-1 font-playfair text-xl font-black text-[#942E3A]">
-                  Add discount
+                  {isRtl ? "إضافة خصم" : "Add discount"}
                 </h2>
                 <p className="mt-1 max-w-xs truncate text-xs text-[#6B1F2A]/65" title={productName}>
                   {productName}
@@ -78,11 +80,11 @@ export default function AdminProductDiscountModal({
             </div>
             <div className="mt-5 rounded-2xl bg-white p-4">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[#6B1F2A]/60">Current price</span>
+                <span className="text-[#6B1F2A]/60">{isRtl ? "السعر الحالي" : "Current price"}</span>
                 <span className="font-bold text-[#942E3A]">{formatCurrency(basePrice)}</span>
               </div>
               <div className="mt-2 flex items-center justify-between text-xs">
-                <span className="text-[#6B1F2A]/60">New price</span>
+                <span className="text-[#6B1F2A]/60">{isRtl ? "السعر الجديد" : "New price"}</span>
                 <span className="font-playfair text-lg font-black text-[#942E3A]">{formatCurrency(previewPrice)}</span>
               </div>
             </div>
@@ -93,20 +95,20 @@ export default function AdminProductDiscountModal({
             <form action={updateProductDiscountAction} onSubmit={() => setIsOpen(false)} className="mt-5 space-y-4">
               <input type="hidden" name="productId" value={productId} />
               <div>
-                <span className="field-label">Discount type</span>
+                <span className="field-label">{isRtl ? "نوع الخصم" : "Discount type"}</span>
                 <div className="mt-1 grid grid-cols-2 gap-2">
                   <label className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold ${discountType === "percentage" ? "border-[#942E3A] bg-[#942E3A] text-[#FFF9EB]" : "border-[#942E3A]/10 bg-white text-[#942E3A]"}`}>
                     <input type="radio" name="discountType" value="percentage" checked={discountType === "percentage"} onChange={() => setDiscountType("percentage")} className="sr-only" />
-                    <Percent className="h-3.5 w-3.5 text-[#D8B46A]" /> Percentage
+                    <Percent className="h-3.5 w-3.5 text-[#D8B46A]" /> {isRtl ? "نسبة مئوية" : "Percentage"}
                   </label>
                   <label className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold ${discountType === "fixed" ? "border-[#942E3A] bg-[#942E3A] text-[#FFF9EB]" : "border-[#942E3A]/10 bg-white text-[#942E3A]"}`}>
                     <input type="radio" name="discountType" value="fixed" checked={discountType === "fixed"} onChange={() => setDiscountType("fixed")} className="sr-only" />
-                    EGP Fixed amount
+                    {isRtl ? "مبلغ ثابت EGP" : "EGP Fixed amount"}
                   </label>
                 </div>
               </div>
               <label>
-                <span className="field-label">{discountType === "fixed" ? "Amount" : "Percentage"}</span>
+                <span className="field-label">{discountType === "fixed" ? (isRtl ? "المبلغ" : "Amount") : (isRtl ? "النسبة المئوية" : "Percentage")}</span>
                 <input
                   required
                   min="0.01"
@@ -127,11 +129,11 @@ export default function AdminProductDiscountModal({
                     form={`remove-discount-${productId}`}
                     className="rounded-xl border border-red-200 px-4 py-2.5 text-xs font-bold text-red-700 hover:bg-red-50"
                   >
-                    Remove discount
+                    {isRtl ? "إزالة الخصم" : "Remove discount"}
                   </button>
                 )}
                 <button type="submit" name="action" value="apply" className="rounded-xl bg-[#942E3A] px-5 py-2.5 text-xs font-bold text-[#FFF9EB] sm:ml-auto">
-                  Apply discount
+                  {isRtl ? "تطبيق الخصم" : "Apply discount"}
                 </button>
               </div>
             </form>

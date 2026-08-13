@@ -115,6 +115,75 @@ const TARGET_CATEGORY_OPTIONS = [
   { id: "accessories", label: "Accessories" },
 ];
 
+const ARABIC_LABELS: Record<string, string> = {
+  "All Statuses": "كل الحالات",
+  "Active Only": "النشطة فقط",
+  "Paused Only": "المتوقفة فقط",
+  "Expired Only": "المنتهية فقط",
+  "All Types": "كل الأنواع",
+  "Percentage (%)": "نسبة مئوية (%)",
+  "Fixed Amount (EGP)": "مبلغ ثابت (EGP)",
+  "Free Shipping (🚚)": "شحن مجاني (🚚)",
+  "Free Shipping Rule (🚚)": "قاعدة شحن مجاني (🚚)",
+  "All Scopes": "كل النطاقات",
+  "Entire Order": "كامل الطلب",
+  Category: "القسم",
+  Product: "المنتج",
+  Color: "اللون",
+  Material: "الخامة",
+  "Specific Category": "قسم محدد",
+  Shoes: "أحذية",
+  Perfumes: "عطور",
+  Bags: "حقائب",
+  Accessories: "إكسسوارات",
+  "DeRoma Signature": "طابع DeRoma المميز",
+  "Golden Luxury": "الفخامة الذهبية",
+  "Midnight Elegance": "أناقة منتصف الليل",
+  "Emerald Premium": "الزمرد الفاخر",
+  "Crimson Spark": "توهج قرمزي",
+  "Warm Olive": "زيتوني دافئ",
+  "DeRoma Burgundy": "عنابي DeRoma",
+  Gold: "ذهبي",
+  "Warm Cream": "كريمي دافئ",
+  "Dark Chocolate": "شوكولاتة داكنة",
+  "Emerald Green": "أخضر زمردي",
+  Mint: "نعناعي",
+  "Crimson Rose": "وردي قرمزي",
+  "Pure White": "أبيض ناصع",
+  "Midnight Black": "أسود منتصف الليل",
+  "Royal Blue": "أزرق ملكي",
+  "Deep Violet": "بنفسجي داكن",
+  "Amber Orange": "برتقالي كهرماني",
+};
+
+const ARABIC_CONTENT: Record<string, string> = {
+  "Welcome to DeRoma": "أهلًا بك في DeRoma",
+  "Shoes edit savings": "خصم على تشكيلة الأحذية",
+  "Free delivery weekend": "شحن مجاني في عطلة نهاية الأسبوع",
+  "Complimentary delivery on orders over 2,500 EGP · Shop the new DeRoma edit":
+    "شحن مجاني للطلبات التي تتجاوز 2,500 EGP · تسوق أحدث تشكيلات DeRoma",
+  "Order with confidence — open and try your shoes before payment":
+    "اطلب بثقة — افتح وجرب الحذاء قبل الدفع",
+};
+
+function localizedLabel(label: string, isArabic: boolean) {
+  return isArabic ? ARABIC_LABELS[label] || label : label;
+}
+
+function localizedContent(value: string, isArabic: boolean) {
+  return isArabic ? ARABIC_CONTENT[value] || value : value;
+}
+
+function localizedOptions(
+  options: { id: string; label: string }[],
+  isArabic: boolean
+) {
+  return options.map((option) => ({
+    ...option,
+    label: localizedLabel(option.label, isArabic),
+  }));
+}
+
 // Reusable Custom Styled Select Dropdown
 function CustomSelect({
   value,
@@ -290,7 +359,7 @@ function CustomDateTimePicker({
   name,
   value = "",
   onChange,
-  placeholder = "Select date & time",
+  placeholder,
   className,
   align = "left",
   placement = "top",
@@ -303,6 +372,8 @@ function CustomDateTimePicker({
   align?: "left" | "right";
   placement?: "top" | "bottom";
 }) {
+  const { lang } = useAdminI18n();
+  const isArabic = lang === "ar";
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -365,7 +436,7 @@ function CustomDateTimePicker({
       h24,
       minutes
     );
-    return d.toLocaleString("en-US", {
+    return d.toLocaleString(isArabic ? "ar-EG-u-nu-latn" : "en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -373,7 +444,7 @@ function CustomDateTimePicker({
       minute: "2-digit",
       hour12: true,
     });
-  }, [selectedDate, hours, minutes, ampm]);
+  }, [selectedDate, hours, minutes, ampm, isArabic]);
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -436,20 +507,26 @@ function CustomDateTimePicker({
     setAmPm(today.getHours() >= 12 ? "PM" : "AM");
   };
 
-  const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
+  const monthNames = isArabic
+    ? [
+        "يناير",
+        "فبراير",
+        "مارس",
+        "أبريل",
+        "مايو",
+        "يونيو",
+        "يوليو",
+        "أغسطس",
+        "سبتمبر",
+        "أكتوبر",
+        "نوفمبر",
+        "ديسمبر",
+      ]
+    : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  const weekDays = isArabic
+    ? ["ح", "ن", "ث", "ر", "خ", "ج", "س"]
+    : ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
   return (
     <div ref={containerRef} className="relative text-left">
@@ -473,7 +550,7 @@ function CustomDateTimePicker({
               !selectedDate && "text-[#6B1F2A]/40 font-normal"
             )}
           >
-            {displayString || placeholder}
+            {displayString || placeholder || (isArabic ? "اختر التاريخ والوقت" : "Select date & time")}
           </span>
         </div>
         {selectedDate ? (
@@ -528,13 +605,7 @@ function CustomDateTimePicker({
           </div>
 
           <div className="mt-2 grid grid-cols-7 text-center text-[9px] font-bold uppercase tracking-wider text-[#D8B46A]">
-            <span>Su</span>
-            <span>Mo</span>
-            <span>Tu</span>
-            <span>We</span>
-            <span>Th</span>
-            <span>Fr</span>
-            <span>Sa</span>
+            {weekDays.map((day) => <span key={day}>{day}</span>)}
           </div>
 
           <div className="mt-1 grid grid-cols-7 gap-0.5 text-center text-[10px]">
@@ -584,7 +655,7 @@ function CustomDateTimePicker({
 
           <div className="mt-3 border-t border-[#942E3A]/10 pt-2">
             <div className="flex items-center justify-between text-[11px] font-bold text-[#6B1F2A]/80 mb-1">
-              <span>Time</span>
+              <span>{isArabic ? "الوقت" : "Time"}</span>
               <span className="font-mono text-[#942E3A]">
                 {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")} {ampm}
               </span>
@@ -636,7 +707,7 @@ function CustomDateTimePicker({
               onClick={handleClear}
               className="font-bold text-stone-400 hover:text-stone-600"
             >
-              Clear
+              {isArabic ? "مسح" : "Clear"}
             </button>
             <div className="flex items-center gap-1.5">
               <button
@@ -644,7 +715,7 @@ function CustomDateTimePicker({
                 onClick={handleSetToday}
                 className="rounded-lg border border-[#942E3A]/20 px-2.5 py-0.5 font-bold text-[#942E3A] hover:bg-[#D8B46A]/20 text-[10px]"
               >
-                Today
+                {isArabic ? "اليوم" : "Today"}
               </button>
               <button
                 type="button"
@@ -654,7 +725,7 @@ function CustomDateTimePicker({
                 }}
                 className="rounded-lg bg-[#942E3A] px-3 py-0.5 font-bold text-[#FFF9EB] shadow-xs hover:bg-[#802832] text-[10px]"
               >
-                Done
+                {isArabic ? "تم" : "Done"}
               </button>
             </div>
           </div>
@@ -691,6 +762,8 @@ function CustomColorPicker({
   onChange: (val: string) => void;
   label: string;
 }) {
+  const { lang } = useAdminI18n();
+  const isArabic = lang === "ar";
   const [isOpen, setIsOpen] = useState(false);
   const [hexInput, setHexInput] = useState(value);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -757,7 +830,7 @@ function CustomColorPicker({
         <div className="absolute left-0 top-[calc(100%+6px)] z-50 w-64 overflow-hidden rounded-3xl border border-[#D8B46A]/50 bg-[#FFF9EB] p-4 shadow-[0_20px_45px_rgba(67,25,31,0.22)] animate-in fade-in zoom-in-95">
           <div className="flex items-center justify-between border-b border-[#942E3A]/10 pb-2 mb-3">
             <span className="font-playfair text-xs font-black text-[#942E3A]">
-              Color Palette & Hex
+              {isArabic ? "لوحة الألوان ورمز Hex" : "Color Palette & Hex"}
             </span>
             <div className="flex items-center gap-1.5">
               <div
@@ -775,7 +848,7 @@ function CustomColorPicker({
               <button
                 key={swatch.hex}
                 type="button"
-                title={swatch.name}
+                 title={localizedLabel(swatch.name, isArabic)}
                 onClick={() => {
                   onChange(swatch.hex);
                   setHexInput(swatch.hex);
@@ -820,7 +893,7 @@ function CustomColorPicker({
                 type="button"
                 onClick={() => colorInputRef.current?.click()}
                 className="rounded-xl border border-[#942E3A]/20 bg-white p-1.5 text-xs font-bold text-[#942E3A] hover:bg-[#D8B46A]/20 transition"
-                title="Custom Color Spectrum Picker"
+                title={isArabic ? "اختيار طيف ألوان مخصص" : "Custom Color Spectrum Picker"}
               >
                 🎨
               </button>
@@ -887,17 +960,31 @@ export default function AdminPromotionsClient({
   // Tab 2: Announcement Form State (for live preview)
   const activeAnnouncement = announcements.find((a) => a.active);
   const [previewText, setPreviewText] = useState(
-    activeAnnouncement?.text || "Free shipping on orders over 2,500 EGP | Code: FREESHIP"
+    localizedContent(
+      activeAnnouncement?.text ||
+        (isRtl ? "شحن مجاني للطلبات فوق 2,500 EGP | الكود: FREESHIP" : "Free shipping on orders over 2,500 EGP | Code: FREESHIP"),
+      isRtl
+    )
   );
   const [previewBg, setPreviewBg] = useState(activeAnnouncement?.backgroundColor || "#942E3A");
   const [previewTextColor, setPreviewTextColor] = useState(activeAnnouncement?.textColor || "#FFF9EB");
   const [previewMoving, setPreviewMoving] = useState(activeAnnouncement?.moving || false);
 
+  const statusOptions = localizedOptions(STATUS_OPTIONS, isRtl);
+  const typeOptions = localizedOptions(TYPE_OPTIONS, isRtl);
+  const scopeOptions = localizedOptions(SCOPE_OPTIONS, isRtl);
+  const formTypeOptions = localizedOptions(FORM_TYPE_OPTIONS, isRtl);
+  const formScopeOptions = localizedOptions(FORM_SCOPE_OPTIONS, isRtl);
+  const targetCategoryOptions = localizedOptions(TARGET_CATEGORY_OPTIONS, isRtl);
+
   // Copy code helper
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
-    toast.success(`Promo code "${code}" copied!`, "COPIED");
+      toast.success(
+        isRtl ? `تم نسخ كود الخصم "${code}"` : `Promo code "${code}" copied!`,
+        isRtl ? "تم النسخ" : "COPIED"
+      );
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
@@ -1064,7 +1151,7 @@ export default function AdminPromotionsClient({
             )}
           >
             <Megaphone className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
-            <span className="truncate">Announcement Bar</span>
+            <span className="truncate">{isRtl ? "شريط الإعلانات" : "Announcement Bar"}</span>
             <span
               className={cn(
                 "rounded-full px-1.5 py-0.5 text-[10px] font-black shrink-0",
@@ -1091,7 +1178,7 @@ export default function AdminPromotionsClient({
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B1F2A]/40" />
               <input
                 type="text"
-                placeholder="Search by code, promotion name, or target..."
+                placeholder={isRtl ? "ابحث بالكود أو اسم العرض أو النطاق..." : "Search by code, promotion name, or target..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full rounded-2xl border border-[#942E3A]/15 bg-[#FFF9EB]/40 pl-10 pr-4 py-2.5 text-xs text-[#942E3A] placeholder-[#6B1F2A]/40 outline-none transition focus:border-[#942E3A] focus:bg-white focus:ring-2 focus:ring-[#942E3A]/10"
@@ -1112,19 +1199,19 @@ export default function AdminPromotionsClient({
               <CustomSelect
                 value={statusFilter}
                 onChange={(val) => setStatusFilter(val as any)}
-                options={STATUS_OPTIONS}
+                options={statusOptions}
               />
 
               <CustomSelect
                 value={typeFilter}
                 onChange={setTypeFilter}
-                options={TYPE_OPTIONS}
+                options={typeOptions}
               />
 
               <CustomSelect
                 value={scopeFilter}
                 onChange={setScopeFilter}
-                options={SCOPE_OPTIONS}
+                options={scopeOptions}
               />
             </div>
           </div>
@@ -1154,7 +1241,7 @@ export default function AdminPromotionsClient({
                             <button
                               type="button"
                               onClick={() => handleCopyCode(promo.code!)}
-                              title="Click to copy code"
+                              title={isRtl ? "اضغط لنسخ الكود" : "Click to copy code"}
                               className="group/code inline-flex items-center gap-1.5 rounded-xl border border-[#D8B46A]/40 bg-[#FFF9EB] px-3 py-1 text-xs font-black tracking-wide text-[#942E3A] transition hover:bg-[#942E3A] hover:text-[#FFF9EB] truncate"
                             >
                               <span className="truncate">{promo.code}</span>
@@ -1166,7 +1253,7 @@ export default function AdminPromotionsClient({
                             </button>
                           ) : (
                             <span className="inline-block rounded-xl border border-stone-200 bg-stone-100 px-3 py-1 text-xs font-bold text-stone-500 truncate">
-                              Automatic Discount
+                              {isRtl ? "خصم تلقائي" : "Automatic Discount"}
                             </span>
                           )}
                         </div>
@@ -1196,7 +1283,11 @@ export default function AdminPromotionsClient({
                                   : "bg-stone-400"
                               )}
                             />
-                            {isExpired ? "Expired" : promo.active ? "Active" : "Paused"}
+                            {isExpired
+                              ? isRtl ? "منتهي" : "Expired"
+                              : promo.active
+                              ? isRtl ? "نشط" : "Active"
+                              : isRtl ? "متوقف" : "Paused"}
                           </button>
                         </form>
                       </div>
@@ -1204,15 +1295,15 @@ export default function AdminPromotionsClient({
                       {/* Promo Title & Main Value */}
                       <div className="mt-4 min-w-0">
                         <h3 className="font-playfair text-lg font-black text-[#942E3A] truncate">
-                          {promo.name}
+                          {localizedContent(promo.name, isRtl)}
                         </h3>
                         <div className="mt-1 flex items-center gap-2 min-w-0">
                           <span className="font-playfair text-2xl font-black text-[#942E3A] truncate">
                             {promo.type === "percentage"
-                              ? `${promo.value}% OFF`
+                              ? `${promo.value}% ${isRtl ? "خصم" : "OFF"}`
                               : promo.type === "fixed"
-                              ? `${formatCurrency(promo.value)} OFF`
-                              : "Free Shipping 🚚"}
+                              ? `${formatCurrency(promo.value)} ${isRtl ? "خصم" : "OFF"}`
+                              : isRtl ? "شحن مجاني 🚚" : "Free Shipping 🚚"}
                           </span>
                         </div>
                       </div>
@@ -1222,8 +1313,9 @@ export default function AdminPromotionsClient({
                         <div className="flex items-center gap-1.5 min-w-0">
                           <Layers className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
                           <span className="capitalize truncate">
-                            Applies to: <strong>{promo.scope}</strong>
-                            {promo.targetValue ? ` (${promo.targetValue})` : ""}
+                            {isRtl ? "ينطبق على: " : "Applies to: "}
+                            <strong>{localizedLabel(promo.scope, isRtl)}</strong>
+                            {promo.targetValue ? ` (${localizedLabel(promo.targetValue, isRtl)})` : ""}
                           </span>
                         </div>
 
@@ -1231,7 +1323,8 @@ export default function AdminPromotionsClient({
                           <div className="flex items-center gap-1.5 min-w-0">
                             <Tag className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
                             <span className="truncate">
-                              Min order: <strong>{formatCurrency(promo.minimumOrderValue)}</strong>
+                              {isRtl ? "الحد الأدنى للطلب: " : "Min order: "}
+                              <strong>{formatCurrency(promo.minimumOrderValue)}</strong>
                             </span>
                           </div>
                         ) : null}
@@ -1241,9 +1334,9 @@ export default function AdminPromotionsClient({
                       {promo.usageLimit ? (
                         <div className="mt-3 space-y-1 min-w-0">
                           <div className="flex items-center justify-between text-[10px] font-bold text-[#6B1F2A]/65 min-w-0">
-                            <span>Usage Limit</span>
+                            <span>{isRtl ? "حد الاستخدام" : "Usage Limit"}</span>
                             <span>
-                              {promo.usedCount} / {promo.usageLimit} uses
+                              {promo.usedCount} / {promo.usageLimit} {isRtl ? "استخدام" : "uses"}
                             </span>
                           </div>
                           <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#FFF9EB] border border-[#D8B46A]/20">
@@ -1260,7 +1353,9 @@ export default function AdminPromotionsClient({
                         </div>
                       ) : (
                         <p className="mt-2 text-[10px] text-[#6B1F2A]/55 truncate">
-                          Total Redemptions: <strong>{promo.usedCount}</strong> (Unlimited uses)
+                          {isRtl ? "إجمالي الاستخدامات: " : "Total Redemptions: "}
+                          <strong>{promo.usedCount}</strong>
+                          {isRtl ? " (استخدامات غير محدودة)" : " (Unlimited uses)"}
                         </p>
                       )}
                     </div>
@@ -1271,8 +1366,8 @@ export default function AdminPromotionsClient({
                         <Calendar className="h-3 w-3 text-[#D8B46A] shrink-0" />
                         <span className="truncate">
                           {promo.endsAt
-                            ? `Ends ${new Date(promo.endsAt).toLocaleDateString("en-US")}`
-                            : "No expiration"}
+                      ? `${isRtl ? "ينتهي " : "Ends "}${new Date(promo.endsAt).toLocaleDateString(isRtl ? "ar-EG-u-nu-latn" : "en-US")}`
+                      : isRtl ? "بدون تاريخ انتهاء" : "No expiration"}
                         </span>
                       </div>
 
@@ -1280,7 +1375,7 @@ export default function AdminPromotionsClient({
                         type="button"
                         onClick={() => setDeleteConfirmId(promo.id)}
                         className="rounded-lg p-1.5 text-stone-400 hover:bg-rose-50 hover:text-rose-600 transition shrink-0"
-                        title="Delete promotion"
+                      title={isRtl ? "حذف العرض" : "Delete promotion"}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -1293,12 +1388,12 @@ export default function AdminPromotionsClient({
             <div className="rounded-3xl border border-[#942E3A]/10 bg-white p-12 text-center shadow-sm min-w-0">
               <Tag className="mx-auto h-10 w-10 text-[#D8B46A]/60" />
               <h3 className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">
-                No Promotions Found
+                {isRtl ? "لم يتم العثور على عروض" : "No Promotions Found"}
               </h3>
               <p className="mt-1 text-xs text-[#6B1F2A]/60">
                 {searchQuery || statusFilter !== "all" || typeFilter !== "all"
-                  ? "Try clearing filters to see all coupon codes."
-                  : "Start creating promo codes to drive customer sales."}
+                  ? isRtl ? "جرّب إلغاء الفلاتر لعرض كل أكواد الخصم." : "Try clearing filters to see all coupon codes."
+                  : isRtl ? "ابدأ بإنشاء أكواد خصم لزيادة مبيعات العملاء." : "Start creating promo codes to drive customer sales."}
               </p>
               <button
                 type="button"
@@ -1306,7 +1401,7 @@ export default function AdminPromotionsClient({
                 className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB] shadow-md transition hover:bg-[#802832]"
               >
                 <Plus className="h-4 w-4 text-[#D8B46A]" />
-                Create First Promo Code
+                {isRtl ? "إنشاء أول كود خصم" : "Create First Promo Code"}
               </button>
             </div>
           )}
@@ -1323,12 +1418,12 @@ export default function AdminPromotionsClient({
             <div className="flex items-center justify-between mb-2 sm:mb-3 min-w-0">
               <div className="flex items-center gap-2 min-w-0">
                 <Eye className="h-4 w-4 text-[#942E3A] shrink-0" />
-                <h3 className="font-playfair text-sm sm:text-base font-bold text-[#942E3A] truncate">
-                  Live Storefront Preview
+                  <h3 className="font-playfair text-sm sm:text-base font-bold text-[#942E3A] truncate">
+                   {isRtl ? "معاينة المتجر المباشرة" : "Live Storefront Preview"}
                 </h3>
               </div>
               <span className="hidden sm:block text-[10px] font-bold text-[#6B1F2A]/60 shrink-0">
-                Interactive real-time preview
+                 {isRtl ? "معاينة تفاعلية لحظية" : "Interactive real-time preview"}
               </span>
             </div>
 
@@ -1339,10 +1434,10 @@ export default function AdminPromotionsClient({
             >
               {previewMoving ? (
                 <div className="whitespace-nowrap animate-marquee">
-                  <span>{previewText}</span>
+                   <span>{localizedContent(previewText, isRtl)}</span>
                 </div>
               ) : (
-                <span className="block truncate sm:whitespace-normal">{previewText}</span>
+                <span className="block truncate sm:whitespace-normal">{localizedContent(previewText, isRtl)}</span>
               )}
             </div>
           </div>
@@ -1354,10 +1449,10 @@ export default function AdminPromotionsClient({
                 <Megaphone className="h-4 w-4 sm:h-5 sm:w-5 text-[#D8B46A] shrink-0" />
                 <div className="min-w-0">
                   <h2 className="font-playfair text-lg sm:text-xl font-bold text-[#942E3A] truncate">
-                    Publish Announcement
+                    {isRtl ? "نشر إعلان" : "Publish Announcement"}
                   </h2>
                   <p className="text-[11px] text-[#6B1F2A]/65 sm:text-xs truncate">
-                    Only one banner is active on the storefront at a time.
+                    {isRtl ? "يمكن تفعيل شريط إعلان واحد فقط على المتجر في نفس الوقت." : "Only one banner is active on the storefront at a time."}
                   </p>
                 </div>
               </div>
@@ -1366,7 +1461,7 @@ export default function AdminPromotionsClient({
                 {/* Announcement Message */}
                 <div className="min-w-0">
                   <label className="mb-1.5 block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                    Banner Text Message *
+                    {isRtl ? "نص الإعلان في الشريط *" : "Banner Text Message *"}
                   </label>
                   <textarea
                     name="text"
@@ -1374,7 +1469,7 @@ export default function AdminPromotionsClient({
                     rows={2}
                     value={previewText}
                     onChange={(e) => setPreviewText(e.target.value)}
-                    placeholder="e.g. Free delivery on orders over 2500 EGP | Code: FREESHIP"
+                    placeholder={isRtl ? "مثال: شحن مجاني للطلبات فوق 2500 EGP | الكود: FREESHIP" : "e.g. Free delivery on orders over 2500 EGP | Code: FREESHIP"}
                     className="w-full min-w-0 max-w-full rounded-xl sm:rounded-2xl border border-[#942E3A]/15 bg-[#FFF9EB]/40 p-2.5 text-xs text-[#942E3A] outline-none transition focus:border-[#942E3A] focus:bg-white focus:ring-2 focus:ring-[#942E3A]/10"
                   />
                 </div>
@@ -1382,7 +1477,7 @@ export default function AdminPromotionsClient({
                 {/* Preset Themes Selector */}
                 <div className="min-w-0">
                   <label className="mb-1.5 block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                    Aesthetic Theme Presets
+                    {isRtl ? "اختيارات الطابع الجمالي" : "Aesthetic Theme Presets"}
                   </label>
                   <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 min-w-0">
                     {COLOR_PRESETS.map((preset) => (
@@ -1400,7 +1495,7 @@ export default function AdminPromotionsClient({
                           style={{ backgroundColor: preset.bg }}
                         />
                         <span className="truncate font-semibold text-[#942E3A]">
-                          {preset.name}
+                          {localizedLabel(preset.name, isRtl)}
                         </span>
                       </button>
                     ))}
@@ -1411,13 +1506,13 @@ export default function AdminPromotionsClient({
                 <div className="grid grid-cols-2 gap-1.5 sm:gap-3 pt-1 min-w-0">
                   <CustomColorPicker
                     name="backgroundColor"
-                    label="Background Color"
+                    label={isRtl ? "لون الخلفية" : "Background Color"}
                     value={previewBg}
                     onChange={setPreviewBg}
                   />
                   <CustomColorPicker
                     name="textColor"
-                    label="Text Color"
+                    label={isRtl ? "لون النص" : "Text Color"}
                     value={previewTextColor}
                     onChange={setPreviewTextColor}
                   />
@@ -1435,10 +1530,10 @@ export default function AdminPromotionsClient({
                     />
                     <div className="min-w-0">
                       <span className="text-xs font-bold text-[#942E3A] block truncate">
-                        Enable Moving Marquee Ticker
+                        {isRtl ? "تفعيل الشريط المتحرك" : "Enable Moving Marquee Ticker"}
                       </span>
                       <p className="text-[10px] text-[#6B1F2A]/60 leading-tight">
-                        Makes the banner message continuously slide across the top bar.
+                        {isRtl ? "يجعل نص الإعلان يتحرك باستمرار عبر الشريط العلوي." : "Makes the banner message continuously slide across the top bar."}
                       </p>
                     </div>
                   </label>
@@ -1448,21 +1543,21 @@ export default function AdminPromotionsClient({
                 <div className="grid grid-cols-2 gap-1.5 sm:gap-3 min-w-0">
                   <div className="min-w-0">
                     <label className="mb-1 block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70 truncate">
-                      Starts At (Optional)
+                      {isRtl ? "يبدأ في (اختياري)" : "Starts At (Optional)"}
                     </label>
                     <CustomDateTimePicker
                       name="startsAt"
-                      placeholder="Start date & time"
+                      placeholder={isRtl ? "تاريخ ووقت البداية" : "Start date & time"}
                       align="left"
                     />
                   </div>
                   <div className="min-w-0">
                     <label className="mb-1 block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70 truncate">
-                      Ends At (Optional)
+                      {isRtl ? "ينتهي في (اختياري)" : "Ends At (Optional)"}
                     </label>
                     <CustomDateTimePicker
                       name="endsAt"
-                      placeholder="End date & time"
+                      placeholder={isRtl ? "تاريخ ووقت النهاية" : "End date & time"}
                       align="right"
                     />
                   </div>
@@ -1472,7 +1567,7 @@ export default function AdminPromotionsClient({
                   type="submit"
                   className="w-full rounded-xl sm:rounded-2xl bg-[#942E3A] py-3 text-xs font-bold text-[#FFF9EB] shadow-md transition hover:bg-[#802832] active:scale-95"
                 >
-                  Publish Announcement Banner
+                  {isRtl ? "نشر شريط الإعلان" : "Publish Announcement Banner"}
                 </button>
               </form>
             </div>
@@ -1480,7 +1575,7 @@ export default function AdminPromotionsClient({
             {/* Right: Announcement History Log (5 cols) */}
             <div className="w-full min-w-0 max-w-full lg:col-span-5 rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-xs sm:rounded-3xl sm:p-6">
               <h3 className="font-playfair text-base sm:text-lg font-bold text-[#942E3A] border-b border-[#942E3A]/10 pb-2.5 sm:pb-3 truncate">
-                Banner History & Drafts
+                {isRtl ? "سجل ومسودات شريط الإعلانات" : "Banner History & Drafts"}
               </h3>
 
               <div className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3 max-h-[520px] overflow-y-auto pr-1 min-w-0">
@@ -1501,12 +1596,12 @@ export default function AdminPromotionsClient({
                         color: item.textColor,
                       }}
                     >
-                      {item.text}
+                      {localizedContent(item.text, isRtl)}
                     </div>
 
                     <div className="mt-2.5 flex items-center justify-between text-[10px] min-w-0">
                       <span className="text-stone-500 truncate">
-                        {new Date(item.createdAt).toLocaleDateString("en-US", {
+                        {new Date(item.createdAt).toLocaleDateString(isRtl ? "ar-EG-u-nu-latn" : "en-US", {
                           month: "short",
                           day: "numeric",
                           year: "numeric",
@@ -1527,7 +1622,9 @@ export default function AdminPromotionsClient({
                                 : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                             )}
                           >
-                            {item.active ? "Active" : "Re-activate"}
+                            {item.active
+                              ? isRtl ? "نشط" : "Active"
+                              : isRtl ? "إعادة تفعيل" : "Re-activate"}
                           </button>
                         </form>
 
@@ -1545,7 +1642,7 @@ export default function AdminPromotionsClient({
 
                 {announcements.length === 0 && (
                   <p className="py-8 text-center text-xs text-stone-400">
-                    No announcement history yet.
+                    {isRtl ? "لا يوجد سجل إعلانات حتى الآن." : "No announcement history yet."}
                   </p>
                 )}
               </div>
@@ -1564,7 +1661,7 @@ export default function AdminPromotionsClient({
               <div className="flex items-center gap-2">
                 <Tag className="h-5 w-5 text-[#D8B46A]" />
                 <h2 className="font-playfair text-xl font-bold text-[#942E3A]">
-                  Create New Promo Rule
+                  {isRtl ? "إنشاء عرض جديد" : "Create New Promo Rule"}
                 </h2>
               </div>
               <button
@@ -1586,12 +1683,12 @@ export default function AdminPromotionsClient({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                    Promo Name *
+                    {isRtl ? "اسم العرض *" : "Promo Name *"}
                   </label>
                   <input
                     required
                     name="name"
-                    placeholder="e.g. Summer Flash Sale"
+                    placeholder={isRtl ? "مثال: عرض الصيف السريع" : "e.g. Summer Flash Sale"}
                     className="w-full rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB]/40 p-2.5 text-xs text-[#942E3A] outline-none focus:border-[#942E3A]"
                   />
                 </div>
@@ -1599,7 +1696,7 @@ export default function AdminPromotionsClient({
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                      Coupon Code
+                      {isRtl ? "كود الخصم" : "Coupon Code"}
                     </label>
                     <button
                       type="button"
@@ -1607,14 +1704,14 @@ export default function AdminPromotionsClient({
                       className="text-[9px] font-bold text-[#942E3A] hover:underline flex items-center gap-1"
                     >
                       <Shuffle className="h-3 w-3 text-[#D8B46A]" />
-                      <span>Generate Code</span>
+                      <span>{isRtl ? "إنشاء كود" : "Generate Code"}</span>
                     </button>
                   </div>
                   <input
                     name="code"
                     value={codeValue}
                     onChange={(e) => setCodeValue(e.target.value.toUpperCase())}
-                    placeholder="e.g. SUMMER20"
+                    placeholder={isRtl ? "مثال: SUMMER20" : "e.g. SUMMER20"}
                     className="w-full rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB]/40 p-2.5 text-xs font-mono uppercase text-[#942E3A] outline-none focus:border-[#942E3A]"
                   />
                 </div>
@@ -1624,13 +1721,13 @@ export default function AdminPromotionsClient({
               <div className="grid grid-cols-2 gap-3">
                 <div className={cn(formType === "free_shipping" && "col-span-2")}>
                   <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                    Discount Type *
+                    {isRtl ? "نوع الخصم *" : "Discount Type *"}
                   </label>
                   <CustomSelect
                     name="type"
                     value={formType}
                     onChange={setFormType}
-                    options={FORM_TYPE_OPTIONS}
+                    options={formTypeOptions}
                     className="w-full h-10"
                   />
                 </div>
@@ -1638,7 +1735,9 @@ export default function AdminPromotionsClient({
                 {formType !== "free_shipping" ? (
                   <div>
                     <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                      {formType === "percentage" ? "Percentage Value (%) *" : "Fixed Amount (EGP) *"}
+                      {formType === "percentage"
+                        ? isRtl ? "قيمة النسبة (%) *" : "Percentage Value (%) *"
+                        : isRtl ? "المبلغ الثابت (EGP) *" : "Fixed Amount (EGP) *"}
                     </label>
                     <input
                       name="value"
@@ -1647,7 +1746,9 @@ export default function AdminPromotionsClient({
                       step="0.01"
                       value={formValue}
                       onChange={(e) => setFormValue(e.target.value)}
-                      placeholder={formType === "percentage" ? "e.g. 20" : "e.g. 150"}
+                      placeholder={formType === "percentage"
+                        ? isRtl ? "مثال: 20" : "e.g. 20"
+                        : isRtl ? "مثال: 150" : "e.g. 150"}
                       className="w-full rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB]/40 p-2.5 text-xs text-[#942E3A] outline-none focus:border-[#942E3A]"
                     />
                   </div>
@@ -1660,13 +1761,13 @@ export default function AdminPromotionsClient({
               <div className="grid grid-cols-2 gap-3">
                 <div className={cn(formScope === "order" && "col-span-2")}>
                   <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                    Applies To (Scope)
+                    {isRtl ? "ينطبق على (النطاق)" : "Applies To (Scope)"}
                   </label>
                   <CustomSelect
                     name="scope"
                     value={formScope}
                     onChange={setFormScope}
-                    options={FORM_SCOPE_OPTIONS}
+                    options={formScopeOptions}
                     className="w-full h-10"
                   />
                 </div>
@@ -1674,13 +1775,13 @@ export default function AdminPromotionsClient({
                 {formScope === "category" ? (
                   <div>
                     <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                      Select Target Category *
+                      {isRtl ? "اختر القسم المستهدف *" : "Select Target Category *"}
                     </label>
                     <CustomSelect
                       name="targetValue"
                       value={formTargetCategory}
                       onChange={setFormTargetCategory}
-                      options={TARGET_CATEGORY_OPTIONS}
+                      options={targetCategoryOptions}
                       className="w-full h-10"
                     />
                   </div>
@@ -1693,20 +1794,20 @@ export default function AdminPromotionsClient({
               <div className="rounded-2xl border border-[#D8B46A]/40 bg-[#fff7df] p-3 text-xs font-semibold text-[#942E3A] flex items-center gap-2 shadow-xs">
                 <Sparkles className="h-4 w-4 text-[#D8B46A] shrink-0" />
                 <span>
-                  Rule Preview:{" "}
+                  {isRtl ? "معاينة القاعدة: " : "Rule Preview: "}
                   <strong>
                     {formType === "percentage"
-                      ? `${formValue || "0"}% OFF`
+                      ? `${formValue || "0"}% ${isRtl ? "خصم" : "OFF"}`
                       : formType === "fixed"
-                      ? `${formValue || "0"} EGP OFF`
-                      : "Free Shipping 🚚"}
+                      ? `${formValue || "0"} EGP ${isRtl ? "خصم" : "OFF"}`
+                      : isRtl ? "شحن مجاني 🚚" : "Free Shipping 🚚"}
                   </strong>{" "}
-                  on{" "}
+                  {isRtl ? " على " : " on "}
                   <strong>
                     {formScope === "order"
-                      ? "Entire Order"
-                      : `Category (${
-                          TARGET_CATEGORY_OPTIONS.find((c) => c.id === formTargetCategory)?.label ||
+                      ? localizedLabel("Entire Order", isRtl)
+                      : `${localizedLabel("Category", isRtl)} (${
+                          targetCategoryOptions.find((c) => c.id === formTargetCategory)?.label ||
                           formTargetCategory
                         })`}
                   </strong>
@@ -1716,28 +1817,28 @@ export default function AdminPromotionsClient({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                    Minimum Order Value (EGP)
+                    {isRtl ? "الحد الأدنى لقيمة الطلب (EGP)" : "Minimum Order Value (EGP)"}
                   </label>
                   <input
                     name="minimumOrderValue"
                     type="number"
                     min="0"
                     step="0.01"
-                    placeholder="Optional (e.g. 1000)"
+                    placeholder={isRtl ? "اختياري (مثال: 1000)" : "Optional (e.g. 1000)"}
                     className="w-full rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB]/40 p-2.5 text-xs text-[#942E3A] outline-none"
                   />
                 </div>
 
                 <div>
                   <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                    Usage Limit (Max Uses)
+                    {isRtl ? "حد الاستخدام (أقصى عدد)" : "Usage Limit (Max Uses)"}
                   </label>
                   <input
                     name="usageLimit"
                     type="number"
                     min="1"
                     step="1"
-                    placeholder="Unlimited"
+                    placeholder={isRtl ? "غير محدود" : "Unlimited"}
                     className="w-full rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB]/40 p-2.5 text-xs text-[#942E3A] outline-none"
                   />
                 </div>
@@ -1746,22 +1847,22 @@ export default function AdminPromotionsClient({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                    Starts At
+                    {isRtl ? "يبدأ في" : "Starts At"}
                   </label>
                   <CustomDateTimePicker
                     name="startsAt"
-                    placeholder="Start date & time"
+                    placeholder={isRtl ? "تاريخ ووقت البداية" : "Start date & time"}
                     align="left"
                   />
                 </div>
 
                 <div>
                   <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                    Ends At
+                    {isRtl ? "ينتهي في" : "Ends At"}
                   </label>
                   <CustomDateTimePicker
                     name="endsAt"
-                    placeholder="End date & time"
+                    placeholder={isRtl ? "تاريخ ووقت النهاية" : "End date & time"}
                     align="right"
                   />
                 </div>
@@ -1773,13 +1874,13 @@ export default function AdminPromotionsClient({
                   onClick={() => setIsCreatePromoOpen(false)}
                   className="rounded-xl px-4 py-2.5 text-xs font-bold text-stone-600 hover:bg-stone-100"
                 >
-                  Cancel
+                  {isRtl ? "إلغاء" : "Cancel"}
                 </button>
                 <button
                   type="submit"
                   className="rounded-xl bg-[#942E3A] px-5 py-2.5 text-xs font-bold text-[#FFF9EB] shadow-md hover:bg-[#802832]"
                 >
-                  Publish Promo Code
+                  {isRtl ? "نشر كود الخصم" : "Publish Promo Code"}
                 </button>
               </div>
             </form>
@@ -1795,10 +1896,12 @@ export default function AdminPromotionsClient({
           <div className="w-full max-w-sm overflow-hidden rounded-3xl bg-white p-6 shadow-xl animate-in zoom-in-95 text-center">
             <AlertCircle className="mx-auto h-10 w-10 text-rose-500" />
             <h3 className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">
-              Delete Promotion Rule?
+              {isRtl ? "حذف قاعدة العرض؟" : "Delete Promotion Rule?"}
             </h3>
             <p className="mt-1 text-xs text-stone-500">
-              Are you sure you want to permanently delete this promo rule? Customers will no longer be able to redeem it.
+              {isRtl
+                ? "هل أنت متأكد من حذف قاعدة العرض نهائيًا؟ لن يتمكن العملاء من استخدامها بعد ذلك."
+                : "Are you sure you want to permanently delete this promo rule? Customers will no longer be able to redeem it."}
             </p>
             <div className="mt-5 flex items-center justify-center gap-3">
               <button
@@ -1806,7 +1909,7 @@ export default function AdminPromotionsClient({
                 onClick={() => setDeleteConfirmId(null)}
                 className="rounded-xl border border-stone-200 px-4 py-2 text-xs font-bold text-stone-600 hover:bg-stone-50"
               >
-                Cancel
+                {isRtl ? "إلغاء" : "Cancel"}
               </button>
               <form action={deletePromotionAction}>
                 <input type="hidden" name="id" value={deleteConfirmId} />
@@ -1815,7 +1918,7 @@ export default function AdminPromotionsClient({
                   onClick={() => setDeleteConfirmId(null)}
                   className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700"
                 >
-                  Confirm Delete
+                  {isRtl ? "تأكيد الحذف" : "Confirm Delete"}
                 </button>
               </form>
             </div>
@@ -1831,10 +1934,12 @@ export default function AdminPromotionsClient({
           <div className="w-full max-w-sm overflow-hidden rounded-3xl bg-white p-6 shadow-xl animate-in zoom-in-95 text-center">
             <AlertCircle className="mx-auto h-10 w-10 text-rose-500" />
             <h3 className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">
-              Delete Banner History?
+              {isRtl ? "حذف سجل شريط الإعلانات؟" : "Delete Banner History?"}
             </h3>
             <p className="mt-1 text-xs text-stone-500">
-              This will remove this announcement from your banner history logs.
+              {isRtl
+                ? "سيؤدي ذلك إلى حذف هذا الإعلان من سجل أشرطة الإعلانات."
+                : "This will remove this announcement from your banner history logs."}
             </p>
             <div className="mt-5 flex items-center justify-center gap-3">
               <button
@@ -1842,7 +1947,7 @@ export default function AdminPromotionsClient({
                 onClick={() => setDeleteAnnouncementId(null)}
                 className="rounded-xl border border-[#D8B46A]/20 px-4 py-2 text-xs font-bold text-stone-600 hover:bg-stone-50"
               >
-                Cancel
+                {isRtl ? "إلغاء" : "Cancel"}
               </button>
               <form action={deleteAnnouncementAction}>
                 <input type="hidden" name="id" value={deleteAnnouncementId} />
@@ -1851,7 +1956,7 @@ export default function AdminPromotionsClient({
                   onClick={() => setDeleteAnnouncementId(null)}
                   className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700"
                 >
-                  Confirm Delete
+                  {isRtl ? "تأكيد الحذف" : "Confirm Delete"}
                 </button>
               </form>
             </div>

@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ClipboardList, Eye, Search, Plus } from "lucide-react";
 import AdminStatusSelect from "@/components/AdminStatusSelect";
 import AdminCopyButton from "@/components/AdminCopyButton";
 import { getStatusLabel } from "@/lib/orderStatus";
-import { localizeLegacyAdminDom, useAdminI18n } from "@/providers/AdminI18nContext";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 export interface AdminOrderRow {
   id: string;
@@ -41,25 +41,6 @@ export default function AdminOrdersClient({ orders }: { orders: AdminOrderRow[] 
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
   const isRtl = lang === "ar";
-  const ordersRootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isRtl || !ordersRootRef.current) return;
-    const root = ordersRootRef.current;
-    let applying = false;
-    const applyTranslations = () => {
-      if (applying) return;
-      applying = true;
-      observer.disconnect();
-      localizeLegacyAdminDom(root);
-      observer.observe(root, { childList: true, subtree: true, characterData: true });
-      applying = false;
-    };
-    const observer = new MutationObserver(applyTranslations);
-    applyTranslations();
-    return () => observer.disconnect();
-  }, [isRtl, status]);
-
   useEffect(() => {
     const statusParam = searchParams.get("status");
     if (statusParam && statuses.includes(statusParam)) {
@@ -85,7 +66,7 @@ export default function AdminOrdersClient({ orders }: { orders: AdminOrderRow[] 
   }, [orders, search, status]);
 
   return (
-    <div ref={ordersRootRef} className="space-y-4 sm:space-y-5">
+    <div dir={isRtl ? "rtl" : "ltr"} className="space-y-4 text-start sm:space-y-5">
       {/* Header Section */}
       <div className="flex items-center justify-between gap-3">
         <div>
@@ -233,7 +214,7 @@ export default function AdminOrdersClient({ orders }: { orders: AdminOrderRow[] 
                       </span>
                     </td>
                     <td className="py-3 whitespace-nowrap text-[#6B1F2A]/65">
-                      {new Date(order.createdAt).toLocaleDateString(isRtl ? "ar-EG" : "en-US", {
+                      {new Date(order.createdAt).toLocaleDateString(isRtl ? "ar-EG-u-nu-latn" : "en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
@@ -285,7 +266,7 @@ export default function AdminOrdersClient({ orders }: { orders: AdminOrderRow[] 
                       {order.orderNumber}
                     </Link>
                     <span className="text-[9px] font-semibold text-[#6B1F2A]/50 shrink-0">
-                      {new Date(order.createdAt).toLocaleDateString(isRtl ? "ar-EG" : "en-US", { month: "short", day: "numeric" })}
+                      {new Date(order.createdAt).toLocaleDateString(isRtl ? "ar-EG-u-nu-latn" : "en-US", { month: "short", day: "numeric" })}
                     </span>
                   </div>
 

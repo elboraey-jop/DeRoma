@@ -19,9 +19,9 @@ export default function AdminSuppliersWorkspace({ suppliers, invoices }: { suppl
   const isInvoices = tab === "invoices";
 
   return (
-    <div className="space-y-4 sm:space-y-5 text-right">
+    <div dir={isRtl ? "rtl" : "ltr"} className="space-y-4 text-start sm:space-y-5">
       <div className="flex items-center justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
             {isRtl ? "المشتريات والتوريد" : "Procurement"}
           </p>
@@ -71,7 +71,7 @@ export default function AdminSuppliersWorkspace({ suppliers, invoices }: { suppl
           className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/55 p-4"
           onMouseDown={(event) => { if (event.target === event.currentTarget) setShowModal(false); }}
         >
-          <div className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-[#D8B46A]/35 bg-[#FFF9EB] p-5 shadow-2xl sm:p-7 text-right">
+          <div dir={isRtl ? "rtl" : "ltr"} className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-[#D8B46A]/35 bg-[#FFF9EB] p-5 text-start shadow-2xl sm:p-7">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#D8B46A]">
@@ -97,17 +97,17 @@ export default function AdminSuppliersWorkspace({ suppliers, invoices }: { suppl
             <form action={createSupplierAction} className="mt-6 grid gap-3 sm:grid-cols-2">
               <label className="sm:col-span-2">
                 <span className="field-label">{t("suppliers.supplierName")} *</span>
-                <input required name="name" className="admin-input text-right" placeholder={isRtl ? "اسم المورد أو الشركة" : "Supplier or company name"} />
+                <input required name="name" className="admin-input text-start" placeholder={isRtl ? "اسم المورد أو الشركة" : "Supplier or company name"} />
               </label>
 
               <label>
                 <span className="field-label">{t("team.phone")}</span>
-                <input name="phone" className="admin-input text-right" placeholder="01012345678" />
+                <input name="phone" dir="ltr" className="admin-input text-left" placeholder="01012345678" />
               </label>
 
               <label>
                 <span className="field-label">{t("team.email")}</span>
-                <input name="email" type="email" className="admin-input text-right" placeholder="name@company.com" />
+                <input name="email" type="email" dir="ltr" className="admin-input text-left" placeholder="name@company.com" />
               </label>
 
               <label className="sm:col-span-2">
@@ -178,11 +178,11 @@ function SupplierGrid({ suppliers }: { suppliers: SupplierCard[] }) {
           </h2>
 
           <div className="relative mt-2 space-y-1 text-[10px] text-[#6B1F2A]/65 sm:mt-3 sm:space-y-1.5 sm:text-[11px]">
-            <p className="flex items-center gap-1.5">
+            <p dir="ltr" className="flex items-center gap-1.5 text-left">
               <Phone className="h-3 w-3 shrink-0 text-[#D8B46A] sm:h-3.5 sm:w-3.5" />
               <span>{supplier.phone || (isRtl ? "لم يحدد رقم هاتف" : "No phone added")}</span>
             </p>
-            <p className="flex items-center gap-1.5 truncate">
+            <p dir="ltr" className="flex items-center gap-1.5 truncate text-left">
               <Mail className="h-3 w-3 shrink-0 text-[#D8B46A] sm:h-3.5 sm:w-3.5" />
               <span>{supplier.email || (isRtl ? "لم يحدد بريد إلكتروني" : "No email added")}</span>
             </p>
@@ -219,7 +219,7 @@ function InvoiceGrid({ invoices }: { invoices: InvoiceCard[] }) {
   if (!invoices.length) return <EmptyState icon={<FileText />} title={isRtl ? "لا توجد فواتير توريد" : "No invoices yet"} text={isRtl ? "قم بإنشاء فاتورة توريد جديدة لإضافة وتعديل المخزون." : "Create a purchase invoice to receive stock and record its cost."} />;
 
   return (
-    <div className="grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
       {invoices.map((invoice) => (
         <Link
           key={invoice.id}
@@ -244,7 +244,7 @@ function InvoiceGrid({ invoices }: { invoices: InvoiceCard[] }) {
           </h2>
 
           <p className="mt-1 text-[10px] text-[#6B1F2A]/60 truncate sm:mt-2 sm:text-xs">
-            {new Date(invoice.invoiceDate).toLocaleDateString(isRtl ? "ar-EG" : "en-US", { dateStyle: "medium" })} · {formatNumber(invoice.itemCount)} {isRtl ? "صنف" : "items"}
+            <span dir={isRtl ? "rtl" : "ltr"}>{new Date(invoice.invoiceDate).toLocaleDateString(isRtl ? "ar-EG-u-nu-latn" : "en-US", { dateStyle: "medium" })}</span> · {formatNumber(invoice.itemCount)} {isRtl ? "صنف" : "items"}
           </p>
 
           <div className="mt-3 flex items-end justify-between border-t border-[#942E3A]/10 pt-2.5 sm:mt-5 sm:pt-4">

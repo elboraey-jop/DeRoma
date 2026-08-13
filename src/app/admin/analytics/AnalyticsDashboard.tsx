@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import {
  TrendingUp,
  ShoppingCart,
@@ -69,7 +69,7 @@ import {
  Legend,
 } from "recharts";
 import { formatCurrency } from "@/lib/utils";
-import { localizeLegacyAdminDom, useAdminI18n } from "@/providers/AdminI18nContext";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 // --- Types ---
 export interface AnalyticsOrder {
@@ -173,7 +173,6 @@ export default function AnalyticsDashboard({
   // Keep analytics labels reactive to the shared admin language toggle.
   const { lang, t, formatPrice, formatNumber } = useAdminI18n();
   const isRtl = lang === "ar";
-  const analyticsRootRef = useRef<HTMLDivElement>(null);
 
  // State for active tab, date range filter, category filter, and tooltip popover
  const [activeTab, setActiveTab] = useState<
@@ -193,23 +192,6 @@ export default function AnalyticsDashboard({
   const [viewMonth, setViewMonth] = useState<number>(new Date().getMonth());
 
  const [selectedStatus, setSelectedStatus] = useState<string>("all");
-
-  useEffect(() => {
-    if (!isRtl || !analyticsRootRef.current) return;
-    const root = analyticsRootRef.current;
-    let applying = false;
-    const applyTranslations = () => {
-      if (applying) return;
-      applying = true;
-      observer.disconnect();
-      localizeLegacyAdminDom(root);
-      observer.observe(root, { childList: true, subtree: true, characterData: true });
-      applying = false;
-    };
-    const observer = new MutationObserver(applyTranslations);
-    applyTranslations();
-    return () => observer.disconnect();
-  }, [isRtl, activeTab]);
 
   // Calendar day grid calculations for custom range modal
   const calendarDays = useMemo(() => {
@@ -1299,7 +1281,7 @@ export default function AnalyticsDashboard({
  );
 
  return (
- <div ref={analyticsRootRef} data-analytics-dashboard className="space-y-6 text-[#1A1A1A]">
+ <div dir={isRtl ? "rtl" : "ltr"} data-analytics-dashboard className="space-y-6 text-start text-[#1A1A1A]">
  {/* Header Banner */}
  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#942E3A]/10 pb-4">
  <div>
