@@ -345,8 +345,8 @@ model SiteSettings {
   hours                String   @default("24/7 Available All Day")
 
   aboutTitle           String   @default("The DeRoma Story")
-  aboutParagraph1      String   @default("Founded on the belief that athletic footwear can be as elegant as it is functional, DeRoma has redefined women's sports sneakers. By bringing together artisanal craftsmanship and athletic research, we offer silhouettes that shift smoothly from early workouts to active street steps.")
-  aboutParagraph2      String   @default("Our sneakers feature meticulously selected premium imported leathers, dynamic arch supports, and ultra-lightweight cushioned soles to ensure maximum wearability.")
+  aboutParagraph1      String   @default("Founded on the belief that athletic footwear can be as elegant as it is functional, DeRoma curates women's sports sneakers from trusted suppliers. We bring together refined style and everyday performance for active street steps.")
+  aboutParagraph2      String   @default("Our collection features carefully selected premium imported materials, supportive designs, and ultra-lightweight cushioned soles to ensure maximum wearability.")
   aboutImage           String   @default("/products/deroma-new-balance-9060-pastel-pink.png")
 
   heroBanners          Json     @default("[]")
@@ -413,7 +413,6 @@ model AccountTransfer {
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
 }
-
 
 
 

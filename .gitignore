@@ -49,4 +49,6 @@ next-env.d.ts
 .DS_Store
 Thumbs.db
 /scratch
-
+*.log
+.next-stale-*
+/public/uploads

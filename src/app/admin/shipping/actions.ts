@@ -4,33 +4,69 @@ import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 
-export async function updateFreeShippingSettingsAction(formData: FormData) {
-  await requireAdmin();
-  const enabled = formData.get("freeShippingEnabled") === "on";
-  const rawThreshold = String(
-    formData.get("freeShippingThreshold") || "",
-  ).trim();
-  const threshold = rawThreshold ? Number(rawThreshold) : null;
-  if (
-    enabled &&
-    (threshold === null || !Number.isFinite(threshold) || threshold < 0)
-  )
-    throw new Error("Enter a valid minimum order value for free shipping.");
-  await prisma.shippingSettings.upsert({
-    where: { id: "default" },
-    create: {
-      id: "default",
-      freeShippingEnabled: enabled,
-      freeShippingThreshold: threshold,
-    },
-    update: { freeShippingEnabled: enabled, freeShippingThreshold: threshold },
-  });
-  revalidatePath("/admin/shipping");
-  revalidatePath("/api/shipping");
-  revalidatePath("/checkout");
+export async function updateFreeShippingSettingsAction(
+  prevStateOrFormData: any,
+  formDataOrUndefined?: FormData,
+) {
+  try {
+    await requireAdmin();
+    let formData: FormData;
+    if (formDataOrUndefined instanceof FormData) {
+      formData = formDataOrUndefined;
+    } else if (prevStateOrFormData instanceof FormData) {
+      formData = prevStateOrFormData;
+    } else {
+      formData = new FormData();
+    }
+
+    const rawEnabled = formData.get("freeShippingEnabled");
+    const enabled =
+      rawEnabled === "on" || rawEnabled === "true" || rawEnabled === "1";
+    const rawThreshold = String(
+      formData.get("freeShippingThreshold") || "",
+    ).trim();
+    const threshold = rawThreshold !== "" ? Number(rawThreshold) : null;
+
+    if (
+      enabled &&
+      (threshold === null || !Number.isFinite(threshold) || threshold < 0)
+    ) {
+      return {
+        success: false,
+        error: "يرجى إدخال مبلغ صحيح للحد الأدنى للشحن المجاني.",
+      };
+    }
+
+    await prisma.shippingSettings.upsert({
+      where: { id: "default" },
+      create: {
+        id: "default",
+        freeShippingEnabled: enabled,
+        freeShippingThreshold: threshold,
+      },
+      update: { freeShippingEnabled: enabled, freeShippingThreshold: threshold },
+    });
+
+    revalidatePath("/admin/shipping");
+    revalidatePath("/api/shipping");
+    revalidatePath("/checkout");
+
+    return {
+      success: true,
+      message: "تم حفظ إعدادات الشحن المجاني بنجاح.",
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      error: err?.message || "حدث خطأ أثناء حفظ الإعدادات.",
+    };
+  }
 }
 
-export async function createShippingZoneAction(formData: FormData) {
+export async function createShippingZoneAction(
+  _previousState: { success: boolean },
+  formData: FormData,
+) {
   await requireAdmin();
   const name = String(formData.get("name") || "").trim();
   const governorates = String(formData.get("governorates") || "")
@@ -56,6 +92,7 @@ export async function createShippingZoneAction(formData: FormData) {
   revalidatePath("/admin/shipping");
   revalidatePath("/api/shipping");
   revalidatePath("/checkout");
+  return { success: true };
 }
 
 function parseExceptions(formData: FormData) {

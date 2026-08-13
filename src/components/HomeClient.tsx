@@ -9,11 +9,7 @@ import {
   ShoppingBag,
   Truck,
   ArrowRight,
-  ShieldCheck,
   Headphones,
-  RotateCcw,
-  Activity,
-  RefreshCw,
   ChevronLeft,
   ChevronRight,
   Quote,
@@ -22,6 +18,7 @@ import {
 import ProductCard, { ProductWithVariants } from "./ProductCard";
 
 import { useSiteSettings } from "@/providers/SiteSettingsProvider";
+import { useStoreI18n } from "@/providers/StoreI18nContext";
 
 export type HomeReviewItem = {
   id?: string;
@@ -42,6 +39,7 @@ export default function HomeClient({
   dbHomeReviews?: HomeReviewItem[];
 }) {
   const settings = useSiteSettings();
+  const { t, lang, dir, formatNumber } = useStoreI18n();
   const [activeSlide, setActiveSlide] = useState(0);
   const [direction, setDirection] = useState(1);
   const [activeReview, setActiveReview] = useState(0);
@@ -231,6 +229,45 @@ export default function HomeClient({
 
   const reviews = dbHomeReviews.length > 0 ? dbHomeReviews : settings.homeReviews;
 
+  const localizedReviewQuotes: Record<string, string> = lang === "ar"
+    ? {
+        "1": "المقاس مظبوط جدًا والجودة أحلى بكتير على الطبيعة. DeRoma سهّلت عليا اختيار الكوتشي اليومي بتاعي.",
+        "2": "ده بالضبط الموديل اللي كنت بدور عليه. التوصيل كان سريع، والتغليف جميل، والكوتشي مريح جدًا.",
+        "3": "أخيرًا لقيت كوتشي جري شكله شيك وخفيف طول اليوم. دليل المقاسات ساعدني أختار المقاس الصح.",
+        "4": "التجربة كلها فخمة من أول تصفح المجموعة لحد ما لبست الكوتشي المفضل الجديد بتاعي.",
+        "5": "كوتشي يومي جميل ولونه سهل يتنسق مع أي لبس. بلبسه تقريبًا كل يوم.",
+        "6": "نصيحة المقاسات خلتني أختار بثقة، والكوتشي وصل مطابق تمامًا للصور.",
+        "7": "خفيف جدًا ومريح، وتفصيلة اللون النبيتي خلت اللوك كله مميز أكتر.",
+        "8": "تصميم بسيط ونعل مريح للاستخدام اليومي. تجربة التوصيل كانت سهلة من البداية للنهاية.",
+      }
+    : {};
+
+  const reviewSectionCopy = lang === "ar"
+    ? {
+        eyebrow: "آراء العملاء",
+        title: "اللي جربوا قالوا إيه؟",
+        hint: "آراء عملائنا عن المنتجات وتجربتهم مع DeRoma",
+        ratingAria: "تقييم كامل من 5 نجوم",
+        previousAria: "التقييم السابق",
+        nextAria: "التقييم التالي",
+        showAria: "عرض تقييم",
+        customer: "من عملاء DeRoma",
+        verifiedCustomer: "عميل موثّق",
+        shoes: "أحذية",
+      }
+    : {
+        eyebrow: "THE DE ROMA EDIT",
+        title: "Loved by every step.",
+        hint: "Swipe the cards to discover what our sneaker community is saying.",
+        ratingAria: "5 out of 5 stars",
+        previousAria: "Previous review",
+        nextAria: "Next review",
+        showAria: "Show review",
+        customer: "DeRoma Customer",
+        verifiedCustomer: "Verified DeRoma customer",
+        shoes: "SHOES",
+      };
+
 
   const activeReviewData = reviews[activeReview];
 
@@ -282,7 +319,7 @@ export default function HomeClient({
 
 
   return (
-    <div className="w-full flex flex-col space-y-8 pb-16 bg-[#FFF9EB] text-[#942E3A]" dir="ltr">
+    <div className="w-full flex flex-col space-y-8 pb-16 bg-[#FFF9EB] text-[#942E3A]" dir={dir}>
       {/* Eagerly preload all hero banner images */}
       <div className="hidden" aria-hidden="true">
         {heroCards.map((card) => (
@@ -319,152 +356,22 @@ export default function HomeClient({
                 <div className={`absolute -top-20 -right-20 h-64 w-64 rounded-full ${currentTheme.accentBlur} blur-2xl pointer-events-none z-0`} />
                 <div className={`absolute -bottom-20 -left-20 h-64 w-64 rounded-full ${currentTheme.accentBlur} blur-2xl pointer-events-none z-0`} />
 
-                {false && currentIndex === 0 && (
-                  <div className="relative flex h-[420px] flex-col overflow-hidden bg-[#942E3A] text-[#FFF9EB] sm:grid sm:grid-cols-1 sm:grid-rows-[1.22fr_0.78fr] sm:h-[440px] lg:h-[460px] lg:grid-cols-[0.88fr_1.12fr] lg:grid-rows-1">
-                    {/* Quiet brand canvas */}
-                    <div className="pointer-events-none absolute -bottom-40 -left-20 h-[430px] w-[430px] rounded-full border border-[#D8B46A]/15" />
-                    <div className="pointer-events-none absolute -bottom-28 -left-8 h-[300px] w-[300px] rounded-full border border-[#D8B46A]/10" />
-                    <div className="pointer-events-none absolute right-[38%] top-1/2 hidden -translate-y-1/2 select-none font-sans text-[180px] font-black leading-none tracking-[-0.12em] text-white/[0.035] lg:block">D</div>
-
-                    {/* Editorial copy */}
-                    <div className="relative z-20 flex h-full flex-col justify-between p-5 pb-[128px] sm:p-9 sm:pb-9 lg:p-12">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <span className="font-playfair text-lg font-semibold text-[#D8B46A]">DeRoma</span>
-                          <span className="h-px w-8 bg-[#D8B46A]/60" />
-                          <span className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#FFF9EB]/55">Edition 01</span>
-                        </div>
-                        <span className="text-[10px] font-bold tracking-[0.18em] text-[#D8B46A]">01 / 03</span>
-                      </div>
-
-                      <div className="max-w-[390px] py-3 sm:py-5 lg:py-0">
-                        <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#D8B46A]">{currentCard.tag}</p>
-                        <h1 className="font-playfair text-[2.35rem] font-normal leading-[0.9] tracking-[-0.045em] text-[#FFF9EB] sm:text-5xl lg:text-[3.9rem]">Soft<br />Sport<br /><em className="text-[#D8B46A]">Icons</em></h1>
-                        <p className="mt-4 max-w-[330px] text-[11px] leading-relaxed text-[#FFF9EB]/70 sm:text-sm">A feminine everyday edit in soft colour, easy comfort, and unmistakable street style.</p>
-                        <Link href={currentCard.href} className="group mt-5 inline-flex items-center gap-4 rounded-full bg-[#FFF9EB] py-2 pl-5 pr-2 text-[11px] font-bold text-[#942E3A] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D8B46A]">
-                          <span>Shop the collection</span>
-                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#942E3A] text-[#FFF9EB] transition-transform duration-300 group-hover:translate-x-0.5"><ArrowRight className="h-4 w-4" /></span>
-                        </Link>
-                      </div>
-
-                      <div className="flex items-center gap-4 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#FFF9EB]/55">
-                        <span>New Balance</span><span className="h-1 w-1 rounded-full bg-[#D8B46A]" /><span>Adidas</span><span className="h-1 w-1 rounded-full bg-[#D8B46A]" /><span>Daily icons</span>
-                      </div>
-                    </div>
-
-                    {/* Product portrait */}
-                    <div className="absolute bottom-4 left-4 right-4 z-10 h-[105px] min-h-0 p-0 sm:relative sm:inset-auto sm:h-auto sm:p-7 sm:pt-0 lg:min-h-0 lg:p-8 lg:pl-0 lg:pr-10 lg:py-10">
-                      <div className="relative h-full min-h-0 overflow-hidden rounded-[1.5rem] border border-[#FFF9EB]/50 bg-[#FFF9EB] shadow-[0_22px_50px_rgba(28,10,14,0.25)] sm:rounded-[2rem] lg:min-h-0">
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_28%,rgba(216,180,106,0.32),transparent_26%),linear-gradient(145deg,#fff9eb_0%,#f3dfd1_100%)]" />
-                        <div className="absolute inset-x-5 top-14 h-px bg-[#942E3A]/15" />
-                        <div className="absolute inset-x-5 bottom-14 h-px bg-[#942E3A]/15" />
-                        <div className="absolute left-5 top-5 z-10 flex items-center gap-2 text-[#942E3A]/60"><span className="h-1.5 w-1.5 rounded-full bg-[#D8B46A]" /><span className="text-[9px] font-bold uppercase tracking-[0.22em]">New Balance · 9060</span></div>
-                        <Image src={currentCard.image} alt={currentCard.title} fill className="relative z-[1] scale-[1.3] object-contain p-0 mix-blend-multiply transition-transform duration-700 hover:scale-[1.38] sm:scale-[1.38] sm:hover:scale-[1.46] lg:scale-[1.45] lg:hover:scale-[1.52]" priority />
-                        <div className="absolute bottom-5 left-5 z-10 font-playfair text-2xl italic text-[#942E3A]">01</div>
-                        <div className="absolute bottom-5 right-5 z-10 text-right"><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#942E3A]/55">Pastel pink</p><p className="mt-1 font-playfair text-xl italic text-[#942E3A]">Everyday, elevated.</p></div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {false && currentIndex === 1 && (
-                  <div className="w-full h-full p-5 sm:p-8 lg:p-10 grid grid-cols-1 lg:grid-cols-12 items-center gap-6 relative min-h-[420px] sm:min-h-[440px] lg:min-h-[460px] overflow-hidden text-left">
-                    {/* Large outline text watermark behind everything */}
-                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[90px] sm:text-[130px] lg:text-[160px] font-black text-[#942E3A]/5 select-none uppercase tracking-widest font-sans pointer-events-none z-0">
-                      SNEAKERS
-                    </div>
-
-                    {/* Left Column: Floating Content Box */}
-                    <div className="lg:col-span-6 z-20 flex flex-col justify-center pointer-events-auto">
-                      <div className="bg-[#942E3A] text-[#FFF9EB] p-5 sm:p-7 rounded-2xl max-w-sm shadow-xl flex flex-col space-y-3.5">
-                        <span className="text-[#FFF9EB]/60 text-[9px] font-bold uppercase tracking-widest font-sans">
-                          {currentCard.tag}
-                        </span>
-                        <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight uppercase font-sans text-[#FFF9EB]">
-                          {currentCard.title}
-                        </h1>
-                        <p className="text-[11px] sm:text-xs text-stone-200 font-light leading-relaxed">
-                          {currentCard.desc}
-                        </p>
-                        <Link
-                          href={currentCard.href}
-                          className="inline-flex items-center justify-center rounded-full bg-[#FFF9EB] text-[#942E3A] hover:bg-[#FFF9EB]/90 px-5 py-2 text-xs font-bold transition-all w-fit shadow-md"
-                        >
-                          <span>Shop Sneakers</span>
-                          <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* Right Column: Large Floating Shoe */}
-                    <div className="lg:col-span-6 relative flex justify-center items-center pointer-events-auto z-10">
-                      <div className="relative w-full max-w-[220px] sm:max-w-[280px] aspect-[4/3] flex items-center justify-center">
-                        {/* Soft backing glow */}
-                        <div className="absolute w-[80%] h-[80%] rounded-full bg-[#942E3A]/10 blur-2xl z-0" />
-                        
-                        {/* Image wrapper */}
-                        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-md border border-[#942E3A]/5 z-10">
-                          <Image
-                            src={currentCard.image}
-                            alt={currentCard.title}
-                            fill
-                            className="object-cover transition-transform duration-700 hover:scale-105"
-                            priority
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {false && currentIndex === 2 && (
-                  <div className="w-full h-full p-5 sm:p-8 lg:p-10 flex flex-col justify-center items-center text-center relative min-h-[420px] sm:min-h-[440px] lg:min-h-[460px]">
-                    {/* Frame Portrait of Boots */}
-                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-[#942E3A]/20 p-1.5 shadow-2xl flex items-center justify-center overflow-hidden mb-5">
-                      <div className="relative w-full h-full rounded-full overflow-hidden">
-                        <Image
-                          src={currentCard.image}
-                          alt={currentCard.title}
-                          fill
-                          className="object-cover transition-transform duration-700 hover:scale-105"
-                          priority
-                        />
-                      </div>
-                    </div>
-
-                    {/* Typography */}
-                    <div className="flex flex-col items-center space-y-2 max-w-md pointer-events-auto">
-                      <span className="text-[#D8B46A] text-[10px] sm:text-xs font-bold tracking-[0.25em] uppercase font-sans">
-                        {currentCard.tag}
-                      </span>
-                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif italic text-[#942E3A] tracking-tight leading-tight">
-                        {currentCard.title}
-                      </h1>
-                      <p className="text-xs sm:text-sm text-[#942E3A]/70 font-sans font-light max-w-sm leading-relaxed mt-1">
-                        {currentCard.desc}
-                      </p>
-                      
-                      <div className="pt-4">
-                        <Link
-                          href={currentCard.href}
-                          className="group inline-flex items-center gap-1.5 text-xs font-semibold text-[#942E3A] hover:text-[#942E3A]/80 transition-colors"
-                        >
-                          <span>Explore Platforms</span>
-                          <ArrowRight className="h-3.5 w-3.5 translate-x-0 group-hover:translate-x-1.5 transition-transform" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Responsive artwork supplied by DeRoma */}
                 <picture className="absolute inset-0 z-10 block h-full w-full">
-                  <source media="(max-width: 639px)" srcSet={currentCard.mobileImage} />
+                  {currentCard.mobileImage && (
+                    <source media="(max-width: 639px)" srcSet={currentCard.mobileImage} />
+                  )}
                   <img
-                    src={currentCard.image}
-                    alt={currentCard.title}
+                    src={currentCard.image || "/banners/hero-1-desktop.webp"}
+                    alt={currentCard.title || "DeRoma Banner"}
                     className="h-full w-full select-none object-cover"
                     draggable={false}
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.src.endsWith("/banners/hero-1-desktop.webp")) {
+                        target.src = "/banners/hero-1-desktop.webp";
+                      }
+                    }}
                   />
                 </picture>
 
@@ -474,7 +381,7 @@ export default function HomeClient({
                     onPointerDown={(event) => event.stopPropagation()}
                     className="absolute bottom-[3.8%] left-[39.8%] z-20 inline-flex -translate-x-1/2 items-center justify-center rounded-full bg-[#942E3A] px-4 py-2 text-[10px] font-bold tracking-wide text-[#FFF9EB] shadow-md transition-transform hover:scale-105 hover:bg-[#7d2530] sm:bottom-[8%] sm:left-[27.5%] sm:px-8 sm:py-3 sm:text-sm"
                   >
-                    SHOP NOW
+                    {t("nav.shop")}
                   </Link>
                 )}
 
@@ -519,13 +426,13 @@ export default function HomeClient({
 
               <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8">
                 <div className="shrink-0 sm:w-[170px] lg:w-[220px]">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">THE DE ROMA EDIT</span>
-                  <h2 className="mt-1 font-playfair text-xl font-semibold leading-tight sm:text-2xl">Loved by every step.</h2>
-                  <div className="mt-3 flex items-center gap-1.5 text-[#D8B46A]" aria-label="5 out of 5 stars">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">{reviewSectionCopy.eyebrow}</span>
+                  <h2 className="mt-1 font-playfair text-xl font-semibold leading-tight sm:text-2xl">{reviewSectionCopy.title}</h2>
+                  <div className="mt-3 flex items-center gap-1.5 text-[#D8B46A]" aria-label={reviewSectionCopy.ratingAria}>
                     {Array.from({ length: 5 }).map((_, index) => <Star key={index} className="h-3.5 w-3.5 fill-current" />)}
                     <span className="ml-1 text-[10px] font-semibold text-[#FFF9EB]/75">4.9 / 5</span>
                   </div>
-                  <p className="mt-3 hidden max-w-[190px] text-[10px] leading-relaxed text-[#FFF9EB]/60 sm:block">Swipe the cards to discover what our sneaker community is saying.</p>
+                  <p className="mt-3 hidden max-w-[190px] text-[10px] leading-relaxed text-[#FFF9EB]/60 sm:block">{reviewSectionCopy.hint}</p>
                 </div>
 
                 <div className="relative min-w-0 flex-1 sm:h-[190px]">
@@ -579,10 +486,10 @@ export default function HomeClient({
                               </div>
                               <Quote className="h-6 w-6 rotate-180 text-[#942E3A]/20" />
                             </div>
-                            <p className="max-w-[540px] font-playfair text-base leading-snug sm:text-lg">“{review.quote}”</p>
+                            <p className="max-w-[540px] font-playfair text-base leading-snug sm:text-lg">“{localizedReviewQuotes[review.id || ""] || review.quote}”</p>
                             <div className="flex items-center justify-between gap-3 text-[10px]">
-                              <span className="font-bold tracking-[0.14em] text-[#D8B46A]">{review.brand}</span>
-                              <span className="text-[#942E3A]/55">{review.detail}</span>
+                              <span className="font-bold tracking-[0.14em] text-[#D8B46A]">{lang === "ar" && review.brand.toLowerCase() === "shoes" ? reviewSectionCopy.shoes : review.brand}</span>
+                              <span className="text-[#942E3A]/55">{lang === "ar" ? (review.detail.toLowerCase().includes("verified") ? reviewSectionCopy.verifiedCustomer : reviewSectionCopy.customer) : review.detail}</span>
                             </div>
                           </div>
                         </motion.article>
@@ -590,13 +497,13 @@ export default function HomeClient({
                     })}
                   </div>
                   <div className="absolute -bottom-1 left-0 right-0 z-40 flex items-center justify-center gap-1.5 sm:-bottom-3">
-                    {reviews.map((review, index) => <button key={`${review.brand}-${index}`} type="button" onClick={() => selectReview(index)} aria-label={`Show ${review.brand} review`} className={`h-1.5 rounded-full transition-all duration-300 ${index === activeReview ? "w-6 bg-[#D8B46A]" : "w-1.5 bg-[#FFF9EB]/45 hover:bg-[#FFF9EB]"}`} />)}
+                    {reviews.map((review, index) => <button key={`${review.brand}-${index}`} type="button" onClick={() => selectReview(index)} aria-label={`${reviewSectionCopy.showAria} ${review.brand}`} className={`h-1.5 rounded-full transition-all duration-300 ${index === activeReview ? "w-6 bg-[#D8B46A]" : "w-1.5 bg-[#FFF9EB]/45 hover:bg-[#FFF9EB]"}`} />)}
                   </div>
                 </div>
 
                 <div className="absolute right-0 top-0 z-40 flex gap-1.5 sm:right-0 sm:top-auto sm:bottom-1">
-                  <button type="button" onClick={() => changeReview(-1)} aria-label="Previous review" className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]"><ChevronLeft className="h-4 w-4" /></button>
-                  <button type="button" onClick={() => changeReview(1)} aria-label="Next review" className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]"><ChevronRight className="h-4 w-4" /></button>
+                  <button type="button" onClick={() => changeReview(-1)} aria-label={reviewSectionCopy.previousAria} className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]">{dir === "rtl" ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}</button>
+                  <button type="button" onClick={() => changeReview(1)} aria-label={reviewSectionCopy.nextAria} className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]">{dir === "rtl" ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</button>
                 </div>
               </div>
             </div>
@@ -610,7 +517,7 @@ export default function HomeClient({
           <ScrollReveal>
             <div className="flex items-center justify-center py-2">
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#942E3A] font-playfair tracking-[0.2em] uppercase text-center">
-                OUR COLLECTIONS
+                {lang === "ar" ? "مجموعاتنا" : "OUR COLLECTIONS"}
               </h2>
             </div>
           </ScrollReveal>
@@ -719,9 +626,9 @@ export default function HomeClient({
       <section className="px-2 sm:px-4 lg:px-6">
         <ScrollReveal>
           <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] text-center border-b border-[#D8B46A]/40 pb-4">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">FOR HER</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">DE ROMA</span>
             <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair tracking-tight mt-1">
-              BOUTIQUE HIGHLIGHTS
+              {t("home.featuredCollection")}
             </h2>
           </div>
         </ScrollReveal>
@@ -734,8 +641,8 @@ export default function HomeClient({
             {displayForYouProducts.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-2xl border border-[#D8B46A] p-6">
                 <ShoppingBag className="h-8 w-8 text-[#D8B46A] mx-auto mb-2" />
-                <h3 className="text-sm font-bold text-[#942E3A]">No shoes found</h3>
-                <p className="text-[11px] text-[#D8B46A] mt-1">Explore our full boutique collection to view all women's styles.</p>
+                <h3 className="text-sm font-bold text-[#942E3A]">{t("shopPage.noProductsFound")}</h3>
+                <p className="text-[11px] text-[#D8B46A] mt-1">{t("shopPage.subtitle")}</p>
               </div>
             ) : (
               <>
@@ -769,61 +676,14 @@ export default function HomeClient({
         </ScrollReveal>
       </section>
 
-      {/* 8. TRUST FOOTNOTE BAR */}
-      <section className="px-2 sm:px-4 lg:px-6">
-        <StaggerContainer className="w-full mx-auto max-w-[94vw] lg:max-w-[1320px] grid grid-cols-3 sm:grid-cols-4 gap-x-1.5 gap-y-0 sm:gap-y-6 sm:gap-x-4 bg-white border border-[#D8B46A]/45 rounded-2xl p-3 sm:p-5 shadow-xs">
-          
-          <StaggerItem direction="up" scale={true} className="hidden w-full min-w-0 flex-col items-center text-center gap-1 sm:flex sm:gap-2 justify-center">
-            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
-              <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </div>
-            <div className="flex flex-col items-center w-full">
-              <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Fast Delivery</p>
-              <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Express delivery across Egypt</p>
-            </div>
-          </StaggerItem>
-
-          <StaggerItem direction="up" scale={true} className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
-            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
-              <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </div>
-            <div className="flex flex-col items-center w-full">
-              <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Mirror Quality</p>
-              <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Nike & New Balance sports</p>
-            </div>
-          </StaggerItem>
-
-          <StaggerItem direction="up" scale={true} className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
-            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
-              <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </div>
-            <div className="flex flex-col items-center w-full">
-              <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Sole Cushioning</p>
-              <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Perfect for running & gym</p>
-            </div>
-          </StaggerItem>
-
-          <StaggerItem direction="up" scale={true} className="w-full min-w-0 flex flex-col items-center text-center gap-1 sm:gap-2 justify-center">
-            <div className="p-1.5 sm:p-2 rounded-xl bg-[#FFF9EB] text-[#D8B46A] shrink-0 sm:mb-1">
-              <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </div>
-            <div className="flex flex-col items-center w-full">
-              <p className="text-[9px] sm:text-xs font-bold text-[#942E3A] leading-tight">Easy Exchanges</p>
-              <p className="text-[7px] sm:text-[9px] text-[#D8B46A] mt-0.5 leading-snug max-w-[72px] sm:max-w-[130px]">Fast swap for perfect fit</p>
-            </div>
-          </StaggerItem>
-
-        </StaggerContainer>
-      </section>
-
       {/* 4.5 BEST SELLERS SECTION */}
       <section className="px-2 sm:px-4 lg:px-6">
         <ScrollReveal>
           <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] space-y-6">
             <div className="text-center border-b border-[#D8B46A]/40 pb-4">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">BEST SELLERS</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">DE ROMA</span>
               <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair tracking-tight mt-1">
-                BESTSELLER HIGHLIGHTS
+                {t("home.bestSellers")}
               </h2>
             </div>
 

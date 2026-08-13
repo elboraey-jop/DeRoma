@@ -73,20 +73,30 @@ export const getActiveProducts = cache(async function getActiveProducts(): Promi
 
     return dbProducts.map((p) =>
       enrichCatalogProduct({
-        ...p,
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        sku: p.sku,
         price: Number(p.price),
-        compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+        compareAtPrice: p.compareAtPrice == null ? null : Number(p.compareAtPrice),
+        category: p.category,
+        subcategory: p.subcategory,
+        images: p.images,
+        brand: p.brand || undefined,
+        color: p.color,
         rating: Number(p.rating),
         reviewsCount: p.reviewsCount,
         variants: p.variants.map((v) => ({
-          ...v,
+          id: v.id,
+          productId: v.productId,
+          size: v.size,
           stock: Number(v.stock),
           price: v.price == null ? null : Number(v.price),
           compareAtPrice: v.compareAtPrice == null ? null : Number(v.compareAtPrice),
           wholesalePrice: v.wholesalePrice == null ? null : Number(v.wholesalePrice),
           additionalCost: v.additionalCost == null ? null : Number(v.additionalCost),
         })),
-      } as ProductWithVariants),
+      }),
     );
   } catch (error) {
     console.warn(
@@ -111,22 +121,30 @@ export const getProductById = cache(async function getProductById(
 
     if (product) {
       return enrichCatalogProduct({
-        ...product,
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        sku: product.sku,
         price: Number(product.price),
-        compareAtPrice: product.compareAtPrice
-          ? Number(product.compareAtPrice)
-          : null,
+        compareAtPrice: product.compareAtPrice == null ? null : Number(product.compareAtPrice),
+        category: product.category,
+        subcategory: product.subcategory,
+        images: product.images,
+        brand: product.brand || undefined,
+        color: product.color,
         rating: Number(product.rating),
         reviewsCount: product.reviewsCount,
         variants: product.variants.map((v) => ({
-          ...v,
+          id: v.id,
+          productId: v.productId,
+          size: v.size,
           stock: Number(v.stock),
           price: v.price == null ? null : Number(v.price),
           compareAtPrice: v.compareAtPrice == null ? null : Number(v.compareAtPrice),
           wholesalePrice: v.wholesalePrice == null ? null : Number(v.wholesalePrice),
           additionalCost: v.additionalCost == null ? null : Number(v.additionalCost),
         })),
-      } as ProductWithVariants);
+      });
     }
   } catch (error) {
     console.warn("Database error during getProductById:", error);
@@ -134,4 +152,3 @@ export const getProductById = cache(async function getProductById(
 
   return fallbackProduct || null;
 });
-

@@ -21,7 +21,7 @@ export default async function NewProductPage({ searchParams }: { searchParams: P
       .catch(() => []),
     prisma.product
       .findMany({
-        select: { id: true, name: true, category: true, sku: true },
+        select: { id: true, name: true, category: true, sku: true, images: true },
         orderBy: { name: "asc" },
       })
       .catch(() => []),
@@ -46,7 +46,13 @@ export default async function NewProductPage({ searchParams }: { searchParams: P
       <AdminProductCreateForm
         options={options}
         suppliers={suppliers}
-        products={products}
+        products={products.map((product) => ({
+          id: product.id,
+          name: product.name,
+          category: product.category,
+          sku: product.sku,
+          image: product.images[0] || null,
+        }))}
         redirectTo={params.fromInvoice === "1" ? "/admin/suppliers/invoices/new" : undefined}
       />
     </div>

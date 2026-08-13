@@ -6,6 +6,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import { SiteSettingsProvider } from "@/providers/SiteSettingsProvider";
+import { useStoreI18n } from "@/providers/StoreI18nContext";
+import { cn } from "@/lib/utils";
 
 interface Announcement {
   text: string;
@@ -20,6 +22,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
   const chromeRef = useRef<HTMLDivElement>(null);
   const [chromeHeight, setChromeHeight] = useState(68);
+  const { lang, dir } = useStoreI18n();
 
   useEffect(() => {
     if (isAdmin) return;
@@ -47,8 +50,11 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
 
   return (
     <SiteSettingsProvider>
-      <div className="min-h-screen flex flex-col bg-[#FFF9EB] text-[#942E3A]">
-        <div ref={chromeRef} className="fixed top-0 left-0 right-0 z-50 pointer-events-none flex flex-col" dir="ltr">
+      <div className={cn(
+        "min-h-screen flex flex-col bg-[#FFF9EB] text-[#942E3A] transition-colors duration-200",
+        lang === "ar" ? "font-cairo" : "font-playfair"
+      )} dir={dir}>
+        <div ref={chromeRef} className="fixed top-0 left-0 right-0 z-50 pointer-events-none flex flex-col" dir={dir}>
           {announcement && <AnnouncementBar announcement={announcement} />}
           <Navbar hasAnnouncement={!!announcement} />
         </div>
@@ -60,4 +66,5 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
     </SiteSettingsProvider>
   );
 }
+
 

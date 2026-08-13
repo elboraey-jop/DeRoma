@@ -8,6 +8,7 @@ import SmoothScroll from "@/components/SmoothScroll";
 import SplashScreen from "@/components/SplashScreen";
 import ScrollToTop from "@/components/ScrollToTop";
 import RoutePrefetcher from "@/components/RoutePrefetcher";
+import AnalyticsScripts from "@/components/AnalyticsScripts";
 import "./globals.css";
 
 
@@ -35,14 +36,14 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deromastore.com";
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "DeRoma Store | Premium Women's Shoes & Handcrafted Footwear",
+    default: "DeRoma Store | Premium Women's Shoes & Curated Footwear",
     template: "%s | DeRoma Store",
   },
-  description: "Handcrafted boutique collection of elegant women's shoes with cushioned comfort, everyday support, and fast nationwide delivery.",
-  keywords: ["women's shoes", "DeRoma shoes", "handcrafted footwear", "Egyptian boutique", "comfortable heels", "sneakers", "women's sneakers"],
+  description: "Curated boutique collection of elegant women's shoes with cushioned comfort, everyday support, and fast nationwide delivery.",
+  keywords: ["women's shoes", "DeRoma shoes", "curated footwear", "Egyptian boutique", "comfortable heels", "sneakers", "women's sneakers"],
   openGraph: {
     title: "DeRoma Store | Premium Women's Shoes",
-    description: "Handcrafted boutique collection of elegant women's shoes with cushioned comfort & fast nationwide delivery.",
+    description: "Curated boutique collection of elegant women's shoes with cushioned comfort & fast nationwide delivery.",
     url: baseUrl,
     siteName: "DeRoma Store",
     images: [
@@ -59,7 +60,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "DeRoma Store | Premium Women's Shoes",
-    description: "Handcrafted boutique collection of elegant women's shoes with cushioned comfort.",
+    description: "Curated boutique collection of elegant women's shoes with cushioned comfort.",
     images: ["/banners/hero-1-desktop.webp"],
   },
   robots: {
@@ -86,13 +87,15 @@ const organizationSchema = {
   },
 };
 
+import { StoreI18nProvider } from "@/providers/StoreI18nContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
@@ -104,17 +107,19 @@ export default function RootLayout({
 
       <body className={`${playfair.variable} ${outfit.variable} ${cairo.variable} font-playfair antialiased`}>
         <ToastProvider>
-          <RoutePrefetcher />
-          <SmoothScroll />
-          <ScrollToTop />
-          <SplashScreen />
-          <CartProvider>
-            <SiteChrome>{children}</SiteChrome>
-            <CartDrawer />
-          </CartProvider>
+          <StoreI18nProvider>
+            <RoutePrefetcher />
+            <SmoothScroll />
+            <ScrollToTop />
+            <SplashScreen />
+            <AnalyticsScripts />
+            <CartProvider>
+              <SiteChrome>{children}</SiteChrome>
+              <CartDrawer />
+            </CartProvider>
+          </StoreI18nProvider>
         </ToastProvider>
       </body>
-
     </html>
   );
 }

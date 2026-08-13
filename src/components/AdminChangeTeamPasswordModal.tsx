@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Eye, EyeOff, KeyRound, X } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
+import { AlertCircle, CheckCircle2, Eye, EyeOff, KeyRound, Loader2, X } from "lucide-react";
 import { changeTeamMemberPasswordAction } from "@/app/admin/team/actions";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 
@@ -15,21 +15,55 @@ export default function AdminChangeTeamPasswordModal({
   const { lang, t } = useAdminI18n();
   const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [clientError, setClientError] = useState<string | null>(null);
+
   const isRtl = lang === "ar";
+
+  const [state, formAction, isPending] = useActionState(
+    changeTeamMemberPasswordAction,
+    null
+  );
+
+  useEffect(() => {
+    if (state?.success) {
+      const timer = setTimeout(() => {
+        setOpen(false);
+        setNewPassword("");
+        setConfirmPassword("");
+        setClientError(null);
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [state?.success]);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    if (newPassword !== confirmPassword) {
+      e.preventDefault();
+      setClientError(
+        isRtl
+          ? "كلمتا السر غير متطابقتين، يرجى التأكد وإعادة المحاولة."
+          : "Passwords do not match. Please verify and try again."
+      );
+      return;
+    }
+    setClientError(null);
+  };
 
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-xl bg-[#942E3A] px-4 py-3 text-xs font-bold text-[#FFF9EB] transition hover:bg-[#7e2732]"
+        className="inline-flex items-center gap-2 rounded-xl bg-[#942E3A] px-4 py-3 text-xs font-bold text-[#FFF9EB] transition hover:bg-[#7e2732] shadow-xs"
       >
         <KeyRound className="h-4 w-4 text-[#D8B46A]" />
         <span>{t("team.changePassword")}</span>
       </button>
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/55 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/55 p-4 backdrop-blur-xs"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setOpen(false);
           }}
@@ -56,14 +90,21 @@ export default function AdminChangeTeamPasswordModal({
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <form action={changeTeamMemberPasswordAction} className="mt-6 space-y-3">
+
+            <form action={formAction} onSubmit={handleSubmit} className="mt-6 space-y-4">
               <input type="hidden" name="id" value={memberId} />
+
               <label className="block">
                 <span className="field-label">{isRtl ? "كلمة السر الجديدة *" : "New password *"}</span>
                 <div className="relative">
                   <input
                     required
                     name="newPassword"
+                    value={newPassword}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      if (clientError) setClientError(null);
+                    }}
                     type={showPassword ? "text" : "password"}
                     minLength={8}
                     className={`admin-input ${isRtl ? "pl-11 pr-3 text-right" : "pr-11 pl-3 text-left"}`}
@@ -88,6 +129,11 @@ export default function AdminChangeTeamPasswordModal({
                   <input
                     required
                     name="confirmPassword"
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (clientError) setClientError(null);
+                    }}
                     type={showPassword ? "text" : "password"}
                     minLength={8}
                     className={`admin-input ${isRtl ? "text-right" : "text-left"}`}
@@ -96,19 +142,42 @@ export default function AdminChangeTeamPasswordModal({
                 </div>
               </label>
 
+              {(clientError || state?.error) && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-bold text-red-800 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+                  <span>{clientError || state?.error}</span>
+                </div>
+              )}
+
+              {state?.success && (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs font-bold text-emerald-800 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                  <span>{state.message || (isRtl ? "تم تغيير كلمة السر بنجاح!" : "Password changed successfully!")}</span>
+                </div>
+              )}
+
               <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="rounded-xl border border-[#942E3A]/15 bg-white px-5 py-3 text-xs font-bold text-[#942E3A]"
+                  disabled={isPending}
+                  className="rounded-xl border border-[#942E3A]/15 bg-white px-5 py-3 text-xs font-bold text-[#942E3A] hover:bg-[#FFF9EB] disabled:opacity-50"
                 >
                   {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-[#942E3A] px-5 py-3 text-xs font-bold text-[#FFF9EB]"
+                  disabled={isPending}
+                  className="rounded-xl bg-[#942E3A] px-6 py-3 text-xs font-bold text-[#FFF9EB] hover:bg-[#7e2732] disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {t("common.save")}
+                  {isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-[#D8B46A]" />
+                      <span>{isRtl ? "جاري التحديث..." : "Updating..."}</span>
+                    </>
+                  ) : (
+                    <span>{t("common.save")}</span>
+                  )}
                 </button>
               </div>
             </form>

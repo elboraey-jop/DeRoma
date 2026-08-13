@@ -27,10 +27,95 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { useSiteSettings } from "@/providers/SiteSettingsProvider";
 import { submitContactMessageAction } from "@/app/actions";
+import { useStoreI18n } from "@/providers/StoreI18nContext";
 
 export default function AboutAndContactPage() {
   const settings = useSiteSettings();
+  const { t, dir } = useStoreI18n();
+  const isArabic = dir === "rtl";
   const [activeTab, setActiveTab] = useState<"about" | "contact">("about");
+
+  const copy = isArabic
+    ? {
+        curatedElegance: "أناقة مختارة بعناية",
+        curatedIntro: "في DeRoma، نؤمن أن الأناقة لا يجب أن تأتي على حساب الراحة. نختار كل حذاء بعناية ليجمع بين الذوق الراقي والراحة اليومية للمرأة العصرية.",
+        aboutTitle: "اختيارات أنيقة بعناية",
+        aboutParagraph1: "نختار منتجاتنا من موردين موثوقين بعناية، ونركز على الجودة والراحة والتصميم العملي.",
+        aboutParagraph2: "هدفنا أن نقدم تجربة تسوق سهلة وتشكيلة تناسب إطلالتك اليومية.",
+        promise: "وعدنا لكِ",
+        selectedWithCare: "اختيارات بعناية",
+        premiumMaterials: "خامات مميزة",
+        premiumMaterialsDesc: "نختار خامات مستوردة مريحة وجيدة التهوية للاستخدام اليومي.",
+        ergonomicComfort: "راحة عملية",
+        ergonomicComfortDesc: "تصميمات مريحة تساعدك على الحركة بسهولة طوال اليوم.",
+        comfortSelection: "تشكيلة تركز على الراحة",
+        comfortSelectionDesc: "اختيارات متنوعة تناسب أشكال وأذواق السيدات المختلفة.",
+        futureComfort: "خطوتك نحو راحة أكبر",
+        futureComfortDesc: "اكتشفي تشكيلتنا المختارة من الأحذية الرياضية المميزة واختاري زوجك المفضل اليوم.",
+        exploreCollection: "استكشفي التشكيلة",
+        phoneSupport: "الدعم عبر الهاتف",
+        whatsappDirect: "واتساب مباشر",
+        emailInquiry: "استفسارات البريد الإلكتروني",
+        onlineHours: "مواعيد المتجر أونلاين",
+        directMessage: "رسالة مباشرة",
+        sendMessageTitle: "أرسلي لنا رسالة",
+        sendMessageDesc: "اكتبي بياناتك وسيرد عليك فريقنا في أقرب وقت.",
+        messageSent: "تم إرسال الرسالة بنجاح!",
+        messageSentDesc: "شكرًا لتواصلك مع DeRoma. استلمنا استفسارك وسنرد عليك عبر واتساب أو الهاتف.",
+        sendAnother: "إرسال رسالة أخرى",
+        yourName: "الاسم *",
+        phoneNumber: "رقم الهاتف *",
+        yourMessage: "رسالتك *",
+        messagePlaceholder: "كيف يمكننا مساعدتك اليوم؟",
+        sending: "جاري إرسال الرسالة...",
+        send: "إرسال الرسالة",
+        storeHub: "مقر متجر DeRoma أونلاين",
+        dispatchCenter: "مركز تجهيز وشحن الطلبات في Samanoud",
+        socialChannels: "قنوات التواصل الرسمية",
+        socialDesc: "تابعي آخر التحديثات والمنتجات الجديدة معنا.",
+        helpCenter: "مركز المساعدة",
+        faqTitle: "الأسئلة الشائعة",
+      }
+    : {
+        curatedElegance: "Curated Elegance in Motion",
+        curatedIntro: "At DeRoma, we believe that style should never demand the sacrifice of comfort. Every sneaker is selected for refined style and everyday comfort for the modern woman.",
+        aboutTitle: settings.aboutTitle,
+        aboutParagraph1: settings.aboutParagraph1,
+        aboutParagraph2: settings.aboutParagraph2,
+        promise: "Our Promise",
+        selectedWithCare: "Selected With Care",
+        premiumMaterials: "Premium Materials",
+        premiumMaterialsDesc: "We source only the finest imported leathers and breathable mesh.",
+        ergonomicComfort: "Ergonomic Comfort",
+        ergonomicComfortDesc: "Features specialized arch supports and memory foam footbeds.",
+        comfortSelection: "Comfort-Focused Selection",
+        comfortSelectionDesc: "Selected to complement a range of women's foot shapes.",
+        futureComfort: "Step Into the Future of Comfort",
+        futureComfortDesc: "Explore our curated line of premium sports and performance sneakers and find your perfect pair today.",
+        exploreCollection: "Explore Collection",
+        phoneSupport: "Phone Support",
+        whatsappDirect: "WhatsApp Direct",
+        emailInquiry: "Email Inquiry",
+        onlineHours: "Online Store Hours",
+        directMessage: "Direct Message",
+        sendMessageTitle: "Send Us a Message",
+        sendMessageDesc: "Fill in your details and our team will get back to you promptly.",
+        messageSent: "Message Sent Successfully!",
+        messageSentDesc: "Thank you for contacting DeRoma. We have received your inquiry and will reply via WhatsApp or Phone.",
+        sendAnother: "Send Another Message",
+        yourName: "Your Name *",
+        phoneNumber: "Phone Number *",
+        yourMessage: "Your Message *",
+        messagePlaceholder: "How can we assist you today?",
+        sending: "Sending Message...",
+        send: "Send Message",
+        storeHub: "DeRoma Online Store Hub",
+        dispatchCenter: "Samanoud Dispatch & Fulfilment Center",
+        socialChannels: "Official Social Channels",
+        socialDesc: "Connect with us for instant updates & new drops!",
+        helpCenter: "Help Center",
+        faqTitle: "Frequently Asked Questions",
+      };
 
   const whatsappUrl = settings.whatsapp
     ? settings.whatsapp.startsWith("http")
@@ -87,15 +172,32 @@ export default function AboutAndContactPage() {
         setSentSuccess(true);
         setContactMessage("");
       } else {
-        setFormError(res.error || "Could not send message.");
+        setFormError(res.error || (isArabic ? "تعذر إرسال الرسالة." : "Could not send message."));
       }
     } catch (err) {
       setIsSending(false);
-      setFormError("An unexpected error occurred. Please try again.");
+      setFormError(isArabic ? "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى." : "An unexpected error occurred. Please try again.");
     }
   };
 
-  const faqs = [
+  const faqs = isArabic ? [
+    {
+      question: "كم يستغرق الشحن داخل مصر؟",
+      answer: "نوفر شحنًا سريعًا لجميع المحافظات المصرية. تصل الطلبات إلى القاهرة والجيزة خلال 24–48 ساعة، بينما تستغرق باقي المحافظات من 2–4 أيام عمل.",
+    },
+    {
+      question: "هل يمكنني فحص أو تجربة الحذاء قبل الدفع؟",
+      answer: "نعم، جميع طلبات الدفع عند الاستلام تتيح فحص المنتج عند باب المنزل قبل الدفع.",
+    },
+    {
+      question: "ما سياسة الاسترجاع والاستبدال في DeRoma؟",
+      answer: "نوفر سياسة استرجاع واستبدال سهلة خلال 14 يومًا، بشرط أن يكون المنتج بحالته الأصلية وغير مستخدم ومعه التاج والتغليف الأصلي.",
+    },
+    {
+      question: "هل مقاسات أحذية DeRoma أوروبية؟",
+      answer: "نعم، جميع المقاسات تعتمد نظام المقاسات الأوروبي للسيدات من EU 36 إلى 41. إذا كنتِ بين مقاسين، ننصح باختيار مقاسك المعتاد.",
+    },
+  ] : [
     {
       question: "How long does shipping take across Egypt?",
       answer: "We offer express shipping across all Egyptian governorates! Deliveries to Cairo and Giza take 24–48 hours, while other governorates take 2–4 business days.",
@@ -115,17 +217,17 @@ export default function AboutAndContactPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit py-4 sm:py-10 px-2.5 sm:px-6 lg:px-8" dir="ltr">
+    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit py-4 sm:py-10 px-2.5 sm:px-6 lg:px-8" dir={dir}>
       <div className="max-w-[1050px] mx-auto space-y-4 sm:space-y-10">
         
         {/* Main Title & Tabs Switcher */}
         <section className="text-center space-y-2 sm:space-y-6">
           <div className="space-y-0.5 sm:space-y-1">
             <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.25em] text-[#942E3A]">
-              Get to Know Us & Connect
+              DeRoma
             </span>
             <h1 className="text-xl sm:text-5xl font-black font-playfair tracking-tight text-[#942E3A]">
-              About Us & Contact
+              {t("nav.about")}
             </h1>
           </div>
 
@@ -140,7 +242,7 @@ export default function AboutAndContactPage() {
               }`}
             >
               <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>About Us</span>
+              <span>{t("nav.about")}</span>
             </button>
 
             <button
@@ -152,7 +254,7 @@ export default function AboutAndContactPage() {
               }`}
             >
               <Headphones className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>Contact & Support</span>
+              <span>{t("footer.contactUs")}</span>
             </button>
           </div>
         </section>
@@ -171,30 +273,30 @@ export default function AboutAndContactPage() {
               {/* Hero Heritage Banner */}
               <section className="text-center space-y-1.5 sm:space-y-4 max-w-2xl mx-auto">
                 <h2 className="text-lg sm:text-3xl font-extrabold font-playfair text-[#942E3A]">
-                  Crafting Elegance in Motion
+                  {copy.curatedElegance}
                 </h2>
                 <p className="text-[11px] sm:text-sm text-[#6B1F2A] font-light leading-relaxed">
-                  At DeRoma, we believe that style should never demand the sacrifice of comfort. Every sneaker is a statement of handcrafted sophistication designed for the modern woman.
+                  {copy.curatedIntro}
                 </p>
               </section>
 
               {/* Story Section */}
               <section className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 items-center bg-[#FFF9EB]/20 border border-[#942E3A]/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-10 shadow-xs">
                 <div className="space-y-2 sm:space-y-4">
-                  <h3 className="text-lg sm:text-3xl font-extrabold font-playfair text-[#942E3A]">{settings.aboutTitle}</h3>
+                  <h3 className="text-lg sm:text-3xl font-extrabold font-playfair text-[#942E3A]">{copy.aboutTitle}</h3>
                   <p className="text-[11px] sm:text-sm text-[#6B1F2A] font-light leading-relaxed">
-                    {settings.aboutParagraph1}
+                    {copy.aboutParagraph1}
                   </p>
-                  {settings.aboutParagraph2 && (
+                  {copy.aboutParagraph2 && (
                     <p className="text-[11px] sm:text-sm text-[#6B1F2A] font-light leading-relaxed">
-                      {settings.aboutParagraph2}
+                      {copy.aboutParagraph2}
                     </p>
                   )}
                 </div>
                 <div className="relative h-36 sm:h-80 rounded-xl sm:rounded-2xl overflow-hidden border border-[#942E3A]/30 shadow-sm">
                   <Image
                     src={settings.aboutImage || "/products/deroma-new-balance-9060-pastel-pink.png"}
-                    alt={settings.aboutTitle}
+                    alt={copy.aboutTitle}
                     fill
                     className="object-cover"
                   />
@@ -204,8 +306,8 @@ export default function AboutAndContactPage() {
               {/* Core Values - 3 Columns Side-by-Side even on mobile! */}
               <section className="space-y-3 sm:space-y-8">
                 <div className="text-center space-y-0.5">
-                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.25em] text-[#942E3A]">Our Promise</span>
-                  <h3 className="text-lg sm:text-2xl font-extrabold font-playfair text-[#942E3A]">Crafted With Care</h3>
+                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.25em] text-[#942E3A]">{copy.promise}</span>
+                  <h3 className="text-lg sm:text-2xl font-extrabold font-playfair text-[#942E3A]">{copy.selectedWithCare}</h3>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 sm:gap-6">
@@ -213,9 +315,9 @@ export default function AboutAndContactPage() {
                     <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-[#FFF9EB] text-[#942E3A] flex items-center justify-center mx-auto">
                       <ShieldCheck className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                     </div>
-                    <h4 className="text-[10px] sm:text-base font-bold text-[#942E3A]">Premium Materials</h4>
+                    <h4 className="text-[10px] sm:text-base font-bold text-[#942E3A]">{copy.premiumMaterials}</h4>
                     <p className="text-[9px] sm:text-xs text-[#6B1F2A] font-light leading-relaxed hidden sm:block">
-                      We source only the finest imported leathers and breathable mesh.
+                      {copy.premiumMaterialsDesc}
                     </p>
                   </div>
 
@@ -223,9 +325,9 @@ export default function AboutAndContactPage() {
                     <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-[#FFF9EB] text-[#942E3A] flex items-center justify-center mx-auto">
                       <Heart className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                     </div>
-                    <h4 className="text-[10px] sm:text-base font-bold text-[#942E3A]">Ergonomic Comfort</h4>
+                    <h4 className="text-[10px] sm:text-base font-bold text-[#942E3A]">{copy.ergonomicComfort}</h4>
                     <p className="text-[9px] sm:text-xs text-[#6B1F2A] font-light leading-relaxed hidden sm:block">
-                      Features specialized arch supports and memory foam footbeds.
+                      {copy.ergonomicComfortDesc}
                     </p>
                   </div>
 
@@ -233,9 +335,9 @@ export default function AboutAndContactPage() {
                     <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-[#FFF9EB] text-[#942E3A] flex items-center justify-center mx-auto">
                       <Award className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                     </div>
-                    <h4 className="text-[10px] sm:text-base font-bold text-[#942E3A]">Bespoke Contours</h4>
+                    <h4 className="text-[10px] sm:text-base font-bold text-[#942E3A]">{copy.comfortSelection}</h4>
                     <p className="text-[9px] sm:text-xs text-[#6B1F2A] font-light leading-relaxed hidden sm:block">
-                      Designed exclusively for female foot structure alignment.
+                      {copy.comfortSelectionDesc}
                     </p>
                   </div>
                 </div>
@@ -243,16 +345,16 @@ export default function AboutAndContactPage() {
 
               {/* Call to Action Banner */}
               <section className="text-center bg-[#942E3A] rounded-2xl sm:rounded-3xl p-4 sm:p-12 text-[#FFF9EB] space-y-2 sm:space-y-4 shadow-lg border border-white/10">
-                <h3 className="text-lg sm:text-3xl font-extrabold font-playfair">Step Into the Future of Comfort</h3>
+                <h3 className="text-lg sm:text-3xl font-extrabold font-playfair">{copy.futureComfort}</h3>
                 <p className="text-[11px] sm:text-sm max-w-xl mx-auto font-light leading-relaxed text-stone-100">
-                  Explore our curated line of premium sports and performance sneakers and find your perfect pair today.
+                  {copy.futureComfortDesc}
                 </p>
                 <div className="pt-1">
                   <Link
                     href="/shop"
                     className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF9EB] text-[#942E3A] hover:bg-white px-4 sm:px-6 py-2 sm:py-3 text-[11px] sm:text-xs font-bold transition-all shadow-md"
                   >
-                    <span>Explore Collection</span>
+                    <span>{copy.exploreCollection}</span>
                     <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </Link>
                 </div>
@@ -276,7 +378,7 @@ export default function AboutAndContactPage() {
                   <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-[#FFF9EB] text-[#942E3A] flex items-center justify-center mx-auto group-hover:bg-[#942E3A] group-hover:text-white transition-colors">
                     <Phone className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <h4 className="text-[9px] sm:text-xs font-bold text-[#942E3A] uppercase tracking-wider">Phone Support</h4>
+                  <h4 className="text-[9px] sm:text-xs font-bold text-[#942E3A] uppercase tracking-wider">{copy.phoneSupport}</h4>
                   <p className="text-[9px] sm:text-xs font-semibold text-[#6B1F2A] truncate">{settings.phone}</p>
                 </a>
 
@@ -289,7 +391,7 @@ export default function AboutAndContactPage() {
                   <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                     <MessageCircle className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <h4 className="text-[9px] sm:text-xs font-bold text-[#942E3A] uppercase tracking-wider">WhatsApp Direct</h4>
+                  <h4 className="text-[9px] sm:text-xs font-bold text-[#942E3A] uppercase tracking-wider">{copy.whatsappDirect}</h4>
                   <p className="text-[9px] sm:text-xs font-semibold text-emerald-700 flex items-center justify-center gap-0.5 truncate">
                     <span>WhatsApp</span>
                     <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
@@ -303,7 +405,7 @@ export default function AboutAndContactPage() {
                   <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-[#FFF9EB] text-[#942E3A] flex items-center justify-center mx-auto group-hover:bg-[#942E3A] group-hover:text-white transition-colors">
                     <Mail className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <h4 className="text-[9px] sm:text-xs font-bold text-[#942E3A] uppercase tracking-wider">Email Inquiry</h4>
+                  <h4 className="text-[9px] sm:text-xs font-bold text-[#942E3A] uppercase tracking-wider">{copy.emailInquiry}</h4>
                   <p className="text-[9px] sm:text-xs font-semibold text-[#6B1F2A] truncate">{settings.email}</p>
                 </a>
 
@@ -311,7 +413,7 @@ export default function AboutAndContactPage() {
                   <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-[#FFF9EB] text-[#942E3A] flex items-center justify-center mx-auto">
                     <Clock className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <h4 className="text-[9px] sm:text-xs font-bold text-[#942E3A] uppercase tracking-wider">Online Store Hours</h4>
+                  <h4 className="text-[9px] sm:text-xs font-bold text-[#942E3A] uppercase tracking-wider">{copy.onlineHours}</h4>
                   <p className="text-[9px] sm:text-xs font-semibold text-[#6B1F2A] truncate">{settings.hours}</p>
                 </div>
               </div>
@@ -322,23 +424,23 @@ export default function AboutAndContactPage() {
                 {/* Left (7 cols): Contact Form */}
                 <div className="lg:col-span-7 bg-white border border-[#942E3A]/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-8 shadow-xs space-y-3 sm:space-y-6">
                   <div className="space-y-0.5">
-                    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#942E3A]">Direct Message</span>
-                    <h3 className="text-lg sm:text-2xl font-bold font-playfair text-[#942E3A]">Send Us a Message</h3>
-                    <p className="text-[10px] sm:text-xs text-stone-500">Fill in your details and our team will get back to you promptly.</p>
+                    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#942E3A]">{copy.directMessage}</span>
+                    <h3 className="text-lg sm:text-2xl font-bold font-playfair text-[#942E3A]">{copy.sendMessageTitle}</h3>
+                    <p className="text-[10px] sm:text-xs text-stone-500">{copy.sendMessageDesc}</p>
                   </div>
 
                   {sentSuccess ? (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 sm:p-6 text-center space-y-2 sm:space-y-3">
                       <CheckCircle2 className="w-7 h-7 sm:w-10 sm:h-10 text-emerald-600 mx-auto" />
-                      <h4 className="text-xs sm:text-base font-bold text-emerald-900">Message Sent Successfully!</h4>
+                      <h4 className="text-xs sm:text-base font-bold text-emerald-900">{copy.messageSent}</h4>
                       <p className="text-[11px] text-emerald-700 max-w-sm mx-auto">
-                        Thank you for contacting DeRoma. We have received your inquiry and will reply via WhatsApp or Phone.
+                        {copy.messageSentDesc}
                       </p>
                       <button
                         onClick={() => setSentSuccess(false)}
                         className="px-4 py-1.5 rounded-full bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition-colors"
                       >
-                        Send Another Message
+                        {copy.sendAnother}
                       </button>
                     </div>
                   ) : (
@@ -350,7 +452,7 @@ export default function AboutAndContactPage() {
                       )}
                       <div className="grid grid-cols-2 gap-2 sm:gap-4">
                         <div className="space-y-0.5">
-                          <label className="font-bold text-[#942E3A] text-[10px] sm:text-xs">Your Name *</label>
+                          <label className="font-bold text-[#942E3A] text-[10px] sm:text-xs">{copy.yourName}</label>
                           <input
                             type="text"
                             required
@@ -362,7 +464,7 @@ export default function AboutAndContactPage() {
                         </div>
 
                         <div className="space-y-0.5">
-                          <label className="font-bold text-[#942E3A] text-[10px] sm:text-xs">Phone Number *</label>
+                          <label className="font-bold text-[#942E3A] text-[10px] sm:text-xs">{copy.phoneNumber}</label>
                           <input
                             type="text"
                             required
@@ -375,13 +477,13 @@ export default function AboutAndContactPage() {
                       </div>
 
                       <div className="space-y-0.5">
-                        <label className="font-bold text-[#942E3A] text-[10px] sm:text-xs">Your Message *</label>
+                        <label className="font-bold text-[#942E3A] text-[10px] sm:text-xs">{copy.yourMessage}</label>
                         <textarea
                           rows={2.5}
                           required
                           value={contactMessage}
                           onChange={(e) => setContactMessage(e.target.value)}
-                          placeholder="How can we assist you today?"
+                          placeholder={copy.messagePlaceholder}
                           className="w-full px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 rounded-lg sm:rounded-xl border border-[#942E3A]/30 bg-[#FFF9EB]/40 text-[#942E3A] text-[11px] sm:text-xs focus:outline-none focus:ring-1 focus:ring-[#942E3A]"
                         />
                       </div>
@@ -392,7 +494,7 @@ export default function AboutAndContactPage() {
                         className="w-full flex items-center justify-center gap-1.5 py-2 sm:py-3 rounded-full bg-[#942E3A] text-white text-[11px] sm:text-xs font-bold shadow-md hover:bg-[#7a2430] transition-all disabled:opacity-50"
                       >
                         <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span>{isSending ? "Sending Message..." : "Send Message"}</span>
+                        <span>{isSending ? copy.sending : copy.send}</span>
                       </button>
                     </form>
                   )}
@@ -405,11 +507,11 @@ export default function AboutAndContactPage() {
                   <div className="bg-white border border-[#942E3A]/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-xs space-y-1.5 sm:space-y-4">
                     <h4 className="text-xs sm:text-base font-bold font-playfair text-[#942E3A] flex items-center gap-1.5 border-b border-[#942E3A]/15 pb-1.5 sm:pb-3">
                       <MapPin className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-[#942E3A]" />
-                      <span>DeRoma Online Store Hub</span>
+                      <span>{copy.storeHub}</span>
                     </h4>
                     
                     <div className="space-y-0.5 sm:space-y-1 text-xs text-[#6B1F2A]">
-                      <p className="font-bold text-[11px] sm:text-sm text-[#942E3A]">Samanoud Dispatch & Fulfilment Center</p>
+                      <p className="font-bold text-[11px] sm:text-sm text-[#942E3A]">{copy.dispatchCenter}</p>
                       <p className="font-light leading-relaxed text-[10px] sm:text-xs">{settings.address}</p>
                     </div>
                   </div>
@@ -417,9 +519,9 @@ export default function AboutAndContactPage() {
                   {/* Social Accounts Grid */}
                   <div className="bg-white border border-[#942E3A]/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-xs space-y-2 sm:space-y-4">
                     <h4 className="text-xs sm:text-base font-bold font-playfair text-[#942E3A] border-b border-[#942E3A]/15 pb-1.5 sm:pb-3">
-                      Official Social Channels
+                      {copy.socialChannels}
                     </h4>
-                    <p className="text-[10px] sm:text-xs text-stone-500">Connect with us for instant updates & new drops!</p>
+                    <p className="text-[10px] sm:text-xs text-stone-500">{copy.socialDesc}</p>
 
                     <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-0.5">
                       {settings.instagram && (
@@ -482,10 +584,10 @@ export default function AboutAndContactPage() {
               {/* FAQ Accordion */}
               <section className="bg-white border border-[#942E3A]/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-8 shadow-xs space-y-3 sm:space-y-6">
                 <div className="space-y-0.5">
-                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#942E3A]">Help Center</span>
+                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#942E3A]">{copy.helpCenter}</span>
                   <h3 className="text-base sm:text-xl font-bold font-playfair text-[#942E3A] flex items-center gap-1.5">
                     <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#942E3A]" />
-                    <span>Frequently Asked Questions</span>
+                    <span>{copy.faqTitle}</span>
                   </h3>
                 </div>
 

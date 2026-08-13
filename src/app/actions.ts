@@ -1,6 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { cookies, headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { Resend } from "resend";
 import { consumeInventoryLots } from "@/lib/inventoryLots";
@@ -11,6 +12,10 @@ import {
   ShippingZoneData,
 } from "@/lib/shippingHelper";
 import { getCustomerSession } from "@/lib/userAuth";
+import {
+  getGoogleEnhancedConversionData,
+  sendMetaServerEvent,
+} from "@/lib/serverAnalytics";
 
 import { checkRateLimit, sanitizeInput } from "@/lib/rateLimit";
 
@@ -251,6 +256,14 @@ export async function createOrder(input: CreateOrderInput) {
     const totalPrice = Math.max(0, subtotal - discountAmount + shippingCost);
 
     const customerSession = await getCustomerSession();
+    const requestHeaders = await headers();
+    const requestCookies = await cookies();
+    const forwardedFor = requestHeaders.get("x-forwarded-for");
+    const clientIpAddress =
+      forwardedFor?.split(",")[0]?.trim() ||
+      requestHeaders.get("x-real-ip") ||
+      null;
+    const clientUserAgent = requestHeaders.get("user-agent");
 
     // 5. Database transaction (create order + deduct stock)
     const order = await prisma.$transaction(async (tx) => {
@@ -431,10 +444,50 @@ export async function createOrder(input: CreateOrderInput) {
       );
     }
 
+    const eventId = order.orderNumber;
+    const enhancedConversionData = getGoogleEnhancedConversionData({
+      email: customerSession?.email,
+      phone: cleanPhone,
+      firstName: cleanFirstName,
+      lastName: cleanLastName,
+      city: input.city,
+      state: input.governorate,
+      country: "EG",
+    });
+
+    await sendMetaServerEvent({
+      eventName: "Purchase",
+      eventId,
+      eventSourceUrl: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://deromastore.com"}/checkout/success`,
+      value: totalPrice,
+      orderNumber: order.orderNumber,
+      items: dbItemsToCreate.map((item) => ({
+        productId: item.productId,
+        productName: item.productName,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      customer: {
+        email: customerSession?.email,
+        phone: cleanPhone,
+        firstName: cleanFirstName,
+        lastName: cleanLastName,
+        city: input.city,
+        state: input.governorate,
+        country: "eg",
+        clientIpAddress,
+        clientUserAgent,
+        fbp: requestCookies.get("_fbp")?.value,
+        fbc: requestCookies.get("_fbc")?.value,
+      },
+    });
+
     return {
       success: true,
       orderId: order.id,
       orderNumber: order.orderNumber,
+      eventId,
+      enhancedConversionData,
       totalPrice,
       shippingCost,
       discountAmount,

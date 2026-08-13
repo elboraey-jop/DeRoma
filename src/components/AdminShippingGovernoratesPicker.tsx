@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Search, X } from "lucide-react";
+import { Check, ChevronDown, Search } from "lucide-react";
 import { GOVERNORATES } from "@/lib/locations";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 export default function AdminShippingGovernoratesPicker({
   exclude = [],
@@ -11,10 +12,13 @@ export default function AdminShippingGovernoratesPicker({
   exclude?: string[];
   onChange?: (values: string[]) => void;
 }) {
+  const { lang } = useAdminI18n();
+  const isRtl = lang === "ar";
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const pickerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!open) return;
     const close = (event: PointerEvent) => {
@@ -23,10 +27,12 @@ export default function AdminShippingGovernoratesPicker({
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, [open]);
+
   const available = GOVERNORATES.filter((item) => !exclude.includes(item));
   const filtered = available.filter((item) =>
     item.toLowerCase().includes(search.toLowerCase()),
   );
+
   const toggle = (item: string) =>
     setSelected((current) => {
       const next = current.includes(item)
@@ -35,10 +41,11 @@ export default function AdminShippingGovernoratesPicker({
       onChange?.(next);
       return next;
     });
+
   return (
     <div ref={pickerRef} className="relative">
       <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide">
-        Governorates
+        {isRtl ? "المحافظات" : "Governorates"}
       </span>
       <input type="hidden" name="governorates" value={selected.join(",")} />
       <button
@@ -47,12 +54,17 @@ export default function AdminShippingGovernoratesPicker({
         className={`admin-input flex w-full items-center justify-between gap-3 text-left ${selected.length ? "text-[#481827]" : "text-[#a99ca0]"}`}
       >
         <span className="truncate">
-          {selected.length ? selected.join(", ") : "Select governorates"}
+          {selected.length
+            ? selected.join(", ")
+            : isRtl
+              ? "اختر المحافظات"
+              : "Select governorates"}
         </span>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-[#942E3A] transition ${open ? "rotate-180" : ""}`}
         />
       </button>
+
       {open && (
         <div className="absolute inset-x-0 top-[calc(100%+0.35rem)] z-30 overflow-hidden rounded-2xl border border-[#eadfd6] bg-[#fffdfa] p-2 shadow-xl">
           <div className="relative">
@@ -62,10 +74,11 @@ export default function AdminShippingGovernoratesPicker({
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search governorates..."
+              placeholder={isRtl ? "ابحث عن محافظة..." : "Search governorates..."}
               className="h-10 w-full rounded-xl border border-[#eadfd6] bg-[#fffaf0] pl-9 pr-3 text-xs text-[#481827] outline-none focus:border-[#942E3A] focus:ring-2 focus:ring-[#942E3A]/10"
             />
           </div>
+
           <div
             className="hide-scrollbar mt-2 max-h-52 overscroll-contain overflow-y-auto"
             onWheel={(event) => {
@@ -85,22 +98,24 @@ export default function AdminShippingGovernoratesPicker({
                 {selected.includes(item) && <Check className="h-3.5 w-3.5" />}
               </button>
             ))}
+
             {filtered.length === 0 && (
               <p className="px-3 py-4 text-center text-xs text-[#806e73]">
-                No governorate found
+                {isRtl ? "لم يتم العثور على محافظة" : "No governorate found"}
               </p>
             )}
           </div>
+
           <div className="mt-2 flex items-center justify-between border-t border-[#eadfd6] px-1 pt-2">
             <span className="text-[10px] text-[#806e73]">
-              {selected.length} selected
+              {selected.length} {isRtl ? "محددة" : "selected"}
             </span>
             <button
               type="button"
               onClick={() => setOpen(false)}
               className="rounded-lg bg-[#942E3A] px-3 py-1.5 text-[10px] font-bold text-white"
             >
-              Done
+              {isRtl ? "تم" : "Done"}
             </button>
           </div>
         </div>

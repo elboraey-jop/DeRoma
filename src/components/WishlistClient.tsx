@@ -5,9 +5,11 @@ import { ProductWithVariants } from "@/components/ProductCard";
 import ProductCard from "@/components/ProductCard";
 import Link from "next/link";
 import { Heart } from "lucide-react";
+import { useStoreI18n } from "@/providers/StoreI18nContext";
 
 export default function WishlistClient({ allProducts }: { allProducts: ProductWithVariants[] }) {
   const { wishlist } = useWishlist();
+  const { t, dir } = useStoreI18n();
 
   // Filter products in the wishlist
   const wishlistedProducts = allProducts.filter((product) =>
@@ -15,14 +17,14 @@ export default function WishlistClient({ allProducts }: { allProducts: ProductWi
   );
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:py-12 lg:px-8">
+    <div className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:py-12 lg:px-8" dir={dir}>
       {/* Page Title */}
       <div className="text-center mb-8 sm:mb-12">
         <h1 className="text-2xl sm:text-4xl font-extrabold text-[#942E3A] font-playfair tracking-tight mb-2">
-          My Wishlist
+          {t("wishlist.title")}
         </h1>
         <p className="text-xs sm:text-sm text-[#D8B46A] max-w-md mx-auto font-medium font-sans">
-          Your curated selection of premium handcrafted footwear. Keep track of the pairs you love.
+          {t("wishlist.subtitle")}
         </p>
       </div>
 
@@ -33,16 +35,16 @@ export default function WishlistClient({ allProducts }: { allProducts: ProductWi
             <Heart className="h-12 w-12 text-[#D8B46A] stroke-[1.5]" />
           </div>
           <h2 className="text-lg sm:text-xl font-bold text-[#942E3A] font-playfair mb-2">
-            Your wishlist is empty
+            {t("wishlist.emptyTitle")}
           </h2>
           <p className="text-xs sm:text-sm text-[#D8B46A] max-w-xs mb-8 font-medium font-sans">
-            Explore our collection and tap the heart icon to save products here.
+            {t("wishlist.emptyDesc")}
           </p>
           <Link
             href="/shop"
             className="inline-flex items-center justify-center rounded-full bg-[#942E3A] px-8 py-3.5 text-xs font-bold text-white hover:bg-[#802832] transition-all shadow-md hover:scale-[1.03] active:scale-[0.98] font-sans"
           >
-            Go to Shop
+            {t("wishlist.exploreShop")}
           </Link>
         </div>
       ) : (

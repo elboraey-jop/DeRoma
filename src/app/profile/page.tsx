@@ -99,8 +99,11 @@ function getStatusBadge(status: string) {
   };
 }
 
+import { useStoreI18n } from "@/providers/StoreI18nContext";
+
 export default function ProfilePage() {
   const router = useRouter();
+  const { t, formatPrice, formatNumber, dir, lang } = useStoreI18n();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -226,33 +229,40 @@ export default function ProfilePage() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit py-12 px-4 sm:px-6 lg:px-8" dir="ltr">
-      <div className="max-w-[1000px] mx-auto space-y-10">
+    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] py-10 px-4 sm:px-6 lg:px-8" dir={dir}>
+      <div className="max-w-5xl mx-auto space-y-8">
         
-        {/* Navigation & Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Top Header Bar */}
+        <div className="flex items-center justify-between border-b border-[#942E3A]/20 pb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#942E3A] hover:text-[#942E3A] transition-colors w-fit"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#942E3A] hover:underline"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Store</span>
+            {dir === "rtl" ? <ArrowLeft className="w-4 h-4 rotate-180" /> : <ArrowLeft className="w-4 h-4" />}
+            <span>{t("nav.home")}</span>
           </Link>
 
           <button
-            onClick={handleLogout}
-            className="inline-flex items-center gap-2 rounded-full border border-[#942E3A]/40 hover:bg-[#942E3A]/10 px-4 py-2 text-xs font-bold text-[#942E3A] transition-all w-fit cursor-pointer"
+            onClick={async () => {
+              await logoutCustomerAction();
+              localStorage.removeItem("isLoggedIn");
+              localStorage.removeItem("customerName");
+              localStorage.removeItem("customerEmail");
+              window.dispatchEvent(new Event("auth-change"));
+              router.push("/");
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>Log Out</span>
+            <span>{t("profile.signOut")}</span>
           </button>
         </div>
 
         {/* Heading */}
         <section className="space-y-1">
-          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#942E3A]">My Dashboard</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#942E3A]">{t("profile.title")}</span>
           <h1 className="text-3xl sm:text-4xl font-black font-playfair tracking-tight text-[#942E3A]">
-            {greeting}, {profile.name.split(" ")[0]}!
+            {t("profile.welcomeBack")}, {profile.name.split(" ")[0]}!
           </h1>
         </section>
 
@@ -265,14 +275,14 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between border-b border-[#942E3A]/20 pb-3">
                 <h2 className="text-lg font-bold font-playfair flex items-center gap-2">
                   <User className="w-4.5 h-4.5 text-[#942E3A]" />
-                  <span>Account Info</span>
+                  <span>{t("profile.accountDetails")}</span>
                 </h2>
                 <button
                   onClick={() => setIsEditing(true)}
                   className="inline-flex items-center gap-1 text-[11px] font-bold text-[#942E3A] hover:underline"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
-                  <span>Edit</span>
+                  <span>{t("profile.editProfile")}</span>
                 </button>
               </div>
 
@@ -281,7 +291,7 @@ export default function ProfilePage() {
                 <div className="flex items-start gap-3">
                   <User className="w-4 h-4 text-[#942E3A] shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">Full Name</p>
+                    <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">{t("login.fullNameLabel")}</p>
                     <p className="font-semibold text-sm mt-0.5">{profile.name}</p>
                   </div>
                 </div>
@@ -289,7 +299,7 @@ export default function ProfilePage() {
                 <div className="flex items-start gap-3">
                   <Mail className="w-4 h-4 text-[#942E3A] shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">Email Address</p>
+                    <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">{t("login.emailLabel")}</p>
                     <p className="font-semibold text-sm mt-0.5">{profile.email}</p>
                   </div>
                 </div>
@@ -297,9 +307,9 @@ export default function ProfilePage() {
                 <div className="flex items-start gap-3">
                   <Phone className="w-4 h-4 text-[#942E3A] shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">Contact Phone</p>
+                    <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">{t("login.phoneLabel")}</p>
                     <p className="font-semibold text-sm mt-0.5">
-                      {profile.phone ? profile.phone : <span className="text-stone-400 italic">Not added yet</span>}
+                      {profile.phone ? profile.phone : <span className="text-stone-400 italic">-</span>}
                     </p>
                     {profile.phone2 && <p className="text-[11px] text-stone-500 mt-0.5">Alt: {profile.phone2}</p>}
                   </div>
@@ -308,13 +318,13 @@ export default function ProfilePage() {
                 <div className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-[#942E3A] shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">Default Shipping Address</p>
+                    <p className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">{t("checkout.shippingAddress")}</p>
                     {profile.address || profile.city || profile.governorate ? (
                       <p className="font-semibold leading-relaxed mt-0.5">
                         {[profile.address, profile.city, profile.governorate].filter(Boolean).join(", ")}
                       </p>
                     ) : (
-                      <p className="text-stone-400 italic mt-0.5">Not added yet</p>
+                      <p className="text-stone-400 italic mt-0.5">-</p>
                     )}
                   </div>
                 </div>
@@ -328,28 +338,28 @@ export default function ProfilePage() {
             <div className="bg-[#FFF9EB]/20 border border-[#942E3A]/30 rounded-3xl p-6 shadow-xs space-y-5">
               <h2 className="text-lg font-bold font-playfair border-b border-[#942E3A]/20 pb-3 flex items-center gap-2">
                 <Package className="w-4.5 h-4.5 text-[#942E3A]" />
-                <span>My Orders ({profile.orders.length})</span>
+                <span>{t("profile.orderHistory")} ({formatNumber(profile.orders.length)})</span>
               </h2>
 
               {profile.orders.length === 0 ? (
                 <div className="text-center py-10 space-y-3">
                   <ShoppingBag className="w-10 h-10 text-[#942E3A]/30 mx-auto" />
-                  <p className="text-sm font-bold text-[#942E3A]">No orders placed yet</p>
+                  <p className="text-sm font-bold text-[#942E3A]">{t("profile.noOrders")}</p>
                   <p className="text-xs text-stone-500 max-w-xs mx-auto">
-                    When you order from DeRoma Store, your order details and delivery status will appear here!
+                    {t("profile.noOrdersDesc")}
                   </p>
                   <Link
                     href="/shop"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#942E3A] text-white text-xs font-bold shadow-md hover:bg-[#7a2430] transition-all"
                   >
-                    <span>Browse Shop</span>
+                    <span>{t("cart.startShopping")}</span>
                   </Link>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {profile.orders.map((order) => {
                     const statusBadge = getStatusBadge(order.status);
-                    const formattedDate = new Date(order.createdAt).toLocaleDateString("en-US", {
+                    const formattedDate = new Date(order.createdAt).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
@@ -370,7 +380,7 @@ export default function ProfilePage() {
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px] text-stone-500">
                               <Clock className="w-3 h-3" />
-                              <span>Order Date: {formattedDate}</span>
+                              <span>{t("profile.date")}: {formattedDate}</span>
                             </div>
                           </div>
 
@@ -379,7 +389,7 @@ export default function ProfilePage() {
                               href={`/track?order=${order.orderNumber}`}
                               className="text-[11px] font-bold text-[#942E3A] hover:underline self-start sm:self-auto"
                             >
-                              Track Shipment &rarr;
+                              {t("nav.trackOrder")} {dir === "rtl" ? "←" : "→"}
                             </Link>
                           )}
                         </div>
@@ -391,21 +401,21 @@ export default function ProfilePage() {
                               <div>
                                 <span className="font-bold text-[#942E3A]">{item.productName}</span>
                                 <div className="text-[11px] text-stone-500 gap-2 flex">
-                                  {item.size && <span>Size: {item.size}</span>}
-                                  {item.color && <span>• Color: {item.color}</span>}
-                                  <span>• Qty: {item.quantity}</span>
+                                  {item.size && <span>{t("cart.size")}: {formatNumber(item.size)}</span>}
+                                  {item.color && <span>• {t("cart.color")}: {item.color}</span>}
+                                  <span>• {t("cart.quantity")}: {formatNumber(item.quantity)}</span>
                                 </div>
                               </div>
-                              <span className="font-numeric font-bold text-[#942E3A]">
-                                {formatCurrency(item.price * item.quantity)}
+                              <span className="font-bold text-[#942E3A]">
+                                {formatPrice(item.price * item.quantity)}
                               </span>
                             </div>
                           ))}
                         </div>
 
                         <div className="border-t border-stone-100 pt-2 flex items-center justify-between text-xs font-bold text-[#942E3A]">
-                          <span className="text-stone-500 font-normal">Total Price:</span>
-                          <span className="text-sm font-numeric font-extrabold">{formatCurrency(order.totalPrice)}</span>
+                          <span className="text-stone-500 font-normal">{t("profile.total")}:</span>
+                          <span className="text-sm font-extrabold">{formatPrice(order.totalPrice)}</span>
                         </div>
                       </div>
                     );

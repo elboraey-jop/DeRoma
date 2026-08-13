@@ -34,38 +34,97 @@ export async function createTeamMemberAction(formData: FormData) {
   revalidatePath("/admin/team");
 }
 
-export async function changeAdminPasswordAction(formData: FormData) {
-  const current = await requireAdmin();
-  const currentPassword = String(formData.get("currentPassword") || "");
-  const newPassword = String(formData.get("newPassword") || "");
-  const confirmation = String(formData.get("confirmPassword") || "");
-  if (newPassword.length < 8)
-    throw new Error("The new password must be at least 8 characters.");
-  if (newPassword !== confirmation)
-    throw new Error("The new password confirmation does not match.");
-  const user = await prisma.user.findUnique({
-    where: { id: current.id },
-    select: { passwordHash: true },
-  });
-  if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash)))
-    throw new Error("The current password is incorrect.");
-  await prisma.user.update({
-    where: { id: current.id },
-    data: { passwordHash: await bcrypt.hash(newPassword, 12) },
-  });
-  revalidatePath("/admin/team");
+export async function changeAdminPasswordAction(
+  prevStateOrFormData: any,
+  formDataOrUndefined?: FormData
+) {
+  try {
+    const current = await requireAdmin();
+    let formData: FormData;
+    if (formDataOrUndefined instanceof FormData) {
+      formData = formDataOrUndefined;
+    } else if (prevStateOrFormData instanceof FormData) {
+      formData = prevStateOrFormData;
+    } else {
+      formData = new FormData();
+    }
+
+    const currentPassword = String(formData.get("currentPassword") || "");
+    const newPassword = String(formData.get("newPassword") || "");
+    const confirmation = String(formData.get("confirmPassword") || "");
+
+    if (newPassword.length < 8) {
+      return { success: false, error: "يجب أن تتكون كلمة السر من 8 أحرف على الأقل." };
+    }
+    if (newPassword !== confirmation) {
+      return { success: false, error: "كلمتا السر غير متطابقتين." };
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: current.id },
+      select: { passwordHash: true },
+    });
+
+    if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
+      return { success: false, error: "كلمة السر الحالية غير صحيحة." };
+    }
+
+    await prisma.user.update({
+      where: { id: current.id },
+      data: { passwordHash: await bcrypt.hash(newPassword, 12) },
+    });
+
+    revalidatePath("/admin/team");
+    return { success: true, message: "تم تغيير كلمة السر بنجاح!" };
+  } catch (err: any) {
+    console.error("Error in changeAdminPasswordAction:", err);
+    return { success: false, error: err?.message || "حدث خطأ أثناء تغيير كلمة السر." };
+  }
 }
 
-export async function changeTeamMemberPasswordAction(formData: FormData) {
-  await requireAdmin();
-  const id = String(formData.get("id") || "");
-  const newPassword = String(formData.get("newPassword") || "");
-  const confirmation = String(formData.get("confirmPassword") || "");
-  if (!id || newPassword.length < 8) throw new Error("The new password must be at least 8 characters.");
-  if (newPassword !== confirmation) throw new Error("The new password confirmation does not match.");
-  await prisma.user.update({ where: { id }, data: { passwordHash: await bcrypt.hash(newPassword, 12), role: "admin" } });
-  revalidatePath("/admin/team");
-  revalidatePath(`/admin/team/${id}`);
+export async function changeTeamMemberPasswordAction(
+  prevStateOrFormData: any,
+  formDataOrUndefined?: FormData
+) {
+  try {
+    await requireAdmin();
+    let formData: FormData;
+    if (formDataOrUndefined instanceof FormData) {
+      formData = formDataOrUndefined;
+    } else if (prevStateOrFormData instanceof FormData) {
+      formData = prevStateOrFormData;
+    } else {
+      formData = new FormData();
+    }
+
+    const id = String(formData.get("id") || "");
+    const newPassword = String(formData.get("newPassword") || "");
+    const confirmation = String(formData.get("confirmPassword") || "");
+
+    if (!id) {
+      return { success: false, error: "معرف العضو غير صحيح." };
+    }
+    if (newPassword.length < 8) {
+      return { success: false, error: "يجب أن تتكون كلمة السر من 8 أحرف على الأقل." };
+    }
+    if (newPassword !== confirmation) {
+      return { success: false, error: "كلمتا السر غير متطابقتين." };
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({
+      where: { id },
+      data: { passwordHash, role: "admin" },
+    });
+
+    revalidatePath("/admin/team");
+    revalidatePath(`/admin/team/${id}`);
+
+    return { success: true, message: "تم تغيير كلمة السر للعضو بنجاح!" };
+  } catch (err: any) {
+    console.error("Error in changeTeamMemberPasswordAction:", err);
+    return { success: false, error: err?.message || "حدث خطأ أثناء تغيير كلمة السر." };
+  }
 }
 
 export async function removeTeamMemberAction(formData: FormData) {

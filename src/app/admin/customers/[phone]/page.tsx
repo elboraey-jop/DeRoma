@@ -135,12 +135,14 @@ export default async function CustomerDetailsPage({
                 >
                   <MessageCircle className="h-3 w-3 text-[#7CFFAA]" /> WhatsApp
                 </a>
-                <a
-                  href="mailto:?subject=DeRoma order"
-                  className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold sm:px-3 sm:py-1.5 sm:text-xs"
-                >
-                  <Mail className="h-3 w-3" /> Email
-                </a>
+                {Boolean(customer.email?.trim()) && (
+                  <a
+                    href={`mailto:${customer.email}?subject=DeRoma order`}
+                    className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold sm:px-3 sm:py-1.5 sm:text-xs"
+                  >
+                    <Mail className="h-3 w-3" /> Email
+                  </a>
+                )}
               </div>
             </div>
           </div>

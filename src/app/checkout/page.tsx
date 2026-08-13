@@ -30,6 +30,16 @@ import {
   ShippingSettingsData,
   ShippingZoneData,
 } from "@/lib/shippingHelper";
+import {
+  trackAddPaymentInfo,
+  trackAddShippingInfo,
+  trackBeginCheckout,
+  trackCheckoutError,
+  trackPromoCodeApplied,
+  trackPurchase,
+} from "@/lib/analytics";
+
+import { useStoreI18n } from "@/providers/StoreI18nContext";
 
 interface GovItem {
   en: string;
@@ -140,6 +150,7 @@ function FieldLabel({ icon: Icon, children, optional = false }: { icon: typeof U
 export default function CheckoutPage() {
   const { cart, cartTotal, clearCart } = useCart();
   const { toast } = useToast();
+  const { t, formatPrice, formatNumber, dir, lang } = useStoreI18n();
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -158,6 +169,8 @@ export default function CheckoutPage() {
   const [promoIsFreeShipping, setPromoIsFreeShipping] = useState(false);
   const [promoMessage, setPromoMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const hasTrackedBeginCheckout = useRef(false);
+  const lastTrackedShippingInfo = useRef("");
 
   const handleApplyCoupon = async () => {
     const clean = couponCode.trim().toUpperCase();
@@ -182,6 +195,7 @@ export default function CheckoutPage() {
         setPromoIsFreeShipping(Boolean(data.isFreeShipping));
         setPromoMessage(data.message || `Code ${clean} applied!`);
         setPromoError("");
+        trackPromoCodeApplied(clean, Number(data.discountAmount) || 0);
         toast.success(data.message || `Promo code ${clean} applied!`, "PROMO CODE");
       } else {
         const err = data.error || "Invalid promo code.";
@@ -234,7 +248,20 @@ export default function CheckoutPage() {
       .catch(() => null);
   }, []);
 
-  const governorates = GOVERNORATES;
+  const adminShippingFeeFor = (governorate: string, selectedCity = "") =>
+    calculateShippingFee({
+      governorate,
+      city: selectedCity,
+      subtotal: 0,
+      zones: adminShippingData.zones,
+      settings: null,
+    });
+  const governorates = GOVERNORATES.map((gov) => ({
+    ...gov,
+    fee: adminShippingData.zones.length > 0
+      ? adminShippingFeeFor(gov.en)
+      : gov.fee,
+  }));
   const govMenuRef = useRef<HTMLDivElement>(null);
   const centerMenuRef = useRef<HTMLDivElement>(null);
 
@@ -252,6 +279,11 @@ export default function CheckoutPage() {
   }, []);
 
   const activeGov = governorates.find((gov) => gov.en === selectedGovEn);
+  const activeGovernorateFee = selectedGovEn
+    ? adminShippingData.zones.length > 0
+      ? adminShippingFeeFor(selectedGovEn)
+      : activeGov?.fee ?? 0
+    : 0;
   const filteredGovernorates = governorates.filter((gov) =>
     gov.en.toLowerCase().includes(govSearch.trim().toLowerCase())
   );
@@ -265,6 +297,12 @@ export default function CheckoutPage() {
         adminShippingData.settings.freeShippingThreshold !== null &&
         cartTotal >= Number(adminShippingData.settings.freeShippingThreshold))
   );
+  const cityShippingFee = (center: string) =>
+    isFreeShippingUnlocked
+      ? 0
+      : adminShippingData.zones.length > 0
+        ? adminShippingFeeFor(selectedGovEn, center)
+        : activeGovernorateFee;
 
   const shippingCost = isFreeShippingUnlocked
     ? 0
@@ -278,6 +316,52 @@ export default function CheckoutPage() {
       })
     : 0;
   const grandTotal = Math.max(0, cartTotal - appliedDiscount) + shippingCost;
+  const analyticsItems = cart.map((item) => ({
+    productId: item.productId,
+    variantId: item.variantId,
+    name: item.name,
+    price: item.price,
+    quantity: item.quantity,
+    color: item.color,
+    size: item.size,
+  }));
+
+  useEffect(() => {
+    if (!isMounted || hasTrackedBeginCheckout.current || cart.length === 0) return;
+
+    hasTrackedBeginCheckout.current = true;
+    trackBeginCheckout({
+      value: cartTotal,
+      items: analyticsItems,
+      coupon: couponApplied ? couponCode : undefined,
+    });
+  }, [analyticsItems, cart.length, cartTotal, couponApplied, couponCode, isMounted]);
+
+  useEffect(() => {
+    if (!isMounted || cart.length === 0 || !selectedGovEn || !city) return;
+
+    const shippingKey = `${selectedGovEn}|${city}|${shippingCost}|${grandTotal}`;
+    if (lastTrackedShippingInfo.current === shippingKey) return;
+    lastTrackedShippingInfo.current = shippingKey;
+
+    trackAddShippingInfo({
+      value: grandTotal,
+      shipping: shippingCost,
+      shipping_tier: `${selectedGovEn} - ${city}`,
+      coupon: couponApplied ? couponCode : undefined,
+      items: analyticsItems,
+    });
+  }, [
+    analyticsItems,
+    cart.length,
+    city,
+    couponApplied,
+    couponCode,
+    grandTotal,
+    isMounted,
+    selectedGovEn,
+    shippingCost,
+  ]);
 
   const egPhoneRegex = /^01[0125]\d{8}$/;
 
@@ -350,14 +434,23 @@ export default function CheckoutPage() {
       const msg = "Please fix the highlighted errors before placing your order.";
       setError(msg);
       toast.error(msg, "CHECKOUT");
+      trackCheckoutError("validation_failed", "delivery_details");
       return;
     }
     if (cart.length === 0) {
       const msg = "Your bag is empty. Please add items to checkout.";
       setError(msg);
       toast.error(msg, "CHECKOUT");
+      trackCheckoutError("empty_cart", "checkout");
       return;
     }
+
+    trackAddPaymentInfo({
+      value: grandTotal,
+      payment_type: "Cash on delivery",
+      coupon: couponApplied ? couponCode : undefined,
+      items: analyticsItems,
+    });
 
     setLoading(true);
     try {
@@ -380,6 +473,15 @@ export default function CheckoutPage() {
       });
 
       if (result.success && result.orderNumber) {
+        trackPurchase({
+          transaction_id: result.orderNumber,
+          event_id: result.eventId,
+          google_enhanced_conversion_data: result.enhancedConversionData,
+          value: Number(result.totalPrice ?? grandTotal),
+          shipping: Number(result.shippingCost ?? shippingCost),
+          coupon: couponApplied ? couponCode : undefined,
+          items: analyticsItems,
+        });
         toast.success(`Order ${result.orderNumber} placed successfully!`, "ORDER CONFIRMED");
         clearCart();
         const fullCustomerName = `${firstName.trim()} ${lastName.trim()}`;
@@ -390,12 +492,14 @@ export default function CheckoutPage() {
         const err = result.error || "Something went wrong. Please try again.";
         setError(err);
         toast.error(err, "ORDER FAILED");
+        trackCheckoutError("order_create_failed", "place_order");
       }
     } catch (submitError) {
       console.error(submitError);
       const msg = "We could not connect to the server. Please try again.";
       setError(msg);
       toast.error(msg, "CONNECTION ERROR");
+      trackCheckoutError("connection_error", "place_order");
     } finally {
       setLoading(false);
     }
@@ -405,16 +509,16 @@ export default function CheckoutPage() {
 
   if (cart.length === 0) {
     return (
-      <main className="min-h-[70vh] bg-[#fffaf0] px-4 py-16 sm:py-24" dir="ltr">
+      <main className="min-h-[70vh] bg-[#fffaf0] px-4 py-16 sm:py-24" dir={dir}>
         <div className="mx-auto max-w-md text-center">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#942e3a]/10 text-[#942e3a]">
             <ShoppingBag className="h-9 w-9" />
           </div>
-          <p className="mt-7 text-[10px] font-bold uppercase tracking-[0.28em] text-[#c49a50]">Your DeRoma bag</p>
-          <h1 className="mt-2 font-playfair text-3xl font-semibold text-[#481827]">Your bag is empty</h1>
-          <p className="mt-3 text-sm leading-6 text-[#806e73]">Discover your next favourite pair and come back here when you are ready to checkout.</p>
+          <p className="mt-7 text-[10px] font-bold uppercase tracking-[0.28em] text-[#c49a50]">DeRoma</p>
+          <h1 className="mt-2 font-playfair text-3xl font-semibold text-[#481827]">{t("cart.emptyTitle")}</h1>
+          <p className="mt-3 text-sm leading-6 text-[#806e73]">{t("cart.emptyDesc")}</p>
           <Link href="/shop" className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-[#942e3a] px-7 text-sm font-bold text-white shadow-lg shadow-[#942e3a]/20 transition hover:bg-[#76232d]">
-            Browse the shop <ArrowLeft className="h-4 w-4 rotate-180" />
+            {t("cart.startShopping")} {dir === "rtl" ? <ArrowLeft className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4 rotate-180" />}
           </Link>
         </div>
       </main>
@@ -422,26 +526,23 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#fffaf0] px-3 py-6 text-[#481827] sm:px-6 sm:py-12 lg:px-8" dir="ltr">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#fffaf0] px-3 py-6 text-[#481827] sm:px-6 sm:py-12 lg:px-8" dir={dir}>
       <div className="mx-auto w-full min-w-0 max-w-6xl">
-        <div className="mb-8 flex flex-col items-center gap-5 border-b border-[#eadfd6] pb-7 text-center sm:flex-row sm:items-end sm:justify-between sm:text-left">
+        <div className="mb-8 flex flex-col items-center gap-5 border-b border-[#eadfd6] pb-7 text-center sm:flex-row sm:items-end sm:justify-between rtl:sm:text-right ltr:sm:text-left">
           <div>
-            <Link href="/shop" className="flex w-full items-center justify-start gap-2 text-left text-xs font-semibold text-[#806e73] transition hover:text-[#942e3a] sm:inline-flex sm:w-auto">
-              <ArrowLeft className="h-4 w-4" /> Continue shopping
+            <Link href="/shop" className="flex w-full items-center justify-start gap-2 text-xs font-semibold text-[#806e73] transition hover:text-[#942e3a] sm:inline-flex sm:w-auto">
+              {dir === "rtl" ? <ArrowLeft className="h-4 w-4 rotate-180" /> : <ArrowLeft className="h-4 w-4" />} {t("nav.shop")}
             </Link>
-            <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.3em] text-[#c49a50]">DeRoma checkout</p>
-            <h1 className="mt-1 font-playfair text-3xl font-semibold sm:text-4xl">Complete your order</h1>
+            <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.3em] text-[#c49a50]">DeRoma</p>
+            <h1 className="mt-1 font-playfair text-3xl font-semibold sm:text-4xl">{t("checkout.title")}</h1>
           </div>
 
           <div className="flex items-center justify-center gap-3 text-xs font-semibold text-[#806e73]">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#942e3a] text-white"><Check className="h-4 w-4" /></span>
-            <span className="text-[#942e3a]">Bag</span>
+            <span className="text-[#942e3a]">{t("nav.bag")}</span>
             <span className="h-px w-8 bg-[#d8b46a] sm:w-12" />
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#942e3a] text-white">2</span>
-            <span className="text-[#942e3a]">Details</span>
-            <span className="h-px w-8 bg-[#eadfd6] sm:w-12" />
-            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#d8c9c0] bg-white">3</span>
-            <span className="hidden sm:inline">Confirmation</span>
+            <span className="text-[#942e3a]">{t("checkout.title")}</span>
           </div>
         </div>
 
@@ -452,38 +553,38 @@ export default function CheckoutPage() {
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#942e3a]/10 text-[#942e3a]"><UserRound className="h-5 w-5" /></div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c49a50]">Step 02</p>
-                  <h2 className="mt-1 font-playfair text-xl font-semibold">Delivery details</h2>
-                  <p className="mt-1 text-xs leading-5 text-[#806e73]">Tell us where to deliver your new pair.</p>
+                  <h2 className="mt-1 font-playfair text-xl font-semibold">{t("checkout.expressCheckout")}</h2>
+                  <p className="mt-1 text-xs leading-5 text-[#806e73]">{t("checkout.shippingAddress")}</p>
                 </div>
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <FieldLabel icon={UserRound}>First name *</FieldLabel>
+                  <FieldLabel icon={UserRound}>{t("checkout.firstName")} *</FieldLabel>
                   <input
                     required
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     onBlur={() => handleBlur("firstName")}
-                    placeholder="e.g. Yasmin"
+                    placeholder={t("checkout.firstName")}
                     className={getFieldClass(fieldErrors.firstName)}
                   />
                   {fieldErrors.firstName && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.firstName}</p>}
                 </div>
                 <div>
-                  <FieldLabel icon={UserRound}>Second name *</FieldLabel>
+                  <FieldLabel icon={UserRound}>{t("checkout.lastName")} *</FieldLabel>
                   <input
                     required
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     onBlur={() => handleBlur("lastName")}
-                    placeholder="e.g. Mohamed"
+                    placeholder={t("checkout.lastName")}
                     className={getFieldClass(fieldErrors.lastName)}
                   />
                   {fieldErrors.lastName && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.lastName}</p>}
                 </div>
                 <div>
-                  <FieldLabel icon={Phone}>Primary phone *</FieldLabel>
+                  <FieldLabel icon={Phone}>{t("checkout.phone")} *</FieldLabel>
                   <input
                     required
                     type="tel"
@@ -496,19 +597,19 @@ export default function CheckoutPage() {
                   {fieldErrors.phone && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.phone}</p>}
                 </div>
                 <div>
-                  <FieldLabel icon={Phone} optional>Alternative phone</FieldLabel>
+                  <FieldLabel icon={Phone} optional>{t("login.phoneLabel")} (2)</FieldLabel>
                   <input
                     type="tel"
                     value={phone2}
                     onChange={(e) => setPhone2(e.target.value)}
                     onBlur={() => handleBlur("phone2")}
-                    placeholder="Another number"
+                    placeholder="011 ..."
                     className={getFieldClass(fieldErrors.phone2)}
                   />
                   {fieldErrors.phone2 && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.phone2}</p>}
                 </div>
                 <div ref={govMenuRef} className="relative">
-                  <FieldLabel icon={MapPin}>Governorate *</FieldLabel>
+                  <FieldLabel icon={MapPin}>{t("checkout.governorate")} *</FieldLabel>
                   <button
                     type="button"
                     aria-haspopup="listbox"
@@ -518,9 +619,9 @@ export default function CheckoutPage() {
                       setGovSearch("");
                       handleBlur("governorate");
                     }}
-                    className={`${getFieldClass(fieldErrors.governorate)} flex min-w-0 items-center justify-between overflow-hidden text-left ${selectedGovEn ? "text-[#481827]" : "text-[#a99ca0]"}`}
+                    className={`${getFieldClass(fieldErrors.governorate)} flex min-w-0 items-center justify-between overflow-hidden text-left rtl:text-right ${selectedGovEn ? "text-[#481827]" : "text-[#a99ca0]"}`}
                   >
-                    <span>{selectedGovEn ? <span>{selectedGovEn} · {isFreeShippingUnlocked ? <span className="font-bold text-emerald-700">FREE delivery</span> : `${activeGov?.fee} EGP delivery`}</span> : (isFreeShippingUnlocked ? <span>Select governorate (<span className="font-bold text-emerald-700">FREE delivery</span>)</span> : "Select governorate")}</span>
+                    <span>{selectedGovEn ? <span>{lang === "ar" ? (activeGov?.ar || selectedGovEn) : selectedGovEn} · {isFreeShippingUnlocked ? <span className="font-bold text-emerald-700">{t("checkout.free")}</span> : formatPrice(activeGov?.fee || 50)}</span> : (isFreeShippingUnlocked ? <span>{t("checkout.selectGovernorate")} (<span className="font-bold text-emerald-700">{t("checkout.free")}</span>)</span> : t("checkout.selectGovernorate"))}</span>
                     <ChevronDown className={`h-4 w-4 shrink-0 text-[#942e3a] transition-transform ${isGovMenuOpen ? "rotate-180" : ""}`} />
                   </button>
                   {fieldErrors.governorate && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.governorate}</p>}
@@ -536,29 +637,29 @@ export default function CheckoutPage() {
                     >
                       <div className="sticky top-0 z-10 bg-white pb-1.5">
                         <div className="relative">
-                          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#942e3a]" />
+                          <Search className="pointer-events-none absolute left-3 rtl:left-auto rtl:right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#942e3a]" />
                           <input
                             type="search"
                             value={govSearch}
                             onChange={(event) => setGovSearch(event.target.value)}
                             onClick={(event) => event.stopPropagation()}
-                            placeholder="Search governorate..."
+                            placeholder={t("nav.searchAction")}
                             aria-label="Search governorates"
-                            className="h-11 w-full rounded-xl border border-[#eadfd6] bg-[#fffaf0] pl-9 pr-3 text-sm text-[#481827] outline-none placeholder:text-[#a99ca0] focus:border-[#942e3a] focus:ring-2 focus:ring-[#942e3a]/10"
+                            className="h-11 w-full rounded-xl border border-[#eadfd6] bg-[#fffaf0] pl-9 pr-3 rtl:pl-3 rtl:pr-9 text-sm text-[#481827] outline-none placeholder:text-[#a99ca0] focus:border-[#942e3a] focus:ring-2 focus:ring-[#942e3a]/10"
                           />
                         </div>
                       </div>
-                      {!govSearch && <button type="button" role="option" aria-selected={!selectedGovEn} onClick={() => { setSelectedGovEn(""); setCity(""); setIsGovMenuOpen(false); setGovSearch(""); handleBlur("governorate"); }} className={`w-full rounded-xl px-3 py-3 text-left text-sm transition ${!selectedGovEn ? "bg-[#942e3a] text-white" : "text-[#806e73] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}>Select governorate</button>}
+                      {!govSearch && <button type="button" role="option" aria-selected={!selectedGovEn} onClick={() => { setSelectedGovEn(""); setCity(""); setIsGovMenuOpen(false); setGovSearch(""); handleBlur("governorate"); }} className={`w-full rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${!selectedGovEn ? "bg-[#942e3a] text-white" : "text-[#806e73] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}>{t("checkout.selectGovernorate")}</button>}
                       {filteredGovernorates.map((gov) => {
                         const isSelected = gov.en === selectedGovEn;
-                        return <button key={gov.en} type="button" role="option" aria-selected={isSelected} onClick={() => { setSelectedGovEn(gov.en); setCity(""); setCenterSearch(""); setIsGovMenuOpen(false); setGovSearch(""); handleBlur("governorate"); }} className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left text-sm transition ${isSelected ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}><span>{gov.en}</span><span className={`shrink-0 text-xs ${isSelected ? (isFreeShippingUnlocked ? "text-emerald-200 font-bold" : "text-[#fffaf0]/80") : (isFreeShippingUnlocked ? "text-emerald-600 font-bold" : "text-[#b8934a]")}`}>{isFreeShippingUnlocked ? "FREE" : `${gov.fee} EGP`}</span></button>;
+                        const displayName = lang === "ar" ? gov.ar : gov.en;
+                        return <button key={gov.en} type="button" role="option" aria-selected={isSelected} onClick={() => { setSelectedGovEn(gov.en); setCity(""); setCenterSearch(""); setIsGovMenuOpen(false); setGovSearch(""); handleBlur("governorate"); }} className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${isSelected ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}><span>{displayName}</span><span className={`shrink-0 text-xs ${isSelected ? (isFreeShippingUnlocked ? "text-emerald-200 font-bold" : "text-[#fffaf0]/80") : (isFreeShippingUnlocked ? "text-emerald-600 font-bold" : "text-[#b8934a]")}`}>{isFreeShippingUnlocked ? t("checkout.free") : formatPrice(gov.fee)}</span></button>;
                       })}
-                      {filteredGovernorates.length === 0 && <p className="px-3 py-4 text-center text-sm text-[#806e73]">No governorate found</p>}
                     </div>
                   )}
                 </div>
                 <div ref={centerMenuRef} className="relative">
-                  <FieldLabel icon={MapPin}>City / area *</FieldLabel>
+                  <FieldLabel icon={MapPin}>{t("checkout.city")} *</FieldLabel>
                   <button
                     type="button"
                     disabled={!selectedGovEn}
@@ -569,9 +670,9 @@ export default function CheckoutPage() {
                       setCenterSearch("");
                       handleBlur("city");
                     }}
-                    className={`${getFieldClass(fieldErrors.city)} flex min-w-0 items-center justify-between overflow-hidden text-left ${city ? "text-[#481827]" : "text-[#a99ca0]"} disabled:cursor-not-allowed disabled:bg-[#f8f3ed] disabled:opacity-70`}
+                    className={`${getFieldClass(fieldErrors.city)} flex min-w-0 items-center justify-between overflow-hidden text-left rtl:text-right ${city ? "text-[#481827]" : "text-[#a99ca0]"} disabled:cursor-not-allowed disabled:bg-[#f8f3ed] disabled:opacity-70`}
                   >
-                    <span>{city || (selectedGovEn ? "Select city / center" : "Select governorate first")}</span>
+                    <span>{city || (selectedGovEn ? t("checkout.selectCity") : t("checkout.selectGovernorate"))}</span>
                     <ChevronDown className={`h-4 w-4 shrink-0 text-[#942e3a] transition-transform ${isCenterMenuOpen ? "rotate-180" : ""}`} />
                   </button>
                   {fieldErrors.city && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.city}</p>}
@@ -587,39 +688,38 @@ export default function CheckoutPage() {
                     >
                       <div className="sticky top-0 z-10 bg-white pb-1.5">
                         <div className="relative">
-                          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#942e3a]" />
-                          <input type="search" value={centerSearch} onChange={(event) => setCenterSearch(event.target.value)} onClick={(event) => event.stopPropagation()} placeholder="Search city or center..." aria-label="Search cities and centers" className="h-11 w-full rounded-xl border border-[#eadfd6] bg-[#fffaf0] pl-9 pr-3 text-sm text-[#481827] outline-none placeholder:text-[#a99ca0] focus:border-[#942e3a] focus:ring-2 focus:ring-[#942e3a]/10" />
+                          <Search className="pointer-events-none absolute left-3 rtl:left-auto rtl:right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#942e3a]" />
+                          <input type="search" value={centerSearch} onChange={(event) => setCenterSearch(event.target.value)} onClick={(event) => event.stopPropagation()} placeholder={t("nav.searchAction")} aria-label="Search cities and centers" className="h-11 w-full rounded-xl border border-[#eadfd6] bg-[#fffaf0] pl-9 pr-3 rtl:pl-3 rtl:pr-9 text-sm text-[#481827] outline-none placeholder:text-[#a99ca0] focus:border-[#942e3a] focus:ring-2 focus:ring-[#942e3a]/10" />
                         </div>
                       </div>
-                      {filteredCenters.map((c) => <button key={c} type="button" role="option" aria-selected={c === city} onClick={() => { setCity(c); setIsCenterMenuOpen(false); setCenterSearch(""); handleBlur("city"); }} className={`flex w-full items-center rounded-xl px-3 py-3 text-left text-sm transition ${c === city ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}>{c}</button>)}
-                      {filteredCenters.length === 0 && <p className="px-3 py-4 text-center text-sm text-[#806e73]">No city or center found</p>}
+                      {filteredCenters.map((c) => <button key={c} type="button" role="option" aria-selected={c === city} onClick={() => { setCity(c); setIsCenterMenuOpen(false); setCenterSearch(""); handleBlur("city"); }} className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${c === city ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}><span>{c}</span><span className={`shrink-0 text-xs ${c === city ? "text-[#fffaf0]/80" : "text-[#b8934a]"}`}>{isFreeShippingUnlocked ? t("checkout.free") : formatPrice(cityShippingFee(c))}</span></button>)}
                     </div>
                   )}
                 </div>
                 <div className="sm:col-span-2">
-                  <FieldLabel icon={MapPin}>Detailed address *</FieldLabel>
+                  <FieldLabel icon={MapPin}>{t("checkout.address")} *</FieldLabel>
                   <textarea
                     required
                     rows={3}
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     onBlur={() => handleBlur("address")}
-                    placeholder="Street, building number, apartment number..."
+                    placeholder={t("checkout.address")}
                     className={`${getFieldClass(fieldErrors.address)} h-auto resize-none py-3`}
                   />
                   {fieldErrors.address && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.address}</p>}
                 </div>
-                <div className="sm:col-span-2"><FieldLabel icon={MessageSquare} optional>Delivery notes</FieldLabel><textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Call before delivery, leave with the guard..." className={`${inputClass} h-auto resize-none py-3`} /></div>
+                <div className="sm:col-span-2"><FieldLabel icon={MessageSquare} optional>{t("checkout.notes")}</FieldLabel><textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("checkout.notes")} className={`${inputClass} h-auto resize-none py-3`} /></div>
               </div>
             </section>
 
             <section className="rounded-3xl border border-[#eadfd6] bg-white p-5 shadow-[0_14px_40px_rgba(73,24,39,0.05)] sm:p-7">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#d8b46a]/20 text-[#9a742b]"><CreditCard className="h-5 w-5" /></div>
-                <div><h2 className="font-playfair text-xl font-semibold">Payment method</h2><p className="mt-1 text-xs text-[#806e73]">Simple, secure payment at your doorstep.</p></div>
+                <div><h2 className="font-playfair text-xl font-semibold">{t("checkout.paymentMethod")}</h2><p className="mt-1 text-xs text-[#806e73]">{t("checkout.cashOnDeliveryDesc")}</p></div>
               </div>
               <div className="mt-5 flex items-center justify-between gap-4 rounded-2xl border-2 border-[#942e3a] bg-[#fffaf0] p-4">
-                <div className="flex items-center gap-3"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#942e3a] text-white"><Check className="h-3 w-3" /></span><div><p className="text-sm font-bold">Cash on delivery</p><p className="mt-1 text-[11px] text-[#806e73]">Pay conveniently when your order arrives.</p></div></div>
+                <div className="flex items-center gap-3"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#942e3a] text-white"><Check className="h-3 w-3" /></span><div><p className="text-sm font-bold">{t("checkout.cashOnDelivery")}</p><p className="mt-1 text-[11px] text-[#806e73]">{t("checkout.cashOnDeliveryDesc")}</p></div></div>
                 <span className="hidden rounded-full bg-[#942e3a]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#942e3a] sm:inline">COD</span>
               </div>
             </section>
@@ -627,102 +727,36 @@ export default function CheckoutPage() {
 
           <aside className="order-1 min-w-0 space-y-5 lg:order-2 lg:sticky lg:top-6">
             <section className="rounded-3xl bg-[#942e3a] p-5 text-[#fffaf0] shadow-[0_18px_45px_rgba(148,46,58,0.2)] sm:p-6">
-              <div className="flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#d8b46a]">Your bag</p><h2 className="mt-1 font-playfair text-2xl font-semibold">Order summary</h2></div><span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10"><ShoppingBag className="h-5 w-5" /></span></div>
+              <div className="flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#d8b46a]">{t("nav.bag")}</p><h2 className="mt-1 font-playfair text-2xl font-semibold">{t("checkout.orderSummary")}</h2></div><span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10"><ShoppingBag className="h-5 w-5" /></span></div>
               <div className="my-5 h-px bg-white/15" />
               <div className="hide-scrollbar max-h-64 space-y-4 overflow-y-auto pr-1">
-                {cart.map((item) => <div key={item.variantId} className="flex items-center gap-3"><div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-white"><Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-bold">{item.name}</p><p className="mt-1 text-[11px] text-white/65">{item.color} · Size {item.size}</p><p className="mt-1 text-[11px] text-white/65">Quantity: {item.quantity}</p></div><p className="shrink-0 text-sm font-bold">{formatCurrency(item.price * item.quantity)}</p></div>)}
+                {cart.map((item) => <div key={item.variantId} className="flex items-center gap-3"><div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-white"><Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-bold">{item.name}</p><p className="mt-1 text-[11px] text-white/65">{item.color} · {t("cart.size")} {formatNumber(item.size)}</p><p className="mt-1 text-[11px] text-white/65">{t("cart.quantity")}: {formatNumber(item.quantity)}</p></div><p className="shrink-0 text-sm font-bold">{formatPrice(item.price * item.quantity)}</p></div>)}
               </div>
               <div className="my-5 h-px bg-white/15" />
-
-              {/* Promo Code Collapsible Section */}
-              <div className="mb-4">
-                {!couponApplied ? (
-                  <div className="space-y-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowPromoInput((prev) => !prev)}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-[#d8b46a] hover:text-[#e5c785] transition-colors"
-                    >
-                      <Tag className="h-3.5 w-3.5" />
-                      <span>Have a promo code?</span>
-                    </button>
-
-                    {showPromoInput && (
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <input
-                            value={couponCode}
-                            onChange={(event) => {
-                              setCouponCode(event.target.value.toUpperCase());
-                              if (promoError) setPromoError("");
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                handleApplyCoupon();
-                              }
-                            }}
-                            placeholder="ENTER CODE"
-                            className="h-10 min-w-0 flex-1 rounded-xl border border-white/15 bg-white/10 px-3 text-xs font-bold font-mono text-white placeholder:text-white/45 outline-none uppercase leading-none box-border"
-                          />
-                          <button
-                            type="button"
-                            onClick={handleApplyCoupon}
-                            disabled={!couponCode.trim() || promoLoading}
-                            className="h-10 rounded-xl bg-[#d8b46a] px-5 text-xs font-bold text-[#481827] hover:bg-[#e5c785] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0 inline-flex items-center justify-center leading-none box-border"
-                          >
-                            {promoLoading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#481827] border-t-transparent" /> : "Apply"}
-                          </button>
-                        </div>
-                        {promoError && (
-                          <p className="text-[11px] font-bold text-rose-300">{promoError}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between rounded-xl border border-[#d8b46a]/40 bg-white/10 px-3 py-2.5 text-xs font-bold text-white">
-                      <span className="font-mono text-[#d8b46a]">CODE: {couponCode}</span>
-                      <button
-                        type="button"
-                        onClick={handleRemoveCoupon}
-                        className="text-[11px] font-semibold text-rose-300 hover:text-rose-100 transition-colors"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                    {promoMessage && (
-                      <p className="text-[10px] font-semibold text-emerald-300">{promoMessage}</p>
-                    )}
-                  </div>
-                )}
-              </div>
 
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between text-white/70">
-                  <span>Subtotal</span>
-                  <span className="font-semibold text-white">{formatCurrency(cartTotal)}</span>
+                  <span>{t("checkout.subtotal")}</span>
+                  <span className="font-semibold text-white">{formatPrice(cartTotal)}</span>
                 </div>
                 {appliedDiscount > 0 && (
                   <div className="flex justify-between text-emerald-300 font-semibold">
                     <span>Discount ({couponCode})</span>
-                    <span>-{formatCurrency(appliedDiscount)}</span>
+                    <span>-{formatPrice(appliedDiscount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-white/70">
-                  <span>Delivery</span>
+                  <span>{t("checkout.shippingFee")}</span>
                   <span className={isFreeShippingUnlocked ? "font-bold text-emerald-400" : "font-semibold text-[#d8b46a]"}>
-                    {isFreeShippingUnlocked ? "FREE" : selectedGovEn ? `${shippingCost} EGP` : "Select governorate"}
+                    {isFreeShippingUnlocked ? t("checkout.free") : selectedGovEn ? formatPrice(shippingCost) : t("checkout.selectGovernorate")}
                   </span>
                 </div>
                 <div className="flex items-end justify-between border-t border-white/15 pt-4">
-                  <span className="font-bold">Total</span>
-                  <span className="font-playfair text-2xl font-semibold">{formatCurrency(grandTotal)}</span>
+                  <span className="font-bold">{t("checkout.total")}</span>
+                  <span className="font-playfair text-2xl font-semibold">{formatPrice(grandTotal)}</span>
                 </div>
               </div>
-              <button form="checkout-form" type="submit" disabled={loading} className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#d8b46a] px-5 py-3.5 text-sm font-bold text-[#481827] shadow-lg transition hover:bg-[#e5c785] disabled:cursor-not-allowed disabled:opacity-60">{loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#481827] border-t-transparent" /> : <><span>Place order</span><ArrowLeft className="h-4 w-4 rotate-180" /></>}</button>
-              <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-white/60"><LockKeyhole className="h-3.5 w-3.5" /> Your details are kept private</div>
+              <button form="checkout-form" type="submit" disabled={loading} className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#d8b46a] px-5 py-3.5 text-sm font-bold text-[#481827] shadow-lg transition hover:bg-[#e5c785] disabled:cursor-not-allowed disabled:opacity-60">{loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#481827] border-t-transparent" /> : <><span>{t("checkout.placeOrder")}</span>{dir === "rtl" ? <ArrowLeft className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4 rotate-180" />}</>}</button>
             </section>
           </aside>
         </div>

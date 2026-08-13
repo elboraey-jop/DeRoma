@@ -53,7 +53,7 @@ export default async function AuditDetailsPage({
               </div>
               <p className="mt-1 text-xs text-[#6B1F2A]/65 font-medium">
                 Conducted by <span className="font-bold text-[#942E3A]">{audit.auditedBy || "Admin"}</span> on{" "}
-                {new Date(audit.createdAt).toLocaleDateString("en-US", {
+                {new Date(audit.createdAt).toLocaleString("en-US", {
                   dateStyle: "full",
                   timeStyle: "short",
                 })}

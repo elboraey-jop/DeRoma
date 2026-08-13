@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, User, Lock, Mail, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
-
 import { loginCustomerAction, registerCustomerAction } from "@/app/auth-actions";
+import { useStoreI18n } from "@/providers/StoreI18nContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t, dir } = useStoreI18n();
   const [isRegister, setIsRegister] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -57,16 +58,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative" dir="ltr">
+    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative" dir={dir}>
       
       {/* Back button */}
-      <div className="absolute top-6 left-6 z-10">
+      <div className="absolute top-6 left-6 rtl:left-auto rtl:right-6 z-10">
         <Link 
           href="/" 
           className="inline-flex items-center gap-1.5 text-xs font-bold text-[#942E3A] hover:text-[#942E3A] transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Home</span>
+          {dir === "rtl" ? <ArrowLeft className="w-4 h-4 rotate-180" /> : <ArrowLeft className="w-4 h-4" />}
+          <span>{t("nav.home")}</span>
         </Link>
       </div>
 
@@ -75,7 +76,7 @@ export default function LoginPage() {
           DeRoma
         </h1>
         <p className="text-xs text-stone-500 uppercase tracking-widest font-bold">
-          Women's Premium Sneakers
+          DeRoma Store
         </p>
       </div>
 
@@ -89,10 +90,10 @@ export default function LoginPage() {
         <div className="bg-[#FFF9EB]/20 border border-[#942E3A]/30 rounded-3xl p-6 sm:p-10 shadow-xs space-y-6">
           <div className="text-center space-y-1">
             <h2 className="text-xl font-bold font-playfair text-[#942E3A]">
-               {isRegister ? "Create Account" : "Welcome Back"}
+              {isRegister ? t("login.registerTitle") : t("login.signInTitle")}
             </h2>
             <p className="text-xs text-stone-600 font-light">
-              {isRegister ? "Sign up to start tracking orders and customizing your profile" : "Sign in to track orders and manage your profile"}
+              {isRegister ? t("login.registerSub") : t("login.signInSub")}
             </p>
           </div>
 
@@ -102,18 +103,18 @@ export default function LoginPage() {
             {isRegister && (
               <div className="space-y-1">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-[#942E3A]/80 block">
-                  Full Name
+                  {t("login.fullNameLabel")}
                 </label>
                 <div className="relative rounded-xl shadow-xs">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#942E3A]">
+                  <div className="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 pl-3 rtl:pl-0 rtl:pr-3 flex items-center pointer-events-none text-[#942E3A]">
                     <User className="h-4 w-4" />
                   </div>
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Farida Ahmed"
-                    className="block w-full pl-9 pr-3 py-2.5 text-xs text-[#942E3A] bg-[#FFF9EB] border border-[#942E3A]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#942E3A] focus:border-[#942E3A] transition-all"
+                    placeholder={t("login.fullNameLabel")}
+                    className="block w-full pl-9 pr-3 rtl:pl-3 rtl:pr-9 py-2.5 text-xs text-[#942E3A] bg-[#FFF9EB] border border-[#942E3A]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#942E3A] focus:border-[#942E3A] transition-all"
                     required
                   />
                 </div>
@@ -123,10 +124,10 @@ export default function LoginPage() {
             {/* Email Field */}
             <div className="space-y-1">
               <label className="text-[11px] font-bold uppercase tracking-wider text-[#942E3A]/80 block">
-                Email Address
+                {t("login.emailLabel")}
               </label>
               <div className="relative rounded-xl shadow-xs">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#942E3A]">
+                <div className="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 pl-3 rtl:pl-0 rtl:pr-3 flex items-center pointer-events-none text-[#942E3A]">
                   <Mail className="h-4 w-4" />
                 </div>
                 <input
@@ -134,7 +135,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="block w-full pl-9 pr-3 py-2.5 text-xs text-[#942E3A] bg-[#FFF9EB] border border-[#942E3A]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#942E3A] focus:border-[#942E3A] transition-all"
+                  className="block w-full pl-9 pr-3 rtl:pl-3 rtl:pr-9 py-2.5 text-xs text-[#942E3A] bg-[#FFF9EB] border border-[#942E3A]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#942E3A] focus:border-[#942E3A] transition-all"
                   required
                 />
               </div>
@@ -143,10 +144,10 @@ export default function LoginPage() {
             {/* Password Field */}
             <div className="space-y-1">
               <label className="text-[11px] font-bold uppercase tracking-wider text-[#942E3A]/80 block">
-                Password
+                {t("login.passwordLabel")}
               </label>
               <div className="relative rounded-xl shadow-xs">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#942E3A]">
+                <div className="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 pl-3 rtl:pl-0 rtl:pr-3 flex items-center pointer-events-none text-[#942E3A]">
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
@@ -154,13 +155,13 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="block w-full pl-9 pr-10 py-2.5 text-xs text-[#942E3A] bg-[#FFF9EB] border border-[#942E3A]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#942E3A] focus:border-[#942E3A] transition-all"
+                  className="block w-full pl-9 pr-10 rtl:pl-10 rtl:pr-9 py-2.5 text-xs text-[#942E3A] bg-[#FFF9EB] border border-[#942E3A]/30 rounded-xl placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#942E3A] focus:border-[#942E3A] transition-all"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-[#942E3A] transition-colors"
+                  className="absolute inset-y-0 right-0 rtl:right-auto rtl:left-0 pr-3 rtl:pr-0 rtl:pl-3 flex items-center text-stone-400 hover:text-[#942E3A] transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -181,7 +182,7 @@ export default function LoginPage() {
                 disabled={isLoading}
                 className="w-full flex justify-center items-center py-3 px-4 rounded-full border border-transparent bg-[#942E3A] hover:bg-[#942E3A] text-[#FFF9EB] text-xs font-bold shadow-md focus:outline-none transition-all active:scale-98 disabled:opacity-75 disabled:cursor-not-allowed"
               >
-                {isLoading ? (isRegister ? "Creating account..." : "Signing in...") : (isRegister ? "Create Account" : "Sign In")}
+                {isLoading ? (isRegister ? t("login.registerBtn") : t("login.signInBtn")) : (isRegister ? t("login.registerBtn") : t("login.signInBtn"))}
               </button>
             </div>
 
@@ -191,7 +192,7 @@ export default function LoginPage() {
           <div className="text-center text-xs pt-2">
             {isRegister ? (
               <span className="text-stone-500 font-light">
-                Already have an account?{" "}
+                {t("login.alreadyHaveAccount")}{" "}
                 <button 
                   type="button"
                   onClick={() => {
@@ -200,12 +201,12 @@ export default function LoginPage() {
                   }}
                   className="font-bold text-[#942E3A] hover:underline"
                 >
-                  Sign In
+                  {t("login.signInBtn")}
                 </button>
               </span>
             ) : (
               <span className="text-stone-500 font-light">
-                Don't have an account?{" "}
+                {t("login.dontHaveAccount")}{" "}
                 <button 
                   type="button"
                   onClick={() => {
@@ -214,7 +215,7 @@ export default function LoginPage() {
                   }}
                   className="font-bold text-[#942E3A] hover:underline"
                 >
-                  Register Now
+                  {t("login.createAccount")}
                 </button>
               </span>
             )}

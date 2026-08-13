@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deromastore.com";
   const title = `${product.name} | DeRoma Store`;
-  const description = product.description || `Buy ${product.name} handcrafted premium women's shoes at DeRoma Store.`;
+  const description = product.description || `Buy ${product.name} premium women's shoes from the curated DeRoma Store collection.`;
   const imageUrl = product.images[0] ? (product.images[0].startsWith("http") ? product.images[0] : `${baseUrl}${product.images[0]}`) : `${baseUrl}/banners/hero-1-desktop.webp`;
 
   return {
@@ -77,7 +77,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     "@type": "Product",
     name: product.name,
     image: product.images,
-    description: product.description || `${product.name} handcrafted women's shoes`,
+    description: product.description || `${product.name} women's shoes from the curated DeRoma Store collection`,
     sku: product.sku || product.id,
     brand: {
       "@type": "Brand",

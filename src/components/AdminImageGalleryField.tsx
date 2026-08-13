@@ -1,10 +1,19 @@
 "use client";
 
-import { DragEvent, useMemo, useState } from "react";
+import { DragEvent, useEffect, useMemo, useState } from "react";
 import { GripVertical, ImagePlus, LoaderCircle, Star, X } from "lucide-react";
 
 export default function AdminImageGalleryField({ defaultValue = "" }: { defaultValue?: string }) {
-  const [images, setImages] = useState(defaultValue.split("\n").map((item) => item.trim()).filter(Boolean));
+  const parseImages = (value: string) =>
+    value
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  const [images, setImages] = useState(() => parseImages(defaultValue));
+
+  useEffect(() => {
+    setImages(parseImages(defaultValue));
+  }, [defaultValue]);
   const [uploading, setUploading] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [error, setError] = useState("");

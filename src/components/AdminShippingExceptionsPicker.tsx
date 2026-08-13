@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import { CENTERS_BY_GOVERNORATE } from "@/lib/locations";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 export type ShippingException = { city: string; fee: number };
 
@@ -14,12 +15,15 @@ export default function AdminShippingExceptionsPicker({
   initial?: ShippingException[];
   allowedCities?: string[];
 }) {
+  const { lang } = useAdminI18n();
+  const isRtl = lang === "ar";
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [exceptions, setExceptions] = useState<ShippingException[]>(initial);
   const [position, setPosition] = useState({ left: 0, bottom: 0, width: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
+
   const cities = useMemo(
     () =>
       allowedCities
@@ -27,25 +31,30 @@ export default function AdminShippingExceptionsPicker({
         : [...new Set(Object.values(CENTERS_BY_GOVERNORATE).flat())].sort(),
     [allowedCities],
   );
+
   const filtered = cities.filter((city) =>
     city.toLowerCase().includes(search.toLowerCase()),
   );
+
   useEffect(() => {
-    if (allowedCities)
+    if (allowedCities) {
       setExceptions((current) =>
         current.filter((item) => allowedCities.includes(item.city)),
       );
+    }
   }, [allowedCities]);
+
   useEffect(() => {
     if (!open) return;
     const updatePosition = () => {
       const rect = buttonRef.current?.getBoundingClientRect();
-      if (rect)
+      if (rect) {
         setPosition({
           left: rect.left,
           bottom: window.innerHeight - rect.top + 6,
           width: rect.width,
         });
+      }
     };
     updatePosition();
     window.addEventListener("resize", updatePosition);
@@ -55,27 +64,36 @@ export default function AdminShippingExceptionsPicker({
       window.removeEventListener("scroll", updatePosition, true);
     };
   }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const close = (event: PointerEvent) => {
       const target = event.target as Element;
-      if (!pickerRef.current?.contains(target) && !target.closest("[data-shipping-exceptions-menu]")) setOpen(false);
+      if (
+        !pickerRef.current?.contains(target) &&
+        !target.closest("[data-shipping-exceptions-menu]")
+      ) {
+        setOpen(false);
+      }
     };
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, [open]);
+
   const toggle = (city: string) =>
     setExceptions((current) =>
       current.some((item) => item.city === city)
         ? current.filter((item) => item.city !== city)
         : [...current, { city, fee: 0 }],
     );
+
   const updateFee = (city: string, fee: string) =>
     setExceptions((current) =>
       current.map((item) =>
         item.city === city ? { ...item, fee: Number(fee) || 0 } : item,
       ),
     );
+
   const menu =
     open && typeof document !== "undefined"
       ? createPortal(
@@ -97,10 +115,11 @@ export default function AdminShippingExceptionsPicker({
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search cities..."
+                placeholder={isRtl ? "ابحث عن مدينة..." : "Search cities..."}
                 className="h-10 w-full rounded-xl border border-[#eadfd6] bg-[#fffaf0] pl-9 pr-3 text-xs text-[#481827] outline-none focus:border-[#942E3A]"
               />
             </div>
+
             <div
               className="hide-scrollbar mt-2 max-h-64 overscroll-contain overflow-y-auto"
               onWheel={(event) => {
@@ -124,9 +143,10 @@ export default function AdminShippingExceptionsPicker({
                       {city}
                       {selected && <Check className="h-3.5 w-3.5" />}
                     </button>
+
                     {selected && (
                       <label className="mt-2 flex items-center gap-2 text-[10px] text-white/80">
-                        Price{" "}
+                        {isRtl ? "السعر" : "Price"}{" "}
                         <input
                           type="number"
                           min="0"
@@ -145,21 +165,23 @@ export default function AdminShippingExceptionsPicker({
                 );
               })}
             </div>
+
             <button
               type="button"
               onClick={() => setOpen(false)}
               className="mt-2 w-full rounded-xl bg-[#942E3A] px-3 py-2 text-[10px] font-bold text-white"
             >
-              Done
+              {isRtl ? "تم" : "Done"}
             </button>
           </div>,
           document.body,
         )
       : null;
+
   return (
     <div ref={pickerRef} className="relative sm:col-span-2">
       <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide">
-        City exceptions
+        {isRtl ? "استثناءات المدن" : "City exceptions"}
       </span>
       <input
         type="hidden"
@@ -178,13 +200,16 @@ export default function AdminShippingExceptionsPicker({
           }
         >
           {exceptions.length
-            ? `${exceptions.length} city exception${exceptions.length > 1 ? "s" : ""} selected`
-            : "Select cities with a different price"}
+            ? `${exceptions.length} ${isRtl ? "استثناء مدينة محدد" : "city exception selected"}`
+            : isRtl
+              ? "اختر المدن بسعر مختلف"
+              : "Select cities with a different price"}
         </span>
         <ChevronDown
           className={`h-4 w-4 text-[#942E3A] transition ${open ? "rotate-180" : ""}`}
         />
       </button>
+
       {exceptions.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
           {exceptions.map((item) => (
@@ -196,7 +221,7 @@ export default function AdminShippingExceptionsPicker({
               <button
                 type="button"
                 onClick={() => toggle(item.city)}
-                aria-label={`Remove ${item.city}`}
+                aria-label={`${isRtl ? "إزالة" : "Remove"} ${item.city}`}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -204,6 +229,7 @@ export default function AdminShippingExceptionsPicker({
           ))}
         </div>
       )}
+
       {menu}
     </div>
   );

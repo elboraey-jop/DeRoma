@@ -316,17 +316,6 @@ export default function AdminCustomerModal({
                 />
               </label>
 
-              <label className="block">
-                <span className="field-label">{t("orders.notes")}</span>
-                <textarea
-                  rows={2}
-                  name="notes"
-                  defaultValue={customer?.notes || ""}
-                  placeholder={isRtl ? "ملاحظات إضافية عن تفضيلات العميل أو محظورات الشحن..." : "Customer preferences, delivery instructions..."}
-                  className={`admin-input resize-none ${isRtl ? "text-right" : "text-left"}`}
-                />
-              </label>
-
               <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
                 <button
                   type="button"

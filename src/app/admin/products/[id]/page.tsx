@@ -7,17 +7,21 @@ import AdminProductCreateForm from "@/components/AdminProductCreateForm";
 import AdminAddProductModal from "@/components/AdminAddProductModal";
 import AdminBackButton from "@/components/AdminBackButton";
 import { deleteProductAction } from "@/app/admin/products/[id]/actions";
+import { CATALOG_PRODUCTS } from "@/lib/productCatalog";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditProductPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ deleteError?: string }>;
 }) {
   await requireAdmin();
   const { id } = await params;
-  const [product, options, suppliers, relatedProducts, orderCount] = await Promise.all([
+  const query = searchParams ? await searchParams : {};
+  const [product, options, suppliers, relatedProducts, orderCount, invoiceItemCount, inventoryLotCount] = await Promise.all([
     prisma.product.findUnique({
       where: { id },
       include: {
@@ -45,7 +49,7 @@ export default async function EditProductPage({
     prisma.product
       .findMany({
         where: { id: { not: id } },
-        select: { id: true, name: true, category: true, sku: true },
+        select: { id: true, name: true, category: true, sku: true, images: true },
         orderBy: { name: "asc" },
       })
       .catch((err) => {
@@ -56,8 +60,26 @@ export default async function EditProductPage({
       console.error("Failed to count order items for product:", err);
       return 0;
     }),
+    prisma.purchaseInvoiceItem.count({ where: { productId: id } }).catch((err) => {
+      console.error("Failed to count invoice items for product:", err);
+      return 0;
+    }),
+    prisma.inventoryLot.count({ where: { variant: { productId: id } } }).catch((err) => {
+      console.error("Failed to count inventory lots for product:", err);
+      return 0;
+    }),
   ]);
   if (!product) notFound();
+  const deletionBlocked = orderCount > 0 || invoiceItemCount > 0 || inventoryLotCount > 0;
+  const deleteError = query.deleteError === "history" || query.deleteError === "blocked";
+  const catalogProduct = CATALOG_PRODUCTS.find(
+    (catalogItem) => catalogItem.id === product.id || catalogItem.name === product.name,
+  );
+  const productImages = product.images.length
+    ? product.images
+    : catalogProduct?.image
+      ? [catalogProduct.image]
+      : [];
   const initialProduct = {
     id: product.id,
     name: product.name,
@@ -69,7 +91,7 @@ export default async function EditProductPage({
     color: product.color,
     subcategory: product.subcategory,
     material: product.material,
-    images: product.images,
+    images: productImages,
     price: Number(product.price),
     compareAtPrice:
       product.compareAtPrice == null ? null : Number(product.compareAtPrice),
@@ -122,7 +144,13 @@ export default async function EditProductPage({
       <AdminProductCreateForm
         options={options}
         suppliers={suppliers}
-        products={relatedProducts}
+        products={relatedProducts.map((product) => ({
+          id: product.id,
+          name: product.name,
+          category: product.category,
+          sku: product.sku,
+          image: product.images[0] || null,
+        }))}
         initialProduct={initialProduct}
       />
       <AdminAddProductModal
@@ -160,18 +188,18 @@ export default async function EditProductPage({
         <h2 className="mt-1 font-playfair text-xl font-bold text-red-800">
           Delete product
         </h2>
-        {orderCount > 0 ? (
+        {deleteError || deletionBlocked ? (
           <div className="mt-3 rounded-2xl border border-red-300 bg-red-100/70 p-3 text-xs font-semibold text-red-900">
-            This product is linked to {orderCount} customer order(s) and cannot be deleted to protect sales history. Set the status to <strong>Archive</strong> instead.
+            This product has linked sales or inventory history and cannot be deleted safely. Set the status to <strong>Archive</strong> instead.
           </div>
         ) : null}
         <form action={deleteProductAction} className="mt-4">
           <input type="hidden" name="productId" value={product.id} />
           <button
             type="submit"
-            disabled={orderCount > 0}
+            disabled={deletionBlocked}
             className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition ${
-              orderCount > 0
+              deletionBlocked
                 ? "cursor-not-allowed bg-red-300 opacity-60"
                 : "bg-red-700 hover:bg-red-800"
             }`}

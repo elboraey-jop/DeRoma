@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Gift, Plus, Truck, Settings2 } from "lucide-react";
 import AdminShippingZoneForm from "@/components/AdminShippingZoneForm";
 import AdminShippingZonesClient from "@/components/AdminShippingZonesClient";
-import { updateFreeShippingSettingsAction } from "@/app/admin/shipping/actions";
+import AdminFreeShippingForm from "@/components/AdminFreeShippingForm";
 import {
   createFreeShippingPromotionAction,
   deletePromotionAction,
@@ -161,75 +161,9 @@ export default function AdminShippingClient({
         </div>
       )}
 
-      {/* Tab 2: Free Shipping Settings & Promos */}
+      {/* Tab 2: Free Shipping Settings */}
       {activeTab === "freeship" && (
-        <div className="space-y-6">
-          {/* Automatic Free Shipping Rule */}
-          <section className="rounded-3xl border border-[#D8B46A]/35 bg-[#fff7df] p-5 shadow-xs sm:p-6">
-            <div className="flex items-center gap-2.5 pb-4 border-b border-[#D8B46A]/30">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#942E3A] text-white shadow-xs">
-                <Gift className="h-5 w-5 text-[#D8B46A]" />
-              </div>
-              <div>
-                <h2 className="font-playfair text-xl font-extrabold text-[#942E3A]">
-                  {isRtl ? "الشحن المجاني التلقائي" : "Automatic Free Shipping"}
-                </h2>
-                <p className="text-xs text-[#6B1F2A]/70">
-                  {isRtl ? "تفعيل الشحن المجاني فور وصول إجمالي الطلب للحد الأدنى المحدد." : "Automatically unlock 0 EGP delivery fee when order subtotal meets minimum threshold."}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-5 xl:grid-cols-2">
-              <form
-                action={updateFreeShippingSettingsAction}
-                className="rounded-2xl border border-[#D8B46A]/30 bg-white p-5 shadow-xs"
-              >
-                <h3 className="font-playfair text-base font-bold text-[#942E3A] flex items-center gap-2">
-                  <Settings2 className="h-4 w-4 text-[#D8B46A]" />
-                  <span>{isRtl ? "ضبط الشرط التلقائي" : "Configure Automatic Rule"}</span>
-                </h3>
-
-                <label className="mt-4 flex cursor-pointer items-center gap-3 rounded-xl border border-[#942E3A]/10 bg-[#FFF9EB]/70 p-3 text-xs font-bold text-[#942E3A]">
-                  <input
-                    name="freeShippingEnabled"
-                    type="checkbox"
-                    defaultChecked={settings?.freeShippingEnabled || false}
-                    className="peer sr-only"
-                  />
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border-2 border-[#942E3A]/30 bg-white text-transparent shadow-xs transition peer-checked:border-[#942E3A] peer-checked:bg-[#942E3A] peer-checked:text-[#D8B46A]">
-                    <svg viewBox="0 0 20 20" className="h-3.5 w-3.5 fill-none stroke-current stroke-[2.5]"><path d="m4 10 4 4 8-8" /></svg>
-                  </span>
-                  <span className="leading-snug">
-                    {isRtl ? "تفعيل التوصيل المجاني للطلبات التي تتجاوز الحد الأدنى" : "Enable automatic free shipping over minimum order value"}
-                  </span>
-                </label>
-
-                <div className="mt-4 space-y-1.5">
-                  <label className="text-[11px] font-extrabold uppercase tracking-wide text-[#6B1F2A]/70">
-                    {t("shipping.freeThreshold")}
-                  </label>
-                  <input
-                    name="freeShippingThreshold"
-                    type="number"
-                    step="1"
-                    min="0"
-                    defaultValue={settings?.freeShippingThreshold ?? 1000}
-                    placeholder="1000"
-                    className="w-full rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB]/40 px-3.5 py-2.5 text-xs font-bold text-[#942E3A] outline-none focus:border-[#942E3A]"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="mt-5 w-full rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB] shadow-xs hover:bg-[#7e2732] transition"
-                >
-                  {t("common.save")}
-                </button>
-              </form>
-            </div>
-          </section>
-        </div>
+        <AdminFreeShippingForm settings={settings} />
       )}
     </div>
   );

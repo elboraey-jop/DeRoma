@@ -4,11 +4,13 @@ import Link from "next/link";
 import { Clock, Facebook, Instagram, Mail, MapPin, Phone, MessageCircle } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { useSiteSettings } from "@/providers/SiteSettingsProvider";
+import { useStoreI18n } from "@/providers/StoreI18nContext";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const goldAccent = "#D8B46A";
   const settings = useSiteSettings();
+  const { t, dir, formatNumber } = useStoreI18n();
 
   const whatsappUrl = settings.whatsapp
     ? settings.whatsapp.startsWith("http")
@@ -17,9 +19,9 @@ export default function Footer() {
     : "https://wa.me/201023456789";
 
   return (
-    <footer className="border-t border-[#D8B46A]/35 bg-[#942E3A] px-3 py-4 pb-6 text-[#FFF9EB] sm:px-4 sm:py-8 sm:pb-8 lg:px-6">
+    <footer dir={dir} className="border-t border-[#D8B46A]/35 bg-[#942E3A] px-3 py-4 pb-6 text-[#FFF9EB] sm:px-4 sm:py-8 sm:pb-8 lg:px-6">
       <ScrollReveal direction="up" duration={0.8}>
-        <div className="mx-auto w-full max-w-[1320px] space-y-4 sm:space-y-7" dir="ltr">
+        <div className="mx-auto w-full max-w-[1320px] space-y-4 sm:space-y-7" dir={dir}>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-10">
             <div className="flex flex-col gap-3 lg:w-[34%]">
               <div className="flex items-center justify-between gap-3">
@@ -56,40 +58,40 @@ export default function Footer() {
               </div>
 
               <p className="max-w-md text-[11px] leading-relaxed text-[#FFF9EB] sm:text-xs">
-                Handcrafted boutique women&apos;s shoes with cushioned comfort, elegant sport silhouettes, and daily-ready support.
+                {t("footer.aboutDesc")}
               </p>
             </div>
 
             <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-2">
               <div className="min-w-0 space-y-2">
                 <h4 className="font-playfair text-[10px] font-bold uppercase tracking-wider sm:text-xs" style={{ color: goldAccent }}>
-                  CUSTOMER HELP
+                  {t("footer.customerCare")}
                 </h4>
                 <ul className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] font-medium leading-snug text-[#FFF9EB]/80 sm:block sm:space-y-2 sm:text-xs">
-                  <li><Link href="/track" className="transition-colors hover:text-white">Track Order</Link></li>
-                  <li><Link href="/about" className="transition-colors hover:text-white">About Us & Contact</Link></li>
-                  <li><Link href="/terms" className="transition-colors hover:text-white">Shipping</Link></li>
-                  <li><Link href="/privacy" className="transition-colors hover:text-white">Privacy</Link></li>
-                  <li><Link href="/refund-policy" className="transition-colors hover:text-white">Returns</Link></li>
+                  <li><Link href="/track" className="transition-colors hover:text-white">{t("nav.trackOrder")}</Link></li>
+                  <li><Link href="/about" className="transition-colors hover:text-white">{t("nav.about")}</Link></li>
+                  <li><Link href="/terms" className="transition-colors hover:text-white">{t("nav.terms")}</Link></li>
+                  <li><Link href="/privacy" className="transition-colors hover:text-white">{t("nav.privacy")}</Link></li>
+                  <li><Link href="/refund-policy" className="transition-colors hover:text-white">{t("nav.refundPolicy")}</Link></li>
                 </ul>
               </div>
 
               <div className="min-w-0 space-y-2">
                 <h4 className="font-playfair text-[10px] font-bold uppercase tracking-wider sm:text-xs" style={{ color: goldAccent }}>
-                  CONTACT
+                  {t("footer.contactUs")}
                 </h4>
                 <ul className="grid grid-cols-2 gap-1.5 text-[9px] leading-none text-[#FFF9EB]/90 sm:flex sm:flex-col sm:gap-2 sm:text-xs">
                   <li className="flex min-w-0 items-center gap-1 rounded-full border border-[#D8B46A]/15 bg-white/8 px-1.5 py-1 sm:px-2 sm:py-1.5">
                     <Phone className="h-2.5 w-2.5 shrink-0 text-[#D8B46A] sm:h-3 sm:w-3" />
-                    <span className="truncate">{settings.phone}</span>
+                    <span className="truncate" dir="ltr">{settings.phone}</span>
                   </li>
                   <li className="flex min-w-0 items-center gap-1 rounded-full border border-[#D8B46A]/15 bg-white/8 px-1.5 py-1 sm:px-2 sm:py-1.5">
                     <Mail className="h-2.5 w-2.5 shrink-0 text-[#D8B46A] sm:h-3 sm:w-3" />
-                    <span className="truncate">{settings.email}</span>
+                    <span className="truncate" dir="ltr">{settings.email}</span>
                   </li>
                   <li className="flex min-w-0 items-center gap-1 rounded-full border border-[#D8B46A]/15 bg-white/8 px-1.5 py-1 sm:px-2 sm:py-1.5">
                     <MapPin className="h-2.5 w-2.5 shrink-0 text-[#D8B46A] sm:h-3 sm:w-3" />
-                    <span className="truncate">{settings.address}</span>
+                    <span className="truncate">{settings.address || t("footer.locationValue")}</span>
                   </li>
                   <li className="flex min-w-0 items-center gap-1 rounded-full border border-[#D8B46A]/15 bg-white/8 px-1.5 py-1 sm:px-2 sm:py-1.5">
                     <Clock className="h-2.5 w-2.5 shrink-0 text-[#D8B46A] sm:h-3 sm:w-3" />
@@ -101,11 +103,11 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col items-center justify-between gap-2 border-t border-[#D8B46A]/18 pt-4 text-center text-[10px] text-[#FFF9EB]/80 sm:flex-row sm:text-xs">
-            <p>&copy; {currentYear} DeRoma Store. All rights reserved.</p>
+            <p>&copy; {formatNumber(currentYear)} DeRoma Store. {t("footer.allRightsReserved")}</p>
             <div className="flex items-center gap-3 font-medium text-[#FFF9EB]/80">
-              <Link href="/privacy" className="hover:text-white">Privacy Policy</Link>
+              <Link href="/privacy" className="hover:text-white">{t("nav.privacy")}</Link>
               <span>&bull;</span>
-              <Link href="/terms" className="hover:text-white">Terms of Service</Link>
+              <Link href="/terms" className="hover:text-white">{t("nav.terms")}</Link>
             </div>
           </div>
         </div>
@@ -113,4 +115,3 @@ export default function Footer() {
     </footer>
   );
 }
-

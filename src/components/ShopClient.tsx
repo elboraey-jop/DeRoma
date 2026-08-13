@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 import { useIsMobile } from "@/lib/useIsMobile";
 
+import { useStoreI18n } from "@/providers/StoreI18nContext";
+
 interface ShopClientProps {
   initialProducts: ProductWithVariants[];
 }
@@ -53,6 +55,7 @@ function getColorHex(colorName: string): string {
 }
 
 export default function ShopClient({ initialProducts }: ShopClientProps) {
+  const { t, lang, dir, formatNumber } = useStoreI18n();
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get("q") || "";
   const brands = ["New Balance", "Adidas", "Nike", "ASICS"];
@@ -74,10 +77,10 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
   const sortMenuRef = useRef<HTMLDivElement>(null);
 
   const sortOptions = [
-    { value: "newest", label: "Newest Arrivals" },
-    { value: "price-asc", label: "Price: Low to High" },
-    { value: "price-desc", label: "Price: High to Low" },
-    { value: "color-asc", label: "Color: A to Z" },
+    { value: "newest", label: t("shopPage.sortNewest") },
+    { value: "price-asc", label: t("shopPage.sortPriceLowHigh") },
+    { value: "price-desc", label: t("shopPage.sortPriceHighLow") },
+    { value: "color-asc", label: lang === "ar" ? "اللون: أبجديًا" : "Color: A to Z" },
   ];
 
   useEffect(() => {
@@ -198,25 +201,24 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     selectedBrands.length > 0 || selectedSizes.length > 0 || selectedColors.length > 0 || search !== "" || activeCategory !== "all";
 
   return (
-    <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] px-2 sm:px-4 lg:px-6 pb-6 pt-1 sm:py-6 bg-[#FFF9EB] text-[#942E3A]" dir="ltr">
-
+    <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] px-2 sm:px-4 lg:px-6 pb-6 pt-1 sm:py-6 bg-[#FFF9EB] text-[#942E3A]" dir={dir}>
 
       {/* Search & Sort Bar */}
       <div className="mb-6 flex flex-row items-center gap-2 sm:gap-3">
         {/* Search */}
         <div className="relative order-2 min-w-0 flex-1 sm:order-none">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
+          <Search className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
           <input
             type="text"
-            placeholder="Search for heels, flats, boots..."
+            placeholder={t("nav.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-full border border-[#D8B46A] bg-white py-3 pl-10 pr-4 text-xs text-[#942E3A] placeholder-[#D8B46A] outline-none focus:border-[#942E3A] transition-colors font-sans shadow-xs"
+            className="w-full rounded-full border border-[#D8B46A] bg-white py-3 pl-10 pr-4 rtl:pl-4 rtl:pr-10 text-xs text-[#942E3A] placeholder-[#D8B46A] outline-none focus:border-[#942E3A] transition-colors font-sans shadow-xs"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#D8B46A] hover:text-[#942E3A] rounded-full"
+              className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 p-1 text-[#D8B46A] hover:text-[#942E3A] rounded-full"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -231,7 +233,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
             className="order-1 flex md:hidden items-center justify-center gap-x-1.5 rounded-full border border-[#D8B46A] bg-white px-3 py-3 text-xs font-bold text-[#942E3A] hover:bg-[#F2E7D5] whitespace-nowrap sm:order-none"
           >
             <SlidersHorizontal className="h-4 w-4" />
-            <span>Filters</span>
+            <span>{t("shopPage.filterBy")}</span>
             {hasActiveFilters && (
               <span className="h-2 w-2 rounded-full bg-[#942E3A]" />
             )}
@@ -244,7 +246,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
               className="order-3 sm:order-none hidden sm:flex h-[42px] items-center justify-center gap-x-1.5 rounded-full bg-[#942E3A] px-4 text-xs font-bold text-white hover:bg-[#76232D] transition-colors whitespace-nowrap shadow-md shadow-[#942E3A]/10"
             >
               <X className="h-3.5 w-3.5 text-[#D8B46A]" />
-              <span>Clear Filters</span>
+              <span>{t("shopPage.clearFilters")}</span>
             </button>
           )}
 

@@ -30,6 +30,9 @@ import { useIsMobile } from "@/lib/useIsMobile";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 import ProductCard, { ProductWithVariants, COLOR_TRANSLATIONS } from "@/components/ProductCard";
 import { submitReviewAction } from "@/app/review-actions";
+import { trackAddToWishlist, trackViewItem } from "@/lib/analytics";
+
+import { useStoreI18n } from "@/providers/StoreI18nContext";
 
 export interface ProductReviewView {
   id: string | number;
@@ -86,13 +89,10 @@ function getColorHex(colorName: string): string {
   }
 }
 
-// Mock reviews data
-
-
-
 export default function ProductDetailClient({ product, similarProducts, reviews = [] }: ProductDetailClientProps) {
   const router = useRouter();
   const { addItem } = useCart();
+  const { t, formatPrice, formatNumber, dir, lang } = useStoreI18n();
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -104,6 +104,8 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const isBag = product.category === "bags";
   const sizesForColor = product.variants;
   const currentColorImages = product.images;
+  const stockRemainingLabel = lang === "ar" ? "المتبقي" : "Remaining";
+  const stockLeftLabel = lang === "ar" ? "متبقي" : "left";
 
   const [shippingSettings, setShippingSettings] = useState<{
     freeShippingEnabled: boolean;
@@ -128,14 +130,17 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   );
 
   const deliveryBannerText = isFreeShippingActive
-    ? `Free Express Delivery On Orders Over ${formatCurrency(shippingSettings!.freeShippingThreshold!)}`
-    : `Fast Express Delivery Across Egypt`;
+    ? (lang === "ar"
+        ? `شحن سريع مجاني للطلبات أكثر من ${formatPrice(shippingSettings!.freeShippingThreshold!)}`
+        : `Free Express Delivery On Orders Over ${formatPrice(shippingSettings!.freeShippingThreshold!)}`)
+    : (lang === "ar" ? "شحن سريع وموثوق إلى جميع محافظات مصر" : "Fast Express Delivery Across Egypt");
 
   const isTotalSoldOut = product.variants.length > 0 && product.variants.every((v) => v.stock <= 0);
 
   const activeVariant = isBag
     ? product.variants[0]
     : product.variants.find((v) => v.size === selectedSize);
+  const maxQuantity = activeVariant?.stock ?? 0;
 
 
   const priceNum = Number(activeVariant?.price ?? product.price);
@@ -145,10 +150,38 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const discountPercent = compareAtPriceNum
     ? Math.round(((compareAtPriceNum - priceNum) / compareAtPriceNum) * 100)
     : null;
+  const analyticsItem = {
+    productId: product.id,
+    variantId: activeVariant?.id,
+    name: product.name,
+    price: priceNum,
+    category: product.category,
+    color: product.color || "",
+    size: isBag ? "" : selectedSize,
+  };
+
+  useEffect(() => {
+    trackViewItem({
+      productId: product.id,
+      variantId: activeVariant?.id,
+      name: product.name,
+      price: priceNum,
+      category: product.category,
+      color: product.color || "",
+      size: isBag ? "" : selectedSize,
+    });
+  }, [product.id]);
+
+  const handleWishlistToggle = () => {
+    if (!isWishlisted) {
+      trackAddToWishlist(analyticsItem);
+    }
+    toggle(product.id);
+  };
 
   const handleAddToCart = () => {
     if (!isBag && !selectedSize) {
-      alert("Please select your shoe size first.");
+      alert(lang === "ar" ? "يرجى اختيار مقاس الحذاء أولاً." : "Please select your shoe size first.");
       return;
     }
 
@@ -171,7 +204,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
 
   const handleBuyNow = () => {
     if (!isBag && !selectedSize) {
-      alert("Please select your shoe size first.");
+      alert(lang === "ar" ? "يرجى اختيار مقاس الحذاء أولاً." : "Please select your shoe size first.");
       return;
     }
 
@@ -200,20 +233,20 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   ];
 
   return (
-    <div className="pdp-page w-full flex flex-col pb-16 sm:pb-24 bg-[#FFF9EB] text-[#942E3A]" dir="ltr">
+    <div className="pdp-page w-full flex flex-col pb-16 sm:pb-24 bg-[#FFF9EB] text-[#942E3A]" dir={dir}>
       
       {/* Breadcrumbs */}
       <ScrollReveal direction="none" duration={0.5}>
         <nav className="pdp-breadcrumb mx-auto w-full max-w-[1400px] px-4 lg:px-6 pt-3 sm:pt-4">
           <ol className="flex items-center gap-x-1.5 text-[11px] sm:text-xs font-bold text-[#D8B46A]">
             <li>
-              <Link href="/" className="hover:text-[#942E3A] transition-colors">Home</Link>
+              <Link href="/" className="hover:text-[#942E3A] transition-colors">{t("nav.home")}</Link>
             </li>
-            <ChevronRight className="h-3 w-3 text-[#D8B46A] shrink-0" />
+            <ChevronRight className={`h-3 w-3 text-[#D8B46A] shrink-0 ${dir === "rtl" ? "rotate-180" : ""}`} />
             <li>
-              <Link href="/shop" className="hover:text-[#942E3A] transition-colors">Shop</Link>
+              <Link href="/shop" className="hover:text-[#942E3A] transition-colors">{t("nav.shop")}</Link>
             </li>
-            <ChevronRight className="h-3 w-3 text-[#D8B46A] shrink-0" />
+            <ChevronRight className={`h-3 w-3 text-[#D8B46A] shrink-0 ${dir === "rtl" ? "rotate-180" : ""}`} />
             <li className="text-[#942E3A] truncate">
               {product.name}
             </li>
@@ -233,7 +266,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             }`}>
               {isTotalSoldOut ? (
                 <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-15 rounded-full bg-red-700 px-3 py-1 text-[11px] sm:text-xs font-black text-white uppercase tracking-wider shadow-md">
-                  SOLD OUT
+                  {t("productCard.soldOut")}
                 </span>
               ) : discountPercent ? (
                 <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-15 rounded-full bg-[#942E3A] px-3 py-1 text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider shadow-sm">
@@ -308,36 +341,36 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                   ))}
                 </div>
                 <span className="font-numeric text-[11px] sm:text-xs font-bold text-[#942E3A]">
-                  {product.rating ? product.rating.toFixed(1) : "4.8"}
+                  {formatNumber(product.rating ? product.rating.toFixed(1) : "4.8")}
                 </span>
                 <span className="font-numeric text-[11px] sm:text-xs text-[#D8B46A]">
-                  ({product.reviewsCount ? `${product.reviewsCount} Reviews` : "12 Reviews"})
+                  ({formatNumber(product.reviewsCount || 12)} {t("productDetail.reviews")})
                 </span>
               </div>
             </div>
 
             {/* Price Row */}
             <div className="flex items-baseline justify-center lg:justify-start gap-x-2.5 py-3 border-y border-[#D8B46A]/30 w-full">
-              <span className="font-numeric text-2xl sm:text-3xl font-extrabold text-[#942E3A]">
-                {formatCurrency(priceNum)}
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#942E3A]">
+                {formatPrice(priceNum)}
               </span>
               {compareAtPriceNum && (
-                <span className="font-numeric text-sm text-[#D8B46A] line-through">
-                  {formatCurrency(compareAtPriceNum)}
+                <span className="text-sm text-[#D8B46A] line-through">
+                  {formatPrice(compareAtPriceNum)}
                 </span>
               )}
             </div>
 
             {/* Description Brief */}
             {product.description && (
-              <p className="text-[13px] sm:text-sm text-[#942E3A]/80 leading-relaxed text-center lg:text-left">
+              <p className="text-[13px] sm:text-sm text-[#942E3A]/80 leading-relaxed text-center rtl:lg:text-right ltr:lg:text-left">
                 {product.description}
               </p>
             )}
 
             {product.color && (
               <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#D8B46A] lg:justify-start">
-                <span>Color:</span><span className="text-[#942E3A]">{product.color}</span>
+                <span>{t("cart.color")}:</span><span className="text-[#942E3A]">{product.color}</span>
               </div>
             )}
 
@@ -345,7 +378,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             {uniqueColors.length > 0 && (
               <div className="space-y-2 w-full">
                 <div className="flex items-center justify-center lg:justify-between gap-3">
-                  <span className="text-xs font-bold text-[#D8B46A]">Color:</span>
+                  <span className="text-xs font-bold text-[#D8B46A]">{t("productDetail.selectColor")}:</span>
                   <span className="text-xs font-bold text-[#D8B46A]">{COLOR_TRANSLATIONS[selectedColor] || selectedColor}</span>
                 </div>
                 <div className="flex justify-center lg:justify-start gap-3">
@@ -358,6 +391,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                         onClick={() => {
                           setSelectedColor(color);
                           setSelectedSize("");
+                          setQuantity(1);
                         }}
                         className={`h-10 w-10 rounded-full border-2 transition-all flex items-center justify-center ${
                           isSelected
@@ -380,7 +414,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             {/* Size Selector */}
             {!isBag && <div className="space-y-3 w-full">
               <div className="flex items-center justify-center lg:justify-start gap-3">
-                <span className="text-xs font-bold text-[#942E3A]">Select Size (Women)</span>
+                <span className="text-xs font-bold text-[#942E3A]">{t("productDetail.selectSize")}</span>
               </div>
 
               {/* Size circles */}
@@ -392,8 +426,12 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                     <button
                       key={variant.id}
                       disabled={isOutOfStock}
-                      onClick={() => setSelectedSize(variant.size)}
-                      className={`font-numeric h-11 w-11 rounded-full text-xs font-bold transition-all border-2 flex items-center justify-center ${
+                      onClick={() => {
+                        setSelectedSize(variant.size);
+                        setQuantity(1);
+                      }}
+                      title={isOutOfStock ? t("productDetail.outOfStock") : `${stockRemainingLabel}: ${formatNumber(variant.stock)}`}
+                      className={`group relative h-11 w-11 rounded-full text-xs font-bold transition-all border-2 flex items-center justify-center ${
                         isOutOfStock
                           ? "bg-stone-100 border-stone-200 text-stone-300 line-through cursor-not-allowed"
                           : isSelected
@@ -401,16 +439,26 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                           : "bg-white border-[#D8B46A] text-[#942E3A] hover:bg-[#F2E7D5]"
                       }`}
                     >
-                      {variant.size}
+                      {formatNumber(variant.size)}
+                      {!isOutOfStock && (
+                        <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.25rem)] z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-[#942E3A] px-1.5 py-0.5 text-[8px] font-medium text-white shadow-sm group-hover:block">
+                          {formatNumber(variant.stock)} {stockLeftLabel}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
               </div>
+              {activeVariant && (
+                <p className="text-center text-[10px] font-semibold text-[#942E3A]/65 lg:text-left">
+                  {formatNumber(activeVariant.stock)} {stockLeftLabel}
+                </p>
+              )}
             </div>}
             {isBag && (
               <div className="flex items-center justify-between rounded-2xl border border-[#D8B46A]/35 bg-[#FFF9EB] px-4 py-3 text-xs font-bold text-[#942E3A]">
-                <span>Bag stock</span>
-                <span>{product.variants[0]?.stock > 0 ? "Available" : "Out of stock"}</span>
+                <span>{t("productDetail.quantity")}</span>
+                <span>{product.variants[0]?.stock > 0 ? t("productDetail.inStock") : t("productDetail.outOfStock")}</span>
               </div>
             )}
 
@@ -423,7 +471,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
 
                 {/* Wishlist */}
                 <button
-                  onClick={() => toggle(product.id)}
+                  onClick={handleWishlistToggle}
                   className="h-13 w-13 rounded-full border border-[#D8B46A] bg-white flex items-center justify-center text-[#D8B46A] hover:bg-[#F2E7D5] transition-colors shrink-0 shadow-sm"
                 >
                   <Heart className={`h-5 w-5 ${isWishlisted ? "fill-[#942E3A] text-[#942E3A]" : "text-[#D8B46A]"}`} />
@@ -442,10 +490,9 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                     <span className="font-numeric w-8 text-center text-xs font-bold text-[#942E3A]">{quantity}</span>
                     <button
                       onClick={() => {
-                        const maxStock = activeVariant?.stock ?? 99;
-                        setQuantity((q) => Math.min(maxStock, q + 1));
+                        setQuantity((q) => Math.min(maxQuantity, q + 1));
                       }}
-                      disabled={Boolean(activeVariant && quantity >= activeVariant.stock)}
+                      disabled={!activeVariant || quantity >= maxQuantity}
                       className="p-1.5 text-[#D8B46A] hover:text-[#942E3A] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <Plus className="h-3.5 w-3.5" />
@@ -479,7 +526,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
 
                   {/* Wishlist */}
                   <button
-                    onClick={() => toggle(product.id)}
+                    onClick={handleWishlistToggle}
                     className="h-12 w-12 rounded-full border border-[#D8B46A] bg-white flex items-center justify-center text-[#D8B46A] hover:bg-[#F2E7D5] transition-colors shrink-0 shadow-sm"
                   >
                     <Heart className={`h-5 w-5 ${isWishlisted ? "fill-[#942E3A] text-[#942E3A]" : "text-[#D8B46A]"}`} />

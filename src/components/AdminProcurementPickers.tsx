@@ -204,7 +204,10 @@ export function AdminProductPicker({
         />
       </button>
       {open && (
-        <div className="absolute left-0 top-[calc(100%+8px)] z-40 w-full min-w-[300px] overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-2 shadow-[0_18px_40px_rgba(67,25,31,0.2)]">
+        <div
+          style={{ bottom: "calc(100% + 8px)", top: "auto" }}
+          className="absolute left-0 z-40 w-full min-w-[300px] overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-2 shadow-[0_18px_40px_rgba(67,25,31,0.2)]"
+        >
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
             <input

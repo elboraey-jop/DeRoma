@@ -8,6 +8,7 @@ import { requireAdmin } from "@/lib/adminAuth";
 import { getAllowedNextStatuses } from "@/lib/orderStatus";
 import { consumeInventoryLots } from "@/lib/inventoryLots";
 import { formatOrderNumber } from "@/lib/orderNumber";
+import { sendMetaServerEvent } from "@/lib/serverAnalytics";
 
 type ManualOrderItem = { variantId: string; quantity: number };
 
@@ -73,6 +74,44 @@ export async function updateOrderStatusAction(formData: FormData) {
   revalidatePath("/shop");
   for (const productId of new Set(productIds))
     revalidatePath(`/shop/${productId}`);
+
+  if (["shipped", "delivered", "cancelled", "returned"].includes(status)) {
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: { items: true },
+    });
+
+    if (order) {
+      await sendMetaServerEvent({
+        eventName:
+          status === "delivered"
+            ? "OrderDelivered"
+            : status === "cancelled"
+            ? "OrderCancelled"
+            : status === "returned"
+            ? "OrderReturned"
+            : "OrderShipped",
+        eventId: `${order.orderNumber}-${status}`,
+        eventSourceUrl: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://deromastore.com"}/admin/orders/${order.id}`,
+        value: Number(order.totalPrice),
+        orderNumber: order.orderNumber,
+        items: order.items.map((item) => ({
+          productId: item.productId,
+          productName: item.productName,
+          quantity: item.quantity,
+          price: Number(item.price),
+        })),
+        customer: {
+          phone: order.customerPhone,
+          firstName: order.customerFirstName,
+          lastName: order.customerLastName,
+          city: order.city,
+          state: order.governorate,
+          country: "eg",
+        },
+      });
+    }
+  }
 }
 
 export async function createManualOrderAction(formData: FormData) {

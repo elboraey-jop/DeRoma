@@ -19,10 +19,23 @@ export default function AdminPageTranslationBoundary({ children }: { children: R
       observer.observe(root, { childList: true, subtree: true, characterData: true });
       applying = false;
     };
-    const observer = new MutationObserver(apply);
-    apply();
-    return () => observer.disconnect();
+    let frameOne = 0;
+    let frameTwo = 0;
+    const scheduleApply = () => {
+      window.cancelAnimationFrame(frameOne);
+      window.cancelAnimationFrame(frameTwo);
+      frameOne = window.requestAnimationFrame(() => {
+        frameTwo = window.requestAnimationFrame(apply);
+      });
+    };
+    const observer = new MutationObserver(scheduleApply);
+    scheduleApply();
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(frameOne);
+      window.cancelAnimationFrame(frameTwo);
+    };
   }, [lang]);
 
-  return <div ref={rootRef} data-admin-page-translation>{children}</div>;
+  return <div ref={rootRef} data-admin-page-translation suppressHydrationWarning>{children}</div>;
 }

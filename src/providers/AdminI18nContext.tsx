@@ -1034,14 +1034,25 @@ export function AdminI18nProvider({ children }: { children: React.ReactNode }) {
       observer.observe(root, { childList: true, subtree: true, characterData: true });
       applying = false;
     };
-    const observer = new MutationObserver(apply);
-    apply();
+    let frameOne = 0;
+    let frameTwo = 0;
+    const scheduleApply = () => {
+      window.cancelAnimationFrame(frameOne);
+      window.cancelAnimationFrame(frameTwo);
+      frameOne = window.requestAnimationFrame(() => {
+        frameTwo = window.requestAnimationFrame(apply);
+      });
+    };
+    const observer = new MutationObserver(scheduleApply);
+    scheduleApply();
     // Server/client navigation can replace a page subtree after the first
     // mutation batch. Keep a lightweight sync pass while Arabic is active so
     // late-rendered labels cannot remain in English.
-    const syncTimer = window.setInterval(apply, 250);
+    const syncTimer = window.setInterval(scheduleApply, 250);
     return () => {
       observer.disconnect();
+      window.cancelAnimationFrame(frameOne);
+      window.cancelAnimationFrame(frameTwo);
       window.clearInterval(syncTimer);
     };
   }, [isMounted, lang]);
@@ -1115,7 +1126,7 @@ export function AdminI18nProvider({ children }: { children: React.ReactNode }) {
         formatNumber,
       }}
     >
-      <div data-admin-i18n-root dir={dir} className={lang === "ar" ? "font-sans-ar text-right" : ""}>
+      <div suppressHydrationWarning data-admin-i18n-root dir={dir} className={lang === "ar" ? "font-sans-ar text-right" : ""}>
         {children}
       </div>
     </AdminI18nContext.Provider>

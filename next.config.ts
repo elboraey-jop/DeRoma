@@ -41,7 +41,20 @@ const nextConfig: NextConfig = {
   compress: true,
   reactStrictMode: true,
   experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion", "clsx", "tailwind-merge"],
+    // Lucide's per-icon transform can leave stale icon factories behind during
+    // Turbopack HMR updates. Keep it unoptimized in development while retaining
+    // the production bundle optimization.
+    optimizePackageImports: [
+      ...(process.env.NODE_ENV === "production" ? ["lucide-react"] : []),
+      "framer-motion",
+      "clsx",
+      "tailwind-merge",
+    ],
+    // Product forms contain gallery metadata. Keep a small safety margin for
+    // legacy records while new uploads are stored as URLs instead of Base64.
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
   },
   async headers() {
     return [
@@ -92,5 +105,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
-

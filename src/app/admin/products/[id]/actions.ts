@@ -122,8 +122,12 @@ export async function updateProductAction(formData: FormData) {
         additionalCost: optionalNumber(formData.get("additionalCost")),
         supplierId: String(formData.get("supplierId") || "").trim() || null,
         badge: String(formData.get("badge") || "").trim() || null,
-        featured: formData.get("featured") === "on",
-        bestSeller: formData.get("bestSeller") === "on",
+        ...(formData.has("featured")
+          ? { featured: formData.get("featured") === "on" }
+          : {}),
+        ...(formData.has("bestSeller")
+          ? { bestSeller: formData.get("bestSeller") === "on" }
+          : {}),
         lowStockLimit,
         images,
       },
@@ -319,13 +323,24 @@ export async function createProductReviewAction(formData: FormData) {
 export async function deleteProductAction(formData: FormData) {
   await requireAdmin();
   const productId = String(formData.get("productId") || "");
-  if (!productId) throw new Error("Product id is required.");
-  const orderCount = await prisma.orderItem.count({ where: { productId } });
-  if (orderCount)
-    throw new Error(
-      "Products used in orders cannot be deleted. Set the product status to Archived instead.",
-    );
-  await prisma.product.delete({ where: { id: productId } });
+  if (!productId) redirect("/admin/products");
+
+  const [orderCount, invoiceItemCount, inventoryLotCount] = await Promise.all([
+    prisma.orderItem.count({ where: { productId } }),
+    prisma.purchaseInvoiceItem.count({ where: { productId } }),
+    prisma.inventoryLot.count({ where: { variant: { productId } } }),
+  ]);
+
+  if (orderCount || invoiceItemCount || inventoryLotCount) {
+    redirect(`/admin/products/${productId}?deleteError=history`);
+  }
+
+  try {
+    await prisma.product.delete({ where: { id: productId } });
+  } catch (error) {
+    console.error("Unable to delete product safely:", error);
+    redirect(`/admin/products/${productId}?deleteError=blocked`);
+  }
   revalidatePath("/admin/products");
   redirect("/admin/products");
 }

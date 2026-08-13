@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, Check, Heart, Star } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
 import { useWishlist } from "@/lib/wishlistStore";
 import { motion } from "framer-motion";
+import { trackAddToWishlist, trackSelectItem, trackViewItemList } from "@/lib/analytics";
+import { useStoreI18n } from "@/providers/StoreI18nContext";
 
 export interface ProductVariant {
   id: string;
@@ -62,39 +63,6 @@ export const COLOR_TRANSLATIONS: Record<string, string> = {
   Silver: "Silver",
 };
 
-function getColorHex(colorName: string): string {
-  switch (colorName) {
-    case "White":
-      return "#FFFFFF";
-    case "Beige":
-      return "#E8D9C5";
-    case "Black":
-      return "#111111";
-    case "Red":
-      return "#942E3A";
-    case "Gold":
-      return "#D4AF37";
-    case "Brown":
-      return "#5C4033";
-    case "Pink":
-      return "#E8A7A1";
-    case "Burgundy":
-      return "#6F1F2D";
-    case "Navy":
-      return "#1F365D";
-    case "Cream Burgundy":
-      return "#E7DDC7";
-    case "Pastel Pink":
-      return "#F0B8B8";
-    case "Silver":
-      return "#C4C8CE";
-    case "Grey":
-      return "#8E8E86";
-    default:
-      return "#CCCCCC";
-  }
-}
-
 export default function ProductCard({
   product,
   mobileOptimized = false,
@@ -103,11 +71,14 @@ export default function ProductCard({
   mobileOptimized?: boolean;
 }) {
   const { addItem } = useCart();
+  const { t, formatNumber, lang, dir } = useStoreI18n();
   const [selectedSize, setSelectedSize] = useState("");
   const [added, setAdded] = useState(false);
   const { has, toggle } = useWishlist();
   const isWishlisted = has(product.id);
   const [imageLoading, setImageLoading] = useState(true);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const hasTrackedImpression = useRef(false);
   const isBag = product.category === "bags";
 
   const activeImage = product.images[0];
@@ -115,6 +86,13 @@ export default function ProductCard({
   const availableSizes = sizesForProduct.filter((v) => v.stock > 0);
   const selectedVariant =
     availableSizes.find((variant) => variant.size === selectedSize) || availableSizes[0];
+  const stockLeftLabel = "left";
+
+  const formatCardPrice = (amount: number | string) => {
+    const num = typeof amount === "number" ? amount : parseFloat(String(amount));
+    if (isNaN(num)) return `${amount} EGP`;
+    return `${new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(num)} EGP`;
+  };
 
   const priceNum = Number(selectedVariant?.price ?? product.price);
   const compareAtPriceNum = selectedVariant?.compareAtPrice != null
@@ -135,7 +113,9 @@ export default function ProductCard({
     setImageLoading(true);
   }, [activeImage]);
 
-  const handleAddSelected = () => {
+  // Product cards add one unit per click. Quantity changes belong to the
+  // product detail page and the cart drawer, not the card itself.
+  const handleAddOne = () => {
     if (!selectedVariant) return;
 
     addItem({
@@ -146,6 +126,7 @@ export default function ProductCard({
       image: activeImage,
       color: product.color || "",
       size: selectedVariant.size,
+      availableStock: selectedVariant.stock,
     });
 
     setAdded(true);
@@ -153,9 +134,48 @@ export default function ProductCard({
   };
 
   const isTotalSoldOut = sizesForProduct.length > 0 && sizesForProduct.every((v) => v.stock <= 0);
+  const analyticsItem = {
+    productId: product.id,
+    variantId: selectedVariant?.id,
+    name: product.name,
+    price: priceNum,
+    category: product.category,
+    color: product.color || "",
+    size: selectedVariant?.size || "",
+  };
+
+  const handleWishlistToggle = () => {
+    if (!isWishlisted) {
+      trackAddToWishlist(analyticsItem);
+    }
+    toggle(product.id);
+  };
+
+  const handleProductSelect = () => {
+    trackSelectItem(analyticsItem, product.category || "Shop");
+  };
+
+  useEffect(() => {
+    if (!cardRef.current || hasTrackedImpression.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting || hasTrackedImpression.current) return;
+        hasTrackedImpression.current = true;
+        trackViewItemList(analyticsItem, product.category || "Shop");
+        observer.disconnect();
+      },
+      { threshold: 0.5 },
+    );
+
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, [analyticsItem, product.category]);
 
   return (
     <motion.div
+      ref={cardRef}
+      dir={dir}
       whileHover={mobileOptimized || isTotalSoldOut ? undefined : { y: -5, transition: { duration: 0.25, ease: "easeOut" } }}
       className={`product-card-shell group relative flex h-[330px] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_30px_rgba(148,46,58,0.06)] hover:shadow-[0_18px_38px_rgba(148,46,58,0.13)] sm:h-[380px] sm:max-w-[230px] sm:rounded-[1.65rem] transition-all duration-300 ${
         isTotalSoldOut ? "opacity-75 grayscale bg-stone-100" : ""
@@ -166,12 +186,12 @@ export default function ProductCard({
         
         {/* Badges */}
         {isTotalSoldOut ? (
-          <span className="product-card-badge-number absolute left-2 top-2 z-15 rounded-full bg-red-700 px-2 py-0.5 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
+          <span className="product-card-badge-number absolute left-2 rtl:left-auto rtl:right-2 top-2 z-15 rounded-full bg-red-700 px-2 py-0.5 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
             Sold Out
           </span>
         ) : discountPercent ? (
-          <span className="product-card-badge-number absolute left-2 top-2 z-10 rounded-full bg-[#D8B46A] px-2 py-0.5 text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-white shadow-xs">
-            -{discountPercent}%
+          <span className="product-card-badge-number absolute left-2 rtl:left-auto rtl:right-2 top-2 z-10 rounded-full bg-[#D8B46A] px-2 py-0.5 text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-white shadow-xs">
+            -{formatNumber(discountPercent)}%
           </span>
         ) : null}
 
@@ -181,7 +201,7 @@ export default function ProductCard({
         )}
 
         {/* Product Image Link */}
-        <Link href={`/shop/${product.id}`} className="relative h-full w-full flex items-center justify-center">
+        <Link href={`/shop/${product.id}`} onClick={handleProductSelect} className="relative h-full w-full flex items-center justify-center">
           <Image
             src={activeImage}
             alt={product.name}
@@ -204,14 +224,14 @@ export default function ProductCard({
         style={!isTotalSoldOut ? { backgroundColor: "#E2D0C4" } : undefined}
       >
         <div className="relative mb-0.5 min-h-[1.75rem]">
-          <div className="absolute left-0 top-0 flex items-center gap-0.5 text-xs font-semibold text-amber-500">
+          <div className="absolute left-0 rtl:left-auto rtl:right-0 top-0 flex items-center gap-0.5 text-xs font-semibold text-amber-500">
             <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
             <span className="product-card-badge-number text-[#6B1F2A] text-[10px] font-medium sm:text-[11px]">
-              {product.rating ? product.rating.toFixed(1) : "4.8"}
+              {formatNumber(product.rating ? product.rating.toFixed(1) : "4.8")}
             </span>
           </div>
 
-          <Link href={`/shop/${product.id}`} className="block px-8 sm:px-9 text-center transition-colors group-hover:text-[#942E3A]">
+          <Link href={`/shop/${product.id}`} onClick={handleProductSelect} className="block px-8 sm:px-9 text-center transition-colors group-hover:text-[#942E3A]">
             <h3 className="product-card-name text-[10px] font-extrabold leading-[1.15] tracking-tight text-[#6B1F2A] line-clamp-2 sm:text-[11px]">
               {product.name}
             </h3>
@@ -219,12 +239,12 @@ export default function ProductCard({
         </div>
 
         <div className="mb-1 flex flex-row items-baseline justify-center gap-1.5 leading-none">
-          <span className="font-numeric text-[15px] font-semibold text-[#6B1F2A] sm:text-[18px]">
-            {formatCurrency(priceNum)}
+          <span className="text-[15px] font-semibold text-[#6B1F2A] sm:text-[18px]">
+            {formatCardPrice(priceNum)}
           </span>
           {compareAtPriceNum && (
-            <span className="font-numeric text-[9px] font-normal text-[#6B1F2A]/55 line-through sm:text-[10px]">
-              {formatCurrency(compareAtPriceNum)}
+            <span className="text-[9px] font-normal text-[#6B1F2A]/55 line-through sm:text-[10px]">
+              {formatCardPrice(compareAtPriceNum)}
             </span>
           )}
         </div>
@@ -237,10 +257,13 @@ export default function ProductCard({
               <motion.button
                 key={variant.id}
                 disabled={isOutOfStock}
-                onClick={() => setSelectedSize(variant.size)}
+                onClick={() => {
+                  setSelectedSize(variant.size);
+                }}
+                title={isOutOfStock ? "Sold Out" : `${formatNumber(variant.stock)} ${stockLeftLabel}`}
                 whileHover={!mobileOptimized && !isOutOfStock ? { scale: 1.1 } : undefined}
                 whileTap={!mobileOptimized && !isOutOfStock ? { scale: 0.9 } : undefined}
-                  className={`product-card-badge-number relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
+                className={`product-card-badge-number group relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
                   isOutOfStock
                     ? "border-[#6B1F2A]/25 bg-[#FFF9EB]/35 text-[#6B1F2A]/45 after:absolute after:left-1 after:right-1 after:top-[48%] after:h-[1.2px] after:bg-[#6B1F2A]/35 after:content-['']"
                     : isSelected
@@ -248,7 +271,12 @@ export default function ProductCard({
                     : "border-[#942E3A]/30 bg-[#FFF9EB]/65 text-[#6B1F2A] hover:border-[#942E3A]/65"
                 }`}
               >
-                <span className="relative -top-0.5">{variant.size}</span>
+                <span className="relative -top-0.5">{formatNumber(variant.size)}</span>
+                {!isOutOfStock && (
+                  <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.2rem)] z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-[#942E3A] px-1.5 py-0.5 text-[7px] font-medium text-white shadow-sm group-hover:block">
+                    {formatNumber(variant.stock)} {stockLeftLabel}
+                  </span>
+                )}
               </motion.button>
             );
           })}
@@ -263,18 +291,18 @@ export default function ProductCard({
           ) : (
             <div className="flex items-center gap-1.5">
               <motion.button
-                onClick={handleAddSelected}
+                onClick={handleAddOne}
                 disabled={!selectedVariant}
                 whileHover={mobileOptimized ? undefined : { scale: 1.1 }}
                 whileTap={mobileOptimized ? undefined : { scale: 0.9 }}
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#D8B46A] text-[#6B1F2A] shadow-xs transition-all hover:bg-[#942E3A] hover:text-[#FFF9EB] disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:w-8"
-                aria-label="Add to cart"
+                aria-label={t("productCard.addToBag")}
               >
                 {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
               </motion.button>
 
               <motion.button
-                onClick={() => toggle(product.id)}
+                onClick={handleWishlistToggle}
                 whileHover={mobileOptimized ? undefined : { scale: 1.1 }}
                 whileTap={mobileOptimized ? undefined : { scale: 0.9 }}
                 className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-transparent shadow-xs transition-all hover:bg-[#FFF9EB] hover:text-[#942E3A] sm:h-8 sm:w-8 border ${
@@ -286,13 +314,13 @@ export default function ProductCard({
               </motion.button>
 
               <motion.button
-                onClick={handleAddSelected}
+                onClick={handleAddOne}
                 disabled={!selectedVariant}
                 whileHover={mobileOptimized ? undefined : { scale: 1.03 }}
                 whileTap={mobileOptimized ? undefined : { scale: 0.97 }}
                 className="flex h-7 flex-1 items-center justify-center rounded-full bg-[#942E3A] px-3 text-[9px] font-black text-[#FFF9EB] shadow-xs transition-all hover:bg-[#6B1F2A] hover:text-[#FFF9EB] disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:text-[10px]"
               >
-                Buy Now
+                {t("productCard.buyNow", lang === "ar" ? "اشتري الآن" : "Buy Now")}
               </motion.button>
             </div>
           )}

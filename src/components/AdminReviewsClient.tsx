@@ -56,7 +56,7 @@ function StatusPicker({ value }: { value: string }) {
       </button>
       {open && (
         <div
-          className={`absolute top-[calc(100%+6px)] z-30 min-w-full overflow-hidden rounded-xl border border-[#D8B46A]/45 bg-[#fffdf8] p-1 shadow-[0_14px_30px_rgba(67,25,31,0.16)] ${
+          className={`absolute bottom-[calc(100%+6px)] z-50 min-w-[130px] overflow-hidden rounded-xl border border-[#D8B46A]/45 bg-[#fffdf8] p-1 shadow-[0_14px_30px_rgba(67,25,31,0.2)] ${
             isRtl ? "right-0 text-right" : "left-0 text-left"
           }`}
           role="listbox"
@@ -389,7 +389,7 @@ export default function AdminReviewsClient({ reviews, products }: { reviews: Rev
 
         <div className="mt-4 grid min-w-0 gap-3 xl:grid-cols-2 sm:mt-6">
           {filtered.map((review) => (
-            <article key={review.id} className="group relative w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-[#942E3A]/10 bg-[#fffdf8] p-3.5 transition hover:border-[#D8B46A]/70 shadow-xs sm:p-5">
+            <article key={review.id} className="group relative w-full min-w-0 max-w-full rounded-2xl border border-[#942E3A]/10 bg-[#fffdf8] p-3.5 transition hover:border-[#D8B46A]/70 shadow-xs sm:p-5 [&:has([aria-expanded='true'])]:z-30">
               <div className="flex gap-2.5 sm:gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-base font-bold text-[#fff9eb] sm:h-10 sm:w-10 sm:text-lg">
                   {review.customerName.charAt(0).toUpperCase()}

@@ -25,18 +25,19 @@ import { AdminCatalogProductPicker } from "@/components/AdminProcurementPickers"
 import { useToast } from "@/providers/ToastProvider";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 
-type CatalogOption = {
+export type CatalogOption = {
   category: string;
   type: string;
   name: string;
   value: string | null;
 };
-type Supplier = { id: string; name: string };
-type RelatedProduct = {
+export type Supplier = { id: string; name: string };
+export type RelatedProduct = {
   id: string;
   name: string;
   category: string;
   sku?: string | null;
+  image: string | null;
 };
 type VariantDraft = { size: string; stock: number };
 type PerfumePriceDraft = {
@@ -880,12 +881,16 @@ export default function AdminProductCreateForm({
   products,
   redirectTo,
   initialProduct,
+  embedded = false,
+  onCancel,
 }: {
   options: CatalogOption[];
   suppliers: Supplier[];
   products: RelatedProduct[];
   redirectTo?: string;
   initialProduct?: EditProduct;
+  embedded?: boolean;
+  onCancel?: () => void;
 }) {
   const { lang, t, formatPrice, formatNumber } = useAdminI18n();
   const isRtl = lang === "ar";
@@ -1688,7 +1693,7 @@ export default function AdminProductCreateForm({
             </h2>
           </div>
         </div>
-        <AdminImageGalleryField />
+        <AdminImageGalleryField defaultValue={initialProduct?.images.join("\n") || ""} />
       </section>
 
       <section
@@ -2014,51 +2019,9 @@ export default function AdminProductCreateForm({
         <h2 className="mt-1 font-playfair text-xl font-bold">
           {isEdit ? "Manage related products" : "Similar products"}
         </h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <label className="group flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-[#D8B46A]/35 bg-[#FFF9EB] p-4 transition hover:border-[#942E3A]/35 hover:shadow-sm">
-            <span>
-              <span className="block text-xs font-bold text-[#942E3A]">
-                Show in For You
-              </span>
-              <span className="mt-1 block text-[10px] leading-4 text-[#6B1F2A]/55">
-                Feature this product in personalized storefront recommendations.
-              </span>
-            </span>
-            <span className="relative shrink-0">
-              <input
-                name="featured"
-                type="checkbox"
-                defaultChecked={initialProduct?.featured}
-                className="peer sr-only"
-              />
-              <span className="block h-6 w-11 rounded-full bg-[#D8B46A]/45 transition peer-checked:bg-[#942E3A]" />
-              <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition peer-checked:left-[22px]" />
-            </span>
-          </label>
-          <label className="group flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-[#D8B46A]/35 bg-[#FFF9EB] p-4 transition hover:border-[#942E3A]/35 hover:shadow-sm">
-            <span>
-              <span className="block text-xs font-bold text-[#942E3A]">
-                Show in Best Sellers
-              </span>
-              <span className="mt-1 block text-[10px] leading-4 text-[#6B1F2A]/55">
-                Highlight this product in the best sellers collection.
-              </span>
-            </span>
-            <span className="relative shrink-0">
-              <input
-                name="bestSeller"
-                type="checkbox"
-                defaultChecked={initialProduct?.bestSeller}
-                className="peer sr-only"
-              />
-              <span className="block h-6 w-11 rounded-full bg-[#D8B46A]/45 transition peer-checked:bg-[#942E3A]" />
-              <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition peer-checked:left-[22px]" />
-            </span>
-          </label>
-        </div>
         <div className="mt-4">
           <AdminCatalogProductPicker
-            products={products.map((product) => ({ ...product, image: null }))}
+            products={products}
             value=""
             onChange={addRelated}
           />
@@ -2084,6 +2047,13 @@ export default function AdminProductCreateForm({
                 className={`flex items-center gap-3 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] px-3 py-3 ${draggedRelated === index ? "opacity-50" : ""}`}
               >
                 <GripVertical className="h-4 w-4 cursor-grab text-[#D8B46A]" />
+                {product.image ? (
+                  <img src={product.image} alt="" className="h-10 w-10 shrink-0 rounded-xl bg-white object-cover" />
+                ) : (
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#D8B46A]">
+                    <PackagePlus className="h-4 w-4" />
+                  </span>
+                )}
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[10px] font-black text-[#942E3A]">
                   {index + 1}
                 </span>
@@ -2367,12 +2337,22 @@ export default function AdminProductCreateForm({
       )}
 
       <div className="flex items-center justify-between gap-2">
-        <Link
-          href="/admin/products"
-          className="rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-center text-xs font-bold text-[#942E3A] shrink-0"
-        >
-          Cancel
-        </Link>
+        {embedded ? (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-center text-xs font-bold text-[#942E3A] shrink-0"
+          >
+            Cancel
+          </button>
+        ) : (
+          <Link
+            href="/admin/products"
+            className="rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-center text-xs font-bold text-[#942E3A] shrink-0"
+          >
+            Cancel
+          </Link>
+        )}
         <div className="flex gap-2">
           {activeStep > 0 && (
             <button

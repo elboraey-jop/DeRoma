@@ -163,14 +163,35 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsData = {
   address: "Samanoud, Gharbia Governorate, Egypt",
   hours: "24/7 Available All Day",
   aboutTitle: "The DeRoma Story",
-  aboutParagraph1: "Founded on the belief that athletic footwear can be as elegant as it is functional, DeRoma has redefined women's sports sneakers. By bringing together artisanal craftsmanship and athletic research, we offer silhouettes that shift smoothly from early workouts to active street steps.",
-  aboutParagraph2: "Our sneakers feature meticulously selected premium imported leathers, dynamic arch supports, and ultra-lightweight cushioned soles to ensure maximum wearability.",
+  aboutParagraph1: "Founded on the belief that athletic footwear can be as elegant as it is functional, DeRoma curates women's sports sneakers from trusted suppliers. We bring together refined style and everyday performance for active street steps.",
+  aboutParagraph2: "Our collection features carefully selected premium imported materials, supportive designs, and ultra-lightweight cushioned soles to ensure maximum wearability.",
   aboutImage: "/products/deroma-new-balance-9060-pastel-pink.png",
   heroBanners: DEFAULT_HERO_BANNERS,
   homeReviews: DEFAULT_HOME_REVIEWS,
   forYouProductIds: [],
   bestSellerProductIds: [],
 };
+
+function sanitizeStoreCopy(value: string): string {
+  return value
+    .replace(/\bhandcrafted\b/gi, "curated")
+    .replace(/\bhandmade\b/gi, "carefully selected")
+    .replace(/\bartisanal craftsmanship\b/gi, "curated quality")
+    .replace(/\bcraftsmanship\b/gi, "quality")
+    .replace(/\bcrafted\b/gi, "selected")
+    .replace(/\bcrafting\b/gi, "curating")
+    .replace(/المصنوعة\s+يدوي(?:اً|ًا|ا)/g, "المختارة بعناية")
+    .replace(/مصنوعة\s+يدوي(?:اً|ًا|ا)/g, "مختارة بعناية")
+    .replace(/صُنعت\s+يدوي(?:اً|ًا|ا)/g, "مختارة بعناية")
+    .replace(/صُنع\s+بأ?ناقة/g, "اختيرت بأناقة")
+    .replace(/صناعة\s+يدوي(?:ة|اً|ًا|ا)/g, "اختيار بعناية")
+    .replace(/المصنوعة/g, "المختارة")
+    .replace(/مصنوعة/g, "مختارة")
+    .replace(/المصنوع/g, "المختار")
+    .replace(/مصنوع/g, "مختار")
+    .replace(/صُنعت/g, "تم اختيارها")
+    .replace(/صُنع/g, "تم اختيار");
+}
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {
   try {
@@ -184,6 +205,17 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
 
     const rawHeroBanners = (Array.isArray(record.heroBanners) ? record.heroBanners : []) as unknown as HeroBanner[];
     const rawHomeReviews = (Array.isArray(record.homeReviews) ? record.homeReviews : []) as unknown as HomeReview[];
+    const sanitizedHeroBanners = rawHeroBanners.map((banner) => ({
+      ...banner,
+      tag: sanitizeStoreCopy(banner.tag),
+      title: sanitizeStoreCopy(banner.title),
+      desc: sanitizeStoreCopy(banner.desc),
+    }));
+    const sanitizedHomeReviews = rawHomeReviews.map((review) => ({
+      ...review,
+      quote: sanitizeStoreCopy(review.quote),
+      detail: sanitizeStoreCopy(review.detail),
+    }));
 
     return {
       phone: record.phone || DEFAULT_SITE_SETTINGS.phone,
@@ -194,12 +226,12 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
       tiktok: record.tiktok || DEFAULT_SITE_SETTINGS.tiktok,
       address: record.address || DEFAULT_SITE_SETTINGS.address,
       hours: record.hours || DEFAULT_SITE_SETTINGS.hours,
-      aboutTitle: record.aboutTitle || DEFAULT_SITE_SETTINGS.aboutTitle,
-      aboutParagraph1: record.aboutParagraph1 || DEFAULT_SITE_SETTINGS.aboutParagraph1,
-      aboutParagraph2: record.aboutParagraph2 || DEFAULT_SITE_SETTINGS.aboutParagraph2,
+      aboutTitle: sanitizeStoreCopy(record.aboutTitle || DEFAULT_SITE_SETTINGS.aboutTitle),
+      aboutParagraph1: sanitizeStoreCopy(record.aboutParagraph1 || DEFAULT_SITE_SETTINGS.aboutParagraph1),
+      aboutParagraph2: sanitizeStoreCopy(record.aboutParagraph2 || DEFAULT_SITE_SETTINGS.aboutParagraph2),
       aboutImage: record.aboutImage || DEFAULT_SITE_SETTINGS.aboutImage,
-      heroBanners: rawHeroBanners.length > 0 ? rawHeroBanners : DEFAULT_HERO_BANNERS,
-      homeReviews: rawHomeReviews.length > 0 ? rawHomeReviews : DEFAULT_HOME_REVIEWS,
+      heroBanners: sanitizedHeroBanners.length > 0 ? sanitizedHeroBanners : DEFAULT_HERO_BANNERS,
+      homeReviews: sanitizedHomeReviews.length > 0 ? sanitizedHomeReviews : DEFAULT_HOME_REVIEWS,
       forYouProductIds: record.forYouProductIds || [],
       bestSellerProductIds: record.bestSellerProductIds || [],
     };
