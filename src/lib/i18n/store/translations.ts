@@ -224,7 +224,7 @@ export const storeTranslations: Record<StoreLang, StoreTranslations> = {
     nav: {
       home: "Home",
       shop: "Shop",
-      about: "About Us & Contact",
+      about: "About Us",
       privacy: "Our Privacy",
       terms: "Terms of Service",
       refundPolicy: "Refund Policy",
@@ -442,7 +442,7 @@ export const storeTranslations: Record<StoreLang, StoreTranslations> = {
     nav: {
       home: "الرئيسية",
       shop: "المتجر",
-      about: "من نحن والتواصل",
+      about: "من نحن",
       privacy: "سياسة الخصوصية",
       terms: "الشروط والأحكام",
       refundPolicy: "سياسة الإستبدال والإسترجاع",

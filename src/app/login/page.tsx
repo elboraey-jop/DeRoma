@@ -10,7 +10,8 @@ import { useStoreI18n } from "@/providers/StoreI18nContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { t, dir } = useStoreI18n();
+  const { t, dir, lang } = useStoreI18n();
+  const isArabic = lang === "ar";
   const [isRegister, setIsRegister] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,14 +20,31 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const localizeAuthError = (message?: string) => {
+    if (!isArabic) return message || "Authentication failed.";
+
+    const messages: Record<string, string> = {
+      "Please fill in all required fields.": "يرجى ملء جميع الحقول المطلوبة.",
+      "An account with this email already exists.": "يوجد حساب بهذا البريد الإلكتروني بالفعل.",
+      "Failed to register. Please try again.": "تعذر إنشاء الحساب. حاول مرة أخرى.",
+      "Please enter your email and password.": "يرجى إدخال البريد الإلكتروني وكلمة المرور.",
+      "Invalid email or password.": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+      "Failed to log in. Please try again.": "تعذر تسجيل الدخول. حاول مرة أخرى.",
+      "Authentication failed.": "فشلت المصادقة.",
+      "An unexpected error occurred. Please try again.": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+    };
+
+    return messages[message || ""] || "حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isRegister && !fullName) {
-      setError("Please enter your full name.");
+      setError(isArabic ? "يرجى إدخال الاسم بالكامل." : "Please enter your full name.");
       return;
     }
     if (!email || !password) {
-      setError("Please fill in all fields.");
+      setError(isArabic ? "يرجى ملء جميع الحقول." : "Please fill in all fields.");
       return;
     }
 
@@ -41,7 +59,7 @@ export default function LoginPage() {
       setIsLoading(false);
 
       if (!res.success) {
-        setError(res.error || "Authentication failed.");
+        setError(localizeAuthError(res.error));
         return;
       }
 
@@ -53,7 +71,7 @@ export default function LoginPage() {
       router.push(isRegister ? "/profile?from=register" : "/profile?from=login");
     } catch {
       setIsLoading(false);
-      setError("An unexpected error occurred. Please try again.");
+      setError(isArabic ? "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى." : "An unexpected error occurred. Please try again.");
     }
   };
 

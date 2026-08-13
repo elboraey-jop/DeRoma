@@ -33,7 +33,7 @@ export default function AboutAndContactPage() {
   const settings = useSiteSettings();
   const { t, dir } = useStoreI18n();
   const isArabic = dir === "rtl";
-  const [activeTab, setActiveTab] = useState<"about" | "contact">("about");
+  const [activeTab, setActiveTab] = useState<"about" | "contact">("contact");
 
   const copy = isArabic
     ? {
@@ -131,12 +131,14 @@ export default function AboutAndContactPage() {
     ? `mailto:${settings.email}`
     : "mailto:support@deromastore.com";
 
-  // Read URL query param if tab=contact is passed
+  // Read URL query param if tab=about or tab=contact is passed
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get("tab");
-      if (tabParam === "contact") {
+      if (tabParam === "about") {
+        setActiveTab("about");
+      } else if (tabParam === "contact") {
         setActiveTab("contact");
       }
     }

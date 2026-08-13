@@ -56,6 +56,37 @@ function getColorHex(colorName: string): string {
 
 export default function ShopClient({ initialProducts }: ShopClientProps) {
   const { t, lang, dir, formatNumber } = useStoreI18n();
+  const copy = lang === "ar"
+    ? {
+        sortBy: "ترتيب حسب",
+        brands: "البراندات",
+        sizes: "المقاسات",
+        womenSizes: "مقاسات السيدات",
+        colors: "الألوان",
+        colorOptions: "اختيارات الألوان",
+        clearAllFilters: "مسح كل الفلاتر",
+        filters: "الفلاتر",
+        noMatch: "لا توجد أحذية مطابقة لاختياراتك",
+        tryClear: "جرّب مسح بعض الفلاتر أو البحث عن منتج آخر.",
+        clear: "مسح الفلاتر",
+        clearShort: "مسح الكل",
+        apply: "تطبيق الفلاتر",
+      }
+    : {
+        sortBy: "Sort by",
+        brands: "Brands",
+        sizes: "Sizes",
+        womenSizes: "Women's Sizes",
+        colors: "Colors",
+        colorOptions: "Color Options",
+        clearAllFilters: "Clear All Filters",
+        filters: "Filters",
+        noMatch: "No shoes match your criteria",
+        tryClear: "Try clearing some of your filters or searching for another term.",
+        clear: "Clear Filters",
+        clearShort: "Clear All",
+        apply: "Apply Filters",
+      };
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get("q") || "";
   const brands = ["New Balance", "Adidas", "Nike", "ASICS"];
@@ -269,11 +300,11 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
             {showSortMenu && (
               <div
                 role="listbox"
-                aria-label="Sort products"
+                aria-label={copy.sortBy}
                 className="absolute right-0 top-full z-40 mt-2 w-52 overflow-hidden rounded-2xl border border-[#D8B46A]/60 bg-[#FFF9EB] p-1.5 shadow-[0_14px_30px_rgba(93,13,24,0.18)]"
               >
                 <p className="px-3 pb-1.5 pt-2 text-[9px] font-bold uppercase tracking-[0.16em] text-[#D8B46A]">
-                  Sort by
+                  {copy.sortBy}
                 </p>
                 {sortOptions.map((option) => {
                   const isSelected = sortBy === option.value;
@@ -310,7 +341,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
         <StaggerContainer className="hidden md:block w-64 flex-shrink-0 space-y-6">
           {/* Brands */}
           <StaggerItem direction="left" className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
-            <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">Brands</h3>
+            <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">{copy.brands}</h3>
             <div className="flex flex-col gap-y-1">
               {brands.map((brand) => {
                 const isActive = selectedBrands.includes(brand);
@@ -318,7 +349,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                   <button
                     key={brand}
                     onClick={() => toggleBrand(brand)}
-                    className={`text-left text-xs py-2 px-3 rounded-xl font-bold transition-all ${
+                    className={`text-left rtl:text-right text-xs py-2 px-3 rounded-xl font-bold transition-all ${
                       isActive
                         ? "bg-[#D8B46A] text-[#FFF9EB] shadow-xs"
                         : "text-[#942E3A] hover:bg-[#F2E7D5] hover:text-[#942E3A]"
@@ -333,7 +364,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
 
           {/* Sizes */}
           <StaggerItem direction="left" className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
-            <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">Women's Sizes</h3>
+            <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">{copy.womenSizes}</h3>
             <div className="grid grid-cols-4 gap-2">
               {allSizes.map((size) => {
                 const isSelected = selectedSizes.includes(size);
@@ -356,7 +387,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
 
           {/* Colors */}
           <StaggerItem direction="left" className="rounded-3xl border border-[#D8B46A]/40 bg-[#F2E7D5]/20 p-5 shadow-xs">
-            <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">Color Options</h3>
+            <h3 className="text-xs font-bold text-[#942E3A] mb-3 pb-2 border-b border-[#D8B46A]/30 font-playfair uppercase tracking-wider">{copy.colorOptions}</h3>
             <div className="flex flex-wrap gap-2">
               {allColors.map((color) => {
                 const isSelected = selectedColors.includes(color);
@@ -384,7 +415,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                 onClick={clearFilters}
                 className="w-full text-center py-2 text-xs font-bold text-[#942E3A] hover:underline"
               >
-                Clear All Filters
+                {copy.clearAllFilters}
               </button>
             </StaggerItem>
           )}
@@ -395,13 +426,13 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
           {filteredProducts.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-[2rem] border border-[#D8B46A] p-8">
               <Search className="h-10 w-10 text-[#D8B46A] mx-auto mb-3" />
-              <h3 className="text-base font-bold text-[#942E3A]">No shoes match your criteria</h3>
-              <p className="text-xs text-[#D8B46A] mt-1 mb-4">Try clearing some of your filters or searching for another term.</p>
+              <h3 className="text-base font-bold text-[#942E3A]">{copy.noMatch}</h3>
+              <p className="text-xs text-[#D8B46A] mt-1 mb-4">{copy.tryClear}</p>
               <button
                 onClick={clearFilters}
                 className="px-6 py-2.5 rounded-full bg-[#942E3A] text-white text-xs font-bold"
               >
-                Clear Filters
+                {copy.clear}
               </button>
             </div>
           ) : (
@@ -465,7 +496,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
               <div className="flex items-center justify-between border-b border-[#D8B46A]/40 bg-[#942E3A] px-5 py-4">
                 <div className="flex items-center gap-x-2">
                   <SlidersHorizontal className="h-5 w-5 text-[#D8B46A]" />
-                  <h2 className="text-lg font-bold font-playfair uppercase tracking-wider text-[#FFF9EB]">Filters</h2>
+                  <h2 className="text-lg font-bold font-playfair uppercase tracking-wider text-[#FFF9EB]">{copy.filters}</h2>
                 </div>
                 <button
                   onClick={() => setShowMobileFilters(false)}
@@ -479,7 +510,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
               <div className="flex-1 overflow-y-auto space-y-6 px-5 py-5 no-scrollbar">
                 {/* Brands */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">Brands</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">{copy.brands}</h3>
                   <div className="flex flex-col gap-y-1">
                     {brands.map((brand) => {
                       const isActive = selectedBrands.includes(brand);
@@ -487,7 +518,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                         <button
                           key={brand}
                           onClick={() => toggleBrand(brand)}
-                          className={`text-left text-xs py-2.5 px-4 rounded-xl font-bold transition-all ${
+                            className={`text-left rtl:text-right text-xs py-2.5 px-4 rounded-xl font-bold transition-all ${
                             isActive
                               ? "bg-[#D8B46A] text-[#FFF9EB] shadow-xs"
                               : "text-[#942E3A] hover:bg-[#F2E7D5] bg-white border border-[#D8B46A]/20"
@@ -502,7 +533,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
 
                 {/* Sizes */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">Sizes</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">{copy.sizes}</h3>
                   <div className="grid grid-cols-4 gap-2">
                     {allSizes.map((size) => {
                       const isSelected = selectedSizes.includes(size);
@@ -525,7 +556,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
 
                 {/* Colors */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">Colors</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">{copy.colors}</h3>
                   <div className="flex flex-wrap gap-2">
                     {allColors.map((color) => {
                       const isSelected = selectedColors.includes(color);
@@ -558,14 +589,14 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                     }}
                     className="flex-1 py-3 rounded-full border border-[#942E3A] text-xs font-bold text-[#942E3A] text-center hover:bg-[#F2E7D5] transition-colors"
                   >
-                    Clear All
+                    {copy.clearShort}
                   </button>
                 )}
                 <button
                   onClick={() => setShowMobileFilters(false)}
                   className="flex-1 py-3 rounded-full bg-[#942E3A] text-xs font-bold text-white text-center hover:bg-[#942E3A]/90 transition-colors"
                 >
-                  Apply Filters
+                  {copy.apply}
                 </button>
               </div>
             </motion.div>

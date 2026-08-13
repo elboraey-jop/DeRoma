@@ -270,7 +270,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                 </span>
               ) : discountPercent ? (
                 <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-15 rounded-full bg-[#942E3A] px-3 py-1 text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider shadow-sm">
-                  -{discountPercent}% OFF
+                  {lang === "ar" ? `خصم ${discountPercent}%` : `-${discountPercent}% OFF`}
                 </span>
               ) : null}
 
@@ -329,12 +329,12 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             
             {/* Title */}
             <div className="w-full">
-              <h1 className="text-[22px] sm:text-3xl lg:text-4xl font-extrabold text-[#942E3A] font-playfair tracking-tight leading-snug text-center lg:text-left">
+              <h1 className="text-[22px] sm:text-3xl lg:text-4xl font-extrabold text-[#942E3A] font-playfair tracking-tight leading-snug text-center">
                 {product.name}
               </h1>
 
               {/* Star rating */}
-              <div className="flex items-center justify-center lg:justify-start gap-1.5 mt-2">
+              <div className="flex items-center justify-center gap-1.5 mt-2">
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -344,13 +344,13 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                   {formatNumber(product.rating ? product.rating.toFixed(1) : "4.8")}
                 </span>
                 <span className="font-numeric text-[11px] sm:text-xs text-[#D8B46A]">
-                  ({formatNumber(product.reviewsCount || 12)} {t("productDetail.reviews")})
+                  ({formatNumber(product.reviewsCount ?? reviews.length)} {t("productDetail.reviews")})
                 </span>
               </div>
             </div>
 
             {/* Price Row */}
-            <div className="flex items-baseline justify-center lg:justify-start gap-x-2.5 py-3 border-y border-[#D8B46A]/30 w-full">
+            <div className="flex items-baseline justify-center gap-x-2.5 py-3 border-y border-[#D8B46A]/30 w-full">
               <span className="text-2xl sm:text-3xl font-extrabold text-[#942E3A]">
                 {formatPrice(priceNum)}
               </span>
@@ -363,13 +363,13 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
 
             {/* Description Brief */}
             {product.description && (
-              <p className="text-[13px] sm:text-sm text-[#942E3A]/80 leading-relaxed text-center rtl:lg:text-right ltr:lg:text-left">
+              <p className="text-[13px] sm:text-sm text-[#942E3A]/80 leading-relaxed text-center">
                 {product.description}
               </p>
             )}
 
             {product.color && (
-              <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#D8B46A] lg:justify-start">
+              <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#D8B46A]">
                 <span>{t("cart.color")}:</span><span className="text-[#942E3A]">{product.color}</span>
               </div>
             )}
@@ -377,11 +377,11 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             {/* Color Selector */}
             {uniqueColors.length > 0 && (
               <div className="space-y-2 w-full">
-                <div className="flex items-center justify-center lg:justify-between gap-3">
+                <div className="flex items-center justify-center gap-3">
                   <span className="text-xs font-bold text-[#D8B46A]">{t("productDetail.selectColor")}:</span>
                   <span className="text-xs font-bold text-[#D8B46A]">{COLOR_TRANSLATIONS[selectedColor] || selectedColor}</span>
                 </div>
-                <div className="flex justify-center lg:justify-start gap-3">
+                <div className="flex justify-center gap-3">
                   {uniqueColors.map((color) => {
                     const hexColor = getColorHex(color);
                     const isSelected = color === selectedColor;
@@ -413,12 +413,12 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
 
             {/* Size Selector */}
             {!isBag && <div className="space-y-3 w-full">
-              <div className="flex items-center justify-center lg:justify-start gap-3">
+              <div className="flex items-center justify-center gap-3">
                 <span className="text-xs font-bold text-[#942E3A]">{t("productDetail.selectSize")}</span>
               </div>
 
               {/* Size circles */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-2.5">
+              <div className="flex flex-wrap justify-center gap-2.5">
                 {sizesForColor.map((variant) => {
                   const isSelected = variant.size === selectedSize;
                   const isOutOfStock = variant.stock <= 0;
@@ -450,7 +450,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                 })}
               </div>
               {activeVariant && (
-                <p className="text-center text-[10px] font-semibold text-[#942E3A]/65 lg:text-left">
+                <p className="text-center text-[10px] font-semibold text-[#942E3A]/65">
                   {formatNumber(activeVariant.stock)} {stockLeftLabel}
                 </p>
               )}
@@ -466,7 +466,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             {isTotalSoldOut ? (
               <div className="flex items-center justify-between gap-3 py-2 w-full">
                 <div className="flex-1 flex h-13 items-center justify-center gap-2 rounded-full bg-stone-400 text-sm font-extrabold text-white uppercase tracking-wider shadow-inner cursor-not-allowed border border-stone-500">
-                  <span>OUT OF STOCK / SOLD OUT</span>
+                        <span>{t("productDetail.outOfStock")}</span>
                 </div>
 
                 {/* Wishlist */}
@@ -479,7 +479,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
               </div>
             ) : (
               <>
-                <div className="flex items-center justify-center lg:justify-start gap-3 py-1 w-full">
+                <div className="flex items-center justify-center gap-3 py-1 w-full">
                   <div className="flex items-center rounded-full border border-[#D8B46A] bg-white h-11 px-2.5 shrink-0">
                     <button
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -502,7 +502,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                   {added ? (
                     <button className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-emerald-600 text-sm font-bold text-white shadow-sm">
                       <Check className="h-4 w-4" />
-                      <span>Added to Cart!</span>
+                      <span>{t("productDetail.addedToCart")}</span>
                     </button>
                   ) : (
                     <button
@@ -510,18 +510,18 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                       className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-[#D8B46A] text-sm font-bold text-[#FFF9EB] hover:bg-[#B8934A] transition-all shadow-md active:scale-[0.98] min-w-0"
                     >
                       <ShoppingBag className="h-4 w-4" />
-                      <span>Add To Cart</span>
+                      <span>{t("productDetail.addToCart")}</span>
                     </button>
                   )}
                 </div>
 
                 {/* Buy Now + Wishlist Row */}
-                <div className="flex items-center justify-center lg:justify-start gap-3 pt-1">
+                <div className="flex items-center justify-center gap-3 pt-1">
                   <button
                     onClick={handleBuyNow}
                     className="flex-1 flex h-12 items-center justify-center gap-2 rounded-full bg-[#942E3A] text-sm font-bold text-white hover:bg-[#7a2430] transition-all shadow-md active:scale-[0.98] min-w-0"
                   >
-                    <span>Buy Now</span>
+                    <span>{t("productCard.buyNow", lang === "ar" ? "اشتري الآن" : "Buy Now")}</span>
                   </button>
 
                   {/* Wishlist */}
@@ -555,7 +555,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
       {similarProducts.length > 0 && (
         <ScrollReveal>
           <section className="mx-auto w-full max-w-[1400px] px-4 lg:px-6 border-t border-[#D8B46A]/30 pt-8 sm:pt-12 mt-10 sm:mt-14">
-            <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair mb-4 sm:mb-6 text-center">You May Also Like</h2>
+            <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair mb-4 sm:mb-6 text-center">{t("productDetail.relatedProducts")}</h2>
             <div 
               className="flex overflow-x-auto flex-nowrap gap-3 sm:gap-6 py-4 px-1 no-scrollbar justify-start md:justify-center"
               style={{ 
@@ -590,6 +590,36 @@ function ReviewsSection({
   product: ProductWithVariants;
   reviews: ProductReviewView[];
 }) {
+  const { lang, formatNumber } = useStoreI18n();
+  const reviewCopy = lang === "ar"
+    ? {
+        title: "آراء العملاء",
+        write: "اكتب تقييمًا",
+        basedOn: "بناءً على",
+        reviews: "تقييم",
+        noReviews: "لا توجد تقييمات لهذا المنتج. كن أول من يشارك تجربته!",
+        modalTitle: "اكتب تقييمًا",
+        yourRating: "تقييمك",
+        yourName: "اسمك",
+        namePlaceholder: "اكتب اسمك",
+        yourReview: "تقييمك للمنتج",
+        reviewPlaceholder: "شاركنا تجربتك مع هذا المنتج...",
+        submit: "إرسال التقييم",
+      }
+    : {
+        title: "Customer Reviews",
+        write: "Write a Review",
+        basedOn: "Based on",
+        reviews: "reviews",
+        noReviews: "No reviews yet for this product. Be the first to share your experience!",
+        modalTitle: "Write a Review",
+        yourRating: "Your Rating",
+        yourName: "Your Name",
+        namePlaceholder: "Enter your name",
+        yourReview: "Your Review",
+        reviewPlaceholder: "Share your experience with this product...",
+        submit: "Submit Review",
+      };
   const isMobile = useIsMobile();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReviewRating, setNewReviewRating] = useState(0);
@@ -597,6 +627,7 @@ function ReviewsSection({
   const [reviewName, setReviewName] = useState("");
   const [reviewComment, setReviewComment] = useState("");
   const [reviews, setReviews] = useState<ProductReviewView[]>(storedReviews);
+  const actualReviewsCount = product.reviewsCount ?? reviews.length;
 
   const [mounted, setMounted] = useState(false);
 
@@ -653,15 +684,17 @@ function ReviewsSection({
         {/* Reviews Header */}
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#942E3A] font-playfair">Customer Reviews</h2>
-            <p className="text-[11px] sm:text-xs text-[#D8B46A] mt-1">25,000+ verified reviews</p>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#942E3A] font-playfair">{reviewCopy.title}</h2>
+            <p className="text-[11px] sm:text-xs text-[#D8B46A] mt-1">
+              {formatNumber(actualReviewsCount)} {lang === "ar" ? "تقييم موثق" : "verified reviews"}
+            </p>
           </div>
           <button
             onClick={() => setShowReviewForm(true)}
             className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-[#942E3A] text-[11px] sm:text-xs font-bold text-white hover:bg-[#7a2430] transition-all shadow-md shrink-0"
           >
             <Send className="h-3.5 w-3.5" />
-            Write a Review
+            {reviewCopy.write}
           </button>
         </div>
 
@@ -682,7 +715,7 @@ function ReviewsSection({
                 ))}
               </div>
               <span className="text-[11px] sm:text-xs text-[#D8B46A] mt-1 block sm:text-center">
-                Based on {product.reviewsCount ? `${product.reviewsCount} reviews` : "12 reviews"}
+                {reviewCopy.basedOn} {formatNumber(actualReviewsCount)} {reviewCopy.reviews}
               </span>
             </div>
           </div>
@@ -710,7 +743,7 @@ function ReviewsSection({
         {/* Horizontal Swipeable Reviews Carousel */}
         {reviews.length === 0 ? (
           <div className="rounded-2xl border border-[#D8B46A]/25 bg-white/70 p-8 text-center text-xs font-bold text-[#942E3A]">
-            No reviews yet for this product. Be the first to share your experience!
+            {reviewCopy.noReviews}
           </div>
         ) : (
           <div className="relative">
@@ -795,7 +828,7 @@ function ReviewsSection({
                 >
                   {/* Modal Header */}
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-extrabold text-[#942E3A] font-playfair">Write a Review</h3>
+                    <h3 className="text-lg font-extrabold text-[#942E3A] font-playfair">{reviewCopy.modalTitle}</h3>
                     <button
                       onClick={() => setShowReviewForm(false)}
                       className="h-8 w-8 rounded-full bg-[#F2E7D5] flex items-center justify-center text-[#942E3A] hover:bg-[#D8B46A]/30 transition-colors"
@@ -806,7 +839,7 @@ function ReviewsSection({
 
                   {/* Star Rating Picker */}
                   <div className="mb-5">
-                    <label className="text-xs font-bold text-[#942E3A] mb-2 block">Your Rating</label>
+                    <label className="text-xs font-bold text-[#942E3A] mb-2 block">{reviewCopy.yourRating}</label>
                     <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -830,23 +863,23 @@ function ReviewsSection({
 
                   {/* Name Input */}
                   <div className="mb-4">
-                    <label className="text-xs font-bold text-[#942E3A] mb-1.5 block">Your Name</label>
+                    <label className="text-xs font-bold text-[#942E3A] mb-1.5 block">{reviewCopy.yourName}</label>
                     <input
                       type="text"
                       value={reviewName}
                       onChange={(e) => setReviewName(e.target.value)}
-                      placeholder="Enter your name"
+                      placeholder={reviewCopy.namePlaceholder}
                       className="w-full px-4 py-2.5 rounded-xl border border-[#D8B46A]/40 bg-white text-sm text-[#942E3A] placeholder:text-[#D8B46A]/50 focus:outline-none focus:ring-2 focus:ring-[#942E3A]/30 focus:border-[#942E3A] transition-all"
                     />
                   </div>
 
                   {/* Comment Input */}
                   <div className="mb-6">
-                    <label className="text-xs font-bold text-[#942E3A] mb-1.5 block">Your Review</label>
+                    <label className="text-xs font-bold text-[#942E3A] mb-1.5 block">{reviewCopy.yourReview}</label>
                     <textarea
                       value={reviewComment}
                       onChange={(e) => setReviewComment(e.target.value)}
-                      placeholder="Share your experience with this product..."
+                      placeholder={reviewCopy.reviewPlaceholder}
                       rows={4}
                       className="w-full px-4 py-2.5 rounded-xl border border-[#D8B46A]/40 bg-white text-sm text-[#942E3A] placeholder:text-[#D8B46A]/50 focus:outline-none focus:ring-2 focus:ring-[#942E3A]/30 focus:border-[#942E3A] transition-all resize-none"
                     />
@@ -859,7 +892,7 @@ function ReviewsSection({
                     className="w-full flex items-center justify-center gap-2 h-12 rounded-full bg-[#942E3A] text-sm font-bold text-white hover:bg-[#7a2430] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Send className="h-4 w-4" />
-                    Submit Review
+                    {reviewCopy.submit}
                   </button>
                 </motion.div>
               </motion.div>

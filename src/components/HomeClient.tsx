@@ -501,7 +501,7 @@ export default function HomeClient({
                   </div>
                 </div>
 
-                <div className="absolute right-0 top-0 z-40 flex gap-1.5 sm:right-0 sm:top-auto sm:bottom-1">
+                <div className={`absolute top-0 z-40 flex gap-1.5 sm:top-auto sm:bottom-1 ${dir === "rtl" ? "left-0 sm:left-0" : "right-0 sm:right-0"}`}>
                   <button type="button" onClick={() => changeReview(-1)} aria-label={reviewSectionCopy.previousAria} className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]">{dir === "rtl" ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}</button>
                   <button type="button" onClick={() => changeReview(1)} aria-label={reviewSectionCopy.nextAria} className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]">{dir === "rtl" ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</button>
                 </div>

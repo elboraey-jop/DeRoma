@@ -42,9 +42,13 @@ export function StoreI18nProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.dir = saved === "ar" ? "rtl" : "ltr";
       document.documentElement.lang = saved;
     } else {
-      // Check browser language or default to en
-      document.documentElement.dir = "ltr";
-      document.documentElement.lang = "en";
+      // Use the device/browser language on the first visit. A manual toggle
+      // is stored above and takes precedence on future visits.
+      const deviceLanguage = (navigator.language || navigator.languages?.[0] || "en").toLowerCase();
+      const detectedLanguage: StoreLang = deviceLanguage.startsWith("ar") ? "ar" : "en";
+      setLangState(detectedLanguage);
+      document.documentElement.dir = detectedLanguage === "ar" ? "rtl" : "ltr";
+      document.documentElement.lang = detectedLanguage;
     }
   }, []);
 

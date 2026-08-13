@@ -72,6 +72,7 @@ export default function ProductCard({
 }) {
   const { addItem } = useCart();
   const { t, formatNumber, lang, dir } = useStoreI18n();
+  const soldOutLabel = lang === "ar" ? "نفد المخزون" : "Sold Out";
   const [selectedSize, setSelectedSize] = useState("");
   const [added, setAdded] = useState(false);
   const { has, toggle } = useWishlist();
@@ -86,7 +87,6 @@ export default function ProductCard({
   const availableSizes = sizesForProduct.filter((v) => v.stock > 0);
   const selectedVariant =
     availableSizes.find((variant) => variant.size === selectedSize) || availableSizes[0];
-  const stockLeftLabel = "left";
 
   const formatCardPrice = (amount: number | string) => {
     const num = typeof amount === "number" ? amount : parseFloat(String(amount));
@@ -187,7 +187,7 @@ export default function ProductCard({
         {/* Badges */}
         {isTotalSoldOut ? (
           <span className="product-card-badge-number absolute left-2 rtl:left-auto rtl:right-2 top-2 z-15 rounded-full bg-red-700 px-2 py-0.5 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
-            Sold Out
+            {soldOutLabel}
           </span>
         ) : discountPercent ? (
           <span className="product-card-badge-number absolute left-2 rtl:left-auto rtl:right-2 top-2 z-10 rounded-full bg-[#D8B46A] px-2 py-0.5 text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-white shadow-xs">
@@ -260,7 +260,7 @@ export default function ProductCard({
                 onClick={() => {
                   setSelectedSize(variant.size);
                 }}
-                title={isOutOfStock ? "Sold Out" : `${formatNumber(variant.stock)} ${stockLeftLabel}`}
+                title={isOutOfStock ? soldOutLabel : undefined}
                 whileHover={!mobileOptimized && !isOutOfStock ? { scale: 1.1 } : undefined}
                 whileTap={!mobileOptimized && !isOutOfStock ? { scale: 0.9 } : undefined}
                 className={`product-card-badge-number group relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
@@ -272,11 +272,6 @@ export default function ProductCard({
                 }`}
               >
                 <span className="relative -top-0.5">{formatNumber(variant.size)}</span>
-                {!isOutOfStock && (
-                  <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.2rem)] z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-[#942E3A] px-1.5 py-0.5 text-[7px] font-medium text-white shadow-sm group-hover:block">
-                    {formatNumber(variant.stock)} {stockLeftLabel}
-                  </span>
-                )}
               </motion.button>
             );
           })}
@@ -286,7 +281,7 @@ export default function ProductCard({
         <div className="mt-auto border-t border-[#942E3A]/20 pt-1">
           {isTotalSoldOut ? (
             <div className="flex h-7 sm:h-8 w-full items-center justify-center rounded-full bg-stone-500 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-white shadow-inner">
-              Sold Out
+              {soldOutLabel}
             </div>
           ) : (
             <div className="flex items-center gap-1.5">

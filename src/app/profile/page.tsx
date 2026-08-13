@@ -29,6 +29,7 @@ import {
 import { formatCurrency } from "@/lib/utils";
 import { GOVERNORATES, CENTERS_BY_GOVERNORATE } from "@/lib/locations";
 import { ProfileSkeleton } from "@/components/Skeletons";
+import { useStoreI18n } from "@/providers/StoreI18nContext";
 
 interface OrderItemView {
   id: string;
@@ -67,43 +68,87 @@ interface UserProfile {
   orders: OrderView[];
 }
 
-function getStatusBadge(status: string) {
+function getStatusBadge(status: string, isArabic: boolean) {
   const s = status.toLowerCase();
   if (s === "delivered") {
     return {
-      label: "Delivered",
+      label: isArabic ? "تم التوصيل" : "Delivered",
       classes: "text-emerald-700 bg-emerald-50 border-emerald-200",
     };
   }
   if (s === "shipped" || s === "in_transit" || s === "in transit") {
     return {
-      label: "In Transit",
+      label: isArabic ? "قيد التوصيل" : "In Transit",
       classes: "text-amber-700 bg-amber-50 border-amber-200",
     };
   }
   if (s === "processing") {
     return {
-      label: "Processing",
+      label: isArabic ? "جاري التجهيز" : "Processing",
       classes: "text-blue-700 bg-blue-50 border-blue-200",
     };
   }
   if (s === "cancelled" || s === "canceled") {
     return {
-      label: "Cancelled",
+      label: isArabic ? "ملغي" : "Cancelled",
       classes: "text-rose-700 bg-rose-50 border-rose-200",
     };
   }
   return {
-    label: "Pending",
+    label: isArabic ? "قيد الانتظار" : "Pending",
     classes: "text-stone-700 bg-stone-100 border-stone-200",
   };
 }
 
-import { useStoreI18n } from "@/providers/StoreI18nContext";
-
 export default function ProfilePage() {
   const router = useRouter();
   const { t, formatPrice, formatNumber, dir, lang } = useStoreI18n();
+  const isArabic = lang === "ar";
+  const copy = isArabic
+    ? {
+        hello: "مرحبًا",
+        welcomeRegister: "مرحبًا بكِ في DeRoma",
+        welcomeBack: "مرحبًا بعودتكِ",
+        alt: "رقم بديل",
+        editDetails: "تعديل بيانات الحساب",
+        fullName: "الاسم بالكامل",
+        contactPhone: "رقم التواصل",
+        altPhone: "رقم بديل",
+        governorate: "المحافظة",
+        cityArea: "المدينة / المنطقة",
+        selectGovernorate: "اختيار المحافظة",
+        selectCity: "اختيار المدينة",
+        search: "بحث...",
+        noGovernorate: "لم يتم العثور على محافظة",
+        noCity: "لم يتم العثور على مدينة",
+        detailedAddress: "العنوان بالتفصيل",
+        addressPlaceholder: "الشارع، رقم المبنى، الشقة",
+        cancel: "إلغاء",
+        saveChanges: "حفظ التغييرات",
+        failedUpdate: "تعذر تحديث البيانات.",
+      }
+    : {
+        hello: "Hello",
+        welcomeRegister: "Welcome to DeRoma",
+        welcomeBack: "Welcome back",
+        alt: "Alt",
+        editDetails: "Edit Profile Details",
+        fullName: "Full Name",
+        contactPhone: "Contact Phone",
+        altPhone: "Alt Phone",
+        governorate: "Governorate",
+        cityArea: "City / Area",
+        selectGovernorate: "Select Governorate",
+        selectCity: "Select City",
+        search: "Search...",
+        noGovernorate: "No governorate found",
+        noCity: "No city found",
+        detailedAddress: "Detailed Address",
+        addressPlaceholder: "Street, Building No, Apartment",
+        cancel: "Cancel",
+        saveChanges: "Save Changes",
+        failedUpdate: "Failed to update profile.",
+      };
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -119,21 +164,21 @@ export default function ProfilePage() {
   const [saveError, setSaveError] = useState("");
 
   // Dynamic Greeting State
-  const [greeting, setGreeting] = useState("Welcome back");
+  const [greeting, setGreeting] = useState(copy.welcomeBack);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const from = params.get("from");
       if (from === "register") {
-        setGreeting("Welcome to DeRoma");
+        setGreeting(copy.welcomeRegister);
       } else if (from === "login") {
-        setGreeting("Welcome back");
+        setGreeting(copy.welcomeBack);
       } else {
-        setGreeting("Hello");
+        setGreeting(copy.hello);
       }
     }
-  }, []);
+  }, [copy.hello, copy.welcomeBack, copy.welcomeRegister]);
   const [isGovMenuOpen, setIsGovMenuOpen] = useState(false);
   const [isCityMenuOpen, setIsCityMenuOpen] = useState(false);
   const [govSearch, setGovSearch] = useState("");
@@ -213,7 +258,7 @@ export default function ProfilePage() {
     setIsSaving(false);
 
     if (!res.success) {
-      setSaveError(res.error || "Failed to update profile.");
+      setSaveError(res.error || copy.failedUpdate);
       return;
     }
 
@@ -262,7 +307,7 @@ export default function ProfilePage() {
         <section className="space-y-1">
           <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#942E3A]">{t("profile.title")}</span>
           <h1 className="text-3xl sm:text-4xl font-black font-playfair tracking-tight text-[#942E3A]">
-            {t("profile.welcomeBack")}, {profile.name.split(" ")[0]}!
+            {greeting}, {profile.name.split(" ")[0]}!
           </h1>
         </section>
 
@@ -311,7 +356,7 @@ export default function ProfilePage() {
                     <p className="font-semibold text-sm mt-0.5">
                       {profile.phone ? profile.phone : <span className="text-stone-400 italic">-</span>}
                     </p>
-                    {profile.phone2 && <p className="text-[11px] text-stone-500 mt-0.5">Alt: {profile.phone2}</p>}
+                    {profile.phone2 && <p className="text-[11px] text-stone-500 mt-0.5">{copy.alt}: {profile.phone2}</p>}
                   </div>
                 </div>
 
@@ -358,7 +403,7 @@ export default function ProfilePage() {
               ) : (
                 <div className="space-y-4">
                   {profile.orders.map((order) => {
-                    const statusBadge = getStatusBadge(order.status);
+                    const statusBadge = getStatusBadge(order.status, isArabic);
                     const formattedDate = new Date(order.createdAt).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", {
                       year: "numeric",
                       month: "short",
@@ -448,7 +493,7 @@ export default function ProfilePage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between border-b border-[#942E3A]/20 pb-3">
-                <h3 className="text-lg font-bold font-playfair text-[#942E3A]">Edit Profile Details</h3>
+                <h3 className="text-lg font-bold font-playfair text-[#942E3A]">{copy.editDetails}</h3>
                 <button
                   onClick={() => setIsEditing(false)}
                   className="p-1 rounded-full text-stone-400 hover:text-[#942E3A] hover:bg-[#942E3A]/10 transition-colors"
@@ -460,7 +505,7 @@ export default function ProfilePage() {
               <form onSubmit={handleSaveProfile} className="space-y-4 text-xs">
                 
                 <div className="space-y-1">
-                  <label className="font-bold text-[#942E3A]">Full Name</label>
+                  <label className="font-bold text-[#942E3A]">{copy.fullName}</label>
                   <input
                     type="text"
                     value={editName}
@@ -472,7 +517,7 @@ export default function ProfilePage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="font-bold text-[#942E3A]">Contact Phone</label>
+                    <label className="font-bold text-[#942E3A]">{copy.contactPhone}</label>
                     <input
                       type="text"
                       value={editPhone}
@@ -483,12 +528,12 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-[#942E3A]">Alt Phone</label>
+                    <label className="font-bold text-[#942E3A]">{copy.altPhone}</label>
                     <input
                       type="text"
                       value={editPhone2}
                       onChange={(e) => setEditPhone2(e.target.value)}
-                      placeholder="Optional"
+                      placeholder={isArabic ? "اختياري" : "Optional"}
                       className="w-full px-3 py-2.5 rounded-xl border border-[#942E3A]/30 bg-white text-[#942E3A] focus:outline-none focus:ring-1 focus:ring-[#942E3A]"
                     />
                   </div>
@@ -499,7 +544,7 @@ export default function ProfilePage() {
                   
                   {/* Governorate Dropdown */}
                   <div ref={govMenuRef} className="space-y-1 relative">
-                    <label className="font-bold text-[#942E3A]">Governorate</label>
+                    <label className="font-bold text-[#942E3A]">{copy.governorate}</label>
                     <button
                       type="button"
                       onClick={() => {
@@ -509,7 +554,7 @@ export default function ProfilePage() {
                       className="w-full px-3 py-2.5 rounded-xl border border-[#942E3A]/30 bg-white text-[#942E3A] flex items-center justify-between text-xs focus:outline-none focus:ring-1 focus:ring-[#942E3A]"
                     >
                       <span className={editGov ? "text-[#942E3A] font-semibold" : "text-stone-400"}>
-                        {editGov || "Select Governorate"}
+                        {editGov || copy.selectGovernorate}
                       </span>
                       <ChevronDown className={`w-3.5 h-3.5 text-[#942E3A] transition-transform ${isGovMenuOpen ? "rotate-180" : ""}`} />
                     </button>
@@ -529,7 +574,7 @@ export default function ProfilePage() {
                               type="search"
                               value={govSearch}
                               onChange={(e) => setGovSearch(e.target.value)}
-                              placeholder="Search..."
+                              placeholder={copy.search}
                               className="w-full rounded-xl border border-[#942E3A]/20 bg-[#FFF9EB]/60 pl-8 pr-2.5 py-1.5 text-xs text-[#942E3A] outline-none focus:border-[#942E3A]"
                             />
                           </div>
@@ -553,7 +598,7 @@ export default function ProfilePage() {
                           </button>
                         ))}
                         {filteredGovs.length === 0 && (
-                          <p className="px-3 py-3 text-center text-xs text-stone-400">No governorate found</p>
+                          <p className="px-3 py-3 text-center text-xs text-stone-400">{copy.noGovernorate}</p>
                         )}
                       </div>
                     )}
@@ -561,7 +606,7 @@ export default function ProfilePage() {
 
                   {/* City Dropdown */}
                   <div ref={cityMenuRef} className="space-y-1 relative">
-                    <label className="font-bold text-[#942E3A]">City / Area</label>
+                    <label className="font-bold text-[#942E3A]">{copy.cityArea}</label>
                     <button
                       type="button"
                       disabled={!editGov}
@@ -572,7 +617,7 @@ export default function ProfilePage() {
                       className="w-full px-3 py-2.5 rounded-xl border border-[#942E3A]/30 bg-white text-[#942E3A] flex items-center justify-between text-xs focus:outline-none focus:ring-1 focus:ring-[#942E3A] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className={editCity ? "text-[#942E3A] font-semibold truncate" : "text-stone-400 truncate"}>
-                        {editCity || (editGov ? "Select City" : "Select Governorate")}
+                        {editCity || (editGov ? copy.selectCity : copy.selectGovernorate)}
                       </span>
                       <ChevronDown className={`w-3.5 h-3.5 text-[#942E3A] shrink-0 transition-transform ${isCityMenuOpen ? "rotate-180" : ""}`} />
                     </button>
@@ -592,7 +637,7 @@ export default function ProfilePage() {
                               type="search"
                               value={citySearch}
                               onChange={(e) => setCitySearch(e.target.value)}
-                              placeholder="Search..."
+                              placeholder={copy.search}
                               className="w-full rounded-xl border border-[#942E3A]/20 bg-[#FFF9EB]/60 pl-8 pr-2.5 py-1.5 text-xs text-[#942E3A] outline-none focus:border-[#942E3A]"
                             />
                           </div>
@@ -615,7 +660,7 @@ export default function ProfilePage() {
                           </button>
                         ))}
                         {filteredCities.length === 0 && (
-                          <p className="px-3 py-3 text-center text-xs text-stone-400">No city found</p>
+                          <p className="px-3 py-3 text-center text-xs text-stone-400">{copy.noCity}</p>
                         )}
                       </div>
                     )}
@@ -624,12 +669,12 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold text-[#942E3A]">Detailed Address</label>
+                  <label className="font-bold text-[#942E3A]">{copy.detailedAddress}</label>
                   <textarea
                     rows={2}
                     value={editAddress}
                     onChange={(e) => setEditAddress(e.target.value)}
-                    placeholder="Street, Building No, Apartment"
+                    placeholder={copy.addressPlaceholder}
                     className="w-full px-3 py-2.5 rounded-xl border border-[#942E3A]/30 bg-white text-[#942E3A] focus:outline-none focus:ring-1 focus:ring-[#942E3A]"
                   />
                 </div>
@@ -646,7 +691,7 @@ export default function ProfilePage() {
                     onClick={() => setIsEditing(false)}
                     className="flex-1 py-2.5 rounded-full border border-[#942E3A]/30 text-[#942E3A] font-bold text-xs hover:bg-[#942E3A]/10 transition-all"
                   >
-                    Cancel
+                    {copy.cancel}
                   </button>
                   <button
                     type="submit"
@@ -654,7 +699,7 @@ export default function ProfilePage() {
                     className="flex-1 py-2.5 rounded-full bg-[#942E3A] text-white font-bold text-xs hover:bg-[#7a2430] transition-all flex items-center justify-center gap-1.5 shadow-md disabled:opacity-50"
                   >
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                    <span>Save Changes</span>
+                    <span>{copy.saveChanges}</span>
                   </button>
                 </div>
 

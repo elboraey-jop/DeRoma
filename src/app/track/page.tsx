@@ -11,12 +11,12 @@ import {
   MapPin,
   Phone,
   Receipt,
-  Search,
   ShoppingBag,
   Truck,
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
+import TrackSearchForm from "@/components/TrackSearchForm";
 
 interface PageProps {
   searchParams: Promise<{ q?: string; order?: string }>;
@@ -193,25 +193,7 @@ export default async function TrackOrderPage({ searchParams }: PageProps) {
                 <Localized en="Use an order number like DR-1001 or the primary phone number used at checkout." ar="استخدم رقم طلب مثل DR-1001 أو رقم الهاتف الأساسي المستخدم عند إتمام الطلب." />
               </p>
             </div>
-            <form action="/track" method="GET" className="space-y-2 sm:space-y-3">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A] rtl:left-auto rtl:right-4" />
-                <input
-                  type="text"
-                  name="q"
-                  defaultValue={query}
-                  required
-                  placeholder="رقم الطلب أو رقم الهاتف"
-                  className="m-0 w-full rounded-2xl border border-[#942E3A]/20 bg-[#FFF9EB]/70 py-3 pl-11 pr-4 text-sm font-semibold text-[#942E3A] placeholder:text-[#942E3A]/45 outline-none transition-all focus:border-[#942E3A] focus:bg-white focus:ring-4 focus:ring-[#942E3A]/10 rtl:pl-4 rtl:pr-11 sm:py-4"
-                />
-              </div>
-              <button
-                type="submit"
-                className="flex w-full items-center justify-center rounded-2xl bg-[#942E3A] px-6 py-3 text-sm font-bold text-[#FFF9EB] shadow-sm transition-all hover:bg-[#802832] active:scale-[0.99] sm:py-4"
-              >
-                <Localized en="Track Order" ar="تتبع الطلب" />
-              </button>
-            </form>
+            <TrackSearchForm query={query} />
             <div className="mt-3 rounded-2xl border border-[#D8B46A]/25 bg-[#FFF9EB] p-3 text-xs leading-relaxed text-[#6B1F2A] sm:mt-5 sm:p-4">
               <Localized en="Tip: If you placed the order while signed in, you can also open it from your profile orders." ar="نصيحة: إذا أجريت الطلب أثناء تسجيل الدخول، يمكنك فتحه أيضًا من طلبات حسابك." />
             </div>

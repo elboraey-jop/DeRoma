@@ -138,11 +138,13 @@ const inputClass =
   "mt-2 h-12 w-full rounded-xl border border-[#eadfd6] bg-[#fffdfa] px-4 text-sm text-[#481827] outline-none transition placeholder:text-[#a99ca0] focus:border-[#942e3a] focus:ring-4 focus:ring-[#942e3a]/10";
 
 function FieldLabel({ icon: Icon, children, optional = false }: { icon: typeof UserRound; children: React.ReactNode; optional?: boolean }) {
+  const { lang } = useStoreI18n();
+
   return (
     <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-[#5f4a50]">
       <Icon className="h-3.5 w-3.5 text-[#942e3a]" />
       <span>{children}</span>
-      {optional && <span className="font-normal normal-case tracking-normal text-[#a99ca0]">(optional)</span>}
+      {optional && <span className="font-normal normal-case tracking-normal text-[#a99ca0]">{lang === "ar" ? "(اختياري)" : "(optional)"}</span>}
     </label>
   );
 }
@@ -152,6 +154,7 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const { t, formatPrice, formatNumber, dir, lang } = useStoreI18n();
   const router = useRouter();
+  const isArabic = lang === "ar";
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -193,22 +196,23 @@ export default function CheckoutPage() {
         setCouponApplied(true);
         setAppliedDiscount(Number(data.discountAmount) || 0);
         setPromoIsFreeShipping(Boolean(data.isFreeShipping));
-        setPromoMessage(data.message || `Code ${clean} applied!`);
+        const successMessage = isArabic ? `تم تطبيق كود الخصم ${clean} بنجاح.` : (data.message || `Code ${clean} applied!`);
+        setPromoMessage(successMessage);
         setPromoError("");
         trackPromoCodeApplied(clean, Number(data.discountAmount) || 0);
-        toast.success(data.message || `Promo code ${clean} applied!`, "PROMO CODE");
+        toast.success(successMessage, isArabic ? "كود الخصم" : "PROMO CODE");
       } else {
-        const err = data.error || "Invalid promo code.";
+        const err = isArabic ? "كود الخصم غير صالح." : (data.error || "Invalid promo code.");
         setPromoError(err);
         setCouponApplied(false);
         setAppliedDiscount(0);
         setPromoIsFreeShipping(false);
-        toast.error(err, "PROMO CODE");
+        toast.error(err, isArabic ? "كود الخصم" : "PROMO CODE");
       }
     } catch {
-      const msg = "Unable to validate promo code. Please try again.";
+      const msg = isArabic ? "تعذر التحقق من كود الخصم. حاول مرة أخرى." : "Unable to validate promo code. Please try again.";
       setPromoError(msg);
-      toast.error(msg, "PROMO CODE");
+      toast.error(msg, isArabic ? "كود الخصم" : "PROMO CODE");
     } finally {
       setPromoLoading(false);
     }
@@ -221,7 +225,7 @@ export default function CheckoutPage() {
     setPromoIsFreeShipping(false);
     setPromoError("");
     setPromoMessage("");
-    toast.info("Promo code removed.", "PROMO CODE");
+    toast.info(isArabic ? "تمت إزالة كود الخصم." : "Promo code removed.", isArabic ? "كود الخصم" : "PROMO CODE");
   };
 
   const [error, setError] = useState("");
@@ -375,19 +379,19 @@ export default function CheckoutPage() {
     setTouched((prev) => ({ ...prev, [field]: true }));
     let err = "";
     if (field === "firstName" && (!cleanFirst || cleanFirst.length < 2)) {
-      err = !cleanFirst ? "First name is required." : "First name must be at least 2 characters.";
+      err = !cleanFirst ? (isArabic ? "الاسم الأول مطلوب." : "First name is required.") : (isArabic ? "يجب أن يتكون الاسم الأول من حرفين على الأقل." : "First name must be at least 2 characters.");
     } else if (field === "lastName" && (!cleanLast || cleanLast.length < 2)) {
-      err = !cleanLast ? "Second name is required." : "Second name must be at least 2 characters.";
+      err = !cleanLast ? (isArabic ? "اسم العائلة مطلوب." : "Second name is required.") : (isArabic ? "يجب أن يتكون اسم العائلة من حرفين على الأقل." : "Second name must be at least 2 characters.");
     } else if (field === "phone" && (!phone.trim() || !egPhoneRegex.test(cleanPhone))) {
-      err = !phone.trim() ? "Primary phone is required." : "Primary phone must be a valid 11-digit Egyptian mobile number (e.g. 01012345678).";
+      err = !phone.trim() ? (isArabic ? "رقم الهاتف الأساسي مطلوب." : "Primary phone is required.") : (isArabic ? "يجب إدخال رقم هاتف مصري صحيح مكون من 11 رقمًا، مثل 01012345678." : "Primary phone must be a valid 11-digit Egyptian mobile number (e.g. 01012345678).");
     } else if (field === "phone2" && phone2.trim() && !egPhoneRegex.test(cleanPhone2)) {
-      err = "Alternative phone must be a valid 11-digit Egyptian mobile number.";
+      err = isArabic ? "يجب إدخال رقم هاتف بديل مصري صحيح مكون من 11 رقمًا." : "Alternative phone must be a valid 11-digit Egyptian mobile number.";
     } else if (field === "governorate" && !selectedGovEn) {
-      err = "Please select a governorate.";
+      err = isArabic ? "يرجى اختيار المحافظة." : "Please select a governorate.";
     } else if (field === "city" && !city) {
-      err = "Please select a city or area.";
+      err = isArabic ? "يرجى اختيار المدينة أو المنطقة." : "Please select a city or area.";
     } else if (field === "address" && (!address.trim() || address.trim().length < 5)) {
-      err = !address.trim() ? "Detailed address is required." : "Detailed address must be at least 5 characters.";
+      err = !address.trim() ? (isArabic ? "العنوان بالتفصيل مطلوب." : "Detailed address is required.") : (isArabic ? "يجب ألا يقل العنوان بالتفصيل عن 5 أحرف." : "Detailed address must be at least 5 characters.");
     }
 
     if (err) {
@@ -396,13 +400,13 @@ export default function CheckoutPage() {
   };
 
   const fieldErrors: Record<string, string> = {
-    firstName: touched.firstName ? (!cleanFirst ? "First name is required." : cleanFirst.length < 2 ? "First name must be at least 2 characters." : "") : "",
-    lastName: touched.lastName ? (!cleanLast ? "Second name is required." : cleanLast.length < 2 ? "Second name must be at least 2 characters." : "") : "",
-    phone: touched.phone ? (!phone.trim() ? "Primary phone is required." : !egPhoneRegex.test(cleanPhone) ? "Primary phone must be a valid 11-digit Egyptian mobile number (e.g. 01012345678)." : "") : "",
-    phone2: touched.phone2 && phone2.trim() && !egPhoneRegex.test(cleanPhone2) ? "Alternative phone must be a valid 11-digit Egyptian mobile number." : "",
-    governorate: touched.governorate ? (!selectedGovEn ? "Please select a governorate." : "") : "",
-    city: touched.city ? (!city ? "Please select a city or area." : "") : "",
-    address: touched.address ? (!address.trim() ? "Detailed address is required." : address.trim().length < 5 ? "Detailed address must be at least 5 characters." : "") : "",
+    firstName: touched.firstName ? (!cleanFirst ? (isArabic ? "الاسم الأول مطلوب." : "First name is required.") : cleanFirst.length < 2 ? (isArabic ? "يجب أن يتكون الاسم الأول من حرفين على الأقل." : "First name must be at least 2 characters.") : "") : "",
+    lastName: touched.lastName ? (!cleanLast ? (isArabic ? "اسم العائلة مطلوب." : "Second name is required.") : cleanLast.length < 2 ? (isArabic ? "يجب أن يتكون اسم العائلة من حرفين على الأقل." : "Second name must be at least 2 characters.") : "") : "",
+    phone: touched.phone ? (!phone.trim() ? (isArabic ? "رقم الهاتف الأساسي مطلوب." : "Primary phone is required.") : !egPhoneRegex.test(cleanPhone) ? (isArabic ? "يجب إدخال رقم هاتف مصري صحيح مكون من 11 رقمًا، مثل 01012345678." : "Primary phone must be a valid 11-digit Egyptian mobile number (e.g. 01012345678).") : "") : "",
+    phone2: touched.phone2 && phone2.trim() && !egPhoneRegex.test(cleanPhone2) ? (isArabic ? "يجب إدخال رقم هاتف بديل مصري صحيح مكون من 11 رقمًا." : "Alternative phone must be a valid 11-digit Egyptian mobile number.") : "",
+    governorate: touched.governorate ? (!selectedGovEn ? (isArabic ? "يرجى اختيار المحافظة." : "Please select a governorate.") : "") : "",
+    city: touched.city ? (!city ? (isArabic ? "يرجى اختيار المدينة أو المنطقة." : "Please select a city or area.") : "") : "",
+    address: touched.address ? (!address.trim() ? (isArabic ? "العنوان بالتفصيل مطلوب." : "Detailed address is required.") : address.trim().length < 5 ? (isArabic ? "يجب ألا يقل العنوان بالتفصيل عن 5 أحرف." : "Detailed address must be at least 5 characters.") : "") : "",
   };
 
   const getFieldClass = (err?: string) =>
@@ -431,16 +435,16 @@ export default function CheckoutPage() {
       !city ||
       !address || address.trim().length < 5
     ) {
-      const msg = "Please fix the highlighted errors before placing your order.";
+      const msg = isArabic ? "يرجى تصحيح البيانات المظللة قبل تأكيد الطلب." : "Please fix the highlighted errors before placing your order.";
       setError(msg);
-      toast.error(msg, "CHECKOUT");
+      toast.error(msg, isArabic ? "إتمام الطلب" : "CHECKOUT");
       trackCheckoutError("validation_failed", "delivery_details");
       return;
     }
     if (cart.length === 0) {
-      const msg = "Your bag is empty. Please add items to checkout.";
+      const msg = isArabic ? "حقيبة التسوق فارغة. أضف منتجات لإتمام الطلب." : "Your bag is empty. Please add items to checkout.";
       setError(msg);
-      toast.error(msg, "CHECKOUT");
+      toast.error(msg, isArabic ? "إتمام الطلب" : "CHECKOUT");
       trackCheckoutError("empty_cart", "checkout");
       return;
     }
@@ -460,7 +464,7 @@ export default function CheckoutPage() {
         customerName: `${cleanFirst} ${cleanLast}`,
         customerPhone: cleanPhone,
         customerPhone2: cleanPhone2 || undefined,
-        governorate: activeGov?.ar || "",
+        governorate: selectedGovEn,
         city,
         address: address.trim(),
         notes: notes.trim(),
@@ -482,23 +486,23 @@ export default function CheckoutPage() {
           coupon: couponApplied ? couponCode : undefined,
           items: analyticsItems,
         });
-        toast.success(`Order ${result.orderNumber} placed successfully!`, "ORDER CONFIRMED");
+        toast.success(isArabic ? `تم تأكيد الطلب ${result.orderNumber} بنجاح!` : `Order ${result.orderNumber} placed successfully!`, isArabic ? "تم تأكيد الطلب" : "ORDER CONFIRMED");
         clearCart();
         const fullCustomerName = `${firstName.trim()} ${lastName.trim()}`;
         router.push(
           `/checkout/success?orderNumber=${result.orderNumber}&name=${encodeURIComponent(fullCustomerName)}&total=${result.totalPrice}&shipping=${result.shippingCost}&gov=${encodeURIComponent(selectedGovEn)}`
         );
       } else {
-        const err = result.error || "Something went wrong. Please try again.";
+        const err = isArabic ? "حدث خطأ ما. حاول مرة أخرى." : (result.error || "Something went wrong. Please try again.");
         setError(err);
-        toast.error(err, "ORDER FAILED");
+        toast.error(err, isArabic ? "فشل الطلب" : "ORDER FAILED");
         trackCheckoutError("order_create_failed", "place_order");
       }
     } catch (submitError) {
       console.error(submitError);
-      const msg = "We could not connect to the server. Please try again.";
+      const msg = isArabic ? "تعذر الاتصال بالخادم. حاول مرة أخرى." : "We could not connect to the server. Please try again.";
       setError(msg);
-      toast.error(msg, "CONNECTION ERROR");
+      toast.error(msg, isArabic ? "خطأ في الاتصال" : "CONNECTION ERROR");
       trackCheckoutError("connection_error", "place_order");
     } finally {
       setLoading(false);
@@ -552,7 +556,7 @@ export default function CheckoutPage() {
               <div className="mb-6 flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#942e3a]/10 text-[#942e3a]"><UserRound className="h-5 w-5" /></div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c49a50]">Step 02</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c49a50]">{isArabic ? "الخطوة 02" : "Step 02"}</p>
                   <h2 className="mt-1 font-playfair text-xl font-semibold">{t("checkout.expressCheckout")}</h2>
                   <p className="mt-1 text-xs leading-5 text-[#806e73]">{t("checkout.shippingAddress")}</p>
                 </div>
@@ -621,7 +625,7 @@ export default function CheckoutPage() {
                     }}
                     className={`${getFieldClass(fieldErrors.governorate)} flex min-w-0 items-center justify-between overflow-hidden text-left rtl:text-right ${selectedGovEn ? "text-[#481827]" : "text-[#a99ca0]"}`}
                   >
-                    <span>{selectedGovEn ? <span>{lang === "ar" ? (activeGov?.ar || selectedGovEn) : selectedGovEn} · {isFreeShippingUnlocked ? <span className="font-bold text-emerald-700">{t("checkout.free")}</span> : formatPrice(activeGov?.fee || 50)}</span> : (isFreeShippingUnlocked ? <span>{t("checkout.selectGovernorate")} (<span className="font-bold text-emerald-700">{t("checkout.free")}</span>)</span> : t("checkout.selectGovernorate"))}</span>
+                    <span>{selectedGovEn ? <span>{selectedGovEn} · {isFreeShippingUnlocked ? <span className="font-bold text-emerald-700">{t("checkout.free")}</span> : formatPrice(activeGov?.fee || 50)}</span> : (isFreeShippingUnlocked ? <span>{t("checkout.selectGovernorate")} (<span className="font-bold text-emerald-700">{t("checkout.free")}</span>)</span> : t("checkout.selectGovernorate"))}</span>
                     <ChevronDown className={`h-4 w-4 shrink-0 text-[#942e3a] transition-transform ${isGovMenuOpen ? "rotate-180" : ""}`} />
                   </button>
                   {fieldErrors.governorate && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.governorate}</p>}
@@ -629,7 +633,7 @@ export default function CheckoutPage() {
                     <div
                       data-lenis-prevent="true"
                       role="listbox"
-                      aria-label="Governorate"
+                      aria-label={isArabic ? "المحافظة" : "Governorate"}
                       onWheel={(event) => event.stopPropagation()}
                       onTouchMove={(event) => event.stopPropagation()}
                       style={{ WebkitOverflowScrolling: "touch" }}
@@ -644,7 +648,7 @@ export default function CheckoutPage() {
                             onChange={(event) => setGovSearch(event.target.value)}
                             onClick={(event) => event.stopPropagation()}
                             placeholder={t("nav.searchAction")}
-                            aria-label="Search governorates"
+                            aria-label={isArabic ? "البحث عن المحافظات" : "Search governorates"}
                             className="h-11 w-full rounded-xl border border-[#eadfd6] bg-[#fffaf0] pl-9 pr-3 rtl:pl-3 rtl:pr-9 text-sm text-[#481827] outline-none placeholder:text-[#a99ca0] focus:border-[#942e3a] focus:ring-2 focus:ring-[#942e3a]/10"
                           />
                         </div>
@@ -652,7 +656,7 @@ export default function CheckoutPage() {
                       {!govSearch && <button type="button" role="option" aria-selected={!selectedGovEn} onClick={() => { setSelectedGovEn(""); setCity(""); setIsGovMenuOpen(false); setGovSearch(""); handleBlur("governorate"); }} className={`w-full rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${!selectedGovEn ? "bg-[#942e3a] text-white" : "text-[#806e73] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}>{t("checkout.selectGovernorate")}</button>}
                       {filteredGovernorates.map((gov) => {
                         const isSelected = gov.en === selectedGovEn;
-                        const displayName = lang === "ar" ? gov.ar : gov.en;
+                        const displayName = gov.en;
                         return <button key={gov.en} type="button" role="option" aria-selected={isSelected} onClick={() => { setSelectedGovEn(gov.en); setCity(""); setCenterSearch(""); setIsGovMenuOpen(false); setGovSearch(""); handleBlur("governorate"); }} className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${isSelected ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}><span>{displayName}</span><span className={`shrink-0 text-xs ${isSelected ? (isFreeShippingUnlocked ? "text-emerald-200 font-bold" : "text-[#fffaf0]/80") : (isFreeShippingUnlocked ? "text-emerald-600 font-bold" : "text-[#b8934a]")}`}>{isFreeShippingUnlocked ? t("checkout.free") : formatPrice(gov.fee)}</span></button>;
                       })}
                     </div>
@@ -680,7 +684,7 @@ export default function CheckoutPage() {
                     <div
                       data-lenis-prevent="true"
                       role="listbox"
-                      aria-label="City or center"
+                      aria-label={isArabic ? "المدينة أو المنطقة" : "City or center"}
                       onWheel={(event) => event.stopPropagation()}
                       onTouchMove={(event) => event.stopPropagation()}
                       style={{ WebkitOverflowScrolling: "touch" }}
@@ -689,7 +693,7 @@ export default function CheckoutPage() {
                       <div className="sticky top-0 z-10 bg-white pb-1.5">
                         <div className="relative">
                           <Search className="pointer-events-none absolute left-3 rtl:left-auto rtl:right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#942e3a]" />
-                          <input type="search" value={centerSearch} onChange={(event) => setCenterSearch(event.target.value)} onClick={(event) => event.stopPropagation()} placeholder={t("nav.searchAction")} aria-label="Search cities and centers" className="h-11 w-full rounded-xl border border-[#eadfd6] bg-[#fffaf0] pl-9 pr-3 rtl:pl-3 rtl:pr-9 text-sm text-[#481827] outline-none placeholder:text-[#a99ca0] focus:border-[#942e3a] focus:ring-2 focus:ring-[#942e3a]/10" />
+                          <input type="search" value={centerSearch} onChange={(event) => setCenterSearch(event.target.value)} onClick={(event) => event.stopPropagation()} placeholder={t("nav.searchAction")} aria-label={isArabic ? "البحث عن المدن والمراكز" : "Search cities and centers"} className="h-11 w-full rounded-xl border border-[#eadfd6] bg-[#fffaf0] pl-9 pr-3 rtl:pl-3 rtl:pr-9 text-sm text-[#481827] outline-none placeholder:text-[#a99ca0] focus:border-[#942e3a] focus:ring-2 focus:ring-[#942e3a]/10" />
                         </div>
                       </div>
                       {filteredCenters.map((c) => <button key={c} type="button" role="option" aria-selected={c === city} onClick={() => { setCity(c); setIsCenterMenuOpen(false); setCenterSearch(""); handleBlur("city"); }} className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${c === city ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}><span>{c}</span><span className={`shrink-0 text-xs ${c === city ? "text-[#fffaf0]/80" : "text-[#b8934a]"}`}>{isFreeShippingUnlocked ? t("checkout.free") : formatPrice(cityShippingFee(c))}</span></button>)}
@@ -709,7 +713,7 @@ export default function CheckoutPage() {
                   />
                   {fieldErrors.address && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.address}</p>}
                 </div>
-                <div className="sm:col-span-2"><FieldLabel icon={MessageSquare} optional>{t("checkout.notes")}</FieldLabel><textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("checkout.notes")} className={`${inputClass} h-auto resize-none py-3`} /></div>
+                <div className="sm:col-span-2"><FieldLabel icon={MessageSquare}>{t("checkout.notes")}</FieldLabel><textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("checkout.notes")} className={`${inputClass} h-auto resize-none py-3`} /></div>
               </div>
             </section>
 
@@ -741,7 +745,7 @@ export default function CheckoutPage() {
                 </div>
                 {appliedDiscount > 0 && (
                   <div className="flex justify-between text-emerald-300 font-semibold">
-                    <span>Discount ({couponCode})</span>
+                    <span>{isArabic ? "الخصم" : "Discount"} ({couponCode})</span>
                     <span>-{formatPrice(appliedDiscount)}</span>
                   </div>
                 )}
