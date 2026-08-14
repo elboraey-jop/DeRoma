@@ -51,7 +51,13 @@ export default async function AdminOrderDetailsPage({
   const { id } = await params;
   const order = await prisma.order.findUnique({
     where: { id },
-    include: { items: true },
+    include: {
+      items: {
+        include: {
+          product: { select: { images: true } },
+        },
+      },
+    },
   });
   if (!order) notFound();
   const whatsappText = (order.status === "pending_payment" && order.paymentMethod !== "cod"
@@ -124,7 +130,21 @@ export default async function AdminOrderDetailsPage({
                   key={item.id}
                   className="flex items-center justify-between gap-4 py-3"
                 >
-                  <div>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-[#942E3A]/10 bg-[#FFF9EB]">
+                      {item.product.images[0] ? (
+                        <img
+                          src={item.product.images[0]}
+                          alt={item.productName}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-[9px] font-bold text-[#D8B46A]">
+                          DeRoma
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
                     <p className="text-xs font-bold text-[#942E3A]">
                       {item.productName}
                     </p>
@@ -132,6 +152,7 @@ export default async function AdminOrderDetailsPage({
                       Color: {item.color} · Size: {item.size} · Qty:{" "}
                       {item.quantity}
                     </p>
+                    </div>
                   </div>
                   <p className="shrink-0 text-xs font-bold text-[#942E3A]">
                     {formatCurrency(Number(item.price) * item.quantity)}

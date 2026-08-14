@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  Database,
   DollarSign,
   Globe,
   LayoutDashboard,
@@ -64,6 +65,7 @@ const navigationGroups: NavGroup[] = [
       { key: "navigation.products", href: "/admin/products", icon: ShoppingBag },
       { key: "navigation.inventory", href: "/admin/inventory", icon: Package },
       { key: "navigation.suppliers", href: "/admin/suppliers", icon: Boxes },
+      { key: "navigation.backup", href: "/admin/backup", icon: Database },
     ],
   },
   {

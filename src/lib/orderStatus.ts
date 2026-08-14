@@ -32,7 +32,13 @@ export function isCashOnDelivery(paymentMethod?: string | null) {
 export function getAllowedNextStatuses(status: string, paymentMethod?: string | null) {
   if (status === "cancelled" || status === "returned") return [];
   if (status === "delivered") return ["returned", "cancelled"];
-  const path = isCashOnDelivery(paymentMethod) ? COD_STATUS_PATH : PREPAID_STATUS_PATH;
+  const isCod = isCashOnDelivery(paymentMethod);
+  // Older manual prepaid orders were saved as `pending` before the
+  // `pending_payment` state was introduced. Keep those records actionable by
+  // allowing the admin to confirm payment with `Paid`, then continue through
+  // the normal prepaid flow.
+  if (!isCod && status === "pending") return ["paid", "cancelled"];
+  const path = isCod ? COD_STATUS_PATH : PREPAID_STATUS_PATH;
   const index = path.indexOf(status);
   const next = index >= 0 && index < path.length - 1 ? [path[index + 1]] : [];
   return [...next, "cancelled"];
@@ -42,7 +48,7 @@ export function getSelectableStatuses(status: string, paymentMethod?: string | n
   return [status, ...getAllowedNextStatuses(status, paymentMethod)];
 }
 
-export function getStatusLabel(status: string, lang: "ar" | "en" = "ar") {
+export function getStatusLabel(status: string, lang: "ar" | "en" = "en") {
   if (lang === "ar") {
     return ORDER_STATUS_LABELS_AR[status] || ORDER_STATUS_LABELS[status] || status;
   }

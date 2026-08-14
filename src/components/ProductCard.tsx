@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { trackAddToWishlist, trackSelectItem, trackViewItemList } from "@/lib/analytics";
 import { useStoreI18n } from "@/providers/StoreI18nContext";
 import { sortVariantsByNumericSize } from "@/lib/utils";
+import { getProductPath } from "@/lib/productSlug";
 
 export interface ProductVariant {
   id: string;
@@ -33,6 +34,7 @@ export interface ProductColorway {
 
 export interface ProductWithVariants {
   id: string;
+  slug?: string | null;
   name: string;
   description: string | null;
   price: any;
@@ -202,7 +204,7 @@ export default function ProductCard({
         )}
 
         {/* Product Image Link */}
-        <Link href={`/shop/${product.id}`} onClick={handleProductSelect} className="relative h-full w-full flex items-center justify-center">
+        <Link href={getProductPath(product)} onClick={handleProductSelect} className="relative h-full w-full flex items-center justify-center">
           <Image
             src={activeImage}
             alt={product.name}
@@ -232,7 +234,7 @@ export default function ProductCard({
             </span>
           </div>
 
-          <Link href={`/shop/${product.id}`} onClick={handleProductSelect} className="block px-8 sm:px-9 text-center transition-colors group-hover:text-[#942E3A]">
+            <Link href={getProductPath(product)} onClick={handleProductSelect} className="block px-8 sm:px-9 text-center transition-colors group-hover:text-[#942E3A]">
             <h3 className="product-card-name text-[10px] font-extrabold leading-[1.15] tracking-tight text-[#6B1F2A] line-clamp-2 sm:text-[11px]">
               {product.name}
             </h3>

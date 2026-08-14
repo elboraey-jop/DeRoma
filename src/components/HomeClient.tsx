@@ -19,6 +19,7 @@ import ProductCard, { ProductWithVariants } from "./ProductCard";
 
 import { useSiteSettings } from "@/providers/SiteSettingsProvider";
 import { useStoreI18n } from "@/providers/StoreI18nContext";
+import { DEFAULT_HOME_REVIEWS } from "@/lib/siteSettings";
 
 export type HomeReviewItem = {
   id?: string;
@@ -292,9 +293,28 @@ export default function HomeClient({
 
   const handleReviewDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number }; velocity: { x: number } }) => {
     if (Math.abs(info.offset.x) > 45 || Math.abs(info.velocity.x) > 350) {
-      // A hand swipe always dismisses the front card and reveals the card underneath.
-      // The swipe direction only controls the visual direction of the exit.
       changeReview(1, info.offset.x < 0 ? 1 : -1);
+    }
+  };
+
+  // Ultra-lightweight Mobile Touch Swipe (No 3D stack, zero jank)
+  const mobileTouchStartX = useRef<number | null>(null);
+  const handleMobileTouchStart = (e: React.TouchEvent) => {
+    mobileTouchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleMobileTouchEnd = (e: React.TouchEvent) => {
+    if (mobileTouchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - mobileTouchStartX.current;
+    mobileTouchStartX.current = null;
+    if (Math.abs(deltaX) > 35) {
+      if (deltaX > 0) {
+        // Swiped right
+        changeReview(dir === "rtl" ? 1 : -1);
+      } else {
+        // Swiped left
+        changeReview(dir === "rtl" ? -1 : 1);
+      }
     }
   };
 
@@ -436,7 +456,82 @@ export default function HomeClient({
                 </div>
 
                 <div className="relative min-w-0 flex-1 sm:h-[190px]">
-                  <div className="relative mx-auto h-[220px] w-full max-w-[620px] sm:h-full">
+                  {/* MOBILE VIEW: Ultra-lightweight 60fps single-card transition */}
+                  <div
+                    className="relative h-[210px] w-full sm:hidden"
+                    onTouchStart={handleMobileTouchStart}
+                    onTouchEnd={handleMobileTouchEnd}
+                  >
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.article
+                        key={`mobile-rev-${activeReview}`}
+                        initial={{ opacity: 0, x: reviewDirection * 24 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -reviewDirection * 24 }}
+                        transition={{ duration: 0.18, ease: "easeOut" }}
+                        className="absolute inset-0 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] p-4 text-[#942E3A] shadow-md"
+                        style={{ willChange: "transform, opacity" }}
+                      >
+                        <div className="flex h-full flex-col justify-between">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-2.5">
+                              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-xs font-bold text-[#D8B46A]">
+                                {activeReviewData.initials}
+                              </span>
+                              <div>
+                                <p className="text-[10px] font-semibold text-[#942E3A]">
+                                  {activeReviewData.name}
+                                </p>
+                                <div className="mt-0.5 flex items-center gap-1.5">
+                                  <div
+                                    className="flex gap-0.5 text-[#D8B46A]"
+                                    aria-label={`${activeReviewData.rating} out of 5 stars`}
+                                  >
+                                    {Array.from({ length: 5 }).map((_, index) => (
+                                      <Star
+                                        key={index}
+                                        className={`h-3 w-3 ${
+                                          index < activeReviewData.rating
+                                            ? "fill-current"
+                                            : "fill-transparent opacity-40"
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="text-[9px] font-bold tracking-[0.1em] text-[#942E3A]/65">
+                                    {activeReviewData.model}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <Quote className="h-5 w-5 rotate-180 text-[#942E3A]/20" />
+                          </div>
+
+                          <p className="font-playfair text-sm leading-snug">
+                            “{localizedReviewQuotes[activeReviewData.id || ""] || activeReviewData.quote}”
+                          </p>
+
+                          <div className="flex items-center justify-between gap-2 text-[9px]">
+                            <span className="font-bold tracking-[0.12em] text-[#D8B46A]">
+                              {lang === "ar" && activeReviewData.brand.toLowerCase() === "shoes"
+                                ? reviewSectionCopy.shoes
+                                : activeReviewData.brand}
+                            </span>
+                            <span className="text-[#942E3A]/55">
+                              {lang === "ar"
+                                ? activeReviewData.detail.toLowerCase().includes("verified")
+                                  ? reviewSectionCopy.verifiedCustomer
+                                  : reviewSectionCopy.customer
+                                : activeReviewData.detail}
+                            </span>
+                          </div>
+                        </div>
+                      </motion.article>
+                    </AnimatePresence>
+                  </div>
+
+                  {/* DESKTOP VIEW: Rich 3D Stack Deck Animation */}
+                  <div className="relative mx-auto hidden h-full w-full max-w-[620px] sm:block">
                     {[0, 1, 2, ...(returningReview !== null ? [3] : [])].map((stackPosition) => {
                       const isReturning = stackPosition === 3 && returningReview !== null;
                       const reviewIndex = isReturning ? returningReview : (activeReview + stackPosition) % reviews.length;

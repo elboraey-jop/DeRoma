@@ -257,6 +257,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
       color: product.color || "",
       size: isBag ? "" : selectedSize,
       quantity,
+      availableStock: activeVariant.stock,
     });
 
     setAdded(true);
@@ -280,6 +281,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
       color: product.color || "",
       size: isBag ? "" : selectedSize,
       quantity,
+      availableStock: activeVariant.stock,
     });
 
     router.push("/checkout");

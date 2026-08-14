@@ -58,8 +58,14 @@ async function getDashboardData() {
         Number(revenue._sum.subtotalPrice || 0) - Number(revenue._sum.discountAmount || 0),
       ),
       recentOrders: recentOrders.map((order) => ({
-        ...order,
+        id: order.id,
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
         totalPrice: Number(order.totalPrice),
+        status: order.status,
+        paymentMethod: order.paymentMethod,
+        createdAt: order.createdAt.toISOString(),
       })),
     };
   } catch (error) {

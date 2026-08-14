@@ -6,6 +6,7 @@ import {
   CATALOG_PRODUCTS,
   CatalogProduct,
 } from "@/lib/productCatalog";
+import { getProductPath, slugifyProductName } from "@/lib/productSlug";
 
 function buildVariants(product: CatalogProduct) {
   return product.sizes.map((size, index) => ({
@@ -62,6 +63,8 @@ function enrichCatalogProduct(
 export const FALLBACK_PRODUCTS: ProductWithVariants[] = CATALOG_PRODUCTS.map(
   toProductWithVariants,
 );
+
+export { getProductPath };
 
 export const getActiveProducts = cache(async function getActiveProducts(): Promise<ProductWithVariants[]> {
   try {
@@ -122,6 +125,7 @@ export const getProductById = cache(async function getProductById(
     if (product) {
       return enrichCatalogProduct({
         id: product.id,
+        slug: product.slug,
         name: product.name,
         description: product.description,
         sku: product.sku,
@@ -148,6 +152,45 @@ export const getProductById = cache(async function getProductById(
     }
   } catch (error) {
     console.warn("Database error during getProductById:", error);
+  }
+
+  try {
+    const products = await prisma.product.findMany({
+      where: { status: "active" },
+      include: { variants: true },
+    });
+    const matchedProduct = products.find(
+      (product) => slugifyProductName(product.name) === id,
+    );
+    if (matchedProduct) {
+      return enrichCatalogProduct({
+        id: matchedProduct.id,
+        name: matchedProduct.name,
+        description: matchedProduct.description,
+        sku: matchedProduct.sku,
+        price: Number(matchedProduct.price),
+        compareAtPrice: matchedProduct.compareAtPrice == null ? null : Number(matchedProduct.compareAtPrice),
+        category: matchedProduct.category,
+        subcategory: matchedProduct.subcategory,
+        images: matchedProduct.images,
+        brand: matchedProduct.brand || undefined,
+        color: matchedProduct.color,
+        rating: Number(matchedProduct.rating),
+        reviewsCount: matchedProduct.reviewsCount,
+        variants: matchedProduct.variants.map((variant) => ({
+          id: variant.id,
+          productId: variant.productId,
+          size: variant.size,
+          stock: Number(variant.stock),
+          price: variant.price == null ? null : Number(variant.price),
+          compareAtPrice: variant.compareAtPrice == null ? null : Number(variant.compareAtPrice),
+          wholesalePrice: variant.wholesalePrice == null ? null : Number(variant.wholesalePrice),
+          additionalCost: variant.additionalCost == null ? null : Number(variant.additionalCost),
+        })),
+      });
+    }
+  } catch (error) {
+    console.warn("Database error during slug product lookup:", error);
   }
 
   return fallbackProduct || null;

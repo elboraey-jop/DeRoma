@@ -37,6 +37,7 @@ import {
   ChevronDown,
   Check,
   Layers,
+  FileText,
 } from "lucide-react";
 import {
   createExpenseAction,
@@ -831,13 +832,18 @@ export default function FinancialsClient({
     return matchesType && matchesCategory && matchesSearch;
   });
 
-  // Current-week order profitability after allocating this week's eligible
-  // manual expenses by each order's share of weekly sales. Purchase invoices
-  // and income are already excluded from currentWeekPeriod.totalExpenses.
-  const currentWeekOrders = currentWeekPeriod?.orders || [];
-  const currentWeekSales = currentWeekOrders.reduce((sum, order) => sum + order.totalPrice, 0);
-  const currentWeekExpenses = currentWeekPeriod?.totalExpenses || 0;
-  const filteredOrders = currentWeekOrders
+  // Order profitability for the selected date range. Allocate eligible
+  // operating expenses across all orders in that range by each order's share
+  // of sales. Purchase invoices and income are excluded from this allocation.
+  const profitabilitySales = ordersProfit.reduce((sum, order) => sum + Number(order.totalPrice || 0), 0);
+  const profitabilityExpenses = expenses
+    .filter((expense) =>
+      (expense.type || "expense") !== "income" &&
+      !expense.isPurchaseInvoice &&
+      expense.category !== "purchase_invoice",
+    )
+    .reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
+  const filteredOrders = ordersProfit
     .filter((ord) => {
       return (
         ord.orderNumber.toLowerCase().includes(orderSearch.toLowerCase()) ||
@@ -846,7 +852,7 @@ export default function FinancialsClient({
     })
     .map((order) => {
       const weeklyExpenseShare =
-        currentWeekSales > 0 ? (order.totalPrice / currentWeekSales) * currentWeekExpenses : 0;
+        profitabilitySales > 0 ? (order.totalPrice / profitabilitySales) * profitabilityExpenses : 0;
       const netOrderProfit = order.orderProfit - weeklyExpenseShare;
 
       return {
@@ -855,6 +861,304 @@ export default function FinancialsClient({
         netOrderProfit,
       };
     });
+
+  const exportDateLabel = activeDateFilter.preset === "all"
+    ? (isRtl ? "كل الفترات" : "All periods")
+    : `${activeDateFilter.startDate || "..."} - ${activeDateFilter.endDate || "..."}`;
+
+  const exportFileDate = activeDateFilter.preset === "all"
+    ? "all-periods"
+    : `${activeDateFilter.startDate || "start"}-to-${activeDateFilter.endDate || "end"}`;
+
+  const exportTabTitles: Record<FinancialTab, string> = {
+    overview: "Overview & Safes",
+    pnl: "Profit & Loss",
+    cashflow: "Cash Flow",
+    expenses: "Expenses & Income",
+    settlements: "Weekly Settlement",
+    orders: "Order Profitability",
+    forecasting: "Forecasting",
+  };
+
+  const exportTransactions = filteredExpenses.map((expense) => ({
+    Date: new Date(expense.date).toLocaleDateString("en-CA"),
+    Type: expense.type === "income" ? "Income" : expense.isPurchaseInvoice || expense.category === "purchase_invoice" ? "Purchase invoice" : "Expense",
+    Title: expense.title,
+    Category: expense.category,
+    "Payment account": ACCOUNT_LABELS[expense.paymentAccount] || expense.paymentAccount,
+    Amount: Number(expense.amount || 0),
+    Notes: expense.notes || "",
+  }));
+
+  const exportRowsByTab: Record<FinancialTab, Record<string, unknown>[]> = {
+    overview: [
+      { Metric: "Total sales", Value: summary.totalSales },
+      { Metric: "Total liquidity", Value: paymentAccounts.totalLiquidity },
+      { Metric: "Net profit", Value: summary.netProfit },
+      { Metric: "Cash on hand", Value: paymentAccounts.cashOnHand },
+      { Metric: "InstaPay / Visa", Value: paymentAccounts.instapayVisa },
+      { Metric: "E-Wallets", Value: paymentAccounts.wallet },
+      { Metric: "Stock units", Value: inventoryStats.totalItemsInStock },
+      { Metric: "Stock wholesale value", Value: inventoryStats.stockWholesaleValue },
+      { Metric: "Stock retail value", Value: inventoryStats.stockRetailValue },
+    ],
+    pnl: [
+      { Line: "Gross sales revenue", Amount: grossSalesBeforeDiscounts },
+      { Line: "Promotional discounts", Amount: summary.totalDiscounts },
+      { Line: "Net sales revenue", Amount: summary.totalSales },
+      { Line: "COGS", Amount: summary.totalCOGS },
+      { Line: "Gross profit", Amount: summary.grossProfit },
+      { Line: "Operating expenses", Amount: summary.totalExpenses },
+      { Line: "Net operating income", Amount: summary.netProfit },
+    ],
+    cashflow: [
+      { Metric: "Cash inflow (sales)", Amount: cashInflowData.totalSales },
+      { Metric: "Cash outflow (COGS + expenses)", Amount: cashOutflowData.totalOutflow },
+      { Metric: "Net cash", Amount: netCashData.netCash },
+      { Metric: "Cash sales", Amount: paymentAccounts.cashSales },
+      { Metric: "InstaPay / Visa sales", Amount: paymentAccounts.instapaySales },
+      { Metric: "Wallet sales", Amount: paymentAccounts.walletSales },
+      ...transfers.map((transfer) => ({
+        Metric: `Transfer ${transfer.fromAccount} → ${transfer.toAccount}`,
+        Amount: Number(transfer.amount || 0),
+        Fee: Number(transfer.fee || 0),
+      })),
+    ],
+    expenses: exportTransactions,
+    settlements: weeklyPeriods.map((week) => ({
+      Week: week.weekId,
+      Start: week.startSat.toLocaleDateString("en-CA"),
+      End: week.endFri.toLocaleDateString("en-CA"),
+      Sales: week.totalSales,
+      COGS: week.totalCOGS,
+      Expenses: week.totalExpenses,
+      "Net profit": week.netProfit,
+      Status: week.isLocked ? "Completed" : "Open",
+    })),
+    orders: filteredOrders.map((order) => ({
+      Date: new Date(order.createdAt).toLocaleDateString("en-CA"),
+      Order: order.orderNumber,
+      Customer: order.customerName,
+      Status: order.status,
+      "Payment method": order.paymentMethod,
+      Sales: Number(order.totalPrice || 0),
+      COGS: Number(order.itemsCost || 0),
+      Discount: Number(order.discountAmount || 0),
+      Profit: Number(order.orderProfit || 0),
+      "Net profit / order": Number(order.netOrderProfit || 0),
+    })),
+    forecasting: [
+      { Metric: "Stock units", Value: inventoryStats.totalItemsInStock },
+      { Metric: "Wholesale stock value", Value: inventoryStats.stockWholesaleValue },
+      { Metric: "Retail stock value", Value: inventoryStats.stockRetailValue },
+      { Metric: "Projected profit", Value: inventoryStats.projectedProfit },
+      { Metric: "Low stock items", Value: inventoryStats.lowStockItemsCount },
+      { Metric: "Replenishment cost", Value: inventoryStats.lowStockReplenishmentCost },
+    ],
+  };
+
+  /* Excel export removed by request.
+  const handleExportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "DeRoma Admin";
+    workbook.lastModifiedBy = "DeRoma Admin";
+    workbook.created = new Date();
+    workbook.modified = new Date();
+    workbook.properties.date1904 = false;
+
+    const purple = "8B79C6";
+    const darkPurple = "66568F";
+    const gold = "D8B46A";
+    const cream = "FFF9EB";
+    const borderColor = "DCCFF5";
+    const moneyFormat = '#,##0.00;[Red]-#,##0.00';
+
+    const styleTitle = (cell: ExcelJS.Cell) => {
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: purple } };
+      cell.font = { name: "Aptos Display", size: 16, bold: true, color: { argb: "FFFFFF" } };
+      cell.alignment = { vertical: "middle", horizontal: "center" };
+    };
+    const styleHeader = (row: ExcelJS.Row) => {
+      row.height = 26;
+      row.eachCell((cell) => {
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: purple } };
+        cell.font = { name: "Aptos", size: 11, bold: true, color: { argb: "FFFFFF" } };
+        cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+        cell.border = { bottom: { style: "medium", color: { argb: gold } } };
+      });
+    };
+    const styleBody = (row: ExcelJS.Row, rowIndex: number) => {
+      row.eachCell((cell) => {
+        cell.font = { name: "Aptos", size: 10, color: { argb: darkPurple } };
+        cell.alignment = { vertical: "middle", wrapText: true };
+        cell.border = {
+          bottom: { style: "hair", color: { argb: borderColor } },
+        };
+        if (rowIndex % 2 === 0) cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FCFAFF" } };
+        if (typeof cell.value === "number") cell.numFmt = moneyFormat;
+      });
+    };
+
+    const info = workbook.addWorksheet("Report Info", { views: [{ showGridLines: false }] });
+    info.columns = [{ width: 28 }, { width: 42 }, { width: 18 }, { width: 18 }];
+    info.mergeCells("A1:D1");
+    info.getCell("A1").value = `DeRoma Admin | ${exportTabTitles[activeTab]}`;
+    styleTitle(info.getCell("A1"));
+    info.getRow(1).height = 34;
+    info.mergeCells("A2:D2");
+    info.getCell("A2").value = "Professional financial export generated from the selected tab and date range";
+    info.getCell("A2").font = { italic: true, color: { argb: darkPurple } };
+    info.getCell("A2").alignment = { horizontal: "center" };
+    const metaRows = [
+      ["Selected tab", exportTabTitles[activeTab]],
+      ["Report period", exportDateLabel],
+      ["Generated at", new Date().toLocaleString("en-GB")],
+      ["Rows exported", exportRowsByTab[activeTab].length],
+    ];
+    metaRows.forEach((values, index) => {
+      const row = info.addRow(values);
+      row.height = 22;
+      row.getCell(1).font = { bold: true, color: { argb: darkPurple } };
+      row.getCell(2).font = { color: { argb: darkPurple } };
+      if (index % 2 === 0) row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: cream } };
+    });
+    info.addRow([]);
+    const summaryHeader = info.addRow(["Key result", "Value"]);
+    styleHeader(summaryHeader);
+    exportRowsByTab[activeTab].slice(0, 12).forEach((item) => {
+      const firstKey = Object.keys(item)[0];
+      const secondKey = Object.keys(item)[1];
+      const row = info.addRow([firstKey, item[secondKey] ?? ""]);
+      styleBody(row, row.number);
+      row.getCell(1).font = { bold: true, color: { argb: darkPurple } };
+    });
+    info.views = [{ showGridLines: false, state: "frozen", ySplit: 7 }];
+    info.autoFilter = { from: "A7", to: `B${info.rowCount}` };
+    info.pageSetup = { orientation: "portrait", fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
+    info.headerFooter.oddFooter = "DeRoma Admin | &P of &N";
+
+    const detailRows = exportRowsByTab[activeTab];
+    const details = workbook.addWorksheet(exportTabTitles[activeTab].slice(0, 31), { views: [{ showGridLines: false }] });
+    const detailColumns = detailRows.length ? Object.keys(detailRows[0]) : ["Message"];
+    details.columns = detailColumns.map((key) => ({
+      header: key,
+      key,
+      width: Math.min(34, Math.max(14, key.length + 4)),
+    }));
+    const detailHeader = details.getRow(1);
+    styleHeader(detailHeader);
+    detailRows.forEach((item) => {
+      const row = details.addRow(detailColumns.map((key) => item[key] ?? ""));
+      styleBody(row, row.number);
+    });
+    if (detailRows.length) {
+      details.addTable({
+        name: `DeRoma${activeTab}Table`,
+        ref: `A1:${String.fromCharCode(64 + Math.min(detailColumns.length, 26))}${detailRows.length + 1}`,
+        headerRow: true,
+        totalsRow: false,
+        style: { theme: "TableStyleMedium4", showRowStripes: true },
+        columns: detailColumns.map((key) => ({ name: key })),
+        rows: detailRows.map((item) => detailColumns.map((key) => item[key] ?? "")),
+      });
+    }
+    details.views = [{ showGridLines: false, state: "frozen", ySplit: 1 }];
+    details.autoFilter = { from: "A1", to: `${String.fromCharCode(64 + Math.min(detailColumns.length, 26))}${details.rowCount}` };
+    details.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
+    details.headerFooter.oddHeader = `&BDeRoma Admin | ${exportTabTitles[activeTab]}`;
+    details.headerFooter.oddFooter = "&P of &N";
+    details.eachRow((row) => row.eachCell((cell) => { if (typeof cell.value === "number") cell.numFmt = moneyFormat; }));
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `deroma-${activeTab}-${exportFileDate}.xlsx`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  */
+
+  const handleExportPdf = () => {
+    const reportWindow = window.open("", "_blank", "width=1200,height=900");
+    if (!reportWindow) {
+      alert(isRtl ? "يرجى السماح بالنوافذ المنبثقة لتصدير التقرير." : "Please allow pop-ups to export the report.");
+      return;
+    }
+
+    const escapeHtml = (value: unknown) => String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;");
+    const money = (value: number) => `${Number(value || 0).toLocaleString("en-US")} EGP`;
+    const pdfTabTitles: Record<FinancialTab, string> = {
+      overview: isRtl ? "ملخص الخزائن والأرصدة" : exportTabTitles.overview,
+      pnl: isRtl ? "قائمة الأرباح والخسائر" : exportTabTitles.pnl,
+      cashflow: isRtl ? "التدفق النقدي" : exportTabTitles.cashflow,
+      expenses: isRtl ? "المصروفات والإيرادات" : exportTabTitles.expenses,
+      settlements: isRtl ? "التسويات الأسبوعية" : exportTabTitles.settlements,
+      orders: isRtl ? "ربحية الطلبات" : exportTabTitles.orders,
+      forecasting: isRtl ? "التوقعات وإعادة التوريد" : exportTabTitles.forecasting,
+    };
+    const pdfKeyLabels: Record<string, string> = {
+      Metric: "المؤشر",
+      Value: "القيمة",
+      Line: "البند",
+      Amount: "المبلغ",
+      Fee: "الرسوم",
+      Date: "التاريخ",
+      Type: "النوع",
+      Title: "البيان",
+      Category: "التصنيف",
+      "Payment account": "حساب الدفع",
+      Notes: "ملاحظات",
+      Week: "الأسبوع",
+      Start: "من",
+      End: "إلى",
+      Sales: "المبيعات",
+      COGS: "تكلفة المنتجات",
+      Expenses: "المصروفات",
+      "Net profit": "صافي الربح",
+      Status: "الحالة",
+      Order: "رقم الطلب",
+      Customer: "العميل",
+      "Payment method": "طريقة الدفع",
+      Discount: "الخصم",
+      Profit: "الربح",
+      "Net profit / order": "صافي ربح الطلب",
+      From: "من حساب",
+      To: "إلى حساب",
+      "Rows exported": "عدد الصفوف",
+    };
+    const rawRows = exportRowsByTab[activeTab];
+    const rows = isRtl
+      ? rawRows.map((row) => Object.fromEntries(Object.entries(row).map(([key, value]) => [pdfKeyLabels[key] || key, value])))
+      : rawRows;
+    const tableColumns = rows.length ? Object.keys(rows[0]) : [isRtl ? "رسالة" : "Message"];
+    const formatPdfCell = (value: unknown) =>
+      typeof value === "number"
+        ? Math.round(value).toLocaleString("en-US")
+        : value;
+    const tableRows = rows.length
+      ? rows.map((row) => `<tr>${tableColumns.map((column) => `<td>${escapeHtml(formatPdfCell(row[column]))}</td>`).join("")}</tr>`).join("")
+      : `<tr><td colspan="${tableColumns.length}">${isRtl ? "لا توجد بيانات في هذه الفترة." : "No data in this period."}</td></tr>`;
+    const headers = tableColumns.map((column) => `<th>${escapeHtml(column)}</th>`).join("");
+    const reportTitle = pdfTabTitles[activeTab];
+    const reportPeriodLabel = isRtl ? "الفترة" : "Report period";
+    const generatedLabel = isRtl ? "تاريخ الإنشاء" : "Generated";
+    const detailsLabel = isRtl ? "تفاصيل" : "details";
+    const totalSalesLabel = isRtl ? "إجمالي المبيعات" : "Total sales";
+    const expensesLabel = isRtl ? "المصروفات التشغيلية" : "Operating expenses";
+    const netProfitLabel = isRtl ? "صافي الربح" : "Net profit";
+    const rowsLabel = isRtl ? "عدد الصفوف" : "Rows exported";
+    reportWindow.document.write(`<!doctype html><html lang="${isRtl ? "ar" : "en"}"><head><meta charset="utf-8"><title>DeRoma ${escapeHtml(reportTitle)}</title><style>
+      *{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#45366f;margin:32px;background:#fffaf0;direction:${isRtl ? "rtl" : "ltr"}}h1{color:#7565b5;margin:0 0 6px}h2{color:#7565b5;margin:28px 0 10px;font-size:18px}.brand{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #d8b46a;padding-bottom:14px}.brandmark{font-size:22px;font-weight:800;color:#7565b5}.meta{color:#66568f;margin:18px 0 24px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card{border:1px solid #d8b46a;border-radius:12px;padding:12px;background:#fffdf5}.card span{display:block;color:#66568f;font-size:11px;margin-bottom:6px}.card strong{font-size:17px;color:#7565b5}table{width:100%;border-collapse:collapse;font-size:11px;background:#fffdf5}th{background:#8b79c6;color:#fffdf5;text-align:${isRtl ? "right" : "left"};padding:9px}td{border-bottom:1px solid #e5ddf4;padding:8px;color:#4b3b76}.amount{text-align:${isRtl ? "left" : "right"};font-weight:bold}.income{color:#087443}.expense{color:#a3263a}@media print{body{margin:12mm;background:#fffaf0;-webkit-print-color-adjust:exact;print-color-adjust:exact}.summary{grid-template-columns:repeat(4,1fr)}}
+    </style></head><body><div class="brand"><div class="brandmark">DeRoma ADMIN</div><div>${escapeHtml(reportTitle)}</div></div><h1>${escapeHtml(reportTitle)}</h1><div class="meta">${reportPeriodLabel}: ${escapeHtml(exportDateLabel)}<br>${generatedLabel}: ${escapeHtml(new Date().toLocaleString(isRtl ? "ar-EG" : "en-GB"))}</div><div class="summary"><div class="card"><span>${totalSalesLabel}</span><strong>${money(summary.totalSales)}</strong></div><div class="card"><span>${expensesLabel}</span><strong>${money(summary.totalExpenses)}</strong></div><div class="card"><span>${netProfitLabel}</span><strong>${money(summary.netProfit)}</strong></div><div class="card"><span>${rowsLabel}</span><strong>${rows.length}</strong></div></div><h2>${escapeHtml(reportTitle)} ${detailsLabel}</h2><table><thead><tr>${headers}</tr></thead><tbody>${tableRows}</tbody></table><script>window.onload=function(){window.focus();window.print();}</script></body></html>`);
+    reportWindow.document.close();
+  };
 
   return (
     <div dir={isRtl ? "rtl" : "ltr"} data-financials-dashboard className="space-y-5 text-start">
@@ -874,7 +1178,23 @@ export default function FinancialsClient({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={handleExportPdf}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[#8B79C6]/60 bg-white px-3 py-2 text-xs font-bold text-[#66568F] shadow-sm transition hover:bg-[#F4F0FF]"
+            title={isRtl ? "تصدير تقرير PDF للفترة المحددة" : "Export PDF report for selected period"}
+          >
+            <FileText className="h-4 w-4" />
+            <span>{isRtl ? "تصدير PDF" : "Export PDF"}</span>
+          </button>
+          <button
+            type="button"
+            className="hidden"
+            title={isRtl ? "تصدير ملف Excel للفترة المحددة" : "Export Excel workbook for selected period"}
+          >
+            <span>{isRtl ? "تصدير Excel" : "Export Excel"}</span>
+          </button>
           <AdminDailyLogDatePicker
             currentPreset={activeDateFilter.preset}
             currentStartDate={activeDateFilter.startDate}
@@ -2174,10 +2494,10 @@ export default function FinancialsClient({
 
           {/* Search Toolbar */}
           <div className="rounded-xl border border-[#D8B46A]/40 bg-[#FFF9EB]/60 px-3 py-2 text-xs text-[#6B1F2A]">
-            <span className="font-bold">{isRtl ? "مصاريف الأسبوع الموزعة: " : "Weekly expenses allocated: "}</span>
-            <span className="font-black text-[#942E3A]">{formatCurrency(currentWeekExpenses)}</span>
+            <span className="font-bold">{isRtl ? "مصاريف الفترة الموزعة: " : "Period expenses allocated: "}</span>
+            <span className="font-black text-[#942E3A]">{formatCurrency(profitabilityExpenses)}</span>
             <span className="ml-2 text-[10px] text-[#6B1F2A]/70">
-              {isRtl ? "يتم توزيعها حسب نسبة مبيعات كل أوردر. فواتير الشراء والدخل خارج الحساب." : "Allocated by each order's share of weekly sales. Purchase invoices and income are excluded."}
+              {isRtl ? "يتم توزيعها حسب نسبة مبيعات كل طلب. فواتير الشراء والدخل خارج الحساب." : "Allocated by each order's share of period sales. Purchase invoices and income are excluded."}
             </span>
           </div>
 
@@ -2210,7 +2530,15 @@ export default function FinancialsClient({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#942E3A]/10">
-                {filteredOrders.map((order) => (
+                {filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="py-10 text-center text-xs text-[#6B1F2A]/60">
+                      {ordersProfit.length === 0
+                        ? (isRtl ? "لا توجد طلبات مسلّمة في الفترة المحددة." : "No delivered orders in the selected period.")
+                        : (isRtl ? "لا توجد طلبات مطابقة للبحث الحالي." : "No orders match the current search.")}
+                    </td>
+                  </tr>
+                ) : filteredOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-[#FFF9EB]/50 transition">
                     <td className="py-2.5 font-bold text-[#942E3A]">
                       <Link href={`/admin/orders/${order.id}`} className="hover:underline flex items-center gap-1">

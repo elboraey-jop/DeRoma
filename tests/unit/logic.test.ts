@@ -61,6 +61,7 @@ test("enforces order status transitions", () => {
   assert.equal(isCashOnDelivery("cod"), true);
   assert.equal(isCashOnDelivery("wallet"), false);
   assert.deepEqual(getAllowedNextStatuses("pending", "cod"), ["confirmed", "cancelled"]);
+  assert.deepEqual(getAllowedNextStatuses("pending", "instapay"), ["paid", "cancelled"]);
   assert.deepEqual(getSelectableStatuses("delivered", "cod"), ["delivered", "returned", "cancelled"]);
 });
 

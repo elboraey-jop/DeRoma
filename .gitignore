@@ -52,3 +52,5 @@ Thumbs.db
 *.log
 .next-stale-*
 /public/uploads
+/backups
+*.sql

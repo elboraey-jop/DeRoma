@@ -8,10 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
-    "test": "tsx --test tests/unit/logic.test.ts",
+    "test": "tsx --test tests/unit/logic.test.ts tests/unit/backup.test.ts",
     "test:smoke": "tsx --test tests/smoke/routes.test.ts",
     "test:db": "tsx --test tests/integration/database.test.ts",
-    "db:migrate": "prisma migrate dev --name init",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:backup": "tsx scripts/backup-db.ts",
+    "db:restore": "tsx scripts/restore-db.ts",
     "worker": "tsx src/worker.ts"
   },
   "dependencies": {

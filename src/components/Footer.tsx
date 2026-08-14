@@ -102,9 +102,21 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="flex flex-col items-center justify-between gap-2 border-t border-[#D8B46A]/18 pt-4 text-center text-[10px] text-[#FFF9EB]/80 sm:flex-row sm:text-xs">
-            <p>&copy; {formatNumber(currentYear)} DeRoma Store. {t("footer.allRightsReserved")}</p>
-            <div className="flex items-center gap-3 font-medium text-[#FFF9EB]/80">
+          <div className="flex flex-col items-center justify-between gap-3 border-t border-[#D8B46A]/18 pt-4 text-center text-xs text-[#FFF9EB] sm:flex-row">
+            <div className="flex items-center gap-2 text-[#FFF9EB]">
+              <span className="text-[11px] sm:text-xs font-medium">
+                {dir === "rtl" ? "طُور بواسطة" : "Developed by"}{" "}
+                <span className="font-bold text-[#D8B46A] text-xs sm:text-sm">Mohamed Samy</span>
+              </span>
+              <span className="text-[#D8B46A]/40">|</span>
+              <a href="https://www.instagram.com/e.l.b.o.r.a.e.y/" target="_blank" rel="noopener noreferrer" className="hover:text-[#D8B46A] text-[#FFF9EB] transition-colors" aria-label="Instagram">
+                <Instagram className="h-4 w-4" />
+              </a>
+              <a href="https://wa.me/201279342177" target="_blank" rel="noopener noreferrer" className="hover:text-[#D8B46A] text-[#FFF9EB] transition-colors" aria-label="WhatsApp">
+                <MessageCircle className="h-4 w-4" />
+              </a>
+            </div>
+            <div className="flex items-center gap-3 font-medium text-[#FFF9EB]/80 text-[10px] sm:text-xs">
               <Link href="/privacy" className="hover:text-white">{t("nav.privacy")}</Link>
               <span>&bull;</span>
               <Link href="/terms" className="hover:text-white">{t("nav.terms")}</Link>

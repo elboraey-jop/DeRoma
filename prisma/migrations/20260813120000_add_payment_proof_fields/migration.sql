@@ -1,8 +1,0 @@
-ALTER TABLE "Order"
-ADD COLUMN "paymentProofStatus" TEXT NOT NULL DEFAULT 'not_required',
-ADD COLUMN "paymentProofSentAt" TIMESTAMP(3);
-
-ALTER TABLE "SiteSettings"
-ADD COLUMN "instapayAccount" TEXT NOT NULL DEFAULT '01515205073',
-ADD COLUMN "walletNumber" TEXT NOT NULL DEFAULT '01515205073',
-ADD COLUMN "walletProvider" TEXT NOT NULL DEFAULT 'Vodafone Cash';

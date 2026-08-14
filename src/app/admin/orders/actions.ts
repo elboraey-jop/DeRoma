@@ -35,7 +35,10 @@ export async function updateOrderStatusAction(formData: FormData) {
       where: { id },
       include: { items: true },
     });
-    if (!order) throw new Error("Order not found.");
+    // A stale orders page can submit an id that was already removed or
+    // replaced. Treat that submission as a no-op and let revalidation refresh
+    // the list instead of exposing a server runtime error.
+    if (!order) return [];
     if (order.status === status)
       return order.items.map((item) => item.productId);
     if (!getAllowedNextStatuses(order.status, order.paymentMethod).includes(status))
@@ -63,7 +66,13 @@ export async function updateOrderStatusAction(formData: FormData) {
       }
     }
 
-    await tx.order.update({ where: { id }, data: { status } });
+    // Use updateMany for the final write so a stale or double-submitted form
+    // cannot surface Prisma's raw P2025 runtime error to the admin UI.
+    const updated = await tx.order.updateMany({
+      where: { id },
+      data: { status },
+    });
+    if (updated.count !== 1) return [];
     return order.items.map((item) => item.productId);
   });
 

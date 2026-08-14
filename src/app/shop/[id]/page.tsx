@@ -3,6 +3,7 @@ import { getProductById, getActiveProducts } from "@/lib/products";
 import ProductDetailClient from "@/components/ProductDetailClient";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
+import { getProductPath } from "@/lib/productSlug";
 
 export const revalidate = 60; // Cache page for 60 seconds
 
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title,
       description,
-      url: `${baseUrl}/shop/${product.id}`,
+      url: `${baseUrl}${getProductPath(product)}`,
       siteName: "DeRoma Store",
       images: [{ url: imageUrl, width: 800, height: 800, alt: product.name }],
       type: "website",
@@ -85,7 +86,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     },
     offers: {
       "@type": "Offer",
-      url: `${baseUrl}/shop/${product.id}`,
+      url: `${baseUrl}${getProductPath(product)}`,
       priceCurrency: "EGP",
       price: Number(product.price),
       availability: product.variants.some((v) => v.stock > 0)
