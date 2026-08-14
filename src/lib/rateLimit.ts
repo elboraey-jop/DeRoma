@@ -1,8 +1,10 @@
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
+
 /**
  * In-memory sliding window Rate Limiter for Next.js Server Actions & API Routes
- * Protects against brute-force attacks, DDoS, bot spamming, and promo-code guessing.
+ * Used as fallback if Upstash Redis credentials are not configured.
  */
-
 interface RateLimitRecord {
   count: number;
   resetTime: number;
@@ -12,7 +14,7 @@ const rateLimitStore = new Map<string, RateLimitRecord>();
 
 // Cleanup stale records periodically every 5 minutes
 if (typeof setInterval !== "undefined") {
-  setInterval(() => {
+  const cleanupInterval = setInterval(() => {
     const now = Date.now();
     rateLimitStore.forEach((record, key) => {
       if (now > record.resetTime) {
@@ -20,13 +22,17 @@ if (typeof setInterval !== "undefined") {
       }
     });
   }, 5 * 60 * 1000);
+
+  if (typeof cleanupInterval === "object" && "unref" in cleanupInterval) {
+    cleanupInterval.unref();
+  }
 }
 
-export function checkRateLimit(
+function localRateLimit(
   identifier: string,
-  maxRequests: number = 10,
-  windowSeconds: number = 60
-): { success: boolean; limit: number; remaining: number; reset: number } {
+  maxRequests: number,
+  windowSeconds: number
+) {
   const now = Date.now();
   const windowMs = windowSeconds * 1000;
   const record = rateLimitStore.get(identifier);
@@ -63,6 +69,51 @@ export function checkRateLimit(
   };
 }
 
+function getUpstashRatelimit(maxRequests: number, windowSeconds: number): Ratelimit | null {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!url || !token) {
+    return null;
+  }
+
+  const redis = new Redis({
+    url,
+    token,
+  });
+
+  return new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(maxRequests, `${windowSeconds} s`),
+    analytics: true,
+    prefix: "@upstash/ratelimit",
+  });
+}
+
+export async function checkRateLimit(
+  identifier: string,
+  maxRequests: number = 10,
+  windowSeconds: number = 60
+): Promise<{ success: boolean; limit: number; remaining: number; reset: number }> {
+  try {
+    const limiter = getUpstashRatelimit(maxRequests, windowSeconds);
+    if (!limiter) {
+      return localRateLimit(identifier, maxRequests, windowSeconds);
+    }
+
+    const result = await limiter.limit(identifier);
+    return {
+      success: result.success,
+      limit: result.limit,
+      remaining: result.remaining,
+      reset: result.reset,
+    };
+  } catch (error) {
+    console.error("Upstash Rate Limiting error, falling back to memory:", error);
+    return localRateLimit(identifier, maxRequests, windowSeconds);
+  }
+}
+
 /**
  * Helper to sanitize user string inputs to prevent XSS (Cross-Site Scripting)
  */
@@ -76,3 +127,4 @@ export function sanitizeInput(str: string): string {
     .replace(/'/g, "&#x27;")
     .replace(/\//g, "&#x2F;");
 }
+

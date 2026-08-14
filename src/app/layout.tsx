@@ -31,7 +31,7 @@ const cairo = Cairo({
 });
 
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deromastore.com";
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deroma.store";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),

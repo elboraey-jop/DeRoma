@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminCategoriesPage() {
   await requireAdmin();
-  let options: Array<{ id: string; category: string; type: string; name: string }> = [];
+  let options: Array<{ id: string; category: string; type: string; name: string; value: string | null }> = [];
   let products: Array<{
     id: string;
     name: string;
@@ -21,7 +21,7 @@ export default async function AdminCategoriesPage() {
     variants: Array<{ size: string; stock: number }>;
   }> = [];
   try {
-    options = await prisma.catalogOption.findMany({ where: { active: true }, select: { id: true, category: true, type: true, name: true }, orderBy: [{ category: "asc" }, { type: "asc" }, { sortOrder: "asc" }, { name: "asc" }] });
+    options = await prisma.catalogOption.findMany({ where: { active: true }, select: { id: true, category: true, type: true, name: true, value: true }, orderBy: [{ category: "asc" }, { type: "asc" }, { sortOrder: "asc" }, { name: "asc" }] });
     products = (await prisma.product.findMany({
       select: {
         id: true,

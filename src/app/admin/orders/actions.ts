@@ -93,7 +93,7 @@ export async function updateOrderStatusAction(formData: FormData) {
             ? "OrderReturned"
             : "OrderShipped",
         eventId: `${order.orderNumber}-${status}`,
-        eventSourceUrl: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://deromastore.com"}/admin/orders/${order.id}`,
+        eventSourceUrl: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://deroma.store"}/admin/orders/${order.id}`,
         value: Number(order.totalPrice),
         orderNumber: order.orderNumber,
         items: order.items.map((item) => ({

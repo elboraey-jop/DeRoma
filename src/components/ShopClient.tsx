@@ -13,6 +13,7 @@ import { sortSizesList } from "@/lib/utils";
 
 interface ShopClientProps {
   initialProducts: ProductWithVariants[];
+  catalogColors?: Array<{ name: string; value: string | null }>;
 }
 
 function getColorHex(colorName: string): string {
@@ -55,7 +56,7 @@ function getColorHex(colorName: string): string {
   }
 }
 
-export default function ShopClient({ initialProducts }: ShopClientProps) {
+export default function ShopClient({ initialProducts, catalogColors = [] }: ShopClientProps) {
   const { t, lang, dir, formatNumber } = useStoreI18n();
   const copy = lang === "ar"
     ? {
@@ -90,7 +91,13 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
       };
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get("q") || "";
-  const brands = ["New Balance", "Adidas", "Nike", "ASICS"];
+  const brands = useMemo(() => {
+    const uniqueBrands = new Set<string>();
+    initialProducts.forEach((product) => {
+      if (product.brand?.trim()) uniqueBrands.add(product.brand.trim());
+    });
+    return Array.from(uniqueBrands).sort((a, b) => a.localeCompare(b));
+  }, [initialProducts]);
   const initialBrands = searchParams.getAll("brand").flatMap((value) => value.split(","));
   const normalizedInitialBrands = brands.filter((brand) =>
     initialBrands.some((value) => value.trim().toLowerCase() === brand.toLowerCase())
@@ -152,9 +159,17 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
 
   const allColors = useMemo(() => {
     const colors = new Set<string>();
+    catalogColors.forEach((color) => { if (color.name.trim()) colors.add(color.name.trim()); });
     initialProducts.forEach((p) => { if (p.color) colors.add(p.color); });
     return Array.from(colors);
-  }, [initialProducts]);
+  }, [catalogColors, initialProducts]);
+
+  const catalogColorHex = useMemo(
+    () => new Map(catalogColors.filter((color) => color.value).map((color) => [color.name.toLowerCase(), color.value as string])),
+    [catalogColors],
+  );
+
+  const getFilterColorHex = (color: string) => catalogColorHex.get(color.toLowerCase()) || getColorHex(color);
 
   const filteredProducts = useMemo(() => {
     let result = [...initialProducts];
@@ -392,7 +407,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
             <div className="flex flex-wrap gap-2">
               {allColors.map((color) => {
                 const isSelected = selectedColors.includes(color);
-                const hex = getColorHex(color);
+                const hex = getFilterColorHex(color);
                 return (
                   <button
                     key={color}
@@ -561,7 +576,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                   <div className="flex flex-wrap gap-2">
                     {allColors.map((color) => {
                       const isSelected = selectedColors.includes(color);
-                      const hex = getColorHex(color);
+                      const hex = getFilterColorHex(color);
                       return (
                         <button
                           key={color}

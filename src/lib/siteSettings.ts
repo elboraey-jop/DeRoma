@@ -162,7 +162,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsData = {
   instapayAccount: "01515205073",
   walletNumber: "01515205073",
   walletProvider: "Vodafone Cash",
-  email: "support@deromastore.com",
+  email: "support@deroma.store",
   instagram: "https://instagram.com",
   facebook: "https://facebook.com",
   tiktok: "https://tiktok.com",

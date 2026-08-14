@@ -258,7 +258,7 @@ export default function TermsPage() {
                 </div>
               ) : (
                 <p className="text-center text-[11px] text-stone-400 py-2">
-                  {copy.noResults} "{shippingSearch}".
+                  {copy.noResults} &quot;{shippingSearch}&quot;.
                 </p>
               )}
             </div>

@@ -817,7 +817,7 @@ export default function AdminWebsiteClient({
                 type="email"
                 value={settings.email}
                 onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                placeholder="support@deromastore.com"
+                placeholder="support@deroma.store"
                 className="w-full rounded-xl border border-[#942E3A]/20 bg-[#FFF9EB]/30 px-2.5 py-1.5 sm:py-2 text-xs text-[#942E3A] focus:outline-none focus:ring-1 focus:ring-[#942E3A]"
               />
             </div>

@@ -445,7 +445,7 @@ export default function HomeClient({
 
                       return (
                         <motion.article
-                          key={isReturning ? `${review.model}-returning` : review.model}
+                          key={`${review.id || review.model}-${isReturning ? "returning" : stackPosition}`}
                           drag={isFront ? "x" : false}
                           dragConstraints={{ left: -520, right: 520 }}
                           dragElastic={0.18}

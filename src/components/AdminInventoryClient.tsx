@@ -274,7 +274,7 @@ export default function AdminInventoryClient({
   const isRtl = lang === "ar";
 
   const searchParams = useSearchParams();
-  const [viewMode, setViewMode] = useState<"variants" | "products">("variants");
+  const [viewMode, setViewMode] = useState<"variants" | "products">("products");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "healthy" | "low" | "out">("all");

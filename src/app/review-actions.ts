@@ -8,7 +8,7 @@ export async function submitReviewAction(input: { productId: string; customerNam
   const cleanName = sanitizeInput(input.customerName.trim());
   const cleanBody = sanitizeInput(input.body.trim());
 
-  const rateCheck = checkRateLimit(`review_${input.productId}_${cleanName}`, 3, 300);
+  const rateCheck = await checkRateLimit(`review_${input.productId}_${cleanName}`, 3, 300);
   if (!rateCheck.success) {
     return { success: false, error: "Too many reviews submitted. Please wait a few minutes." };
   }

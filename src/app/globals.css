@@ -124,7 +124,7 @@
     @apply pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#942E3A]/55;
   }
 
-  .admin-input {
+.admin-input {
     @apply w-full rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-sm text-[#6B1F2A] outline-none shadow-[0_2px_8px_rgba(67,25,31,0.025)] transition placeholder:text-[#6B1F2A]/35 focus:border-[#942E3A] focus:ring-4 focus:ring-[#D8B46A]/15;
   }
 
@@ -155,6 +155,27 @@
   .product-editor-panel > div:not([class*="absolute"]) {
     @apply px-5 sm:px-7;
   }
+}
+
+.admin-submit-pending {
+  position: relative;
+  cursor: wait !important;
+  opacity: 0.7;
+}
+
+.admin-submit-pending::after {
+  width: 0.85rem;
+  height: 0.85rem;
+  margin-left: 0.5rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 9999px;
+  animation: admin-submit-spin 0.7s linear infinite;
+  content: "";
+}
+
+@keyframes admin-submit-spin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes marquee {

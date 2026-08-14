@@ -5,7 +5,7 @@ import { checkRateLimit } from "@/lib/rateLimit";
 export async function POST(request: Request) {
   try {
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "anonymous";
-    const rate = checkRateLimit(`promo_${ip}`, 10, 60);
+    const rate = await checkRateLimit(`promo_${ip}`, 10, 60);
     if (!rate.success) {
       return NextResponse.json(
         { valid: false, error: "Too many promo code attempts. Please wait a minute and try again." },

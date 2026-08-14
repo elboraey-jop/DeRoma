@@ -450,7 +450,15 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
 
             {product.color && (
               <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#D8B46A]">
-                <span>{t("cart.color")}:</span><span className="text-[#942E3A]">{product.color}</span>
+                <span>{t("cart.color")}:</span>
+                <span className="inline-flex items-center gap-2 text-[#942E3A]">
+                  <span
+                    className="h-4 w-4 rounded-full border border-[#942E3A]/20 shadow-sm"
+                    style={{ backgroundColor: getColorHex(product.color) }}
+                    aria-hidden="true"
+                  />
+                  {product.color}
+                </span>
               </div>
             )}
 
@@ -675,7 +683,8 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96, y: 12 }}
                 transition={{ type: "spring", damping: 28, stiffness: 260 }}
-                className="flex max-h-[calc(100dvh-1rem)] w-full max-w-6xl flex-col overflow-hidden rounded-[1.5rem] border border-white/15 bg-[#241417]/95 p-3 text-white shadow-2xl sm:max-h-[calc(100dvh-3rem)] sm:rounded-[2rem] sm:p-5"
+                className="flex min-h-[36rem] w-full max-w-6xl flex-col overflow-hidden rounded-[1.5rem] border border-white/15 bg-[#241417]/95 p-3 text-white shadow-2xl sm:rounded-[2rem] sm:p-5"
+                style={{ height: "calc(100dvh - 3rem)" }}
                 onClick={(event) => event.stopPropagation()}
               >
                 <div className="flex items-center justify-between gap-3 px-1 pb-3 sm:px-2 sm:pb-4">
@@ -729,7 +738,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                 </div>
 
                 <div
-                  className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[1.1rem] bg-black/20"
+                  className="relative flex min-h-[22rem] flex-1 items-center justify-center overflow-hidden rounded-[1.1rem] bg-black/20 sm:min-h-[30rem]"
                   onWheel={(event) => {
                     event.preventDefault();
                     adjustGalleryZoom(event.deltaY < 0 ? 0.25 : -0.25);

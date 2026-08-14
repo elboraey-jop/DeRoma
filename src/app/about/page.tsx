@@ -129,7 +129,7 @@ export default function AboutAndContactPage() {
 
   const mailUrl = settings.email
     ? `mailto:${settings.email}`
-    : "mailto:support@deromastore.com";
+    : "mailto:support@deroma.store";
 
   // Read URL query param if tab=about or tab=contact is passed
   useEffect(() => {

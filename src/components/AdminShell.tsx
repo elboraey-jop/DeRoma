@@ -94,6 +94,43 @@ function AdminShellContent({ children }: { children: React.ReactNode }) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notifSummary, setNotifSummary] = useState<NotificationSummary | null>(null);
 
+  useEffect(() => {
+    const handleAdminSubmit = (event: SubmitEvent) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement) || form.dataset.submitting === "true") return;
+
+      form.dataset.submitting = "true";
+      form.setAttribute("aria-busy", "true");
+      const submitButtons = Array.from(
+        form.querySelectorAll<HTMLButtonElement | HTMLInputElement>(
+          'button[type="submit"], input[type="submit"]',
+        ),
+      );
+
+      submitButtons.forEach((button) => {
+        button.disabled = true;
+        button.classList.add("admin-submit-pending");
+        button.setAttribute("aria-disabled", "true");
+      });
+
+      // Some inline server-action forms do not expose a shared pending state.
+      // Keep a short client-side guard to stop rapid duplicate clicks without
+      // leaving the button stuck when the action does not navigate.
+      window.setTimeout(() => {
+        form.dataset.submitting = "false";
+        form.removeAttribute("aria-busy");
+        submitButtons.forEach((button) => {
+          button.disabled = false;
+          button.classList.remove("admin-submit-pending");
+          button.removeAttribute("aria-disabled");
+        });
+      }, 2500);
+    };
+
+    document.addEventListener("submit", handleAdminSubmit, true);
+    return () => document.removeEventListener("submit", handleAdminSubmit, true);
+  }, []);
+
   // Fetch notifications summary
   const fetchSummary = async () => {
     try {

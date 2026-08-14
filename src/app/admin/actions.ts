@@ -9,7 +9,7 @@ export async function loginAdminAction(_previousState: { error: string } | null,
   const password = String(formData.get("password") || "");
   if (!email || !password) return { error: "Enter your email and password." };
 
-  const rateCheck = checkRateLimit(`admin_login_${email}`, 5, 300);
+  const rateCheck = await checkRateLimit(`admin_login_${email}`, 5, 300);
   if (!rateCheck.success) {
     return { error: "Too many failed login attempts. Please wait 5 minutes before trying again." };
   }

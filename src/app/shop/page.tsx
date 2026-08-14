@@ -1,11 +1,19 @@
 import { Suspense } from "react";
 import { getActiveProducts } from "@/lib/products";
 import ShopClient from "@/components/ShopClient";
+import prisma from "@/lib/prisma";
 
-export const revalidate = 60; // Cache page for 60 seconds
+export const dynamic = "force-dynamic";
 
 export default async function ShopPage() {
-  const products = await getActiveProducts();
+  const [products, colorOptions] = await Promise.all([
+    getActiveProducts(),
+    prisma.catalogOption.findMany({
+      where: { type: "color", active: true },
+      select: { name: true, value: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   return (
     <main className="flex-1 bg-[#FFF9EB] min-h-screen">
@@ -14,7 +22,7 @@ export default async function ShopPage() {
           Loading boutique...
         </div>
       }>
-        <ShopClient initialProducts={products} />
+        <ShopClient initialProducts={products} catalogColors={colorOptions} />
       </Suspense>
     </main>
   );

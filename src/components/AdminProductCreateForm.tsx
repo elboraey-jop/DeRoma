@@ -205,6 +205,8 @@ function AdminDropdown({
   const [customHex, setCustomHex] = useState("#942E3A");
   const [customColorName, setCustomColorName] = useState("");
   const [customColorSwatches, setCustomColorSwatches] = useState<Record<string, string>>({});
+  const [colorPending, setColorPending] = useState(false);
+  const [colorError, setColorError] = useState("");
   const [brandModalOpen, setBrandModalOpen] = useState(false);
   const [customBrand, setCustomBrand] = useState("");
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
@@ -264,6 +266,32 @@ function AdminDropdown({
   const selectedLabel =
     selected?.label || ((colorMode || brandMode) && value ? value : "");
   const selectedColorSwatch = customColorSwatches[value] || getColorSwatch(value);
+
+  const addCustomColor = async () => {
+    const name = customColorName.trim();
+    if (!name || !optionCategory || !optionType) return;
+
+    setColorPending(true);
+    setColorError("");
+    try {
+      const formData = new FormData();
+      formData.set("category", optionCategory);
+      formData.set("type", optionType);
+      formData.set("name", name);
+      formData.set("value", customHex);
+      await createCatalogOptionAction(formData);
+
+      setCustomColorSwatches((current) => ({ ...current, [name]: customHex }));
+      setValue(name);
+      setCustomColorName("");
+      setPaletteOpen(false);
+      setOpen(false);
+    } catch (error) {
+      setColorError(error instanceof Error ? error.message : "Unable to add this color.");
+    } finally {
+      setColorPending(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -495,21 +523,14 @@ function AdminDropdown({
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const name = customColorName.trim();
-                  if (!name) return;
-                  setCustomColorSwatches((current) => ({ ...current, [name]: customHex }));
-                  setValue(name);
-                  setCustomColorName("");
-                  setPaletteOpen(false);
-                  setOpen(false);
-                }}
-                disabled={!customColorName.trim()}
+                onClick={addCustomColor}
+                disabled={!customColorName.trim() || colorPending}
                 className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB] disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Use this color
+                {colorPending ? "Adding..." : "Use this color"}
               </button>
             </div>
+            {colorError && <p className="mt-3 text-xs font-semibold text-red-600">{colorError}</p>}
           </div>
         </div>
       )}

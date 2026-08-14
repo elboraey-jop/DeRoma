@@ -87,7 +87,7 @@ export async function createOrder(input: CreateOrderInput) {
     const egPhoneRegex = /^01[0125]\d{8}$/;
 
     // Rate Limiting (max 5 orders per phone per 10 minutes)
-    const rateCheck = checkRateLimit(`order_${cleanPhone}`, 5, 600);
+    const rateCheck = await checkRateLimit(`order_${cleanPhone}`, 5, 600);
     if (!rateCheck.success) {
       return { success: false, error: "تم إرسال عدد كبير من الطلبات بنفس الرقم. الرجاء الانتظار قليلاً وتكرار المحاولة." };
     }
@@ -418,7 +418,7 @@ export async function createOrder(input: CreateOrderInput) {
     await sendMetaServerEvent({
       eventName: "Purchase",
       eventId,
-      eventSourceUrl: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://deromastore.com"}/checkout/success`,
+      eventSourceUrl: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://deroma.store"}/checkout/success`,
       value: totalPrice,
       orderNumber: order.orderNumber,
       items: dbItemsToCreate.map((item) => ({
@@ -469,7 +469,7 @@ export async function submitContactMessageAction(input: {
 }) {
   try {
     const cleanPhone = (input.phone || "").trim();
-    const rateCheck = checkRateLimit(`contact_${cleanPhone}`, 3, 300);
+    const rateCheck = await checkRateLimit(`contact_${cleanPhone}`, 3, 300);
     if (!rateCheck.success) {
       return { success: false, error: "Too many messages sent. Please wait a few minutes before trying again." };
     }

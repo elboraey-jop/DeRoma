@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const product = await getProductById(id);
   if (!product) return { title: "Product Not Found" };
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deromastore.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deroma.store";
   const title = `${product.name} | DeRoma Store`;
   const description = product.description || `Buy ${product.name} premium women's shoes from the curated DeRoma Store collection.`;
   const imageUrl = product.images[0] ? (product.images[0].startsWith("http") ? product.images[0] : `${baseUrl}${product.images[0]}`) : `${baseUrl}/banners/hero-1-desktop.webp`;
@@ -61,17 +61,17 @@ export default async function ProductDetailPage({ params }: PageProps) {
   } catch (error) {
     console.error("Unable to load product relations/reviews:", error);
   }
-  const similarProducts = [
-    ...allProducts.filter((p) => relatedIds.includes(p.id)),
-    ...allProducts.filter(
-      (p) =>
-        (p.subcategory || p.category) === (product.subcategory || product.category) &&
-        p.id !== product.id &&
-        !relatedIds.includes(p.id),
-    ),
-  ].slice(0, 4);
+  const manuallyRelatedProducts = allProducts.filter((p) => relatedIds.includes(p.id));
+  const fallbackProducts = allProducts
+    .filter((p) => p.id !== product.id)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 4);
+  const similarProducts = (manuallyRelatedProducts.length > 0
+    ? manuallyRelatedProducts
+    : fallbackProducts
+  ).slice(0, 4);
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deromastore.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deroma.store";
   const productSchema = {
     "@context": "https://schema.org/",
     "@type": "Product",

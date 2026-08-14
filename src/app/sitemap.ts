@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { getActiveProducts } from "@/lib/products";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deromastore.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deroma.store";
 
   let products: Array<{ id: string; updatedAt?: Date }> = [];
   try {
