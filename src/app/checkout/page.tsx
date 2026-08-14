@@ -40,6 +40,7 @@ import {
 } from "@/lib/analytics";
 
 import { useStoreI18n } from "@/providers/StoreI18nContext";
+import { useSiteSettings } from "@/providers/SiteSettingsProvider";
 
 interface GovItem {
   en: string;
@@ -140,6 +141,21 @@ const inputClass =
 function FieldLabel({ icon: Icon, children, optional = false }: { icon: typeof UserRound; children: React.ReactNode; optional?: boolean }) {
   const { lang } = useStoreI18n();
 
+  /* const renderPaymentDetails = () => {
+    if (paymentMethod === "cod") return null;
+
+    return (
+      <div className={`rounded-2xl border p-4 ${paymentMethod === "instapay" ? "border-purple-200 bg-purple-50/70" : "border-emerald-200 bg-emerald-50/70"}`}>
+        <div className="flex items-center justify-between gap-3"><h3 className={`font-playfair text-lg font-bold ${paymentMethod === "instapay" ? "text-purple-800" : "text-emerald-800"}`}>{paymentMethod === "instapay" ? "InstaPay Transfer Details" : "E-Wallet Transfer Details"}</h3><span className="rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-bold text-[#942e3a]">PAYMENT PENDING</span></div>
+        <p className="mt-2 text-xs leading-5 text-[#416866]">{isArabic ? `حوّل إجمالي ${formatPrice(grandTotal)} إلى الرقم التالي، ثم أرسل صورة التحويل على واتساب.` : `Transfer ${formatPrice(grandTotal)} to the account below, then send the transfer screenshot on WhatsApp.`}</p>
+        <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-white bg-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-wider text-[#9a8586]">{paymentAccountLabel}</p><p className="mt-1 text-xl font-black tracking-[0.12em] text-[#164d49]">{paymentAccount || (isArabic ? "غير متاح" : "Not configured")}</p></div><button type="button" onClick={() => { navigator.clipboard?.writeText(paymentAccount); setCopiedPayment(true); }} className="rounded-lg border border-[#eadfd6] px-3 py-2 text-xs font-bold text-[#942e3a]">{copiedPayment ? (isArabic ? "تم النسخ" : "Copied") : (isArabic ? "نسخ" : "Copy")}</button></div>
+        <div className="mt-3 rounded-xl border border-[#eadfd6] bg-white p-3"><label className="text-xs font-bold text-[#164d49]">{isArabic ? "رقم الهاتف المحول منه" : "Transfer-from phone number"}</label><input type="tel" value={paymentSenderPhone} onChange={(event) => setPaymentSenderPhone(event.target.value)} placeholder="01012345678" className={`${inputClass} mt-2 h-11`} />{touched.paymentSenderPhone && (!paymentSenderPhone.trim() || !egPhoneRegex.test(paymentSenderPhone.replace(/[\s\-\+]/g, "").replace(/^20/, ""))) && <p className="mt-1 text-[11px] text-rose-600">{isArabic ? "اكتب رقم الهاتف الذي تم التحويل منه بشكل صحيح." : "Enter the valid phone number used for the transfer."}</p>}</div>
+        <a href={whatsappPaymentHref} target="_blank" rel="noreferrer" className="mt-3 flex h-11 items-center justify-center gap-2 rounded-full bg-[#25D366] px-4 text-xs font-bold text-white transition hover:bg-[#1da851]"><MessageSquare className="h-4 w-4" /> {isArabic ? `إرسال صورة التحويل على واتساب ${paymentAccountLabel}` : `Send proof on WhatsApp to ${paymentAccountLabel}`}</a>
+        <div className="mt-3 rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs leading-5 text-blue-800">{isArabic ? "بعد إتمام الطلب اضغط زر واتساب وأرسل صورة التحويل مع الرسالة الجاهزة. سيظل الطلب بانتظار تأكيد الدفع حتى يراجعه الأدمن." : "After placing the order, tap WhatsApp and send the transfer screenshot with the prepared message. The order will stay pending payment until the admin confirms it."}</div>
+      </div>
+    );
+  }; */
+
   return (
     <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-[#5f4a50]">
       <Icon className="h-3.5 w-3.5 text-[#942e3a]" />
@@ -153,6 +169,7 @@ export default function CheckoutPage() {
   const { cart, cartTotal, clearCart } = useCart();
   const { toast } = useToast();
   const { t, formatPrice, formatNumber, dir, lang } = useStoreI18n();
+  const siteSettings = useSiteSettings();
   const router = useRouter();
   const isArabic = lang === "ar";
   const [firstName, setFirstName] = useState("");
@@ -163,6 +180,9 @@ export default function CheckoutPage() {
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "instapay" | "wallet">("cod");
+  const [paymentSenderPhone, setPaymentSenderPhone] = useState("");
+  const [copiedPayment, setCopiedPayment] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [showPromoInput, setShowPromoInput] = useState(false);
   const [couponApplied, setCouponApplied] = useState(false);
@@ -320,6 +340,11 @@ export default function CheckoutPage() {
       })
     : 0;
   const grandTotal = Math.max(0, cartTotal - appliedDiscount) + shippingCost;
+  const paymentAccount = paymentMethod === "instapay" ? siteSettings.instapayAccount : siteSettings.walletNumber;
+  const paymentAccountLabel = paymentMethod === "instapay" ? "InstaPay" : siteSettings.walletProvider;
+  const paymentAccountDigits = paymentAccount.replace(/[^0-9]/g, "");
+  const paymentWhatsappDigits = paymentAccountDigits.startsWith("0") ? `20${paymentAccountDigits.slice(1)}` : paymentAccountDigits;
+  const whatsappPaymentHref = `https://wa.me/${paymentWhatsappDigits}?text=${encodeURIComponent(isArabic ? "مرحباً DeRoma، سأرسل صورة التحويل وإثبات الدفع بعد إتمام الطلب." : "Hello DeRoma, I will send the transfer screenshot after placing my order.")}`;
   const analyticsItems = cart.map((item) => ({
     productId: item.productId,
     variantId: item.variantId,
@@ -421,6 +446,7 @@ export default function CheckoutPage() {
       lastName: true,
       phone: true,
       phone2: true,
+      paymentSenderPhone: paymentMethod !== "cod",
       governorate: true,
       city: true,
       address: true,
@@ -431,6 +457,7 @@ export default function CheckoutPage() {
       !cleanLast || cleanLast.length < 2 ||
       !phone.trim() || !egPhoneRegex.test(cleanPhone) ||
       (phone2.trim() && !egPhoneRegex.test(cleanPhone2)) ||
+      (paymentMethod !== "cod" && (!paymentSenderPhone.trim() || !egPhoneRegex.test(paymentSenderPhone.replace(/[\s\-\+]/g, "").replace(/^20/, "")))) ||
       !selectedGovEn ||
       !city ||
       !address || address.trim().length < 5
@@ -451,7 +478,7 @@ export default function CheckoutPage() {
 
     trackAddPaymentInfo({
       value: grandTotal,
-      payment_type: "Cash on delivery",
+      payment_type: paymentMethod,
       coupon: couponApplied ? couponCode : undefined,
       items: analyticsItems,
     });
@@ -464,6 +491,8 @@ export default function CheckoutPage() {
         customerName: `${cleanFirst} ${cleanLast}`,
         customerPhone: cleanPhone,
         customerPhone2: cleanPhone2 || undefined,
+        paymentMethod,
+        paymentSenderPhone: paymentMethod === "cod" ? undefined : paymentSenderPhone,
         governorate: selectedGovEn,
         city,
         address: address.trim(),
@@ -490,7 +519,7 @@ export default function CheckoutPage() {
         clearCart();
         const fullCustomerName = `${firstName.trim()} ${lastName.trim()}`;
         router.push(
-          `/checkout/success?orderNumber=${result.orderNumber}&name=${encodeURIComponent(fullCustomerName)}&total=${result.totalPrice}&shipping=${result.shippingCost}&gov=${encodeURIComponent(selectedGovEn)}`
+          `/checkout/success?orderNumber=${result.orderNumber}&name=${encodeURIComponent(fullCustomerName)}&total=${result.totalPrice}&shipping=${result.shippingCost}&gov=${encodeURIComponent(selectedGovEn)}&paymentMethod=${paymentMethod}`
         );
       } else {
         const err = isArabic ? "حدث خطأ ما. حاول مرة أخرى." : (result.error || "Something went wrong. Please try again.");
@@ -528,6 +557,21 @@ export default function CheckoutPage() {
       </main>
     );
   }
+
+  const renderPaymentDetails = () => {
+    if (paymentMethod === "cod") return null;
+
+    return (
+      <div className={`rounded-2xl border p-4 ${paymentMethod === "instapay" ? "border-purple-200 bg-purple-50/70" : "border-emerald-200 bg-emerald-50/70"}`}>
+        <div className="flex items-center justify-between gap-3"><h3 className={`font-playfair text-lg font-bold ${paymentMethod === "instapay" ? "text-purple-800" : "text-emerald-800"}`}>{paymentMethod === "instapay" ? "InstaPay Transfer Details" : "E-Wallet Transfer Details"}</h3><span className="rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-bold text-[#942e3a]">PAYMENT PENDING</span></div>
+        <p className="mt-2 text-xs leading-5 text-[#416866]">{isArabic ? `حوّل إجمالي ${formatPrice(grandTotal)} إلى الرقم التالي، ثم أرسل صورة التحويل على واتساب.` : `Transfer ${formatPrice(grandTotal)} to the account below, then send the transfer screenshot on WhatsApp.`}</p>
+        <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-white bg-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-wider text-[#9a8586]">{paymentAccountLabel}</p><p className="mt-1 text-xl font-black tracking-[0.12em] text-[#164d49]">{paymentAccount || (isArabic ? "غير متاح" : "Not configured")}</p></div><button type="button" onClick={() => { navigator.clipboard?.writeText(paymentAccount); setCopiedPayment(true); }} className="rounded-lg border border-[#eadfd6] px-3 py-2 text-xs font-bold text-[#942e3a]">{copiedPayment ? (isArabic ? "تم النسخ" : "Copied") : (isArabic ? "نسخ" : "Copy")}</button></div>
+        <div className="mt-3 rounded-xl border border-[#eadfd6] bg-white p-3"><label className="text-xs font-bold text-[#164d49]">{isArabic ? "رقم الهاتف المحول منه" : "Transfer-from phone number"}</label><input type="tel" value={paymentSenderPhone} onChange={(event) => setPaymentSenderPhone(event.target.value)} placeholder="01012345678" className={`${inputClass} mt-2 h-11`} />{touched.paymentSenderPhone && (!paymentSenderPhone.trim() || !egPhoneRegex.test(paymentSenderPhone.replace(/[\s\-\+]/g, "").replace(/^20/, ""))) && <p className="mt-1 text-[11px] text-rose-600">{isArabic ? "اكتب رقم الهاتف الذي تم التحويل منه بشكل صحيح." : "Enter the valid phone number used for the transfer."}</p>}</div>
+        <a href={whatsappPaymentHref} target="_blank" rel="noreferrer" className="mt-3 flex h-11 items-center justify-center gap-2 rounded-full bg-[#25D366] px-4 text-xs font-bold text-white transition hover:bg-[#1da851]"><MessageSquare className="h-4 w-4" /> {isArabic ? `إرسال صورة التحويل على واتساب ${paymentAccountLabel}` : `Send proof on WhatsApp to ${paymentAccountLabel}`}</a>
+        <div className="mt-3 rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs leading-5 text-blue-800">{isArabic ? "بعد إتمام الطلب اضغط زر واتساب وأرسل صورة التحويل مع الرسالة الجاهزة. سيظل الطلب بانتظار تأكيد الدفع حتى يراجعه الأدمن." : "After placing the order, tap WhatsApp and send the transfer screenshot with the prepared message. The order will stay pending payment until the admin confirms it."}</div>
+      </div>
+    );
+  };
 
   return (
     <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#fffaf0] px-3 py-6 text-[#481827] sm:px-6 sm:py-12 lg:px-8" dir={dir}>
@@ -720,12 +764,32 @@ export default function CheckoutPage() {
             <section className="rounded-3xl border border-[#eadfd6] bg-white p-5 shadow-[0_14px_40px_rgba(73,24,39,0.05)] sm:p-7">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#d8b46a]/20 text-[#9a742b]"><CreditCard className="h-5 w-5" /></div>
-                <div><h2 className="font-playfair text-xl font-semibold">{t("checkout.paymentMethod")}</h2><p className="mt-1 text-xs text-[#806e73]">{t("checkout.cashOnDeliveryDesc")}</p></div>
+                <div><h2 className="font-playfair text-xl font-semibold">{t("checkout.paymentMethod")}</h2><p className="mt-1 text-xs text-[#806e73]">{isArabic ? "اختار طريقة الدفع المناسبة لك" : "Choose how you would like to pay"}</p></div>
               </div>
-              <div className="mt-5 flex items-center justify-between gap-4 rounded-2xl border-2 border-[#942e3a] bg-[#fffaf0] p-4">
-                <div className="flex items-center gap-3"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#942e3a] text-white"><Check className="h-3 w-3" /></span><div><p className="text-sm font-bold">{t("checkout.cashOnDelivery")}</p><p className="mt-1 text-[11px] text-[#806e73]">{t("checkout.cashOnDeliveryDesc")}</p></div></div>
-                <span className="hidden rounded-full bg-[#942e3a]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#942e3a] sm:inline">COD</span>
+              <div className="mt-5 space-y-3">
+                {([
+                  { value: "cod" as const, title: isArabic ? "الدفع عند الاستلام" : "Cash on delivery", desc: isArabic ? "ادفع عند استلام طلبك" : "Pay when you receive your order", badge: "COD" },
+                  { value: "instapay" as const, title: "InstaPay", desc: isArabic ? "تحويل فوري عبر InstaPay" : "Instant transfer via InstaPay", badge: "INSTAPAY" },
+                  { value: "wallet" as const, title: isArabic ? "المحفظة الإلكترونية" : "Mobile wallet", desc: isArabic ? "فودافون كاش أو أورنج أو اتصالات" : "Vodafone Cash, Orange, Etisalat", badge: "WALLET" },
+                ]).map((option) => {
+                  const selected = paymentMethod === option.value;
+                  return <div key={option.value} className="space-y-3"><button type="button" onClick={() => { setPaymentMethod(option.value); setCopiedPayment(false); }} className={`flex w-full items-center justify-between gap-3 rounded-2xl border-2 p-4 text-left transition ${selected ? "border-[#942e3a] bg-[#fffaf0] shadow-[0_0_0_3px_rgba(148,46,58,.08)]" : "border-[#eadfd6] bg-white hover:border-[#942e3a]/40"}`}>
+                    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${selected ? "border-[#942e3a] bg-[#942e3a]" : "border-[#b9c6c7]"}`}>{selected && <Check className="h-3 w-3 text-white" />}</span>
+                    <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-[#164d49]">{option.title}</span><span className="mt-1 block text-[11px] text-[#806e73]">{option.desc}</span></span>
+                    <span className="hidden rounded-full bg-[#942e3a]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#942e3a] sm:inline">{option.badge}</span>
+                  </button>{selected && option.value !== "cod" && renderPaymentDetails()}</div>;
+                })}
               </div>
+              {false && paymentMethod !== "cod" && (
+                <div className={`mt-4 rounded-2xl border p-4 ${paymentMethod === "instapay" ? "border-purple-200 bg-purple-50/70" : "border-emerald-200 bg-emerald-50/70"}`}>
+                  <div className="flex items-center justify-between gap-3"><h3 className={`font-playfair text-lg font-bold ${paymentMethod === "instapay" ? "text-purple-800" : "text-emerald-800"}`}>{paymentMethod === "instapay" ? "InstaPay Transfer Details" : "E-Wallet Transfer Details"}</h3><span className="rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-bold text-[#942e3a]">PAYMENT PENDING</span></div>
+                  <p className="mt-2 text-xs leading-5 text-[#416866]">{isArabic ? `حوّل إجمالي ${formatPrice(grandTotal)} إلى الرقم التالي، ثم أرسل صورة التحويل على واتساب.` : `Transfer ${formatPrice(grandTotal)} to the account below, then send the transfer screenshot on WhatsApp.`}</p>
+                  <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-white bg-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-wider text-[#9a8586]">{paymentAccountLabel}</p><p className="mt-1 text-xl font-black tracking-[0.12em] text-[#164d49]">{paymentAccount || (isArabic ? "غير متاح" : "Not configured")}</p></div><button type="button" onClick={() => { navigator.clipboard?.writeText(paymentAccount); setCopiedPayment(true); }} className="rounded-lg border border-[#eadfd6] px-3 py-2 text-xs font-bold text-[#942e3a]">{copiedPayment ? (isArabic ? "تم النسخ" : "Copied") : (isArabic ? "نسخ" : "Copy")}</button></div>
+                  <div className="mt-3 rounded-xl border border-[#eadfd6] bg-white p-3"><label className="text-xs font-bold text-[#164d49]">{isArabic ? "رقم الهاتف المحول منه" : "Transfer-from phone number"}</label><input type="tel" value={paymentSenderPhone} onChange={(event) => setPaymentSenderPhone(event.target.value)} placeholder="01012345678" className={`${inputClass} mt-2 h-11`} />{touched.paymentSenderPhone && (!paymentSenderPhone.trim() || !egPhoneRegex.test(paymentSenderPhone.replace(/[\s\-\+]/g, "").replace(/^20/, ""))) && <p className="mt-1 text-[11px] text-rose-600">{isArabic ? "اكتب رقم الهاتف الذي تم التحويل منه بشكل صحيح." : "Enter the valid phone number used for the transfer."}</p>}</div>
+                  <a href={whatsappPaymentHref} target="_blank" rel="noreferrer" className="mt-3 flex h-11 items-center justify-center gap-2 rounded-full bg-[#25D366] px-4 text-xs font-bold text-white transition hover:bg-[#1da851]"><MessageSquare className="h-4 w-4" /> {isArabic ? `إرسال صورة التحويل على واتساب ${paymentAccountLabel}` : `Send proof on WhatsApp to ${paymentAccountLabel}`}</a>
+                  <div className="mt-3 rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs leading-5 text-blue-800">{isArabic ? "بعد إتمام الطلب اضغط زر واتساب وأرسل صورة التحويل مع الرسالة الجاهزة. سيظل الطلب بانتظار تأكيد الدفع حتى يراجعه الأدمن." : "After placing the order, tap WhatsApp and send the transfer screenshot with the prepared message. The order will stay pending payment until the admin confirms it."}</div>
+                </div>
+              )}
             </section>
           </form>
 

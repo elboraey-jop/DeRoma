@@ -126,7 +126,7 @@ export default function AdminNotificationsModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       {/* Backdrop Overlay */}
       <div
-        className="fixed inset-0 bg-[#2c1018]/55 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-[#8B7CC7]/45 backdrop-blur-[2px] transition-opacity"
         onClick={onClose}
       />
 
@@ -192,14 +192,11 @@ export default function AdminNotificationsModal({
         </div>
 
         {/* Category Tabs Filter */}
-        <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-[#942E3A]/10 bg-[#FFF9EB]/70 px-4 py-3 hide-scrollbar shrink-0">
+        <div className="admin-tabs-shell mx-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap px-1 py-1 hide-scrollbar shrink-0">
           <button
             onClick={() => setActiveTab("all")}
-            className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
-              activeTab === "all"
-                ? "bg-[#942E3A] text-white shadow-2xs"
-                : "text-[#942E3A]/75 hover:bg-[#942E3A]/10 bg-white/70"
-            }`}
+            data-active={activeTab === "all"}
+            className="admin-tab flex shrink-0 whitespace-nowrap items-center gap-1.5 px-3.5 py-2 text-xs font-bold"
           >
             <Layers className="h-3.5 w-3.5 shrink-0" />
             <span>
@@ -209,11 +206,8 @@ export default function AdminNotificationsModal({
 
           <button
             onClick={() => setActiveTab("orders")}
-            className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
-              activeTab === "orders"
-                ? "bg-[#942E3A] text-white shadow-2xs"
-                : "text-[#942E3A]/75 hover:bg-[#942E3A]/10 bg-white/70"
-            }`}
+            data-active={activeTab === "orders"}
+            className="admin-tab flex shrink-0 whitespace-nowrap items-center gap-1.5 px-3.5 py-2 text-xs font-bold"
           >
             <ClipboardList className="h-3.5 w-3.5 text-amber-500 shrink-0" />
             <span>
@@ -223,11 +217,8 @@ export default function AdminNotificationsModal({
 
           <button
             onClick={() => setActiveTab("stock")}
-            className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
-              activeTab === "stock"
-                ? "bg-[#942E3A] text-white shadow-2xs"
-                : "text-[#942E3A]/75 hover:bg-[#942E3A]/10 bg-white/70"
-            }`}
+            data-active={activeTab === "stock"}
+            className="admin-tab flex shrink-0 whitespace-nowrap items-center gap-1.5 px-3.5 py-2 text-xs font-bold"
           >
             <AlertTriangle className="h-3.5 w-3.5 text-red-500 shrink-0" />
             <span>
@@ -237,11 +228,8 @@ export default function AdminNotificationsModal({
 
           <button
             onClick={() => setActiveTab("messages")}
-            className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
-              activeTab === "messages"
-                ? "bg-[#942E3A] text-white shadow-2xs"
-                : "text-[#942E3A]/75 hover:bg-[#942E3A]/10 bg-white/70"
-            }`}
+            data-active={activeTab === "messages"}
+            className="admin-tab flex shrink-0 whitespace-nowrap items-center gap-1.5 px-3.5 py-2 text-xs font-bold"
           >
             <MessageSquare className="h-3.5 w-3.5 text-blue-500 shrink-0" />
             <span>
@@ -251,11 +239,8 @@ export default function AdminNotificationsModal({
 
           <button
             onClick={() => setActiveTab("reviews")}
-            className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
-              activeTab === "reviews"
-                ? "bg-[#942E3A] text-white shadow-2xs"
-                : "text-[#942E3A]/75 hover:bg-[#942E3A]/10 bg-white/70"
-            }`}
+            data-active={activeTab === "reviews"}
+            className="admin-tab flex shrink-0 whitespace-nowrap items-center gap-1.5 px-3.5 py-2 text-xs font-bold"
           >
             <Star className="h-3.5 w-3.5 text-amber-400 shrink-0" />
             <span>

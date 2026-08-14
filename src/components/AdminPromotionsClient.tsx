@@ -66,12 +66,12 @@ export interface SerializedAnnouncementBar {
 }
 
 const COLOR_PRESETS = [
-  { name: "DeRoma Signature", bg: "#942E3A", text: "#FFF9EB" },
+  { name: "DeRoma Signature", bg: "#8B7CC7", text: "#FFF9EB" },
   { name: "Golden Luxury", bg: "#D8B46A", text: "#2C1018" },
   { name: "Midnight Elegance", bg: "#2C1018", text: "#FFF9EB" },
   { name: "Emerald Premium", bg: "#064E3B", text: "#ECFDF5" },
   { name: "Crimson Spark", bg: "#BE123C", text: "#FFFFFF" },
-  { name: "Warm Olive", bg: "#3F6212", text: "#FEF08A" },
+  { name: "DeRoma Lavender", bg: "#8B7CC7", text: "#FFF9EB" },
 ];
 
 const STATUS_OPTIONS = [
@@ -141,8 +141,8 @@ const ARABIC_LABELS: Record<string, string> = {
   "Midnight Elegance": "أناقة منتصف الليل",
   "Emerald Premium": "الزمرد الفاخر",
   "Crimson Spark": "توهج قرمزي",
-  "Warm Olive": "زيتوني دافئ",
-  "DeRoma Burgundy": "عنابي DeRoma",
+  "DeRoma Lavender": "لافندر DeRoma",
+  "DeRoma Purple": "بنفسجي DeRoma",
   Gold: "ذهبي",
   "Warm Cream": "كريمي دافئ",
   "Dark Chocolate": "شوكولاتة داكنة",
@@ -737,7 +737,7 @@ function CustomDateTimePicker({
 
 // Custom Color Picker Dropdown with Palette Swatches and Hex Input
 const PALETTE_SWATCHES = [
-  { name: "DeRoma Burgundy", hex: "#942E3A" },
+  { name: "DeRoma Purple", hex: "#8B7CC7" },
   { name: "Gold", hex: "#D8B46A" },
   { name: "Warm Cream", hex: "#FFF9EB" },
   { name: "Dark Chocolate", hex: "#2C1018" },
@@ -1114,17 +1114,13 @@ export default function AdminPromotionsClient({
       </div>
 
       {/* Main Tab Navigation Bar */}
-      <div className="flex items-center justify-between border-b border-[#942E3A]/15 pb-3 min-w-0">
-        <div className="grid grid-cols-2 w-full sm:w-auto sm:flex sm:items-center gap-1.5 sm:gap-2 rounded-2xl border border-[#942E3A]/15 bg-[#FFF9EB] p-1.5 shadow-inner min-w-0">
+      <div className="flex min-w-0 items-center justify-between">
+        <div className="admin-tabs-shell grid w-full min-w-0 grid-cols-2 gap-1.5 sm:w-auto sm:flex sm:items-center sm:gap-2">
           <button
             type="button"
             onClick={() => setActiveTab("promos")}
-            className={cn(
-              "flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-2 text-xs font-bold transition-all truncate min-w-0",
-              activeTab === "promos"
-                ? "bg-[#942E3A] text-[#FFF9EB] shadow-md"
-                : "text-[#942E3A]/70 hover:bg-[#942E3A]/10 hover:text-[#942E3A]"
-            )}
+            data-active={activeTab === "promos"}
+            className="admin-tab flex min-w-0 items-center justify-center gap-1.5 truncate px-2.5 py-2 text-xs font-bold sm:gap-2"
           >
             <Tag className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
             <span className="truncate">{isRtl ? "كوبونات الخصم" : "Coupons"}</span>
@@ -1132,8 +1128,8 @@ export default function AdminPromotionsClient({
               className={cn(
                 "rounded-full px-1.5 py-0.5 text-[10px] font-black shrink-0",
                 activeTab === "promos"
-                  ? "bg-[#FFF9EB] text-[#942E3A]"
-                  : "bg-[#942E3A]/15 text-[#942E3A]"
+                  ? "bg-white text-[#5F5598]"
+                  : "bg-[#FFF9EC] text-[#8178A8]"
               )}
             >
               {formatNumber(promotions.length)}
@@ -1143,12 +1139,8 @@ export default function AdminPromotionsClient({
           <button
             type="button"
             onClick={() => setActiveTab("announcements")}
-            className={cn(
-              "flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-2 text-xs font-bold transition-all truncate min-w-0",
-              activeTab === "announcements"
-                ? "bg-[#942E3A] text-[#FFF9EB] shadow-md"
-                : "text-[#942E3A]/70 hover:bg-[#942E3A]/10 hover:text-[#942E3A]"
-            )}
+            data-active={activeTab === "announcements"}
+            className="admin-tab flex min-w-0 items-center justify-center gap-1.5 truncate px-2.5 py-2 text-xs font-bold sm:gap-2"
           >
             <Megaphone className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
             <span className="truncate">{isRtl ? "شريط الإعلانات" : "Announcement Bar"}</span>
@@ -1156,8 +1148,8 @@ export default function AdminPromotionsClient({
               className={cn(
                 "rounded-full px-1.5 py-0.5 text-[10px] font-black shrink-0",
                 activeTab === "announcements"
-                  ? "bg-[#FFF9EB] text-[#942E3A]"
-                  : "bg-[#942E3A]/15 text-[#942E3A]"
+                  ? "bg-[#D8D0F2] text-[#5F5598]"
+                  : "bg-[#FFF9EC] text-[#8178A8]"
               )}
             >
               {announcements.length}
@@ -1655,7 +1647,7 @@ export default function AdminPromotionsClient({
       {/* MODAL: CREATE NEW PROMO CODE */}
       {/* ========================================================================= */}
       {isCreatePromoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2c1018]/60 backdrop-blur-xs animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#8B7CC7]/45 backdrop-blur-[2px] animate-in fade-in">
           <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-[#D8B46A]/40 bg-white p-6 shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-[#942E3A]/10 pb-4">
               <div className="flex items-center gap-2">
@@ -1892,7 +1884,7 @@ export default function AdminPromotionsClient({
       {/* CONFIRMATION MODAL: DELETE PROMOTION */}
       {/* ========================================================================= */}
       {deleteConfirmId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2c1018]/60 backdrop-blur-xs animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#8B7CC7]/45 backdrop-blur-[2px] animate-in fade-in">
           <div className="w-full max-w-sm overflow-hidden rounded-3xl bg-white p-6 shadow-xl animate-in zoom-in-95 text-center">
             <AlertCircle className="mx-auto h-10 w-10 text-rose-500" />
             <h3 className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">
@@ -1930,7 +1922,7 @@ export default function AdminPromotionsClient({
       {/* CONFIRMATION MODAL: DELETE ANNOUNCEMENT */}
       {/* ========================================================================= */}
       {deleteAnnouncementId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2c1018]/60 backdrop-blur-xs animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#8B7CC7]/45 backdrop-blur-[2px] animate-in fade-in">
           <div className="w-full max-w-sm overflow-hidden rounded-3xl bg-white p-6 shadow-xl animate-in zoom-in-95 text-center">
             <AlertCircle className="mx-auto h-10 w-10 text-rose-500" />
             <h3 className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">

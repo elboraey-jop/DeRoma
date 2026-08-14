@@ -9,6 +9,7 @@ import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/Scroll
 import { useIsMobile } from "@/lib/useIsMobile";
 
 import { useStoreI18n } from "@/providers/StoreI18nContext";
+import { sortSizesList } from "@/lib/utils";
 
 interface ShopClientProps {
   initialProducts: ProductWithVariants[];
@@ -146,7 +147,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
   const allSizes = useMemo(() => {
     const sizes = new Set<string>();
     initialProducts.forEach((p) => p.variants.forEach((v) => sizes.add(v.size)));
-    return Array.from(sizes).sort((a, b) => Number(a) - Number(b));
+    return sortSizesList(Array.from(sizes));
   }, [initialProducts]);
 
   const allColors = useMemo(() => {
@@ -481,7 +482,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
               exit={{ opacity: 0 }}
               transition={{ duration: isMobile ? 0.08 : 0.2 }}
               onClick={() => setShowMobileFilters(false)}
-              className="fixed inset-0 z-[70] bg-black/45"
+              className="fixed inset-0 z-[70] bg-[#8B7CC7]/35 backdrop-blur-[2px]"
             />
 
             {/* Drawer Content */}

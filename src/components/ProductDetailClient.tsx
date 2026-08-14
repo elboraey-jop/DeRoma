@@ -26,7 +26,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, sortVariantsByNumericSize } from "@/lib/utils";
 import { useCart } from "@/lib/cartStore";
 import { useWishlist } from "@/lib/wishlistStore";
 import { motion, AnimatePresence } from "framer-motion";
@@ -110,7 +110,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const uniqueColors: string[] = [];
   const [selectedColor, setSelectedColor] = useState(product.color || "");
   const isBag = product.category === "bags";
-  const sizesForColor = product.variants;
+  const sizesForColor = sortVariantsByNumericSize(product.variants);
   const currentColorImages = product.images;
 
   useEffect(() => {
@@ -664,7 +664,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100000] flex items-center justify-center bg-[#160d10]/90 p-2 backdrop-blur-md sm:p-6"
+              className="fixed inset-0 z-[100000] flex items-center justify-center bg-[#8B7CC7]/70 p-2 backdrop-blur-[2px] sm:p-6"
               role="dialog"
               aria-modal="true"
               aria-label={lang === "ar" ? "معرض صور المنتج" : "Product image gallery"}
@@ -1046,7 +1046,7 @@ function ReviewsSection({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                className="fixed inset-0 z-[99999] flex items-center justify-center bg-[#8B7CC7]/50 backdrop-blur-[2px] p-4"
                 onClick={() => setShowReviewForm(false)}
               >
                 <motion.div

@@ -24,6 +24,9 @@ export interface HomeReview {
 export interface SiteSettingsData {
   phone: string;
   whatsapp: string;
+  instapayAccount: string;
+  walletNumber: string;
+  walletProvider: string;
   email: string;
   instagram: string;
   facebook: string;
@@ -156,6 +159,9 @@ export const DEFAULT_HOME_REVIEWS: HomeReview[] = [
 export const DEFAULT_SITE_SETTINGS: SiteSettingsData = {
   phone: "+20 102 345 6789",
   whatsapp: "201023456789",
+  instapayAccount: "01515205073",
+  walletNumber: "01515205073",
+  walletProvider: "Vodafone Cash",
   email: "support@deromastore.com",
   instagram: "https://instagram.com",
   facebook: "https://facebook.com",
@@ -220,6 +226,9 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
     return {
       phone: record.phone || DEFAULT_SITE_SETTINGS.phone,
       whatsapp: record.whatsapp || DEFAULT_SITE_SETTINGS.whatsapp,
+      instapayAccount: record.instapayAccount || DEFAULT_SITE_SETTINGS.instapayAccount,
+      walletNumber: record.walletNumber || DEFAULT_SITE_SETTINGS.walletNumber,
+      walletProvider: record.walletProvider || DEFAULT_SITE_SETTINGS.walletProvider,
       email: record.email || DEFAULT_SITE_SETTINGS.email,
       instagram: record.instagram || DEFAULT_SITE_SETTINGS.instagram,
       facebook: record.facebook || DEFAULT_SITE_SETTINGS.facebook,

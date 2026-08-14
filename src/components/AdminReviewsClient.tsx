@@ -125,7 +125,7 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
   }, [productMenuOpen]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/45 p-4 backdrop-blur-xs" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#8B7CC7]/35 p-4 backdrop-blur-[2px]" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] bg-[#fffdf8] p-5 shadow-2xl sm:p-7 text-right">
         <div className="flex items-start justify-between">
           <div>

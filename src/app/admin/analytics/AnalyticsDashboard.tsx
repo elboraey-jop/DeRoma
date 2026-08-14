@@ -70,6 +70,7 @@ import {
 } from "recharts";
 import { formatCurrency } from "@/lib/utils";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
+import { getOrderProductSales } from "@/lib/orderAccounting";
 
 // --- Types ---
 export interface AnalyticsOrder {
@@ -325,17 +326,17 @@ export default function AnalyticsDashboard({
  const { currentOrders, prevOrders } = filteredData;
 
  // --- Key KPI Calculations ---
- const validCurrentOrders = currentOrders.filter(
- (o) => o.status !== "cancelled"
- );
- const validPrevOrders = prevOrders.filter((o) => o.status !== "cancelled");
+ const isRevenueOrder = (o: AnalyticsOrder) =>
+  o.status === "delivered";
+  const validCurrentOrders = currentOrders.filter(isRevenueOrder);
+  const validPrevOrders = prevOrders.filter(isRevenueOrder);
 
  const currentRevenue = validCurrentOrders.reduce(
- (acc, o) => acc + Number(o.totalPrice),
+ (acc, o) => acc + getOrderProductSales(o),
  0
  );
  const prevRevenue = validPrevOrders.reduce(
- (acc, o) => acc + Number(o.totalPrice),
+ (acc, o) => acc + getOrderProductSales(o),
  0
  );
 
@@ -431,7 +432,7 @@ export default function AnalyticsDashboard({
  const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
  const existing = dateMap.get(key) || { revenue: 0, orders: 0 };
  dateMap.set(key, {
- revenue: existing.revenue + Number(o.totalPrice),
+ revenue: existing.revenue + getOrderProductSales(o),
  orders: existing.orders + 1,
  });
  });
@@ -462,7 +463,7 @@ export default function AnalyticsDashboard({
  const gov = o.governorate || "Unspecified";
  const existing = map.get(gov) || { revenue: 0, orders: 0 };
  map.set(gov, {
- revenue: existing.revenue + Number(o.totalPrice),
+ revenue: existing.revenue + getOrderProductSales(o),
  orders: existing.orders + 1,
  });
  });
@@ -566,7 +567,7 @@ export default function AnalyticsDashboard({
  >();
 
  orders.forEach((o) => {
- if (o.status === "cancelled") return;
+ if (o.status !== "delivered") return;
  const phone = o.customerPhone || o.customerName;
  const existing = customerOrdersMap.get(phone) || {
  name: o.customerName,
@@ -577,7 +578,7 @@ export default function AnalyticsDashboard({
  customerOrdersMap.set(phone, {
  ...existing,
  orders: existing.orders + 1,
- spend: existing.spend + Number(o.totalPrice),
+  spend: existing.spend + Number(o.totalPrice),
  });
  });
 
@@ -600,8 +601,8 @@ export default function AnalyticsDashboard({
  const fullPriceOrders = validCurrentOrders.filter((o) => Number(o.discountAmount) <= 0);
 
  const totalDiscountsGiven = validCurrentOrders.reduce((sum, o) => sum + Number(o.discountAmount), 0);
- const promoDrivenRevenue = discountedOrders.reduce((sum, o) => sum + Number(o.totalPrice), 0);
- const fullPriceRevenue = fullPriceOrders.reduce((sum, o) => sum + Number(o.totalPrice), 0);
+ const promoDrivenRevenue = discountedOrders.reduce((sum, o) => sum + getOrderProductSales(o), 0);
+ const fullPriceRevenue = fullPriceOrders.reduce((sum, o) => sum + getOrderProductSales(o), 0);
 
  const promoAOV = discountedOrders.length ? promoDrivenRevenue / discountedOrders.length : 0;
  const fullPriceAOV = fullPriceOrders.length ? fullPriceRevenue / fullPriceOrders.length : 0;
@@ -637,8 +638,8 @@ export default function AnalyticsDashboard({
  const isDisc = Number(o.discountAmount) > 0;
  dateMap.set(key, {
  discounts: existing.discounts + Number(o.discountAmount),
- promoRev: existing.promoRev + (isDisc ? Number(o.totalPrice) : 0),
- totalRev: existing.totalRev + Number(o.totalPrice),
+ promoRev: existing.promoRev + (isDisc ? getOrderProductSales(o) : 0),
+ totalRev: existing.totalRev + getOrderProductSales(o),
  });
  });
 
@@ -673,7 +674,7 @@ export default function AnalyticsDashboard({
  ];
 
  validCurrentOrders.forEach((o) => {
- const price = Number(o.totalPrice);
+ const price = getOrderProductSales(o);
  const isDisc = Number(o.discountAmount) > 0;
  const tier = tiers.find((t) => price >= t.min && price < t.max);
  if (tier) {
@@ -735,7 +736,7 @@ export default function AnalyticsDashboard({
  const avgShippingCost = validCurrentOrders.length ? totalShippingRevenue / validCurrentOrders.length : 0;
  const fulfillmentRate = validCurrentOrders.length ? (deliveredCount / validCurrentOrders.length) * 100 : 0;
  const opsHealthScore = validCurrentOrders.length
- ? Math.min(100, Math.round(((deliveredCount + shippedCount) / validCurrentOrders.length) * 100))
+ ? Math.min(100, Math.round((deliveredCount / validCurrentOrders.length) * 100))
  : 100;
 
  // Day of Week Activity Distribution
@@ -786,7 +787,7 @@ export default function AnalyticsDashboard({
  const isDelivered = o.status === "delivered";
  govMap.set(g, {
  orders: existing.orders + 1,
- revenue: existing.revenue + (o.status !== "cancelled" ? Number(o.totalPrice) : 0),
+ revenue: existing.revenue + (isRevenueOrder(o) ? getOrderProductSales(o) : 0),
  shipping: existing.shipping + Number(o.shippingCost),
  delivered: existing.delivered + (isDelivered ? 1 : 0),
  });
@@ -846,7 +847,8 @@ export default function AnalyticsDashboard({
  orders.forEach((o) => {
  const phone = o.customerPhone || o.customerName;
  const oDate = new Date(o.createdAt);
- const isCancelled = o.status === "cancelled";
+ const isDelivered = o.status === "delivered";
+ const isCancelled = o.status === "cancelled" || o.status === "returned";
  const existing = customerMap.get(phone) || {
  name: o.customerName,
  phone: o.customerPhone,
@@ -862,13 +864,13 @@ export default function AnalyticsDashboard({
 
  customerMap.set(phone, {
  ...existing,
- ordersCount: existing.ordersCount + (isCancelled ? 0 : 1),
- spend: existing.spend + (isCancelled ? 0 : Number(o.totalPrice)),
+ ordersCount: existing.ordersCount + (isDelivered ? 1 : 0),
+  spend: existing.spend + (isDelivered ? Number(o.totalPrice) : 0),
  itemsCount:
  existing.itemsCount +
- (isCancelled
- ? 0
- : o.items.reduce((sum, item) => sum + Number(item.quantity), 0)),
+ (isDelivered
+ ? o.items.reduce((sum, item) => sum + Number(item.quantity), 0)
+ : 0),
  cancelledCount: existing.cancelledCount + (isCancelled ? 1 : 0),
  firstDate: oDate < existing.firstDate ? oDate : existing.firstDate,
  lastDate: oDate > existing.lastDate ? oDate : existing.lastDate,
@@ -1145,7 +1147,7 @@ export default function AnalyticsDashboard({
      const existing = pmMap.get(pm) || { count: 0, revenue: 0 };
      pmMap.set(pm, {
        count: existing.count + 1,
-       revenue: existing.revenue + Number(o.totalPrice),
+       revenue: existing.revenue + getOrderProductSales(o),
      });
    });
 
@@ -1341,18 +1343,19 @@ export default function AnalyticsDashboard({
  </div>
 
  {/* Tabs Navigation Bar */}
- <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-gray-200 scrollbar-none">
+ <div className="admin-tabs-shell flex items-center gap-1.5 overflow-x-auto scrollbar-none">
  {[
  {
  id: "overview",
  label: isRtl ? "الأداء المالي والمبيعات" : "Overview & Sales",
  icon: TrendingUp,
  },
- {
+ /* Temporarily hidden — remove these comment markers to restore the tab.
  id: "website",
  label: isRtl ? "حركة الموقع والتحويل" : "Website & Conversion",
  icon: Globe,
  },
+ */
  {
  id: "products",
  label: isRtl ? "المنتجات والمخزون" : "Products & Inventory",
@@ -1373,18 +1376,16 @@ export default function AnalyticsDashboard({
  label: isRtl ? "العروض والخصومات" : "Promotions & Discounts",
  icon: Tag,
  },
- ].map((tab) => {
+ // Website & Conversion is intentionally hidden for now; remove this filter to restore it.
+ ].filter((tab) => tab.id !== "website").map((tab) => {
  const Icon = tab.icon;
  const isActive = activeTab === tab.id;
  return (
  <button
  key={tab.id}
  onClick={() => setActiveTab(tab.id as typeof activeTab)}
- className={`flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all ${
- isActive
- ? "bg-[#942E3A] text-white shadow-xs"
- : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-[#942E3A]"
- }`}
+ data-active={isActive}
+ className="admin-tab flex items-center gap-2 whitespace-nowrap px-3.5 py-2 text-xs font-bold"
  >
  <Icon className={`h-3.5 w-3.5 ${isActive ? "text-[#D8B46A]" : "text-gray-400"}`} />
  {tab.label}
@@ -1395,7 +1396,7 @@ export default function AnalyticsDashboard({
 
  {/* Popover Formula Modal */}
  {activeTooltip && (
- <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
+ <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#8B7CC7]/35 p-4 backdrop-blur-[2px]">
  <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-[#942E3A]/20 animate-in fade-in zoom-in-95 duration-150">
  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
  <div className="flex items-center gap-2">
@@ -1443,7 +1444,7 @@ export default function AnalyticsDashboard({
       {isCustomDateModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           <div
-            className="fixed inset-0 bg-[#2c1018]/65 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-[#8B7CC7]/45 backdrop-blur-[2px] transition-opacity"
             onClick={() => setIsCustomDateModalOpen(false)}
           />
 
@@ -1673,9 +1674,9 @@ export default function AnalyticsDashboard({
  Total Gross Revenue
  </p>
  <MetricInfoButton
- title="Total Gross Store Revenue"
- formula="Sum of totalPrice for all non-cancelled orders in period"
- description="Represents total monetary volume received from store orders after item pricing, shipping and applied discounts."
+ title="Total Store Product Revenue"
+ formula="Sum of subtotalPrice minus discountAmount for valid orders"
+ description="Store revenue from products after discounts. Customer shipping collections are excluded."
  />
  </div>
  <p className="mt-2 font-playfair text-2.5xl font-black">
@@ -3652,7 +3653,7 @@ export default function AnalyticsDashboard({
  {formatCurrency(
  currentOrders
  .filter((o) => o.status === "pending")
- .reduce((sum, o) => sum + Number(o.totalPrice), 0)
+  .reduce((sum, o) => sum + Number(o.totalPrice), 0)
  )}
  </td>
  <td className="p-2.5 text-right font-bold text-gray-600">
@@ -3660,7 +3661,7 @@ export default function AnalyticsDashboard({
  opsAnalytics.pendingCount
  ? currentOrders
  .filter((o) => o.status === "pending")
- .reduce((sum, o) => sum + Number(o.totalPrice), 0) / opsAnalytics.pendingCount
+  .reduce((sum, o) => sum + Number(o.totalPrice), 0) / opsAnalytics.pendingCount
  : 0
  )}
  </td>
@@ -3683,7 +3684,7 @@ export default function AnalyticsDashboard({
  {formatCurrency(
  currentOrders
  .filter((o) => o.status === "shipped")
- .reduce((sum, o) => sum + Number(o.totalPrice), 0)
+  .reduce((sum, o) => sum + Number(o.totalPrice), 0)
  )}
  </td>
  <td className="p-2.5 text-right font-bold text-gray-600">
@@ -3691,7 +3692,7 @@ export default function AnalyticsDashboard({
  opsAnalytics.shippedCount
  ? currentOrders
  .filter((o) => o.status === "shipped")
- .reduce((sum, o) => sum + Number(o.totalPrice), 0) / opsAnalytics.shippedCount
+  .reduce((sum, o) => sum + Number(o.totalPrice), 0) / opsAnalytics.shippedCount
  : 0
  )}
  </td>
@@ -3714,7 +3715,7 @@ export default function AnalyticsDashboard({
  {formatCurrency(
  currentOrders
  .filter((o) => o.status === "delivered")
- .reduce((sum, o) => sum + Number(o.totalPrice), 0)
+  .reduce((sum, o) => sum + Number(o.totalPrice), 0)
  )}
  </td>
  <td className="p-2.5 text-right font-bold text-gray-600">
@@ -3722,7 +3723,7 @@ export default function AnalyticsDashboard({
  opsAnalytics.deliveredCount
  ? currentOrders
  .filter((o) => o.status === "delivered")
- .reduce((sum, o) => sum + Number(o.totalPrice), 0) / opsAnalytics.deliveredCount
+  .reduce((sum, o) => sum + Number(o.totalPrice), 0) / opsAnalytics.deliveredCount
  : 0
  )}
  </td>
@@ -3745,7 +3746,7 @@ export default function AnalyticsDashboard({
  {formatCurrency(
  currentOrders
  .filter((o) => o.status === "cancelled")
- .reduce((sum, o) => sum + Number(o.totalPrice), 0)
+  .reduce((sum, o) => sum + Number(o.totalPrice), 0)
  )}
  </td>
  <td className="p-2.5 text-right font-bold text-gray-600">
@@ -3753,7 +3754,7 @@ export default function AnalyticsDashboard({
  opsAnalytics.cancelledCount
  ? currentOrders
  .filter((o) => o.status === "cancelled")
- .reduce((sum, o) => sum + Number(o.totalPrice), 0) / opsAnalytics.cancelledCount
+  .reduce((sum, o) => sum + Number(o.totalPrice), 0) / opsAnalytics.cancelledCount
  : 0
  )}
  </td>
@@ -4029,7 +4030,7 @@ export default function AnalyticsDashboard({
  </p>
  <MetricInfoButton
  title="Driven Promo Revenue"
- formula="Sum of totalPrice for orders using a promotion code"
+ formula="Sum of product sales after discounts for orders using a promotion code"
  description="Total revenue generated by orders that utilized a promotion."
  />
  </div>

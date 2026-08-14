@@ -41,8 +41,8 @@ const PROMOTIONS = [
 ];
 
 const ANNOUNCEMENTS = [
-  { id: "announcement-welcome", text: "Complimentary delivery on orders over 2,500 EGP · Shop the new DeRoma edit", backgroundColor: "#942E3A", textColor: "#FFF9EB", moving: true },
-  { id: "announcement-fitting", text: "Order with confidence — open and try your shoes before payment", backgroundColor: "#D8B46A", textColor: "#942E3A", moving: false },
+  { id: "announcement-welcome", text: "Complimentary delivery on orders over 2,500 EGP · Shop the new DeRoma edit", backgroundColor: "#8B7CC7", textColor: "#FFF9EB", moving: true },
+  { id: "announcement-fitting", text: "Order with confidence — open and try your shoes before payment", backgroundColor: "#D8B46A", textColor: "#8B7CC7", moving: false },
 ];
 
 const DEMO_ORDERS = [

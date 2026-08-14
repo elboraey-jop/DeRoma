@@ -13,6 +13,7 @@ import { formatCurrency } from "@/lib/utils";
 import AdminStatusSelect from "@/components/AdminStatusSelect";
 import AdminBackButton from "@/components/AdminBackButton";
 import AdminCopyButton from "@/components/AdminCopyButton";
+import { confirmOrderPaymentAction } from "@/app/admin/orders/actions";
 
 const statusMessages: Record<string, string> = {
   pending:
@@ -53,7 +54,9 @@ export default async function AdminOrderDetailsPage({
     include: { items: true },
   });
   if (!order) notFound();
-  const whatsappText = (statusMessages[order.status] || statusMessages.pending)
+  const whatsappText = (order.status === "pending_payment" && order.paymentMethod !== "cod"
+    ? `Hello ${order.customerName}, please send the transfer screenshot for your DeRoma order ${order.orderNumber} here.`
+    : statusMessages[order.status] || statusMessages.pending)
     .replace("{name}", order.customerName)
     .replace("{order}", order.orderNumber);
   const whatsappHref = `https://wa.me/${whatsappNumber(order.customerPhone)}?text=${encodeURIComponent(whatsappText)}`;
@@ -93,7 +96,7 @@ export default async function AdminOrderDetailsPage({
               <Link href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`} className="mt-1 block font-playfair text-2xl font-bold hover:underline">{order.customerName}</Link>
               <span className="mt-1 inline-flex items-center gap-1.5"><a href={`tel:${order.customerPhone}`} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#942E3A]"><Phone className="h-3.5 w-3.5 text-[#D8B46A]" />{order.customerPhone}</a><AdminCopyButton value={order.customerPhone} /></span>
             </div>
-            <div className="flex items-center gap-2 print:hidden"><span className="text-[10px] font-bold uppercase tracking-wide text-[#6B1F2A]/55">Status</span><AdminStatusSelect orderId={order.id} status={order.status} paymentMethod={order.paymentMethod} /></div>
+            <div className="flex flex-wrap items-center gap-2 print:hidden"><span className="text-[10px] font-bold uppercase tracking-wide text-[#6B1F2A]/55">Status</span><AdminStatusSelect orderId={order.id} status={order.status} paymentMethod={order.paymentMethod} />{order.status === "pending_payment" && order.paymentMethod !== "cod" && <form action={confirmOrderPaymentAction}><input type="hidden" name="orderId" value={order.id} /><button type="submit" className="rounded-xl bg-emerald-600 px-3 py-2 text-[11px] font-bold text-white shadow-sm transition hover:bg-emerald-700">Confirm payment</button></form>}</div>
           </div>
           <div className="mt-5 grid gap-3 text-xs sm:grid-cols-2">
             <div className="rounded-2xl bg-[#FFF9EB] p-3">
@@ -144,6 +147,9 @@ export default async function AdminOrderDetailsPage({
               Payment summary
             </p>
             <div className="mt-4 space-y-3 text-xs text-[#6B1F2A]">
+              <p className="flex justify-between gap-3"><span>Payment method</span><strong className="uppercase">{order.paymentMethod === "instapay" ? "InstaPay" : order.paymentMethod === "wallet" ? "Wallet" : "COD"}</strong></p>
+              {order.paymentMethod !== "cod" && <p className="flex justify-between gap-3"><span>Payment proof</span><strong className={order.paymentProofStatus === "verified" ? "text-emerald-700" : "text-amber-700"}>{order.paymentProofStatus === "verified" ? "Verified" : "Awaiting WhatsApp"}</strong></p>}
+              {order.paymentSenderPhone && <p className="flex justify-between gap-3"><span>Transfer from</span><strong>{order.paymentSenderPhone}</strong></p>}
               <p className="flex justify-between gap-3">
                 <span>Subtotal</span>
                 <strong>{formatCurrency(Number(order.subtotalPrice))}</strong>

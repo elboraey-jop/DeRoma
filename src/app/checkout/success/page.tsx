@@ -12,20 +12,30 @@ import {
   MapPin,
   PackageCheck,
   PhoneCall,
+  MessageCircle,
   Truck,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { useStoreI18n } from "@/providers/StoreI18nContext";
+import { useSiteSettings } from "@/providers/SiteSettingsProvider";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const { dir, lang } = useStoreI18n();
+  const siteSettings = useSiteSettings();
   const isArabic = lang === "ar";
   const orderNumber = searchParams.get("orderNumber") || "DR-XXXX";
   const name = searchParams.get("name") || (isArabic ? "عميلنا" : "there");
   const total = Number(searchParams.get("total") || 0);
   const shipping = searchParams.get("shipping") || "0";
   const gov = searchParams.get("gov") || (isArabic ? "العنوان المحدد" : "your selected address");
+  const paymentMethod = searchParams.get("paymentMethod") || "cod";
+  const isPrepaid = paymentMethod === "instapay" || paymentMethod === "wallet";
+  const paymentLabel = paymentMethod === "instapay" ? "InstaPay" : paymentMethod === "wallet" ? (isArabic ? "المحفظة الإلكترونية" : "Mobile wallet") : (isArabic ? "الدفع عند الاستلام" : "Cash on delivery");
+  const paymentAccount = paymentMethod === "instapay" ? siteSettings.instapayAccount : siteSettings.walletNumber;
+  const paymentAccountDigits = paymentAccount.replace(/[^0-9]/g, "");
+  const whatsappDigits = paymentAccountDigits.startsWith("0") ? `20${paymentAccountDigits.slice(1)}` : paymentAccountDigits;
+  const whatsappHref = `https://wa.me/${whatsappDigits}?text=${encodeURIComponent(isArabic ? `مرحباً DeRoma، هذا إثبات تحويل الطلب ${orderNumber}.` : `Hello DeRoma, this is the transfer proof for order ${orderNumber}.`)}`;
 
   const copy = isArabic
     ? {
@@ -116,9 +126,16 @@ function SuccessContent() {
             </div>
 
             <section className="mt-3 rounded-xl border border-[#eadfd6] p-3.5">
-              <div className="flex items-center justify-between gap-4"><div><p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c49a50]">{copy.paymentMethod}</p><p className="mt-0.5 text-xs font-bold">{copy.cashOnDelivery}</p></div><div className="text-right"><p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c49a50]">{copy.totalAmount}</p><p className="mt-0.5 font-playfair text-lg font-bold text-[#942e3a]">{formatCurrency(total)}</p></div></div>
+              <div className="flex items-center justify-between gap-4"><div><p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c49a50]">{copy.paymentMethod}</p><p className="mt-0.5 text-xs font-bold">{paymentLabel}</p></div><div className="text-right"><p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c49a50]">{copy.totalAmount}</p><p className="mt-0.5 font-playfair text-lg font-bold text-[#942e3a]">{formatCurrency(total)}</p></div></div>
               <p className="mt-2.5 border-t border-[#eadfd6] pt-2.5 text-[10px] text-[#806e73]">{copy.deliveryFee}</p>
             </section>
+
+            {isPrepaid && (
+              <section className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5">
+                <div className="flex items-start gap-2.5"><MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#25D366]" /><div><h2 className="text-xs font-bold text-emerald-900">{isArabic ? "أرسل صورة التحويل على واتساب" : "Send your transfer screenshot on WhatsApp"}</h2><p className="mt-1 text-[11px] leading-4 text-emerald-800">{isArabic ? "سيظل الطلب بانتظار تأكيد الدفع حتى يراجع الأدمن التحويل." : "Your order will remain pending payment until the admin verifies the transfer."}</p></div></div>
+                <a href={whatsappHref} target="_blank" rel="noreferrer" className="mt-3 flex h-10 items-center justify-center gap-2 rounded-full bg-[#25D366] px-4 text-xs font-bold text-white transition hover:bg-[#1da851]"><MessageCircle className="h-4 w-4" /> {isArabic ? "إرسال صورة التحويل" : "Send transfer screenshot"}</a>
+              </section>
+            )}
 
             <section className="mt-3 rounded-xl bg-[#942e3a] p-3.5 text-[#fffaf0]">
               <div className="flex items-start gap-2.5"><Truck className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[#d8b46a]" /><div><h2 className="text-xs font-bold">{copy.deliveryNote}</h2><p className="mt-1 text-[11px] leading-4 text-white/70">{copy.deliveryTeam}</p></div></div>

@@ -3,9 +3,9 @@
 import { randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import prisma from "@/lib/prisma";
-import { Resend } from "resend";
 import { consumeInventoryLots } from "@/lib/inventoryLots";
 import { formatOrderNumber } from "@/lib/orderNumber";
+import { sendOrderOwnerEmail } from "@/lib/orderEmail";
 import {
   calculateShippingFee,
   ShippingSettingsData,
@@ -36,6 +36,8 @@ interface CreateOrderInput {
   address: string;
   notes?: string;
   couponCode?: string;
+  paymentMethod?: "cod" | "instapay" | "wallet";
+  paymentSenderPhone?: string;
   items: CheckoutItemInput[];
 }
 
@@ -72,9 +74,16 @@ const SHIPPING_FEES: Record<string, number> = {
 
 export async function createOrder(input: CreateOrderInput) {
   try {
+    const paymentMethod = input.paymentMethod || "cod";
+    if (!["cod", "instapay", "wallet"].includes(paymentMethod)) {
+      return { success: false, error: "Invalid payment method." };
+    }
     // 1. Validation
     const cleanPhone = (input.customerPhone || "").replace(/[\s\-\+]/g, "").replace(/^20/, "");
     const cleanPhone2 = input.customerPhone2 ? input.customerPhone2.replace(/[\s\-\+]/g, "").replace(/^20/, "") : null;
+    const cleanPaymentSenderPhone = input.paymentSenderPhone
+      ? input.paymentSenderPhone.replace(/[\s\-\+]/g, "").replace(/^20/, "")
+      : null;
     const egPhoneRegex = /^01[0125]\d{8}$/;
 
     // Rate Limiting (max 5 orders per phone per 10 minutes)
@@ -98,6 +107,9 @@ export async function createOrder(input: CreateOrderInput) {
     }
     if (cleanPhone2 && !egPhoneRegex.test(cleanPhone2)) {
       return { success: false, error: "رقم الهاتف البديل يجب أن يكون رقم مصري صحيح مكون من 11 رقم (مثال: 01112345678)." };
+    }
+    if (paymentMethod !== "cod" && (!cleanPaymentSenderPhone || !egPhoneRegex.test(cleanPaymentSenderPhone))) {
+      return { success: false, error: "A valid Egyptian phone number is required for the transfer." };
     }
     if (!input.governorate || !input.city) {
       return { success: false, error: "الرجاء اختيار المحافظة والمدينة." };
@@ -335,7 +347,10 @@ export async function createOrder(input: CreateOrderInput) {
           subtotalPrice: subtotal,
           discountAmount,
           manual: false,
-          paymentMethod: "cod",
+          paymentMethod,
+          paymentSenderPhone: paymentMethod === "cod" ? null : cleanPaymentSenderPhone,
+          status: paymentMethod === "cod" ? "pending" : "pending_payment",
+          paymentProofStatus: paymentMethod === "cod" ? "not_required" : "awaiting_whatsapp",
           shippingCost,
           totalPrice,
           items: {
@@ -365,85 +380,30 @@ export async function createOrder(input: CreateOrderInput) {
       return { ...newOrder, orderNumber: formatOrderNumber(newOrder.orderSequence) };
     });
 
-    // 6. Send notification email to admin using Resend.
-    // Email is an optional side effect and must never prevent an order from
-    // being created when the Resend key is not configured on a deployment.
-    if (process.env.RESEND_API_KEY) {
-      try {
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        const itemsHtml = dbItemsToCreate
-          .map(
-            (item) => `
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.productName}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.color}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.size}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: left;">EGP ${item.price * item.quantity}</td>
-        </tr>
-      `,
-          )
-          .join("");
-
-        const emailHtml = `
-        <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-          <h2 style="color: #942E3A; border-bottom: 2px solid #942E3A; padding-bottom: 10px;">طلب جديد رقم ${order.orderNumber} ✨</h2>
-
-          <h3 style="color: #333;">بيانات العميل:</h3>
-          <p><strong>الاسم:</strong> ${input.customerName}</p>
-          <p><strong>رقم الهاتف 1:</strong> ${input.customerPhone}</p>
-          ${input.customerPhone2 ? `<p><strong>رقم الهاتف 2:</strong> ${input.customerPhone2}</p>` : ""}
-          <p><strong>المحافظة:</strong> ${input.governorate}</p>
-          <p><strong>المدينة/المنطقة:</strong> ${input.city}</p>
-          <p><strong>العنوان بالتفصيل:</strong> ${input.address}</p>
-          ${input.notes ? `<p><strong>ملاحظات العميل:</strong> ${input.notes}</p>` : ""}
-
-          <h3 style="color: #333; margin-top: 30px;">تفاصيل الطلب:</h3>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-            <thead>
-              <tr style="background-color: #f8f8f8;">
-                <th style="padding: 8px; text-align: right; border-bottom: 2px solid #ddd;">المنتج</th>
-                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #ddd;">اللون</th>
-                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #ddd;">المقاس</th>
-                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #ddd;">الكمية</th>
-                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">السعر</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsHtml}
-            </tbody>
-          </table>
-
-          <div style="margin-top: 20px; text-align: left; padding: 15px; background-color: #f2d4d7; border-radius: 8px;">
-            <p style="margin: 5px 0;"><strong>الإجمالي الفرعي:</strong> EGP ${subtotal}</p>
-            <p style="margin: 5px 0;"><strong>تكلفة الشحن (${input.governorate}):</strong> EGP ${shippingCost}</p>
-            <h3 style="margin: 10px 0 0 0; color: #942E3A;"><strong>الإجمالي الكلي:</strong> EGP ${totalPrice}</h3>
-          </div>
-
-          <div style="margin-top: 30px; font-size: 11px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 15px;">
-            هذا البريد مرسل تلقائياً من متجر DeRoma Shoes.
-          </div>
-        </div>
-      `;
-
-        await resend.emails.send({
-          from:
-            process.env.RESEND_FROM_EMAIL ||
-            "DeRoma Store <onboarding@resend.dev>",
-          to: process.env.ADMIN_ALERT_EMAIL || "elboraey.jop@gmail.com",
-          subject: `طلب جديد في المتجر! #${order.orderNumber}`,
-          html: emailHtml,
-        });
-      } catch (emailErr) {
-        // Log error but don't fail the order if only the email fails.
-        console.error("Failed to send alert email via Resend:", emailErr);
-      }
-    } else {
-      console.warn(
-        "RESEND_API_KEY is not configured; skipping order email notification.",
-      );
-    }
-
+    // Send exactly one order email to the owner; email failure must not undo the order.
+    await sendOrderOwnerEmail({
+      orderNumber: order.orderNumber,
+      customerName: order.customerName,
+      customerPhone: order.customerPhone,
+      customerPhone2: order.customerPhone2,
+      governorate: order.governorate,
+      city: order.city,
+      address: order.address,
+      notes: order.notes,
+      subtotalPrice: subtotal,
+      shippingCost,
+      totalPrice,
+      paymentMethod,
+      paymentSenderPhone: paymentMethod === "cod" ? null : cleanPaymentSenderPhone,
+      paymentProofStatus: paymentMethod === "cod" ? "not_required" : "awaiting_whatsapp",
+      items: dbItemsToCreate.map(({ productName, color, size, quantity, price }) => ({
+        productName,
+        color,
+        size,
+        quantity,
+        price,
+      })),
+    });
     const eventId = order.orderNumber;
     const enhancedConversionData = getGoogleEnhancedConversionData({
       email: customerSession?.email,

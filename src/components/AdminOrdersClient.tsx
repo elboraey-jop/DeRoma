@@ -136,10 +136,10 @@ export default function AdminOrdersClient({ orders }: { orders: AdminOrderRow[] 
                   key={item}
                   type="button"
                   onClick={() => setStatus(item)}
-                  className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-2 text-[10px] font-bold capitalize ${
+                  className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-2 text-[10px] font-bold capitalize transition ${
                     status === item
-                      ? "bg-[#942E3A] text-[#FFF9EB]"
-                      : "bg-[#FFF9EB] text-[#942E3A]/70"
+                      ? "bg-[#942E3A] text-[#FFF9EB] border border-[#942E3A]"
+                      : "bg-[#FFF9EB] text-[#942E3A]/70 border border-[#942E3A]/20 hover:border-[#942E3A]/40"
                   }`}
                 >
                   {item === "all" ? t("orders.filterAll") : getStatusLabel(item, lang)}
@@ -148,7 +148,7 @@ export default function AdminOrdersClient({ orders }: { orders: AdminOrderRow[] 
                       className={`rounded-full px-1.5 py-0.5 text-[9px] leading-none ${
                         status === item
                           ? "bg-[#FFF9EB]/20 text-[#FFF9EB]"
-                          : "bg-[#942E3A]/10 text-[#942E3A]"
+                          : "bg-[#942E3A] text-white"
                       }`}
                     >
                       {formatNumber(count)}

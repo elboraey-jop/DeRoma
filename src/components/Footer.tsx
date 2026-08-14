@@ -33,22 +33,22 @@ export default function Footer() {
 
                 <div className="flex shrink-0 items-center gap-2">
                   {settings.instagram && (
-                    <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#D8B46A]/35 bg-white/5 text-[#D8B46A] shadow-2xs transition-all hover:border-[#D8B46A] hover:bg-[#FFF9EB] hover:text-[#942E3A]" aria-label="Instagram">
+                    <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full border border-white/35 bg-white/5 text-white shadow-2xs transition-all hover:border-white hover:bg-[#FFF9EB] hover:text-[#5F5598]" aria-label="Instagram">
                       <Instagram className="h-3.5 w-3.5" />
                     </a>
                   )}
                   {settings.facebook && (
-                    <a href={settings.facebook} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#D8B46A]/35 bg-white/5 text-[#D8B46A] shadow-2xs transition-all hover:border-[#D8B46A] hover:bg-[#FFF9EB] hover:text-[#942E3A]" aria-label="Facebook">
+                    <a href={settings.facebook} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full border border-white/35 bg-white/5 text-white shadow-2xs transition-all hover:border-white hover:bg-[#FFF9EB] hover:text-[#5F5598]" aria-label="Facebook">
                       <Facebook className="h-3.5 w-3.5" />
                     </a>
                   )}
                   {settings.whatsapp && (
-                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#D8B46A]/35 bg-white/5 text-[#D8B46A] shadow-2xs transition-all hover:border-[#D8B46A] hover:bg-[#FFF9EB] hover:text-[#942E3A]" aria-label="WhatsApp">
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full border border-white/35 bg-white/5 text-white shadow-2xs transition-all hover:border-white hover:bg-[#FFF9EB] hover:text-[#5F5598]" aria-label="WhatsApp">
                       <MessageCircle className="h-3.5 w-3.5" />
                     </a>
                   )}
                   {settings.tiktok && (
-                    <a href={settings.tiktok} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#D8B46A]/35 bg-white/5 text-[#D8B46A] shadow-2xs transition-all hover:border-[#D8B46A] hover:bg-[#FFF9EB] hover:text-[#942E3A]" aria-label="TikTok">
+                    <a href={settings.tiktok} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full border border-white/35 bg-white/5 text-white shadow-2xs transition-all hover:border-white hover:bg-[#FFF9EB] hover:text-[#5F5598]" aria-label="TikTok">
                       <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
                       </svg>

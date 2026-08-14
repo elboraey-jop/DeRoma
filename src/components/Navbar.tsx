@@ -90,7 +90,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
             {/* Mobile menu toggle */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center rounded-full p-1.5 text-stone-200 hover:bg-white/10 hover:text-white lg:hidden transition-colors"
+              className="inline-flex items-center justify-center rounded-full p-1.5 text-[#FFF9EC]/90 hover:bg-white/10 hover:text-[#FFF9EC] lg:hidden transition-colors"
               aria-label="Toggle menu"
             >
               {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -99,7 +99,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
             {/* Mobile Search button */}
             <button
               onClick={handleSearchClick}
-              className="p-1.5 text-stone-200 hover:text-white hover:bg-white/10 rounded-full transition-colors lg:hidden"
+              className="p-1.5 text-[#FFF9EC]/90 hover:text-[#FFF9EC] hover:bg-white/10 rounded-full transition-colors lg:hidden"
               aria-label="Search"
             >
               <Search className="h-3.5 w-3.5" />
@@ -132,7 +132,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
                     "text-[11px] font-semibold px-3 py-1 rounded-full transition-all duration-200 whitespace-nowrap",
                     isActive
                       ? "bg-[#FFF9EB] text-[#942E3A] shadow-xs font-bold"
-                      : "text-stone-200 hover:text-[#FFF9EB] hover:bg-white/5"
+                      : "text-[#FFF9EC]/90 hover:text-[#FFF9EC] hover:bg-white/5"
                   )}
                 >
                   {t(link.labelKey)}
@@ -163,7 +163,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
 
             <button
               onClick={handleSearchClick}
-              className="p-1.5 text-stone-200 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+              className="p-1.5 text-[#FFF9EC]/90 hover:text-[#FFF9EC] hover:bg-white/10 rounded-full transition-colors"
               aria-label="Search"
             >
               <Search className="h-3.5 w-3.5" />
@@ -173,7 +173,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
             {isLoggedIn ? (
               <Link
                 href="/profile"
-                className="p-1.5 text-stone-200 hover:text-white hover:bg-white/10 rounded-full transition-colors flex items-center justify-center shrink-0"
+              className="p-1.5 text-[#FFF9EC]/90 hover:text-[#FFF9EC] hover:bg-white/10 rounded-full transition-colors flex items-center justify-center shrink-0"
                 aria-label="Profile"
               >
                 <User className="h-3.5 w-3.5" />
@@ -267,7 +267,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="pointer-events-auto fixed inset-0 z-[70] bg-black/60 lg:hidden"
+              className="pointer-events-auto fixed inset-0 z-[70] bg-[#8B7CC7]/45 backdrop-blur-[2px] lg:hidden"
             />
 
             {/* Sidebar Panel - Adjusts position and slide direction for RTL */}
@@ -343,7 +343,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
                           "text-xs font-semibold py-2 px-3 rounded-xl transition-all flex justify-between items-center",
                           isActive
                             ? "bg-[#FFF9EB] text-[#942E3A] font-bold shadow-xs"
-                            : "text-stone-200 hover:text-[#FFF9EB] hover:bg-white/10"
+                    : "text-[#FFF9EC]/90 hover:text-[#FFF9EC] hover:bg-white/10"
                         )}
                       >
                         <span className="flex items-center gap-2">
@@ -391,7 +391,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
                   <Link
                     href="/wishlist"
                     onClick={() => setIsOpen(false)}
-                    className="text-xs font-semibold py-2 px-3 rounded-xl text-stone-200 hover:text-[#FFF9EB] hover:bg-white/10 transition-all flex justify-between items-center"
+                    className="text-xs font-semibold py-2 px-3 rounded-xl text-[#FFF9EC]/90 hover:text-[#FFF9EC] hover:bg-white/10 transition-all flex justify-between items-center"
                   >
                     <div className="flex items-center gap-2">
                       <Heart className="w-3.5 h-3.5 fill-[#D8B46A]/20 text-[#D8B46A]" />

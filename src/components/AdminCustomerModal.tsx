@@ -194,7 +194,7 @@ export default function AdminCustomerModal({
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex h-dvh items-center justify-center bg-[#2c1018]/55 p-3 sm:p-4"
+          className="fixed inset-0 z-50 flex h-dvh items-center justify-center bg-[#8B7CC7]/45 p-3 backdrop-blur-[2px] sm:p-4"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setOpen(false);
           }}

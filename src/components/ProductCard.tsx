@@ -9,6 +9,7 @@ import { useWishlist } from "@/lib/wishlistStore";
 import { motion } from "framer-motion";
 import { trackAddToWishlist, trackSelectItem, trackViewItemList } from "@/lib/analytics";
 import { useStoreI18n } from "@/providers/StoreI18nContext";
+import { sortVariantsByNumericSize } from "@/lib/utils";
 
 export interface ProductVariant {
   id: string;
@@ -83,7 +84,7 @@ export default function ProductCard({
   const isBag = product.category === "bags";
 
   const activeImage = product.images[0];
-  const sizesForProduct = product.variants;
+  const sizesForProduct = sortVariantsByNumericSize(product.variants);
   const availableSizes = sizesForProduct.filter((v) => v.stock > 0);
   const selectedVariant =
     availableSizes.find((variant) => variant.size === selectedSize) || availableSizes[0];
@@ -219,9 +220,9 @@ export default function ProductCard({
       {/* Card Details */}
       <div
         className={`relative z-10 -mt-7 flex flex-1 flex-col rounded-t-[1.15rem] px-2.5 pb-2 pt-2 text-[#6B1F2A] sm:-mt-9 sm:rounded-t-[1.35rem] sm:px-3 sm:pb-2.5 sm:pt-2.5 ${
-          isTotalSoldOut ? "bg-stone-700 text-stone-200" : "bg-[#E2D0C4] text-[#6B1F2A]"
+          isTotalSoldOut ? "bg-stone-700 text-stone-200" : "bg-[#EADFC8] text-[#6B1F2A]"
         }`}
-        style={!isTotalSoldOut ? { backgroundColor: "#E2D0C4" } : undefined}
+        style={!isTotalSoldOut ? { backgroundColor: "#EADFC8" } : undefined}
       >
         <div className="relative mb-0.5 min-h-[1.75rem]">
           <div className="absolute left-0 rtl:left-auto rtl:right-0 top-0 flex items-center gap-0.5 text-xs font-semibold text-amber-500">
@@ -265,13 +266,19 @@ export default function ProductCard({
                 whileTap={!mobileOptimized && !isOutOfStock ? { scale: 0.9 } : undefined}
                 className={`product-card-badge-number group relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
                   isOutOfStock
-                    ? "border-[#6B1F2A]/25 bg-[#FFF9EB]/35 text-[#6B1F2A]/45 after:absolute after:left-1 after:right-1 after:top-[48%] after:h-[1.2px] after:bg-[#6B1F2A]/35 after:content-['']"
+                    ? "border-[#8B7CC7]/35 bg-[#FFF9EC]/70 text-[#8178A8]"
                     : isSelected
                     ? "border-[#942E3A] bg-[#942E3A] text-[#FFF9EB]"
                     : "border-[#942E3A]/30 bg-[#FFF9EB]/65 text-[#6B1F2A] hover:border-[#942E3A]/65"
                 }`}
               >
                 <span className="relative -top-0.5">{formatNumber(variant.size)}</span>
+                {isOutOfStock && (
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-1 right-1 top-1/2 h-[1.5px] -translate-y-1/2 bg-[#8B7CC7]"
+                  />
+                )}
               </motion.button>
             );
           })}
@@ -290,7 +297,7 @@ export default function ProductCard({
                 disabled={!selectedVariant}
                 whileHover={mobileOptimized ? undefined : { scale: 1.1 }}
                 whileTap={mobileOptimized ? undefined : { scale: 0.9 }}
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#D8B46A] text-[#6B1F2A] shadow-xs transition-all hover:bg-[#942E3A] hover:text-[#FFF9EB] disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:w-8"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#D8B46A] text-[#FFF9EC] shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#942E3A] hover:text-white hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:hover:translate-y-0 disabled:hover:shadow-xs sm:h-8 sm:w-8"
                 aria-label={t("productCard.addToBag")}
               >
                 {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
@@ -300,7 +307,7 @@ export default function ProductCard({
                 onClick={handleWishlistToggle}
                 whileHover={mobileOptimized ? undefined : { scale: 1.1 }}
                 whileTap={mobileOptimized ? undefined : { scale: 0.9 }}
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-transparent shadow-xs transition-all hover:bg-[#FFF9EB] hover:text-[#942E3A] sm:h-8 sm:w-8 border ${
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-transparent shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#FFF9EB] hover:text-[#942E3A] hover:shadow-md active:translate-y-0 sm:h-8 sm:w-8 border ${
                   isWishlisted ? "border-[#942E3A] text-[#942E3A]" : "border-[#942E3A]/45 text-[#6B1F2A]"
                 }`}
                 aria-label="Add to wishlist"
@@ -313,7 +320,7 @@ export default function ProductCard({
                 disabled={!selectedVariant}
                 whileHover={mobileOptimized ? undefined : { scale: 1.03 }}
                 whileTap={mobileOptimized ? undefined : { scale: 0.97 }}
-                className="flex h-7 flex-1 items-center justify-center rounded-full bg-[#942E3A] px-3 text-[9px] font-black text-[#FFF9EB] shadow-xs transition-all hover:bg-[#6B1F2A] hover:text-[#FFF9EB] disabled:cursor-not-allowed disabled:bg-stone-300 sm:h-8 sm:text-[10px]"
+                className="flex h-7 flex-1 items-center justify-center rounded-full bg-[#942E3A] px-3 text-[9px] font-black text-[#FFF9EB] shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#6B1F2A] hover:text-[#FFF9EB] hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:hover:translate-y-0 disabled:hover:shadow-xs sm:h-8 sm:text-[10px]"
               >
                 {t("productCard.buyNow", lang === "ar" ? "اشتري الآن" : "Buy Now")}
               </motion.button>

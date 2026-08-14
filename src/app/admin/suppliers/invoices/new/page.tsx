@@ -17,7 +17,15 @@ export default async function NewPurchaseInvoicePage({ searchParams }: { searchP
     }).catch(() => []),
   ]);
   const params = await searchParams;
-  const variants = products.flatMap((product) => product.variants.map((variant) => ({ id: variant.id, productId: product.id, productName: product.name, category: product.category, image: product.images[0] || null, label: `${product.color || "No color"} · ${variant.size} · ${product.sku || "No SKU"}`, wholesalePrice: Number(product.wholesalePrice || 0), retailPrice: Number(product.price) })));
+  const variants = products.flatMap((product) => {
+    const sizes = product.category === "shoes"
+      ? ["36", "37", "38", "39", "40", "41"]
+      : product.variants.map((variant) => variant.size);
+    return Array.from(new Set(sizes)).map((size) => {
+      const variant = product.variants.find((item) => item.size === size);
+      return { id: variant?.id || `new:${product.id}:${size}`, productId: product.id, productName: product.name, category: product.category, image: product.images[0] || null, label: `${product.color || "No color"} · ${size} · ${product.sku || "No SKU"}`, size, stock: variant?.stock || 0, wholesalePrice: Number(variant?.wholesalePrice ?? product.wholesalePrice ?? 0), retailPrice: Number(variant?.price ?? product.price) };
+    });
+  });
   return (
     <div className="mx-auto max-w-6xl space-y-4 sm:space-y-5">
       <div className="flex items-center gap-3">

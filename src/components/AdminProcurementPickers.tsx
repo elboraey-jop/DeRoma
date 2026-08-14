@@ -154,8 +154,33 @@ export function AdminProductPicker({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
+  const [dropdownPosition, setDropdownPosition] = useState({
+    bottom: 0,
+    left: 0,
+    width: 0,
+  });
   const ref = useRef<HTMLDivElement>(null);
   useOutsideClose(ref, () => setOpen(false));
+  useEffect(() => {
+    if (!open) return;
+    const updatePosition = () => {
+      const button = ref.current?.querySelector("button");
+      if (!button) return;
+      const rect = button.getBoundingClientRect();
+      setDropdownPosition({
+        bottom: window.innerHeight - rect.top + 8,
+        left: rect.left,
+        width: rect.width,
+      });
+    };
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [open]);
   const selected = variants.find((variant) => variant.id === value);
   const categories = [
     "all",
@@ -205,8 +230,12 @@ export function AdminProductPicker({
       </button>
       {open && (
         <div
-          style={{ bottom: "calc(100% + 8px)", top: "auto" }}
-          className="absolute left-0 z-40 w-full min-w-[300px] overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-2 shadow-[0_18px_40px_rgba(67,25,31,0.2)]"
+          style={{
+            bottom: dropdownPosition.bottom,
+            left: dropdownPosition.left,
+            width: dropdownPosition.width,
+          }}
+          className="fixed z-[100] max-h-[calc(100dvh-1rem)] min-w-0 max-w-[calc(100vw-1rem)] overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-2 shadow-[0_18px_40px_rgba(67,25,31,0.2)] sm:min-w-[300px]"
         >
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
@@ -232,7 +261,7 @@ export function AdminProductPicker({
           </div>
           <div
             onWheel={(event) => event.stopPropagation()}
-            className="hide-scrollbar mt-1 max-h-72 space-y-1 overflow-y-auto overscroll-contain"
+            className="hide-scrollbar mt-1 max-h-[calc(100dvh-9rem)] space-y-1 overflow-y-auto overscroll-contain sm:max-h-72"
           >
             {filtered.map((variant) => (
               <button
@@ -370,11 +399,12 @@ export function AdminCatalogProductPicker({
       {open && (
         <div
           style={{
-            top: dropdownPosition.top,
-            left: dropdownPosition.left,
-            width: dropdownPosition.width,
+            top: "50%",
+            left: "50%",
+            width: "min(720px, calc(100vw - 2rem))",
+            transform: "translate(-50%, -50%)",
           }}
-          className="fixed z-[100] min-w-[300px] overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-2 shadow-[0_18px_40px_rgba(67,25,31,0.2)]"
+          className="fixed z-[100] max-h-[calc(100dvh-2rem)] min-w-0 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-2 shadow-[0_18px_40px_rgba(67,25,31,0.2)]"
         >
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
@@ -400,7 +430,7 @@ export function AdminCatalogProductPicker({
           </div>
           <div
             onWheel={(event) => event.stopPropagation()}
-            className="hide-scrollbar mt-1 max-h-72 space-y-1 overflow-y-auto overscroll-contain"
+            className="hide-scrollbar mt-1 max-h-[calc(100dvh-9rem)] space-y-1 overflow-y-auto overscroll-contain sm:max-h-72"
           >
             {filtered.map((product) => (
               <button

@@ -10,13 +10,13 @@ async function getDashboardData() {
       await Promise.all([
         prisma.product.count({ where: { status: "active" } }),
         prisma.order.count(),
-        prisma.order.count({ where: { status: "pending" } }),
+        prisma.order.count({ where: { status: { in: ["pending", "pending_payment"] } } }),
         prisma.productVariant.findMany({
           select: { stock: true, product: { select: { status: true, lowStockLimit: true } } },
         }),
         prisma.order.aggregate({
-          where: { status: { not: "cancelled" } },
-          _sum: { totalPrice: true },
+          where: { status: "delivered" },
+          _sum: { subtotalPrice: true, discountAmount: true },
         }),
         prisma.order.findMany({
           orderBy: { createdAt: "desc" },
@@ -27,6 +27,9 @@ async function getDashboardData() {
             customerName: true,
             customerPhone: true,
             totalPrice: true,
+            subtotalPrice: true,
+            discountAmount: true,
+            shippingCost: true,
             status: true,
             paymentMethod: true,
             createdAt: true,
@@ -50,7 +53,10 @@ async function getDashboardData() {
       pendingOrders,
       lowStock,
       outOfStock,
-      revenue: Number(revenue._sum.totalPrice || 0),
+      revenue: Math.max(
+        0,
+        Number(revenue._sum.subtotalPrice || 0) - Number(revenue._sum.discountAmount || 0),
+      ),
       recentOrders: recentOrders.map((order) => ({
         ...order,
         totalPrice: Number(order.totalPrice),

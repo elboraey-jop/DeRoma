@@ -35,6 +35,7 @@ import {
   bulkUpdateProductsStatusAction,
 } from "@/app/admin/inventory/actions";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
+import { sortSizesList } from "@/lib/utils";
 
 export interface InventoryRow {
   variantId: string;
@@ -503,7 +504,12 @@ export default function AdminInventoryClient({
       }
     });
 
-    return Array.from(map.values());
+    const result = Array.from(map.values());
+    result.forEach((item) => {
+      item.sizesList = sortSizesList(item.sizesList);
+    });
+
+    return result;
   }, [filteredRows]);
 
   // Checkbox handlers for Variants View
@@ -1585,7 +1591,7 @@ export default function AdminInventoryClient({
       {isRestockModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-[#2c1018]/65 backdrop-blur-sm"
+            className="fixed inset-0 bg-[#8B7CC7]/45 backdrop-blur-[2px]"
             onClick={() => setIsRestockModalOpen(false)}
           />
           <div className="relative z-10 w-full max-w-sm rounded-3xl border border-[#D8B46A]/30 bg-[#FFF9EB] p-6 shadow-2xl">

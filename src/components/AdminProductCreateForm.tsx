@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { useActionState, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
@@ -202,6 +203,8 @@ function AdminDropdown({
   const [value, setValue] = useState(defaultValue);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [customHex, setCustomHex] = useState("#942E3A");
+  const [customColorName, setCustomColorName] = useState("");
+  const [customColorSwatches, setCustomColorSwatches] = useState<Record<string, string>>({});
   const [brandModalOpen, setBrandModalOpen] = useState(false);
   const [customBrand, setCustomBrand] = useState("");
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
@@ -260,6 +263,7 @@ function AdminDropdown({
   const selected = values.find((item) => item.value === value);
   const selectedLabel =
     selected?.label || ((colorMode || brandMode) && value ? value : "");
+  const selectedColorSwatch = customColorSwatches[value] || getColorSwatch(value);
 
   useEffect(() => {
     if (!open) return;
@@ -323,7 +327,7 @@ function AdminDropdown({
           {selectedLabel && colorMode && (
             <span
               className="h-4 w-4 rounded-full border border-[#942E3A]/15"
-              style={{ backgroundColor: getColorSwatch(value) }}
+              style={{ backgroundColor: selectedColorSwatch }}
             />
           )}
           {selectedLabel || placeholder}
@@ -421,7 +425,7 @@ function AdminDropdown({
         )}
       {paletteOpen && colorMode && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#43191f]/35 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#8B7CC7]/30 p-4 backdrop-blur-[2px]"
           onMouseDown={() => setPaletteOpen(false)}
         >
           <div
@@ -445,7 +449,17 @@ function AdminDropdown({
                 ×
               </button>
             </div>
-            <div className="mt-5 rounded-2xl border border-[#D8B46A]/35 bg-white p-4">
+            <label className="mt-5 block">
+              <span className="field-label">Color name *</span>
+              <input
+                value={customColorName}
+                onChange={(event) => setCustomColorName(event.target.value)}
+                className="admin-input"
+                placeholder="e.g. Burgundy"
+                autoFocus
+              />
+            </label>
+            <div className="mt-4 rounded-2xl border border-[#D8B46A]/35 bg-white p-4">
               <label className="flex cursor-pointer flex-col items-center gap-3">
                 <span
                   className="h-28 w-full rounded-2xl border border-[#942E3A]/15 shadow-inner"
@@ -482,11 +496,16 @@ function AdminDropdown({
               <button
                 type="button"
                 onClick={() => {
-                  setValue(customHex);
+                  const name = customColorName.trim();
+                  if (!name) return;
+                  setCustomColorSwatches((current) => ({ ...current, [name]: customHex }));
+                  setValue(name);
+                  setCustomColorName("");
                   setPaletteOpen(false);
                   setOpen(false);
                 }}
-                className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB]"
+                disabled={!customColorName.trim()}
+                className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Use this color
               </button>
@@ -494,9 +513,9 @@ function AdminDropdown({
           </div>
         </div>
       )}
-      {brandModalOpen && brandMode && (
+      {brandModalOpen && brandMode && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#43191f]/35 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#8B7CC7]/30 p-4 backdrop-blur-[2px]"
           onMouseDown={() => setBrandModalOpen(false)}
         >
           <div
@@ -520,7 +539,11 @@ function AdminDropdown({
                 ×
               </button>
             </div>
-            <form action={brandAction} className="mt-5 space-y-4">
+            <form
+              action={brandAction}
+              onSubmit={(event) => event.stopPropagation()}
+              className="mt-5 space-y-4"
+            >
               <input type="hidden" name="category" value={optionCategory} />
               <input type="hidden" name="type" value={optionType} />
               <label>
@@ -558,11 +581,12 @@ function AdminDropdown({
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
       {categoryModalOpen && (categoryMode || materialMode) && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#43191f]/35 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#8B7CC7]/30 p-4 backdrop-blur-[2px]"
           onMouseDown={() => setCategoryModalOpen(false)}
         >
           <div
@@ -753,7 +777,7 @@ function SupplierDropdown({
       )}
       {modalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#43191f]/35 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#8B7CC7]/30 p-4 backdrop-blur-[2px]"
           onMouseDown={() => setModalOpen(false)}
         >
           <div
@@ -883,6 +907,7 @@ export default function AdminProductCreateForm({
   initialProduct,
   embedded = false,
   onCancel,
+  onEmbeddedSubmit,
 }: {
   options: CatalogOption[];
   suppliers: Supplier[];
@@ -891,6 +916,7 @@ export default function AdminProductCreateForm({
   initialProduct?: EditProduct;
   embedded?: boolean;
   onCancel?: () => void;
+  onEmbeddedSubmit?: (formData: FormData) => void;
 }) {
   const { lang, t, formatPrice, formatNumber } = useAdminI18n();
   const isRtl = lang === "ar";
@@ -1102,8 +1128,13 @@ export default function AdminProductCreateForm({
 
   return (
     <form
-      action={isEdit ? updateProductAction : createProductAction}
-      onSubmit={() => {
+      action={embedded ? undefined : isEdit ? updateProductAction : createProductAction}
+      onSubmit={(event) => {
+        if (embedded) {
+          event.preventDefault();
+          onEmbeddedSubmit?.(new FormData(event.currentTarget));
+          return;
+        }
         toast.success(isEdit ? "Product changes saved!" : "New product published!", "CATALOG");
       }}
       className="space-y-5"
@@ -1112,9 +1143,7 @@ export default function AdminProductCreateForm({
         <input type="hidden" name="id" value={initialProduct.id} />
       )}
       {isEdit && <input type="hidden" name="category" value={category} />}
-      {isEdit && (
-        <input type="hidden" name="reviews" value={JSON.stringify(reviews)} />
-      )}
+      <input type="hidden" name="reviews" value={JSON.stringify(reviews)} />
       {redirectTo && (
         <input type="hidden" name="redirectTo" value={redirectTo} />
       )}
@@ -1722,7 +1751,7 @@ export default function AdminProductCreateForm({
                   }),
                 )
               }
-              className="inline-flex items-center gap-1 rounded-xl bg-[#D8B46A] px-3 py-2 text-[10px] font-bold text-[#942E3A] shadow-sm transition hover:bg-[#E5C57F]"
+              className="hidden inline-flex items-center gap-1 rounded-xl bg-[#D8B46A] px-3 py-2 text-[10px] font-bold text-[#942E3A] shadow-sm transition hover:bg-[#E5C57F]"
             >
               <Plus className="h-3.5 w-3.5" /> Add new batch
             </button>
@@ -2181,7 +2210,7 @@ export default function AdminProductCreateForm({
           </div>
           {reviewModalOpen && (
             <div
-              className="fixed inset-0 z-[100] flex items-center justify-center bg-[#43191f]/40 p-4 backdrop-blur-sm"
+              className="fixed inset-0 z-[100] flex items-center justify-center bg-[#8B7CC7]/35 p-4 backdrop-blur-[2px]"
               onMouseDown={() => setReviewModalOpen(false)}
             >
               <div

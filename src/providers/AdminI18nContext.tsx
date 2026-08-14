@@ -989,6 +989,17 @@ export function localizeLegacyAdminDom(root: HTMLElement) {
     const accountCount = trimmed.match(/^accounts (.+)$/i);
     if (accountCount) localized = `حسابات ${accountCount[1]}`;
     const ordersOn = trimmed.match(/^Orders on (.+)$/);
+    const ordersOnFragment = trimmed.match(/^on (.+)$/i);
+    if (ordersOnFragment) {
+      let translatedDate = ordersOnFragment[1];
+      const dateLabels = Object.entries({ ...LEGACY_ARABIC_LABELS, ...DAILY_LOG_ARABIC_LABELS })
+        .filter(([english]) => english.length > 2)
+        .sort(([a], [b]) => b.length - a.length);
+      for (const [english, arabic] of dateLabels) {
+        if (translatedDate.includes(english)) translatedDate = translatedDate.split(english).join(arabic);
+      }
+      localized = `في ${translatedDate}`;
+    }
     if (ordersOn) localized = `الطلبات في ${ordersOn[1]}`;
     if (!localized) {
       let replaced = value;

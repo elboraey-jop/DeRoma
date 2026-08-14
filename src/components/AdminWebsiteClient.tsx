@@ -441,15 +441,14 @@ export default function AdminWebsiteClient({
       </div>
 
       {/* Primary Navigation Tabs */}
-      <div className="grid grid-cols-3 gap-1.5 border-b border-[#942E3A]/15 pb-2.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
+      <div className="admin-tabs-shell grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
         <button
           type="button"
           onClick={() => setActiveTab("home")}
+          data-active={activeTab === "home"}
           className={cn(
-            "flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-bold transition text-center",
-            activeTab === "home"
-              ? "bg-[#942E3A] text-white shadow-xs"
-              : "bg-white text-[#942E3A] hover:bg-[#942E3A]/10 border border-[#942E3A]/15"
+            "admin-tab flex items-center justify-center gap-1.5 px-2 py-2 text-center text-[11px] font-bold sm:px-4 sm:py-2.5 sm:text-xs",
+            activeTab === "home" ? "text-[#5F5598]" : ""
           )}
         >
           <Home className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
@@ -459,11 +458,10 @@ export default function AdminWebsiteClient({
         <button
           type="button"
           onClick={() => setActiveTab("contact")}
+          data-active={activeTab === "contact"}
           className={cn(
-            "flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-bold transition text-center",
-            activeTab === "contact"
-              ? "bg-[#942E3A] text-white shadow-xs"
-              : "bg-white text-[#942E3A] hover:bg-[#942E3A]/10 border border-[#942E3A]/15"
+            "admin-tab flex items-center justify-center gap-1.5 px-2 py-2 text-center text-[11px] font-bold sm:px-4 sm:py-2.5 sm:text-xs",
+            activeTab === "contact" ? "text-[#5F5598]" : ""
           )}
         >
           <PhoneCall className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
@@ -473,11 +471,10 @@ export default function AdminWebsiteClient({
         <button
           type="button"
           onClick={() => setActiveTab("about")}
+          data-active={activeTab === "about"}
           className={cn(
-            "flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-bold transition text-center",
-            activeTab === "about"
-              ? "bg-[#942E3A] text-white shadow-xs"
-              : "bg-white text-[#942E3A] hover:bg-[#942E3A]/10 border border-[#942E3A]/15"
+            "admin-tab flex items-center justify-center gap-1.5 px-2 py-2 text-center text-[11px] font-bold sm:px-4 sm:py-2.5 sm:text-xs",
+            activeTab === "about" ? "text-[#5F5598]" : ""
           )}
         >
           <Info className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
@@ -489,15 +486,14 @@ export default function AdminWebsiteClient({
       {activeTab === "home" && (
         <div className="space-y-4 sm:space-y-6">
           {/* Sub-Tabs Bar for Home Page Sections */}
-          <div className="grid grid-cols-2 gap-1 rounded-xl bg-[#FFF9EB] border border-[#942E3A]/15 p-1 w-full sm:w-fit">
+          <div className="admin-tabs-shell grid grid-cols-2 gap-1 w-full sm:w-fit">
             <button
               type="button"
               onClick={() => setHomeSubTab("banners")}
+              data-active={homeSubTab === "banners"}
               className={cn(
-                "px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all text-center truncate",
-                homeSubTab === "banners"
-                  ? "bg-[#942E3A] text-white shadow-xs"
-                  : "text-[#942E3A] hover:bg-[#942E3A]/10"
+                "admin-tab px-2.5 py-1.5 text-center text-[11px] font-bold truncate sm:px-4 sm:py-2 sm:text-xs",
+                homeSubTab === "banners" ? "text-[#5F5598]" : ""
               )}
             >
               {isRtl ? `1. البانرات الرئيسية (${settings.heroBanners.length})` : `1. Hero Banners (${settings.heroBanners.length})`}
@@ -506,11 +502,10 @@ export default function AdminWebsiteClient({
             <button
               type="button"
               onClick={() => setHomeSubTab("products")}
+              data-active={homeSubTab === "products"}
               className={cn(
-                "px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all text-center truncate",
-                homeSubTab === "products"
-                  ? "bg-[#942E3A] text-white shadow-xs"
-                  : "text-[#942E3A] hover:bg-[#942E3A]/10"
+                "admin-tab px-2.5 py-1.5 text-center text-[11px] font-bold truncate sm:px-4 sm:py-2 sm:text-xs",
+                homeSubTab === "products" ? "text-[#5F5598]" : ""
               )}
             >
               {isRtl ? "2. صفوف المنتجات" : "2. Product Rows"}
@@ -796,6 +791,24 @@ export default function AdminWebsiteClient({
                 placeholder="201023456789"
                 className="w-full rounded-xl border border-[#942E3A]/20 bg-[#FFF9EB]/30 px-2.5 py-1.5 sm:py-2 text-xs text-[#942E3A] focus:outline-none focus:ring-1 focus:ring-[#942E3A]"
               />
+            </div>
+
+            <div className="col-span-2 mt-2 border-t border-[#942E3A]/10 pt-4 sm:col-span-3">
+              <p className="font-playfair text-base font-bold text-[#942E3A]">{isRtl ? "بيانات الدفع الإلكتروني" : "Online payment details"}</p>
+              <p className="mt-1 text-[10px] text-[#6B1F2A]/60">{isRtl ? "تظهر هذه البيانات للعملاء عند اختيار InstaPay أو المحفظة." : "These details appear at checkout for InstaPay and wallet payments."}</p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold text-[#942E3A] text-[11px] block truncate">{isRtl ? "حساب InstaPay" : "InstaPay account"}</label>
+              <input type="text" value={settings.instapayAccount} onChange={(e) => setSettings({ ...settings, instapayAccount: e.target.value })} placeholder="01515205073" className="w-full rounded-xl border border-[#942E3A]/20 bg-[#FFF9EB]/30 px-2.5 py-1.5 text-xs text-[#942E3A] focus:outline-none focus:ring-1 focus:ring-[#942E3A]" />
+            </div>
+            <div className="space-y-1">
+              <label className="font-bold text-[#942E3A] text-[11px] block truncate">{isRtl ? "رقم المحفظة" : "Wallet number"}</label>
+              <input type="text" value={settings.walletNumber} onChange={(e) => setSettings({ ...settings, walletNumber: e.target.value })} placeholder="01515205073" className="w-full rounded-xl border border-[#942E3A]/20 bg-[#FFF9EB]/30 px-2.5 py-1.5 text-xs text-[#942E3A] focus:outline-none focus:ring-1 focus:ring-[#942E3A]" />
+            </div>
+            <div className="space-y-1">
+              <label className="font-bold text-[#942E3A] text-[11px] block truncate">{isRtl ? "اسم المحفظة" : "Wallet provider"}</label>
+              <input type="text" value={settings.walletProvider} onChange={(e) => setSettings({ ...settings, walletProvider: e.target.value })} placeholder="Vodafone Cash" className="w-full rounded-xl border border-[#942E3A]/20 bg-[#FFF9EB]/30 px-2.5 py-1.5 text-xs text-[#942E3A] focus:outline-none focus:ring-1 focus:ring-[#942E3A]" />
             </div>
 
             <div className="space-y-1 col-span-2 sm:col-span-1">

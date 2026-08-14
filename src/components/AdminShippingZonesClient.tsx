@@ -241,7 +241,7 @@ export default function AdminShippingZonesClient({ zones }: { zones: Zone[] }) {
 
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/55 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#8B7CC7]/45 p-4 backdrop-blur-[2px]"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setEditing(null);
           }}

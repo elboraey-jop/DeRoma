@@ -68,7 +68,7 @@ export default function AdminSuppliersWorkspace({ suppliers, invoices }: { suppl
 
       {showModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#2c1018]/55 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#8B7CC7]/45 p-4 backdrop-blur-[2px]"
           onMouseDown={(event) => { if (event.target === event.currentTarget) setShowModal(false); }}
         >
           <div dir={isRtl ? "rtl" : "ltr"} className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-[#D8B46A]/35 bg-[#FFF9EB] p-5 text-start shadow-2xl sm:p-7">

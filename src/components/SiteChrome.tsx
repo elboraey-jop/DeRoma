@@ -45,13 +45,13 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   }, []);
 
   if (isAdmin) {
-    return <div className="min-h-screen bg-[#f7f1e8] text-[#942E3A]">{children}</div>;
+    return <div className="min-h-screen bg-[#FFF9EC] text-[#5F5598]">{children}</div>;
   }
 
   return (
     <SiteSettingsProvider>
       <div className={cn(
-        "min-h-screen flex flex-col bg-[#FFF9EB] text-[#942E3A] transition-colors duration-200",
+        "min-h-screen flex flex-col bg-[#FFF9EC] text-[#5F5598] transition-colors duration-200",
         lang === "ar" ? "font-cairo" : "font-playfair"
       )} dir={dir}>
         <div ref={chromeRef} className="fixed top-0 left-0 right-0 z-50 pointer-events-none flex flex-col" dir={dir}>
@@ -66,5 +66,4 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
     </SiteSettingsProvider>
   );
 }
-
 

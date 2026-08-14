@@ -45,7 +45,7 @@ export default function AdminProductDiscountModal({
       </button>
       {isOpen && (
         <div
-          className="fixed inset-0 z-[110] flex items-center justify-center bg-[#43191F]/35 p-4 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-[#8B7CC7]/30 p-4 backdrop-blur-[2px]"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setIsOpen(false);

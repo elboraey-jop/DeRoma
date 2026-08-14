@@ -13,7 +13,10 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+import { useAdminI18n } from "@/providers/AdminI18nContext";
+
 export type DatePreset =
+  | "all"
   | "today"
   | "this_week"
   | "last_week"
@@ -25,20 +28,83 @@ export type DatePreset =
 
 interface DatePickerProps {
   currentPreset: DatePreset;
-  currentStartDate: string; // YYYY-MM-DD
-  currentEndDate: string; // YYYY-MM-DD
+  currentStartDate?: string; // YYYY-MM-DD
+  currentEndDate?: string; // YYYY-MM-DD
+  onChange?: (preset: DatePreset, startDate: string, endDate: string) => void;
+  buttonClassName?: string;
 }
 
-const PRESET_OPTIONS: { id: DatePreset; label: string }[] = [
-  { id: "today", label: "Today" },
-  { id: "this_week", label: "This week" },
-  { id: "last_week", label: "Last week" },
-  { id: "this_month", label: "This month" },
-  { id: "last_month", label: "Last month" },
-  { id: "this_year", label: "This year" },
-  { id: "last_year", label: "Last year" },
-  { id: "custom", label: "Custom range..." },
+const PRESET_OPTIONS: { id: DatePreset; label: string; labelAr: string }[] = [
+  { id: "all", label: "All Time", labelAr: "كل الأوقات" },
+  { id: "today", label: "Today", labelAr: "اليوم" },
+  { id: "this_week", label: "This week", labelAr: "هذا الأسبوع" },
+  { id: "last_week", label: "Last week", labelAr: "الأسبوع الماضي" },
+  { id: "this_month", label: "This month", labelAr: "هذا الشهر" },
+  { id: "last_month", label: "Last month", labelAr: "الشهر الماضي" },
+  { id: "this_year", label: "This year", labelAr: "هذه السنة" },
+  { id: "last_year", label: "Last year", labelAr: "السنة الماضية" },
+  { id: "custom", label: "Custom range...", labelAr: "نطاق مخصص..." },
 ];
+
+export function computePresetDates(preset: DatePreset): { startDate: string; endDate: string } {
+  const now = new Date();
+
+  const formatDate = (d: Date) => {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  switch (preset) {
+    case "today": {
+      const todayStr = formatDate(now);
+      return { startDate: todayStr, endDate: todayStr };
+    }
+    case "this_week": {
+      const day = now.getDay();
+      const diffToSat = (day + 1) % 7;
+      const startSat = new Date(now);
+      startSat.setDate(now.getDate() - diffToSat);
+      const endFri = new Date(startSat);
+      endFri.setDate(startSat.getDate() + 6);
+      return { startDate: formatDate(startSat), endDate: formatDate(endFri) };
+    }
+    case "last_week": {
+      const day = now.getDay();
+      const diffToSat = ((day + 1) % 7) + 7;
+      const startSat = new Date(now);
+      startSat.setDate(now.getDate() - diffToSat);
+      const endFri = new Date(startSat);
+      endFri.setDate(startSat.getDate() + 6);
+      return { startDate: formatDate(startSat), endDate: formatDate(endFri) };
+    }
+    case "this_month": {
+      const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      return { startDate: formatDate(startMonth), endDate: formatDate(endMonth) };
+    }
+    case "last_month": {
+      const startMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const endMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      return { startDate: formatDate(startMonth), endDate: formatDate(endMonth) };
+    }
+    case "this_year": {
+      const startYear = new Date(now.getFullYear(), 0, 1);
+      const endYear = new Date(now.getFullYear(), 11, 31);
+      return { startDate: formatDate(startYear), endDate: formatDate(endYear) };
+    }
+    case "last_year": {
+      const startYear = new Date(now.getFullYear() - 1, 0, 1);
+      const endYear = new Date(now.getFullYear() - 1, 11, 31);
+      return { startDate: formatDate(startYear), endDate: formatDate(endYear) };
+    }
+    case "all":
+    default: {
+      return { startDate: "2000-01-01", endDate: "2099-12-31" };
+    }
+  }
+}
 
 function formatDateForInput(date: Date): string {
   const yyyy = date.getFullYear();
@@ -55,8 +121,10 @@ function formatDisplayDate(dateStr: string): string {
 
 export default function AdminDailyLogDatePicker({
   currentPreset,
-  currentStartDate,
-  currentEndDate,
+  currentStartDate = "",
+  currentEndDate = "",
+  onChange,
+  buttonClassName,
 }: DatePickerProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -103,6 +171,9 @@ export default function AdminDailyLogDatePicker({
     }
   }, [isModalOpen, currentStartDate, currentEndDate]);
 
+  const { lang, dir } = useAdminI18n();
+  const isRtl = dir === "rtl" || lang === "ar";
+
   const handleSelectPreset = (presetId: DatePreset) => {
     setIsDropdownOpen(false);
     if (presetId === "custom") {
@@ -110,12 +181,18 @@ export default function AdminDailyLogDatePicker({
       return;
     }
 
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("preset", presetId);
-    params.delete("startDate");
-    params.delete("endDate");
-    params.delete("date");
-    router.push(`/admin/daily-log?${params.toString()}`);
+    const { startDate, endDate } = computePresetDates(presetId);
+
+    if (onChange) {
+      onChange(presetId, startDate, endDate);
+    } else {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("preset", presetId);
+      params.delete("startDate");
+      params.delete("endDate");
+      params.delete("date");
+      router.push(`/admin/daily-log?${params.toString()}`);
+    }
   };
 
   const handleApplyCustomRange = () => {
@@ -132,68 +209,73 @@ export default function AdminDailyLogDatePicker({
       end = swap;
     }
 
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("preset", "custom");
-    params.set("startDate", start);
-    params.set("endDate", end);
-    params.delete("date");
-
     setIsModalOpen(false);
-    router.push(`/admin/daily-log?${params.toString()}`);
+
+    if (onChange) {
+      onChange("custom", start, end);
+    } else {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("preset", "custom");
+      params.set("startDate", start);
+      params.set("endDate", end);
+      params.delete("date");
+      router.push(`/admin/daily-log?${params.toString()}`);
+    }
   };
 
   // Label text for trigger button
   const currentLabel = useMemo(() => {
     const found = PRESET_OPTIONS.find((opt) => opt.id === currentPreset);
     if (currentPreset === "custom") {
-      if (currentStartDate === currentEndDate) {
+      if (currentStartDate && currentEndDate && currentStartDate === currentEndDate) {
         return formatDisplayDate(currentStartDate);
       }
-      return `${formatDisplayDate(currentStartDate)} – ${formatDisplayDate(currentEndDate)}`;
+      if (currentStartDate && currentEndDate) {
+        return `${formatDisplayDate(currentStartDate)} – ${formatDisplayDate(currentEndDate)}`;
+      }
+      return isRtl ? "نطاق مخصص" : "Custom range";
     }
-    return found ? `${found.label}` : "Select range";
-  }, [currentPreset, currentStartDate, currentEndDate]);
+    return found ? (isRtl ? found.labelAr : found.label) : (isRtl ? "اختر النطاق" : "Select range");
+  }, [currentPreset, currentStartDate, currentEndDate, isRtl]);
 
   // Calendar day grid calculations
   const calendarDays = useMemo(() => {
     const firstDayOfMonth = new Date(viewYear, viewMonth, 1);
     const lastDayOfMonth = new Date(viewYear, viewMonth + 1, 0);
 
-    const startDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sun
-    const totalDaysInMonth = lastDayOfMonth.getDate();
-
-    // Days from previous month to fill the first row
     const prevMonthLastDay = new Date(viewYear, viewMonth, 0).getDate();
-    const prevDays: Array<{ dateStr: string; dayNum: number; isCurrentMonth: boolean }> = [];
-    for (let i = startDayOfWeek - 1; i >= 0; i--) {
-      const pDay = prevMonthLastDay - i;
-      const prevDate = new Date(viewYear, viewMonth - 1, pDay);
+    const startingDayOfWeek = firstDayOfMonth.getDay(); // 0 is Sun
+
+    const prevDays: { dateStr: string; dayNum: number; isCurrentMonth: boolean }[] = [];
+    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+      const dayNum = prevMonthLastDay - i;
+      const prevDate = new Date(viewYear, viewMonth - 1, dayNum);
       prevDays.push({
         dateStr: formatDateForInput(prevDate),
-        dayNum: pDay,
+        dayNum: dayNum,
         isCurrentMonth: false,
       });
     }
 
-    // Days in current month
-    const currDays: Array<{ dateStr: string; dayNum: number; isCurrentMonth: boolean }> = [];
-    for (let d = 1; d <= totalDaysInMonth; d++) {
-      const currDate = new Date(viewYear, viewMonth, d);
+    const currDays: { dateStr: string; dayNum: number; isCurrentMonth: boolean }[] = [];
+    for (let dayNum = 1; dayNum <= lastDayOfMonth.getDate(); dayNum++) {
+      const currDate = new Date(viewYear, viewMonth, dayNum);
       currDays.push({
         dateStr: formatDateForInput(currDate),
-        dayNum: d,
+        dayNum: dayNum,
         isCurrentMonth: true,
       });
     }
 
-    // Days from next month to complete grid (42 cells = 6 rows)
-    const nextDaysNeeded = 42 - (prevDays.length + currDays.length);
-    const nextDays: Array<{ dateStr: string; dayNum: number; isCurrentMonth: boolean }> = [];
-    for (let nd = 1; nd <= nextDaysNeeded; nd++) {
-      const nextDate = new Date(viewYear, viewMonth + 1, nd);
+    const totalNeeded = Math.ceil((prevDays.length + currDays.length) / 7) * 7;
+    const nextDaysNeeded = totalNeeded - (prevDays.length + currDays.length);
+
+    const nextDays: { dateStr: string; dayNum: number; isCurrentMonth: boolean }[] = [];
+    for (let dayNum = 1; dayNum <= nextDaysNeeded; dayNum++) {
+      const nextDate = new Date(viewYear, viewMonth + 1, dayNum);
       nextDays.push({
         dateStr: formatDateForInput(nextDate),
-        dayNum: nd,
+        dayNum: dayNum,
         isCurrentMonth: false,
       });
     }
@@ -244,12 +326,15 @@ export default function AdminDailyLogDatePicker({
   const todayStr = formatDateForInput(new Date());
 
   return (
-    <div className="relative inline-block text-left" ref={dropdownRef}>
+    <div className={`relative inline-block text-left ${isDropdownOpen ? "z-50" : ""}`} ref={dropdownRef}>
       {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setIsDropdownOpen((prev) => !prev)}
-        className="group flex items-center gap-1.5 sm:gap-2.5 rounded-xl sm:rounded-2xl border border-[#942E3A]/20 bg-white px-2.5 py-1.5 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-[#942E3A] shadow-xs transition hover:border-[#942E3A]/40 hover:bg-[#FFF9EB] focus:outline-none focus:ring-2 focus:ring-[#D8B46A]/30 shrink-0"
+        className={
+          buttonClassName ||
+          "group flex items-center gap-1.5 sm:gap-2.5 rounded-xl sm:rounded-2xl border border-[#942E3A]/20 bg-white px-2.5 py-1.5 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-[#942E3A] shadow-xs transition hover:border-[#942E3A]/40 hover:bg-[#FFF9EB] focus:outline-none focus:ring-2 focus:ring-[#D8B46A]/30 shrink-0 cursor-pointer"
+        }
       >
         <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#D8B46A] transition-transform group-hover:scale-110 shrink-0" />
         <span className="font-bold text-[#942E3A] truncate">{currentLabel}</span>
@@ -262,10 +347,10 @@ export default function AdminDailyLogDatePicker({
 
       {/* Preset Dropdown Menu */}
       {isDropdownOpen && (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-56 overflow-hidden rounded-2xl border border-[#D8B46A]/35 bg-[#FFF9EB] p-2 shadow-[0_16px_36px_rgba(67,25,31,0.18)] animate-in fade-in zoom-in-95">
+        <div className={`absolute ${isRtl ? "left-0 right-auto" : "right-0 left-auto"} top-[calc(100%+8px)] z-[100] w-56 overflow-hidden rounded-2xl border border-[#D8B46A]/35 bg-[#FFF9EB] p-2 shadow-[0_16px_36px_rgba(67,25,31,0.18)] animate-in fade-in zoom-in-95`}>
           <div className="px-3 py-2 border-b border-[#942E3A]/10">
             <p className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A]">
-              Filter Date Range
+              {isRtl ? "تحديد النطاق الزمني" : "Filter Date Range"}
             </p>
           </div>
           <div className="mt-1 space-y-0.5">
@@ -276,13 +361,13 @@ export default function AdminDailyLogDatePicker({
                   key={option.id}
                   type="button"
                   onClick={() => handleSelectPreset(option.id)}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition ${
+                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-start transition cursor-pointer ${
                     isSelected
                       ? "bg-[#942E3A] text-[#FFF9EB] font-bold"
                       : "text-[#6B1F2A] hover:bg-[#F2DFC0]/60 hover:text-[#942E3A]"
                   }`}
                 >
-                  <span className="text-xs font-semibold">{option.label}</span>
+                  <span className="text-xs font-semibold">{isRtl ? option.labelAr : option.label}</span>
                   {isSelected && <Check className="h-3.5 w-3.5 text-[#D8B46A]" />}
                 </button>
               );
@@ -296,7 +381,7 @@ export default function AdminDailyLogDatePicker({
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-[#2c1018]/65 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-[#8B7CC7]/45 backdrop-blur-[2px] transition-opacity"
             onClick={() => setIsModalOpen(false)}
           />
 

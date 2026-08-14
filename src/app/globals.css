@@ -17,14 +17,14 @@
 .field-label {
   display: block;
   margin-bottom: 0.4rem;
-  color: rgba(107, 31, 42, 0.72);
+  color: rgba(95, 85, 152, 0.72);
   font-size: 0.68rem;
   font-weight: 700;
 }
 
 .field-input {
   width: 100%;
-  border: 1px solid rgba(148, 46, 58, 0.14);
+  border: 1px solid rgba(139, 124, 199, 0.14);
   border-radius: 0.75rem;
   background: #fff;
   padding: 0.7rem 0.8rem;
@@ -44,7 +44,7 @@
   align-items: center;
   gap: 0.75rem;
   min-height: 5.4rem;
-  border: 1px solid rgba(148, 46, 58, 0.1);
+  border: 1px solid rgba(139, 124, 199, 0.1);
   border-radius: 1.25rem;
   background: rgba(255, 255, 255, 0.82);
   padding: 1rem;
@@ -61,7 +61,7 @@
 }
 
 .stat-label {
-  color: rgba(107, 31, 42, 0.55);
+  color: rgba(95, 85, 152, 0.55);
   font-size: 0.62rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -190,12 +190,12 @@
 
 :root {
   /* These are defaults - they will be overridden by settings CSS vars injected in layout.tsx */
-  --bg-dark: #942E3A;
-  --bg-light: #FFF9EB;
-  --surface-dark: #942E3A;
-  --surface-light: #ffffff;
-  --text-on-dark: #FFF9EB;
-  --text-on-light: #942E3A;
+  --bg-dark: #8B7CC7;
+  --bg-light: #FFF9EC;
+  --surface-dark: #8B7CC7;
+  --surface-light: #FFF9EC;
+  --text-on-dark: #FFF9EC;
+  --text-on-light: #5F5598;
   --text-muted-dark: #D8B46A;
   --text-muted-light: #D8B46A;
   --accent: var(--accent-color, #D8B46A);
@@ -216,9 +216,9 @@
   --text-muted: var(--text-muted-default);
   --border: var(--border-default);
 
-  --primary: var(--primary-color, #942E3A);
-  --primary-hover: #802832;
-  --shadow: 0 10px 30px rgba(93, 13, 24, 0.08);
+  --primary: var(--primary-color, #8B7CC7);
+  --primary-hover: #796AB5;
+  --shadow: 0 10px 30px rgba(95, 85, 152, 0.12);
   --radius: var(--border-radius, 4px);
   --radius-sm: 2px;
   --font-heading: var(--font-heading, 'Playfair Display', serif);
@@ -359,7 +359,7 @@ h6 {
 
   .product-card-shell:hover {
     transform: none !important;
-    box-shadow: 0 12px 30px rgba(148, 46, 58, 0.06) !important;
+    box-shadow: 0 12px 30px rgba(139, 124, 199, 0.06) !important;
   }
 
   .product-card-shell:hover img {
@@ -2913,8 +2913,9 @@ select:disabled {
 .mobile-filter-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgb(139 124 199 / 0.4);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   z-index: 1000;
   display: flex;
   justify-content: flex-end;
@@ -4453,7 +4454,7 @@ select:disabled {
 .policy-section-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, var(--bg-dark), #4A161D);
+  background: linear-gradient(135deg, var(--bg-dark), #796AB5);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -4536,7 +4537,7 @@ select:disabled {
   inset-inline-start: 0;
   width: 24px;
   height: 24px;
-  background: linear-gradient(135deg, var(--bg-dark), #4A161D);
+  background: linear-gradient(135deg, var(--bg-dark), #796AB5);
   color: var(--text-on-dark);
   border-radius: 50%;
   font-size: 12px;
@@ -4558,7 +4559,7 @@ select:disabled {
 }
 
 .policy-table thead {
-  background: linear-gradient(135deg, var(--bg-dark), #4A161D);
+  background: linear-gradient(135deg, var(--bg-dark), #796AB5);
 }
 
 .policy-table th {
@@ -4598,7 +4599,7 @@ select:disabled {
 
 /* Policy Contact Box */
 .policy-contact-box {
-  background: linear-gradient(135deg, var(--bg-dark), #802832);
+  background: linear-gradient(135deg, var(--bg-dark), #796AB5);
   border-radius: 16px;
   padding: 40px;
   text-align: center;
@@ -5881,8 +5882,9 @@ select:disabled {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgb(139 124 199 / 0.4);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -6788,4 +6790,206 @@ html.lenis, html.lenis body {
 
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
+}
+
+/* Brand palette: Pallor cream + Iris purple. These compatibility selectors
+   keep the palette consistent in legacy Tailwind class strings across the
+   storefront and the admin workspace while preserving the gold accent. */
+:root {
+  --brand-purple: #8B7CC7;
+  --brand-purple-deep: #5F5598;
+  --brand-purple-hover: #796AB5;
+  --brand-cream: #FFF9EC;
+}
+
+/* Primary burgundy replacements */
+[class*="text-[#942E3A]"],
+[class*="text-[#942e3a]"],
+[class*="text-[#802832]"],
+[class*="text-[#802832]"],
+[class*="text-[#7E2732]"],
+[class*="text-[#7e2732]"],
+[class*="text-[#7A2430]"],
+[class*="text-[#7a2430]"],
+[class*="text-[#7A242F]"],
+[class*="text-[#7a242f]"],
+[class*="text-[#7D2530]"],
+[class*="text-[#7d2530]"],
+[class*="text-[#7C2430]"],
+[class*="text-[#7c2430]"],
+[class*="text-[#76232D]"],
+[class*="text-[#76232d]"],
+[class*="text-[#6F1F2D]"],
+[class*="text-[#6f1f2d]"],
+[class*="text-[#6B1F2A]"],
+[class*="text-[#6b1f2a]"],
+[class*="text-[#681E2A]"],
+[class*="text-[#681e2a]"],
+[class*="text-[#54151D]"],
+[class*="text-[#54151d]"],
+[class*="text-[#4A161D]"],
+[class*="text-[#4a161d]"],
+[class*="text-[#481827]"],
+[class*="text-[#481827]"],
+[class*="text-[#43191F]"],
+[class*="text-[#43191f]"],
+[class*="text-[#2C1018]"],
+[class*="text-[#2c1018]"] {
+  color: var(--brand-purple-deep) !important;
+}
+
+[class*="bg-[#942E3A]"],
+[class*="bg-[#942e3a]"],
+[class*="bg-[#802832]"],
+[class*="bg-[#802832]"],
+[class*="bg-[#7E2732]"],
+[class*="bg-[#7e2732]"],
+[class*="bg-[#7A2430]"],
+[class*="bg-[#7a2430]"],
+[class*="bg-[#7A242F]"],
+[class*="bg-[#7a242f]"],
+[class*="bg-[#7D2530]"],
+[class*="bg-[#7d2530]"],
+[class*="bg-[#7C2430]"],
+[class*="bg-[#7c2430]"],
+[class*="bg-[#76232D]"],
+[class*="bg-[#76232d]"],
+[class*="bg-[#6F1F2D]"],
+[class*="bg-[#6f1f2d]"],
+[class*="bg-[#6B1F2A]"],
+[class*="bg-[#6b1f2a]"],
+[class*="bg-[#681E2A]"],
+[class*="bg-[#681e2a]"],
+[class*="bg-[#54151D]"],
+[class*="bg-[#54151d]"],
+[class*="bg-[#4A161D]"],
+[class*="bg-[#4a161d]"],
+[class*="bg-[#481827]"],
+[class*="bg-[#43191F]"],
+[class*="bg-[#43191f]"],
+[class*="bg-[#2C1018]"],
+[class*="bg-[#2c1018]"] {
+  background-color: var(--brand-purple) !important;
+}
+
+[class*="border-[#942E3A]"],
+[class*="border-[#942e3a]"],
+[class*="border-[#6B1F2A]"],
+[class*="border-[#6b1f2a]"],
+[class*="border-[#802832]"],
+[class*="border-[#7E2732]"],
+[class*="border-[#7A2430]"],
+[class*="border-[#7A242F]"],
+[class*="border-[#7D2530]"],
+[class*="border-[#7C2430]"],
+[class*="border-[#76232D]"],
+[class*="border-[#6F1F2D]"],
+[class*="border-[#681E2A]"],
+[class*="border-[#54151D]"],
+[class*="border-[#4A161D]"],
+[class*="border-[#481827]"],
+[class*="border-[#43191F]"],
+[class*="border-[#2C1018]"],
+[class*="divide-[#942E3A]"],
+[class*="divide-[#6B1F2A]"] {
+  border-color: rgb(139 124 199 / var(--tw-border-opacity, 1)) !important;
+}
+
+[class*="ring-[#942E3A]"],
+[class*="ring-[#942e3a]"],
+[class*="ring-[#6B1F2A]"],
+[class*="ring-[#6b1f2a]"] {
+  --tw-ring-color: rgb(139 124 199 / var(--tw-ring-opacity, 1)) !important;
+}
+
+[class*="fill-[#942E3A]"],
+[class*="fill-[#942e3a]"],
+[class*="stroke-[#942E3A]"],
+[class*="stroke-[#942e3a]"] {
+  fill: var(--brand-purple) !important;
+  stroke: var(--brand-purple) !important;
+}
+
+/* Cream replacement for the old warm-white surface and neutral white UI */
+[class~="bg-[#FFF9EB]"],
+[class~="bg-[#fff9eb]"],
+[class~="ring-offset-[#FFF9EB]"],
+[class~="ring-offset-[#fff9eb]"],
+[class~="bg-white"] {
+  background-color: var(--brand-cream) !important;
+}
+
+[class~="text-[#FFF9EB]"],
+[class~="text-[#fff9eb]"],
+[class~="text-white"] {
+  color: var(--brand-cream) !important;
+}
+
+[class*="bg-[#F2E7D5]"],
+[class*="bg-[#f2e7d5]"],
+[class*="bg-[#E2D0C4]"],
+[class*="bg-[#e2d0c4]"],
+[class*="bg-[#F7F1E8]"],
+[class*="bg-[#f7f1e8]"] {
+  background-color: var(--brand-cream) !important;
+}
+
+/* Clear, white tab controls used across the admin workspace. */
+.admin-tabs-shell {
+  background: #ffffff;
+  border: 1px solid #d8d0f2;
+  border-radius: 1rem;
+  padding: 0.35rem;
+  box-shadow: 0 2px 8px rgb(95 85 152 / 0.08);
+}
+
+.admin-tabs-shell .admin-tab {
+  background: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 0.7rem;
+  color: #8178a8;
+  transition: border-color 160ms ease, color 160ms ease, box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.admin-tabs-shell .admin-tab:hover {
+  background: #faf9fe;
+  border-color: #d8d0f2;
+  color: #5f5598;
+}
+
+.admin-tabs-shell .admin-tab[data-active="true"] {
+  background: #8b7cc7;
+  border-color: #8b7cc7;
+  box-shadow: 0 2px 5px rgb(95 85 152 / 0.2);
+  color: #ffffff;
+}
+
+/* Financial tabs follow the lighter navigation style used by analytics. */
+.financial-tabs {
+  border-bottom: 1px solid #d8d0f2;
+  padding-bottom: 0.5rem;
+}
+
+.financial-tabs .admin-tab {
+  background: #ffffff;
+  border-color: #d8d0f2;
+  border-radius: 0.7rem;
+  box-shadow: 0 1px 2px rgb(95 85 152 / 0.06);
+  color: #5f5598;
+  transition: border-color 160ms ease, color 160ms ease, box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.financial-tabs .admin-tab:hover {
+  background: #f4f1fc;
+  border-color: #d8d0f2;
+  color: #5f5598;
+}
+
+.financial-tabs .admin-tab[data-active="true"] {
+  background: #8b7cc7;
+  border-color: #8b7cc7;
+  box-shadow: 0 2px 5px rgb(95 85 152 / 0.2);
+  color: #ffffff;
 }

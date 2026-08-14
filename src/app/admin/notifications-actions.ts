@@ -39,6 +39,9 @@ export async function getAdminNotificationsAction(): Promise<NotificationSummary
             orderNumber: true,
             customerName: true,
             totalPrice: true,
+            subtotalPrice: true,
+            discountAmount: true,
+            shippingCost: true,
             createdAt: true,
           },
         }),
@@ -60,15 +63,13 @@ export async function getAdminNotificationsAction(): Promise<NotificationSummary
             },
           },
         }),
-        // 3. Low stock variants (0 < stock <= 2)
+        // 3. Low stock variants (each product uses its own low-stock limit)
         prisma.productVariant.findMany({
           where: {
             stock: {
               gt: 0,
-              lte: 2,
             },
           },
-          take: 15,
           select: {
             id: true,
             size: true,
@@ -79,10 +80,15 @@ export async function getAdminNotificationsAction(): Promise<NotificationSummary
                 name: true,
                 color: true,
                 images: true,
+                lowStockLimit: true,
               },
             },
           },
-        }),
+        }).then((variants) =>
+          variants
+            .filter((variant) => variant.stock <= (variant.product?.lowStockLimit ?? 2))
+            .slice(0, 15),
+        ),
         // 4. Unread contact messages
         (prisma as any).contactMessage.findMany({
           where: { status: "unread" },

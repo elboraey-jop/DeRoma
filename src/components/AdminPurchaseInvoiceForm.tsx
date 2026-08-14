@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Boxes, CheckCircle2, FilePlus2, FileText, PackagePlus, Plus, Receipt, Trash2, Wallet, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { createPurchaseInvoiceAction } from "@/app/admin/suppliers/actions";
-import { AdminProductPicker, AdminSupplierPicker, type ProcurementVariant } from "@/components/AdminProcurementPickers";
+import { createPortal } from "react-dom";
+import { ArrowLeft, Boxes, Check, CheckCircle2, ChevronDown, FilePlus2, FileText, LoaderCircle, PackagePlus, Plus, Receipt, Trash2, Wallet, X } from "lucide-react";
+import { useActionState, useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
+import { createPurchaseInvoiceAction, createSupplierWithResultAction } from "@/app/admin/suppliers/actions";
+import { AdminCatalogProductPicker, AdminSupplierPicker, type ProcurementProduct } from "@/components/AdminProcurementPickers";
 import AdminProductCreateForm, { type CatalogOption, type RelatedProduct, type Supplier } from "@/components/AdminProductCreateForm";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 
@@ -17,6 +18,8 @@ type VariantOption = {
   retailPrice: number;
   category: string;
   image: string | null;
+  size: string;
+  stock: number;
 };
 
 type InvoiceLine = VariantOption & {
@@ -24,13 +27,58 @@ type InvoiceLine = VariantOption & {
   wholesalePrice: number;
   retailPrice: number;
   notes: string;
+  batchId?: string;
+};
+
+type PendingProductDraft = {
+  name: string;
+  sku: string;
+  category: string;
+  description: string;
+  subcategory: string;
+  brand: string;
+  color: string;
+  material: string;
+  price: string;
+  compareAtPrice: string;
+  wholesalePrice: string;
+  additionalCost: string;
+  supplierId: string;
+  badge: string;
+  featured: boolean;
+  bestSeller: boolean;
+  lowStockLimit: string;
+  images: string[];
+  status: string;
+  variants: {
+    size: string;
+    stock: number;
+    price?: number | string;
+    compareAtPrice?: number | string | null;
+    wholesalePrice?: number | string | null;
+    additionalCost?: number | string | null;
+  }[];
+  reviews: unknown[];
+  relatedProductIds: string[];
+};
+
+type BatchDraft = {
+  quantity: string;
+  retailPrice: string;
+  wholesalePrice: string;
+  enabled: boolean;
+};
+
+type InvoiceState = {
+  status: "idle" | "error";
+  message: string;
 };
 
 function IntakeStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[#942E3A]/8 bg-[#FFF9EB]/55 px-3.5 py-3">
-      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#6B1F2A]/50">{label}</p>
-      <p className="mt-1 truncate font-playfair text-lg font-bold text-[#942E3A]">{value}</p>
+    <div className="rounded-2xl border border-[#8B7CC7]/45 bg-[#8B7CC7]/12 px-3.5 py-3 shadow-[0_8px_20px_rgba(139,124,199,0.16)]">
+      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#6B1F2A]/65">{label}</p>
+      <p className="mt-1 truncate font-playfair text-lg font-bold text-[#5F4A9A]">{value}</p>
     </div>
   );
 }
@@ -52,10 +100,50 @@ export default function AdminPurchaseInvoiceForm({
   const isRtl = lang === "ar";
 
   const [lines, setLines] = useState<InvoiceLine[]>([]);
-  const [selectedVariant, setSelectedVariant] = useState(initialVariantId || "");
+  const [selectedProductId, setSelectedProductId] = useState(variants.find((variant) => variant.id === initialVariantId)?.productId || "");
+  const [batchDrafts, setBatchDrafts] = useState<Record<string, BatchDraft>>({});
+  const [retailMode, setRetailMode] = useState<"old" | "new">("old");
+  const [wholesaleMode, setWholesaleMode] = useState<"old" | "new">("old");
+  const [newRetailPrice, setNewRetailPrice] = useState("");
+  const [newWholesalePrice, setNewWholesalePrice] = useState("");
+  const [supplierOptions, setSupplierOptions] = useState(suppliers);
   const [selectedSupplier, setSelectedSupplier] = useState("");
+  const [supplierModalOpen, setSupplierModalOpen] = useState(false);
+  const [newSupplierName, setNewSupplierName] = useState("");
+  const [supplierError, setSupplierError] = useState("");
+  const [isCreatingSupplier, setIsCreatingSupplier] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addMode, setAddMode] = useState<"choice" | "batch" | "new">("choice");
+  const [pendingProduct, setPendingProduct] = useState<PendingProductDraft | null>(null);
+  const [invoiceState, invoiceAction, invoicePending] = useActionState<InvoiceState, FormData>(
+    async (_previous, formData) => {
+      try {
+        await createPurchaseInvoiceAction(formData);
+        return { status: "idle", message: "" };
+      } catch (error) {
+        if (error && typeof error === "object" && "digest" in error && String(error.digest).startsWith("NEXT_REDIRECT")) {
+          throw error;
+        }
+        return {
+          status: "error",
+          message: error instanceof Error ? error.message : "Unable to save the invoice.",
+        };
+      }
+    },
+    { status: "idle", message: "" },
+  );
+  const [isAddingBatch, setIsAddingBatch] = useState(false);
+  const [isTransitioningMode, startModeTransition] = useTransition();
+  const [collapsedProductIds, setCollapsedProductIds] = useState<Set<string>>(new Set());
+  const selectedProductVariants = useMemo(
+    () => variants.filter((variant) => variant.productId === selectedProductId),
+    [selectedProductId, variants],
+  );
+  const selectedBatchProduct = selectedProductVariants[0];
+  const batchCatalogProducts: ProcurementProduct[] = useMemo(
+    () => Array.from(new Map(variants.map((variant) => [variant.productId, { id: variant.productId, name: variant.productName, category: variant.category, image: variant.image }])).values()),
+    [variants],
+  );
 
   useEffect(() => {
     if (!addModalOpen) return;
@@ -67,19 +155,100 @@ export default function AdminPurchaseInvoiceForm({
   }, [addModalOpen]);
 
   const summary = useMemo(() => ({
-    productTypes: lines.length,
-    units: lines.reduce((sum, line) => sum + line.quantity, 0),
-    subtotal: lines.reduce((sum, line) => sum + line.quantity * line.wholesalePrice, 0),
-    retailValue: lines.reduce((sum, line) => sum + line.quantity * line.retailPrice, 0),
-  }), [lines]);
+    productTypes: lines.filter((line) => !line.batchId).length
+      + new Set(lines.map((line) => line.batchId).filter(Boolean)).size
+      + (pendingProduct ? 1 : 0),
+    units: lines.reduce((sum, line) => sum + line.quantity, 0) + (pendingProduct?.variants.reduce((sum, variant) => sum + Number(variant.stock || 0), 0) || 0),
+    subtotal: lines.reduce((sum, line) => sum + line.quantity * line.wholesalePrice, 0) + (pendingProduct?.variants.reduce((sum, variant) => sum + Number(variant.stock || 0) * Number(variant.wholesalePrice ?? pendingProduct.wholesalePrice ?? 0), 0) || 0),
+    retailValue: lines.reduce((sum, line) => sum + line.quantity * line.retailPrice, 0) + (pendingProduct?.variants.reduce((sum, variant) => sum + Number(variant.stock || 0) * Number(variant.price ?? pendingProduct.price ?? 0), 0) || 0),
+  }), [lines, pendingProduct]);
+  const batchGroups = useMemo(() => {
+    const groups = new Map<string, InvoiceLine[]>();
+    lines.forEach((line) => {
+      if (!line.batchId) return;
+      groups.set(line.batchId, [...(groups.get(line.batchId) || []), line]);
+    });
+    return Array.from(groups.values());
+  }, [lines]);
 
-  const addLine = () => {
-    const variant = variants.find((item) => item.id === selectedVariant);
-    if (!variant || lines.some((line) => line.id === variant.id)) return;
-    setLines((current) => [...current, { ...variant, quantity: 1, notes: "" }]);
-    setSelectedVariant("");
+  const handleEmbeddedProductSubmit = (formData: FormData) => {
+    const read = (name: string) => String(formData.get(name) || "").trim();
+    let productVariants: PendingProductDraft["variants"] = [];
+    let reviews: unknown[] = [];
+    try {
+      productVariants = JSON.parse(read("variants"));
+      reviews = JSON.parse(read("reviews"));
+    } catch {
+      return;
+    }
+    const images = read("images").split("\n").map((image) => image.trim()).filter(Boolean);
+    const draft: PendingProductDraft = {
+      name: read("name"),
+      sku: read("sku").toUpperCase(),
+      category: read("category") || "shoes",
+      description: read("description"),
+      subcategory: read("subcategory"),
+      brand: read("brand"),
+      color: read("color"),
+      material: read("material"),
+      price: read("price"),
+      compareAtPrice: read("compareAtPrice"),
+      wholesalePrice: read("wholesalePrice"),
+      additionalCost: read("additionalCost"),
+      supplierId: read("supplierId"),
+      badge: read("badge"),
+      featured: formData.get("featured") === "on",
+      bestSeller: formData.get("bestSeller") === "on",
+      lowStockLimit: read("lowStockLimit") || "2",
+      images,
+      status: read("status") || "active",
+      variants: productVariants,
+      reviews,
+      relatedProductIds: formData.getAll("relatedProductIds").map(String).filter(Boolean),
+    };
+    setPendingProduct(draft);
     setAddModalOpen(false);
     setAddMode("choice");
+  };
+
+  useEffect(() => {
+    if (!selectedProductVariants.length) return;
+    setBatchDrafts((current) => {
+      const next = { ...current };
+      selectedProductVariants.forEach((variant) => {
+        if (!next[variant.id]) next[variant.id] = { quantity: "", retailPrice: String(variant.retailPrice), wholesalePrice: String(variant.wholesalePrice), enabled: true };
+      });
+      return next;
+    });
+    setNewRetailPrice(String(selectedBatchProduct?.retailPrice || ""));
+    setNewWholesalePrice(String(selectedBatchProduct?.wholesalePrice || ""));
+    setRetailMode("old");
+    setWholesaleMode("old");
+  }, [selectedProductId, selectedBatchProduct, selectedProductVariants]);
+
+  const updateBatchDraft = (variantId: string, field: keyof BatchDraft, value: string | boolean) => {
+    setBatchDrafts((current) => ({ ...current, [variantId]: { ...(current[variantId] || { quantity: "", retailPrice: "", wholesalePrice: "", enabled: true }), [field]: value } }));
+  };
+
+  const addBatch = () => {
+    if (!selectedProductVariants.length) return;
+    setIsAddingBatch(true);
+    const batchId = `batch-${Date.now()}`;
+    const batchLines = selectedProductVariants
+      .map((variant) => {
+        const draft = batchDrafts[variant.id];
+        const quantity = Number(draft?.quantity || 0);
+        return quantity > 0 && draft?.enabled !== false ? { ...variant, quantity, wholesalePrice: Number(wholesaleMode === "new" ? newWholesalePrice : draft?.wholesalePrice || variant.wholesalePrice), retailPrice: Number(retailMode === "new" ? newRetailPrice : draft?.retailPrice || variant.retailPrice), notes: "", batchId } : null;
+      })
+      .filter(Boolean) as InvoiceLine[];
+    const newBatchLines = batchLines.filter((line) => !lines.some((current) => current.id === line.id));
+    if (!newBatchLines.length) return;
+    setLines((current) => [...current, ...newBatchLines]);
+    setSelectedProductId("");
+    setBatchDrafts({});
+    setAddModalOpen(false);
+    setAddMode("choice");
+    setIsAddingBatch(false);
   };
 
   const openAddModal = () => {
@@ -90,6 +259,42 @@ export default function AdminPurchaseInvoiceForm({
   const closeAddModal = () => {
     setAddModalOpen(false);
     setAddMode("choice");
+  };
+
+  const closeSupplierModal = () => {
+    setSupplierModalOpen(false);
+    setNewSupplierName("");
+    setSupplierError("");
+  };
+
+  const toggleProduct = (id: string) => {
+    setCollapsedProductIds((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const createSupplier = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const name = newSupplierName.trim();
+    if (!name) return;
+
+    setIsCreatingSupplier(true);
+    setSupplierError("");
+    try {
+      const formData = new FormData();
+      formData.set("name", name);
+      const created = await createSupplierWithResultAction(formData);
+      setSupplierOptions((current) => [...current, created].sort((a, b) => a.name.localeCompare(b.name)));
+      setSelectedSupplier(created.id);
+      closeSupplierModal();
+    } catch (error) {
+      setSupplierError(error instanceof Error ? error.message : "Unable to add supplier.");
+    } finally {
+      setIsCreatingSupplier(false);
+    }
   };
 
   const updateLine = (
@@ -104,6 +309,8 @@ export default function AdminPurchaseInvoiceForm({
 
   const serializedLines = JSON.stringify(lines.map(({ id, quantity, wholesalePrice, retailPrice, notes }) => ({
     variantId: id,
+    productId: lines.find((line) => line.id === id)?.productId,
+    variantSize: lines.find((line) => line.id === id)?.size,
     quantity,
     wholesalePrice,
     retailPrice,
@@ -111,8 +318,9 @@ export default function AdminPurchaseInvoiceForm({
   })));
 
   return (
-    <form action={createPurchaseInvoiceAction} className="space-y-4 sm:space-y-5 text-right">
+    <form action={invoiceAction} className="space-y-4 sm:space-y-5 text-right">
       <input type="hidden" name="items" value={serializedLines} />
+      <input type="hidden" name="newProduct" value={pendingProduct ? JSON.stringify(pendingProduct) : ""} />
       <input type="hidden" name="shippingCost" value="0" />
       <input type="hidden" name="discount" value="0" />
       <input type="hidden" name="amountPaid" value="0" />
@@ -129,7 +337,12 @@ export default function AdminPurchaseInvoiceForm({
             <label>
               <span className="field-label">{t("suppliers.supplierName")} *</span>
               <input type="hidden" name="supplierId" value={selectedSupplier} />
-              <AdminSupplierPicker suppliers={suppliers} value={selectedSupplier} onChange={setSelectedSupplier} />
+              <AdminSupplierPicker
+                suppliers={supplierOptions}
+                value={selectedSupplier}
+                onChange={setSelectedSupplier}
+                onAddNew={() => setSupplierModalOpen(true)}
+              />
             </label>
 
             <label>
@@ -172,25 +385,114 @@ export default function AdminPurchaseInvoiceForm({
         </div>
 
         <div className="relative mt-5 grid gap-2 sm:grid-cols-3">
-          <IntakeStat label={isRtl ? "Ø§Ù„Ø£ØµÙ†Ø§Ù" : "Products"} value={formatNumber(lines.length)} />
+          <IntakeStat label={isRtl ? "Ø§Ù„Ø£ØµÙ†Ø§Ù" : "Products"} value={formatNumber(summary.productTypes)} />
           <IntakeStat label={isRtl ? "Ø§Ù„Ù‚Ø·Ø¹" : "Units"} value={formatNumber(summary.units)} />
-          <IntakeStat label={isRtl ? "Ø§Ù„Ø­Ø§Ù„Ø©" : "Status"} value={lines.length ? "In progress" : "Ready to add"} />
+          <IntakeStat label={isRtl ? "Ø§Ù„Ø­Ø§Ù„Ø©" : "Status"} value={summary.productTypes ? "In progress" : "Ready to add"} />
         </div>
 
         <div className="relative mt-4 space-y-3">
-          {lines.map((line) => (
-            <div key={line.id} className="rounded-2xl bg-[#FFF9EB]/70 p-3.5 sm:p-4">
+          {pendingProduct && (
+            <div className={`rounded-2xl border border-[#D8B46A]/50 bg-[#fff7df] p-3.5 sm:p-5 ${isRtl ? "text-right" : "text-left"}`}>
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-bold text-[#942E3A] text-xs sm:text-sm">{line.productName}</p>
-                  <p className="mt-0.5 text-[10px] text-[#6B1F2A]/60">{line.label}</p>
+                <button type="button" onClick={() => toggleProduct("pending-product")} className="min-w-0 flex-1 text-left">
+                  <span className="mb-1 inline-flex rounded-full bg-[#942E3A] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#D8B46A]">New product</span>
+                  <span className="flex items-center gap-2"><span className="font-playfair text-lg font-bold text-[#942E3A]">{pendingProduct.name}</span><ChevronDown className={`h-4 w-4 shrink-0 text-[#D8B46A] transition-transform ${collapsedProductIds.has("pending-product") ? "" : "rotate-180"}`} /></span>
+                  <p className="mt-0.5 text-[10px] text-[#6B1F2A]/60">{pendingProduct.sku} · New product to be created with this invoice</p>
+                </button>
+                <button type="button" onClick={() => setPendingProduct(null)} className="text-red-600 p-1" aria-label="Remove new product">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+              {!collapsedProductIds.has("pending-product") && <>
+              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                <div className="rounded-xl bg-white/70 p-2.5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">Category</p><p className="mt-1 text-xs font-bold text-[#942E3A]">{pendingProduct.category}</p></div>
+                <div className="rounded-xl bg-white/70 p-2.5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">Selling</p><p className="mt-1 text-xs font-bold text-[#942E3A]">{formatPrice(Number(pendingProduct.price) || 0)}</p></div>
+                <div className="rounded-xl bg-white/70 p-2.5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">Wholesale</p><p className="mt-1 text-xs font-bold text-[#942E3A]">{formatPrice(Number(pendingProduct.wholesalePrice) || 0)}</p></div>
+                <div className="rounded-xl bg-white/70 p-2.5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">Additional</p><p className="mt-1 text-xs font-bold text-[#942E3A]">{formatPrice(Number(pendingProduct.additionalCost) || 0)}</p></div>
+                <div className="rounded-xl bg-white/70 p-2.5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">Low stock</p><p className="mt-1 text-xs font-bold text-[#942E3A]">{pendingProduct.lowStockLimit}</p></div>
+              </div>
+              <div className="mt-4 overflow-x-auto rounded-xl border border-[#942E3A]/10 bg-white/70">
+                <div className="min-w-[620px]">
+                <div className="grid grid-cols-5 gap-2 border-b border-[#942E3A]/10 px-3 py-2 text-[9px] font-bold uppercase tracking-wide text-[#6B1F2A]/50">
+                  <span>Size / volume</span><span className="text-right">Qty</span><span className="text-right">Selling</span><span className="text-right">Wholesale</span><span className="text-right">Extra cost</span>
                 </div>
+                {pendingProduct.variants.map((variant) => (
+                  <div key={variant.size} className="grid grid-cols-5 gap-2 border-b border-[#942E3A]/8 px-3 py-2.5 text-xs text-[#942E3A] last:border-0">
+                    <span className="font-bold">{variant.size}</span>
+                    <span className="text-right">{formatNumber(Number(variant.stock) || 0)}</span>
+                    <span className="text-right">{formatPrice(Number(variant.price ?? pendingProduct.price) || 0)}</span>
+                    <span className="text-right">{formatPrice(Number(variant.wholesalePrice ?? pendingProduct.wholesalePrice) || 0)}</span>
+                    <span className="text-right">{formatPrice(Number(variant.additionalCost ?? pendingProduct.additionalCost) || 0)}</span>
+                  </div>
+                ))}
+                <div className="grid grid-cols-5 gap-2 bg-[#FFF9EB] px-3 py-3 text-xs font-bold text-[#942E3A]">
+                  <span>Total</span>
+                  <span className="text-right">{formatNumber(pendingProduct.variants.reduce((sum, variant) => sum + Number(variant.stock || 0), 0))}</span>
+                  <span className="text-right">{formatPrice(pendingProduct.variants.reduce((sum, variant) => sum + Number(variant.stock || 0) * Number(variant.price ?? pendingProduct.price ?? 0), 0))}</span>
+                  <span className="text-right">{formatPrice(pendingProduct.variants.reduce((sum, variant) => sum + Number(variant.stock || 0) * Number(variant.wholesalePrice ?? pendingProduct.wholesalePrice ?? 0), 0))}</span>
+                  <span className="text-right">{formatPrice(pendingProduct.variants.reduce((sum, variant) => sum + Number(variant.stock || 0) * Number(variant.additionalCost ?? pendingProduct.additionalCost ?? 0), 0))}</span>
+                </div>
+                </div>
+              </div>
+              <p className="mt-3 text-[10px] text-[#6B1F2A]/65">
+                {pendingProduct.variants.length} variants · {formatNumber(pendingProduct.variants.reduce((sum, variant) => sum + Number(variant.stock || 0), 0))} units will be added to this invoice.
+              </p>
+              </>}
+              {collapsedProductIds.has("pending-product") && (
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                  <div className="rounded-xl bg-white/70 p-2.5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">Category</p><p className="mt-1 text-xs font-bold text-[#942E3A]">{pendingProduct.category}</p></div>
+                  <div className="rounded-xl bg-white/70 p-2.5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">Selling</p><p className="mt-1 text-xs font-bold text-[#942E3A]">{formatPrice(Number(pendingProduct.price) || 0)}</p></div>
+                  <div className="rounded-xl bg-white/70 p-2.5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">Wholesale</p><p className="mt-1 text-xs font-bold text-[#942E3A]">{formatPrice(Number(pendingProduct.wholesalePrice) || 0)}</p></div>
+                  <div className="rounded-xl bg-white/70 p-2.5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">Additional</p><p className="mt-1 text-xs font-bold text-[#942E3A]">{formatPrice(Number(pendingProduct.additionalCost) || 0)}</p></div>
+                  <div className="rounded-xl bg-white/70 p-2.5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">Low stock</p><p className="mt-1 text-xs font-bold text-[#942E3A]">{pendingProduct.lowStockLimit}</p></div>
+                </div>
+              )}
+            </div>
+          )}
+          {batchGroups.map((group) => {
+            const totalQuantity = group.reduce((sum, line) => sum + line.quantity, 0);
+            const totalWholesale = group.reduce((sum, line) => sum + line.quantity * line.wholesalePrice, 0);
+            const totalRetail = group.reduce((sum, line) => sum + line.quantity * line.retailPrice, 0);
+            return (
+            <div key={group[0].batchId} className={`rounded-2xl border border-[#942E3A]/15 bg-white p-3.5 sm:p-4 ${isRtl ? "text-right" : "text-left"}`}>
+              <div className="flex items-start justify-between gap-3">
+                <button type="button" onClick={() => toggleProduct(group[0].batchId || group[0].productId)} className="min-w-0 flex-1 text-left">
+                  <span className="mb-1 inline-flex rounded-full bg-[#D8B46A] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#942E3A]">New batch</span>
+                  <span className="flex items-center gap-2"><span className="font-playfair text-lg font-bold text-[#942E3A]">{group[0].productName}</span><ChevronDown className={`h-4 w-4 shrink-0 text-[#D8B46A] transition-transform ${collapsedProductIds.has(group[0].batchId || group[0].productId) ? "" : "rotate-180"}`} /></span>
+                  <p className="mt-0.5 text-[10px] text-[#6B1F2A]/60">New stock receipt · {group.length} sizes / volumes</p>
+                </button>
+                <button type="button" onClick={() => setLines((current) => current.filter((line) => line.batchId !== group[0].batchId))} className="p-1 text-red-600" aria-label="Remove batch"><Trash2 className="h-4 w-4" /></button>
+              </div>
+              {!collapsedProductIds.has(group[0].batchId || group[0].productId) && <div className="mt-3 overflow-x-auto rounded-xl border border-[#942E3A]/10">
+                <div className="min-w-[560px]">
+                <div className="grid grid-cols-4 gap-2 bg-[#FFF9EB] px-3 py-2 text-[9px] font-bold uppercase tracking-wide text-[#6B1F2A]/55"><span>Size / volume</span><span className="text-right">Qty</span><span className="text-right">Selling / unit</span><span className="text-right">Wholesale / unit</span></div>
+                {group.map((line) => <div key={line.id} className="grid grid-cols-4 gap-2 border-t border-[#942E3A]/8 px-3 py-2.5 text-xs text-[#942E3A]"><span className="font-bold">{line.size}</span><span className="text-right">{formatNumber(line.quantity)}</span><span className="text-right">{formatPrice(line.retailPrice)}</span><span className="text-right">{formatPrice(line.wholesalePrice)}</span></div>)}
+                <div className="grid grid-cols-4 gap-2 border-t border-[#D8B46A]/45 bg-[#FFF9EB] px-3 py-3 text-xs font-bold text-[#942E3A]"><span>Total</span><span className="text-right">{formatNumber(totalQuantity)} pieces</span><span className="text-right">{formatPrice(totalRetail)} selling total</span><span className="text-right">{formatPrice(totalWholesale)} purchase total</span></div>
+                </div>
+              </div>}
+              {collapsedProductIds.has(group[0].batchId || group[0].productId) && (
+                <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl border border-[#D8B46A]/40 bg-[#FFF9EB] px-3 py-3 text-xs font-bold text-[#942E3A]">
+                  <span>{formatNumber(totalQuantity)} pieces</span>
+                  <span className="text-right">{formatPrice(totalWholesale)} purchase total</span>
+                  <span className="text-right">{formatPrice(totalRetail)} selling total</span>
+                </div>
+              )}
+            </div>
+            );
+          })}
+          {lines.filter((line) => !line.batchId).map((line) => (
+            <div key={line.id} className={`rounded-2xl bg-[#FFF9EB]/70 p-3.5 sm:p-4 ${isRtl ? "text-right" : "text-left"}`}>
+              <div className="flex items-start justify-between gap-3">
+                <button type="button" onClick={() => toggleProduct(line.id)} className="min-w-0 flex-1 text-left">
+                  <span className="flex items-center gap-2"><span className="font-bold text-[#942E3A] text-xs sm:text-sm">{line.productName}</span><ChevronDown className={`h-4 w-4 shrink-0 text-[#D8B46A] transition-transform ${collapsedProductIds.has(line.id) ? "" : "rotate-180"}`} /></span>
+                  <p className="mt-0.5 text-[10px] text-[#6B1F2A]/60">{line.label}</p>
+                </button>
                 <button type="button" onClick={() => setLines((current) => current.filter((item) => item.id !== line.id))} className="text-red-600 p-1" aria-label="Remove product">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+              {!collapsedProductIds.has(line.id) && <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
                 <label>
                   <span className="field-label">{isRtl ? "الكمية" : "Quantity"}</span>
                   <input type="number" min="1" value={line.quantity} onChange={(event) => updateLine(line.id, "quantity", event.target.value)} className="admin-input text-right" />
@@ -212,11 +514,23 @@ export default function AdminPurchaseInvoiceForm({
                     {formatPrice(line.quantity * line.wholesalePrice)}
                   </p>
                 </div>
+              </div>}
+              {collapsedProductIds.has(line.id) && (
+                <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl border border-[#D8B46A]/40 bg-white/70 px-3 py-3 text-xs font-bold text-[#942E3A]">
+                  <span>{formatNumber(line.quantity)} pieces</span>
+                  <span className="text-right">{formatPrice(line.quantity * line.wholesalePrice)} purchase total</span>
+                  <span className="text-right">{formatPrice(line.quantity * line.retailPrice)} selling total</span>
+                </div>
+              )}
+              <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl border border-[#D8B46A]/40 bg-white/70 px-3 py-3 text-xs font-bold text-[#942E3A]">
+                <span>{formatNumber(line.quantity)} pieces</span>
+                <span className="text-right">{formatPrice(line.quantity * line.wholesalePrice)} purchase total</span>
+                <span className="text-right">{formatPrice(line.quantity * line.retailPrice)} selling total</span>
               </div>
             </div>
           ))}
 
-          {!lines.length && (
+          {!lines.length && !pendingProduct && (
             <div className="rounded-2xl border border-dashed border-[#D8B46A]/60 py-8 text-center text-xs text-[#6B1F2A]/60 sm:py-12">
               {isRtl ? "اختر أحد منتجات الكتالوج أعلاه لإضافته للفاتورة." : "Choose a product variant above to start the invoice."}
             </div>
@@ -224,16 +538,17 @@ export default function AdminPurchaseInvoiceForm({
         </div>
       </section>
 
-      {addModalOpen && (
-        <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-[#2d1118]/60 p-3 backdrop-blur-sm sm:p-6"
+      {addModalOpen && typeof document !== "undefined" && createPortal(
+        (
+          <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-[#8B7CC7]/45 p-3 backdrop-blur-[2px] sm:p-6"
           role="dialog"
           aria-modal="true"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeAddModal();
           }}
         >
-          <div className="admin-modal-scroll hide-scrollbar max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-y-auto overscroll-contain rounded-3xl border border-[#D8B46A]/35 bg-[#FFFDFC] p-4 shadow-2xl sm:max-h-[calc(100dvh-3rem)] sm:p-7">
+          <div data-lenis-prevent className={`admin-modal-scroll hide-scrollbar w-full max-w-5xl rounded-3xl border border-[#D8B46A]/35 bg-[#FFFDFC] p-4 shadow-2xl sm:p-7 ${addMode === "new" ? "h-[calc(100dvh-1.5rem)] max-h-[calc(100dvh-1.5rem)] touch-pan-y overflow-y-scroll overscroll-contain sm:h-[calc(100dvh-3rem)] sm:max-h-[calc(100dvh-3rem)]" : "max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain sm:max-h-[calc(100dvh-3rem)]"}`}>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
@@ -268,7 +583,8 @@ export default function AdminPurchaseInvoiceForm({
               <div className="mt-7 grid gap-4 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={() => setAddMode("new")}
+                  onClick={() => startModeTransition(() => setAddMode("new"))}
+                  disabled={isTransitioningMode}
                   className="group rounded-3xl border border-[#942E3A]/12 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#D8B46A] sm:p-6"
                 >
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#942E3A] text-[#D8B46A]">
@@ -286,7 +602,8 @@ export default function AdminPurchaseInvoiceForm({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setAddMode("batch")}
+                  onClick={() => startModeTransition(() => setAddMode("batch"))}
+                  disabled={isTransitioningMode}
                   className="group rounded-3xl border border-[#D8B46A]/50 bg-[#fff7df] p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#942E3A] sm:p-6"
                 >
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#942E3A]">
@@ -318,28 +635,51 @@ export default function AdminPurchaseInvoiceForm({
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">Catalog batch</p>
                   <h3 className="mt-1 font-playfair text-xl font-bold text-[#942E3A]">Choose a product variant</h3>
                   <div className="mt-4">
-                    <AdminProductPicker variants={variants as ProcurementVariant[]} value={selectedVariant} onChange={setSelectedVariant} />
+                    <AdminCatalogProductPicker products={batchCatalogProducts} value={selectedProductId} onChange={setSelectedProductId} />
                   </div>
-                  {selectedVariant && (
-                    <div className="mt-4 rounded-2xl border border-[#942E3A]/10 bg-white p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/50">Selected line</p>
-                      <p className="mt-1 font-playfair text-lg font-bold text-[#942E3A]">
-                        {variants.find((variant) => variant.id === selectedVariant)?.productName}
-                      </p>
-                      <p className="mt-1 text-xs text-[#6B1F2A]/60">
-                        {variants.find((variant) => variant.id === selectedVariant)?.label}
-                      </p>
+                  {selectedProductId && selectedBatchProduct && (
+                    <div className="mt-4 space-y-4 rounded-2xl border border-[#942E3A]/10 bg-white p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="font-playfair text-lg font-bold text-[#942E3A]">{selectedBatchProduct.productName}</p>
+                          <p className="text-[10px] text-[#6B1F2A]/60">Select quantities for each size / volume.</p>
+                        </div>
+                        <div className="flex gap-2 text-[10px] font-bold">
+                          <button type="button" onClick={() => setRetailMode("old")} className={`rounded-full px-3 py-1.5 ${retailMode === "old" ? "bg-[#942E3A] text-white" : "bg-[#FFF9EB] text-[#942E3A]"}`}>Old selling price</button>
+                          <button type="button" onClick={() => setRetailMode("new")} className={`rounded-full px-3 py-1.5 ${retailMode === "new" ? "bg-[#942E3A] text-white" : "bg-[#FFF9EB] text-[#942E3A]"}`}>New selling price</button>
+                        </div>
+                      </div>
+                      {retailMode === "new" && <input type="number" min="0" step="0.01" value={newRetailPrice} onChange={(event) => setNewRetailPrice(event.target.value)} className="admin-input" placeholder="New selling price" />}
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#942E3A]/10 pt-4">
+                        <p className="text-xs font-bold text-[#942E3A]">Wholesale price for this batch</p>
+                        <div className="flex gap-2 text-[10px] font-bold">
+                          <button type="button" onClick={() => setWholesaleMode("old")} className={`rounded-full px-3 py-1.5 ${wholesaleMode === "old" ? "bg-[#942E3A] text-white" : "bg-[#FFF9EB] text-[#942E3A]"}`}>Old wholesale</button>
+                          <button type="button" onClick={() => setWholesaleMode("new")} className={`rounded-full px-3 py-1.5 ${wholesaleMode === "new" ? "bg-[#942E3A] text-white" : "bg-[#FFF9EB] text-[#942E3A]"}`}>New wholesale</button>
+                        </div>
+                      </div>
+                      {wholesaleMode === "new" && <input type="number" min="0" step="0.01" value={newWholesalePrice} onChange={(event) => setNewWholesalePrice(event.target.value)} className="admin-input" placeholder="New wholesale price" />}
+                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {selectedProductVariants.map((variant) => (
+                          <div key={variant.id} className="rounded-xl border border-[#942E3A]/10 bg-[#FFF9EB]/65 p-3 text-xs text-[#942E3A]">
+                            <div className="flex items-center justify-between"><span className="font-bold">EU {variant.size}</span><span className="text-[10px] text-[#6B1F2A]/60">Current: {formatNumber(variant.stock)}</span></div>
+                            <label className="mt-2 block"><span className="mb-1 block text-[9px] uppercase tracking-wide text-[#6B1F2A]/55">Receive quantity</span>
+                            <input type="number" min="0" value={batchDrafts[variant.id]?.quantity || ""} onChange={(event) => updateBatchDraft(variant.id, "quantity", event.target.value)} className="admin-input h-9 px-2" placeholder="0" />
+                            </label>
+                            <button type="button" onClick={() => updateBatchDraft(variant.id, "enabled", batchDrafts[variant.id]?.enabled === false)} className={`mt-2 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[10px] font-bold ${batchDrafts[variant.id]?.enabled !== false ? "bg-[#942E3A] text-white" : "border border-[#D8B46A] text-[#942E3A]"}`}><Check className="h-3.5 w-3.5" /> {batchDrafts[variant.id]?.enabled !== false ? "Included" : "Excluded"}</button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
                 <div className="flex justify-end">
                   <button
                     type="button"
-                    onClick={addLine}
-                    disabled={!selectedVariant || lines.some((line) => line.id === selectedVariant)}
+                    onClick={addBatch}
+                    disabled={isAddingBatch || !selectedProductId || !selectedProductVariants.some((variant) => Number(batchDrafts[variant.id]?.quantity || 0) > 0) || (retailMode === "new" && !newRetailPrice) || (wholesaleMode === "new" && !newWholesalePrice)}
                     className="inline-flex items-center gap-2 rounded-xl bg-[#942E3A] px-5 py-3 text-xs font-bold text-[#FFF9EB] disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    <PackagePlus className="h-4 w-4 text-[#D8B46A]" /> Add to invoice
+                    {isAddingBatch ? <LoaderCircle className="h-4 w-4 animate-spin text-[#D8B46A]" /> : <PackagePlus className="h-4 w-4 text-[#D8B46A]" />} {isAddingBatch ? "Adding…" : "Add to invoice"}
                   </button>
                 </div>
               </div>
@@ -351,14 +691,60 @@ export default function AdminPurchaseInvoiceForm({
                   options={productOptions}
                   suppliers={suppliers}
                   products={catalogProducts}
-                  redirectTo="/admin/suppliers/invoices/new"
                   embedded
                   onCancel={closeAddModal}
+                  onEmbeddedSubmit={handleEmbeddedProductSubmit}
                 />
               </div>
             )}
           </div>
-        </div>
+          </div>
+        ),
+        document.body,
+      )}
+
+      {supplierModalOpen && typeof document !== "undefined" && createPortal(
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-[#8B7CC7]/45 p-4 backdrop-blur-[2px]"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="add-supplier-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeSupplierModal();
+          }}
+        >
+          <form onSubmit={createSupplier} className="w-full max-w-md rounded-3xl border border-[#D8B46A]/35 bg-[#FFFDFC] p-5 shadow-2xl sm:p-7">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">Supplier</p>
+                <h2 id="add-supplier-title" className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">Add new supplier</h2>
+                <p className="mt-1 text-xs text-[#6B1F2A]/60">Add the name now; you can complete the supplier details later.</p>
+              </div>
+              <button type="button" onClick={closeSupplierModal} className="rounded-full p-2 text-[#942E3A] hover:bg-[#FFF9EB]" aria-label="Close add supplier modal">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <label className="mt-6 block">
+              <span className="field-label">Supplier / factory name *</span>
+              <input autoFocus required value={newSupplierName} onChange={(event) => setNewSupplierName(event.target.value)} className="admin-input" placeholder="Enter supplier name" />
+            </label>
+            {supplierError && <p className="mt-2 text-xs font-semibold text-red-600">{supplierError}</p>}
+            <div className="mt-6 flex justify-end gap-2">
+              <button type="button" onClick={closeSupplierModal} className="rounded-xl border border-[#942E3A]/15 bg-white px-4 py-2.5 text-xs font-bold text-[#942E3A]">Cancel</button>
+              <button type="submit" disabled={isCreatingSupplier || !newSupplierName.trim()} className="inline-flex items-center gap-2 rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB] disabled:cursor-not-allowed disabled:opacity-40">
+                {isCreatingSupplier && <LoaderCircle className="h-4 w-4 animate-spin text-[#D8B46A]" />}
+                {isCreatingSupplier ? "Creating..." : "Create supplier"}
+              </button>
+            </div>
+          </form>
+        </div>,
+        document.body,
+      )}
+
+      {invoiceState.status === "error" && (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs font-semibold text-red-700">
+          {invoiceState.message}
+        </p>
       )}
 
       <div className="flex items-center justify-between gap-2">
@@ -367,10 +753,10 @@ export default function AdminPurchaseInvoiceForm({
         </Link>
         <button
           type="submit"
-          disabled={!lines.length}
+          disabled={invoicePending || !selectedSupplier || (!lines.length && !pendingProduct)}
           className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB] disabled:cursor-not-allowed disabled:opacity-40 sm:px-6 sm:py-3"
         >
-          {isRtl ? "حفظ الفاتورة وتأكيد استلام المخزون" : "Save invoice & receive stock"}
+          {invoicePending ? <><LoaderCircle className="mr-2 inline-block h-4 w-4 animate-spin" /> Saving invoice…</> : (isRtl ? "حفظ الفاتورة وتأكيد استلام المخزون" : "Save invoice & receive stock")}
         </button>
       </div>
     </form>

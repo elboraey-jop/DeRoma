@@ -117,6 +117,7 @@ export default function AdminCategoriesClient({
   const [optionType, setOptionType] = useState("brand");
   const [search, setSearch] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [activeOption, setActiveOption] = useState<Option | null>(null);
 
   const selected = categories.find((item) => item.key === category) || categories[0];
   const activeType = selected.types.find((item) => item.key === optionType) || selected.types[0];
@@ -135,6 +136,21 @@ export default function AdminCategoriesClient({
       ),
     [selectedOptions, activeType.key, search],
   );
+
+  const matchingProducts = useMemo(() => {
+    if (!activeOption) return [];
+    const target = activeOption.name.trim().toLowerCase();
+    const matches = (value: string | null | undefined) => value?.trim().toLowerCase() === target;
+    return products.filter((product) => {
+      if (product.category !== activeOption.category) return false;
+      if (activeOption.type === "brand") return matches(product.brand);
+      if (activeOption.type === "color") return matches(product.color);
+      if (activeOption.type === "size" || activeOption.type === "volume") return product.variants.some((variant) => matches(variant.size));
+      if (activeOption.type === "subcategory") return matches(product.subcategory);
+      if (activeOption.type === "material") return matches(product.material);
+      return false;
+    });
+  }, [activeOption, products]);
 
   const totalGroups = selected.types.length;
 
@@ -352,7 +368,8 @@ export default function AdminCategoriesClient({
             {filteredOptions.map((opt) => (
               <div
                 key={opt.id}
-                className="flex items-center justify-between gap-2 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB]/30 p-3 transition hover:border-[#D8B46A]/60"
+                onClick={() => setActiveOption(opt)}
+                className="flex cursor-pointer items-center justify-between gap-2 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB]/30 p-3 transition hover:border-[#D8B46A]/60"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   {opt.type === "color" && (
@@ -365,6 +382,7 @@ export default function AdminCategoriesClient({
                 </div>
 
                 <form
+                  onClick={(event) => event.stopPropagation()}
                   action={async (formData) => {
                     setPendingId(opt.id);
                     try {
@@ -398,6 +416,50 @@ export default function AdminCategoriesClient({
           </div>
         </section>
       </div>
+
+      {activeOption && (
+        <div
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-[#43191F]/35 p-4 backdrop-blur-[2px]"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setActiveOption(null);
+          }}
+        >
+          <div role="dialog" aria-modal="true" aria-labelledby="option-products-title" className="max-h-[86vh] w-full max-w-4xl overflow-hidden rounded-3xl border border-[#D8B46A]/35 bg-[#FFF9EB] shadow-[0_24px_80px_rgba(67,25,31,0.28)]">
+            <div className="flex items-start justify-between gap-4 border-b border-[#942E3A]/10 bg-white px-5 py-5 sm:px-7">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">Catalog connection</p>
+                <h2 id="option-products-title" className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">Products using {activeOption.name}</h2>
+                <p className="mt-1 text-xs text-[#6B1F2A]/60">{matchingProducts.length} {matchingProducts.length === 1 ? "product" : "products"} connected to this {activeOption.type} option.</p>
+              </div>
+              <button type="button" onClick={() => setActiveOption(null)} aria-label="Close products dialog" className="rounded-full p-2 text-[#942E3A]/60 hover:bg-[#F2DFC0] hover:text-[#942E3A]"><X className="h-4 w-4" /></button>
+            </div>
+            <div onWheel={(event) => event.stopPropagation()} className="hide-scrollbar max-h-[calc(86vh-125px)] overflow-y-auto overscroll-contain p-5 sm:p-7">
+              {matchingProducts.length ? (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {matchingProducts.map((product) => (
+                    <Link key={product.id} href={`/admin/products/${product.id}`} onClick={() => setActiveOption(null)} className="group overflow-hidden rounded-2xl border border-[#942E3A]/10 bg-white transition hover:-translate-y-0.5 hover:border-[#D8B46A]/50 hover:shadow-lg">
+                      <div className="flex h-36 items-center justify-center bg-[#FFF9EB]">
+                        {product.images[0] ? <img src={product.images[0]} alt="" className="h-full w-full object-cover" /> : <Package className="h-8 w-8 text-[#D8B46A]" />}
+                      </div>
+                      <div className="p-3">
+                        <p className="truncate text-xs font-bold text-[#942E3A]">{product.name}</p>
+                        <div className="mt-2 flex items-center justify-between gap-2 text-[10px] text-[#6B1F2A]/60"><span className="capitalize">{product.category}</span><span className="font-bold text-[#942E3A]">{formatPrice(product.price)}</span></div>
+                        <p className="mt-2 text-[10px] text-[#6B1F2A]/65">{product.color ? `Color: ${product.color}` : "No color"} · {product.variants.length} sizes</p>
+                        <div className="mt-2 flex flex-wrap gap-1">{product.variants.slice(0, 8).map((variant) => <span key={variant.size} className="rounded-md bg-[#FFF9EB] px-1.5 py-1 text-[9px] font-bold text-[#942E3A]">{variant.size}: {variant.stock}</span>)}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#D8B46A]/45 bg-white px-5 py-16 text-center"><Package className="h-9 w-9 text-[#D8B46A]" /><p className="mt-3 font-playfair text-lg font-bold text-[#942E3A]">No products connected yet</p><p className="mt-1 max-w-sm text-xs leading-5 text-[#6B1F2A]/60">Products using this option will appear here once their details match this value.</p></div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
   );
 }

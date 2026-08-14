@@ -73,17 +73,13 @@ export default function AdminShippingClient({
       </div>
 
       {/* Tabs Bar */}
-      <div className="flex items-center justify-between border-b border-[#942E3A]/15 pb-3 min-w-0">
-        <div className="grid grid-cols-2 w-full sm:w-auto sm:flex sm:items-center gap-1.5 sm:gap-2 rounded-2xl border border-[#942E3A]/15 bg-[#FFF9EB] p-1.5 shadow-inner min-w-0">
+      <div className="flex min-w-0 items-center justify-between">
+        <div className="admin-tabs-shell grid w-full min-w-0 grid-cols-2 gap-1.5 sm:w-auto sm:flex sm:items-center sm:gap-2">
           <button
             type="button"
             onClick={() => setActiveTab("zones")}
-            className={cn(
-              "flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-2 text-xs font-bold transition-all truncate min-w-0",
-              activeTab === "zones"
-                ? "bg-[#942E3A] text-[#FFF9EB] shadow-md"
-                : "text-[#942E3A]/70 hover:bg-[#942E3A]/10 hover:text-[#942E3A]"
-            )}
+            data-active={activeTab === "zones"}
+            className="admin-tab flex min-w-0 items-center justify-center gap-1.5 truncate px-2.5 py-2 text-xs font-bold sm:gap-2"
           >
             <Truck className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
             <span className="truncate">{isRtl ? "مناطق ومحافظات التوصيل" : "Delivery Zones"}</span>
@@ -91,8 +87,8 @@ export default function AdminShippingClient({
               className={cn(
                 "rounded-full px-1.5 py-0.5 text-[10px] font-black shrink-0",
                 activeTab === "zones"
-                  ? "bg-[#FFF9EB] text-[#942E3A]"
-                  : "bg-[#942E3A]/15 text-[#942E3A]"
+                  ? "bg-white text-[#5F5598]"
+                  : "bg-[#FFF9EC] text-[#8178A8]"
               )}
             >
               {formatNumber(zones.length)}
@@ -102,12 +98,8 @@ export default function AdminShippingClient({
           <button
             type="button"
             onClick={() => setActiveTab("freeship")}
-            className={cn(
-              "flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-2 text-xs font-bold transition-all truncate min-w-0",
-              activeTab === "freeship"
-                ? "bg-[#942E3A] text-[#FFF9EB] shadow-md"
-                : "text-[#942E3A]/70 hover:bg-[#942E3A]/10 hover:text-[#942E3A]"
-            )}
+            data-active={activeTab === "freeship"}
+            className="admin-tab flex min-w-0 items-center justify-center gap-1.5 truncate px-2.5 py-2 text-xs font-bold sm:gap-2"
           >
             <Gift className="h-3.5 w-3.5 text-[#D8B46A] shrink-0" />
             <span className="truncate">{isRtl ? "قواعد الشحن المجاني" : "Free Shipping Rules"}</span>

@@ -22,12 +22,12 @@ export default async function CustomersPage() {
       prisma.order.findMany({ where: { status: { not: "cancelled" } }, orderBy: { createdAt: "desc" } }),
     ]);
     const map = new Map(profiles.map((customer) => [customer.phone, { ...customer, orders: 0, spent: 0, lastOrder: null as Date | null }]));
-    for (const order of orders) { const current = map.get(order.customerPhone); if (current) { current.orders += 1; current.spent += Number(order.totalPrice); current.lastOrder ??= order.createdAt; } else map.set(order.customerPhone, { id: "", firstName: order.customerFirstName || order.customerName.split(" ")[0] || "", lastName: order.customerLastName || order.customerName.split(" ").slice(1).join(" ") || "", name: order.customerName, email: null, phone: order.customerPhone, phone2: null, governorate: order.governorate, city: order.city, address: order.address, notes: null, createdAt: order.createdAt, updatedAt: order.createdAt, orders: 1, spent: Number(order.totalPrice), lastOrder: order.createdAt }); }
+    for (const order of orders) { const orderSales = Number(order.totalPrice); const current = map.get(order.customerPhone); if (current) { current.orders += 1; current.spent += orderSales; current.lastOrder ??= order.createdAt; } else map.set(order.customerPhone, { id: "", firstName: order.customerFirstName || order.customerName.split(" ")[0] || "", lastName: order.customerLastName || order.customerName.split(" ").slice(1).join(" ") || "", name: order.customerName, email: null, phone: order.customerPhone, phone2: null, governorate: order.governorate, city: order.city, address: order.address, notes: null, createdAt: order.createdAt, updatedAt: order.createdAt, orders: 1, spent: orderSales, lastOrder: order.createdAt }); }
     const customers = [...map.values()];
     return (
       <div className="space-y-5 sm:space-y-7">
         <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 text-right">
+          <div className="min-w-0 text-start">
             <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">Customer intelligence</p>
             <h1 className="mt-0.5 font-playfair text-2xl font-black text-[#942E3A] sm:mt-1 sm:text-3xl">Customers</h1>
             <p className="mt-1 hidden max-w-xl text-xs leading-5 text-[#6B1F2A]/65 sm:block">A living view of customer history, repeat orders, and value.</p>
@@ -51,7 +51,7 @@ export default async function CustomersPage() {
         </div>
 
         <section className="overflow-hidden rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-xs sm:rounded-3xl sm:p-6">
-          <div className="flex items-center gap-2 text-right">
+          <div className="flex items-center gap-2 text-start">
             <Users className="h-4 w-4 text-[#D8B46A]" />
             <h2 className="font-playfair text-base sm:text-xl font-bold">Customer history</h2>
           </div>

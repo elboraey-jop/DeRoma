@@ -482,7 +482,7 @@ export default function ProfilePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#8B7CC7]/40 backdrop-blur-[2px] p-4"
             onClick={() => setIsEditing(false)}
           >
             <motion.div

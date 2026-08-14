@@ -160,7 +160,7 @@ model Promotion {
 model AnnouncementBar {
   id            String    @id @default(uuid())
   text          String
-  backgroundColor String  @default("#942E3A")
+  backgroundColor String  @default("#8B7CC7")
   textColor     String    @default("#FFF9EB")
   moving        Boolean   @default(false)
   active        Boolean   @default(true)
@@ -203,6 +203,9 @@ model Order {
   discountAmount Decimal          @default(0)
   manual         Boolean          @default(false)
   paymentMethod  String           @default("cod") // cod, card, wallet, etc.
+  paymentSenderPhone String?       // Phone number used to make an InstaPay/wallet transfer
+  paymentProofStatus String        @default("not_required") // not_required, awaiting_whatsapp, received, verified, rejected
+  paymentProofSentAt DateTime?
   totalPrice     Decimal
   shippingCost   Decimal
   status         String      @default("pending") // "pending", "shipped", "delivered", "cancelled"
@@ -337,6 +340,9 @@ model SiteSettings {
   id                   String   @id @default("default")
   phone                String   @default("+20 102 345 6789")
   whatsapp             String   @default("201023456789")
+  instapayAccount      String   @default("01515205073")
+  walletNumber         String   @default("01515205073")
+  walletProvider       String   @default("Vodafone Cash")
   email                String   @default("support@deromastore.com")
   instagram            String   @default("https://instagram.com")
   facebook             String   @default("https://facebook.com")
@@ -373,16 +379,17 @@ model ContactMessage {
 
 model Expense {
   id             String   @id @default(uuid())
+  type           String   @default("expense") // expense, income
   title          String
   amount         Decimal
-  category       String   @default("other") // marketing, shipping_ops, packaging, utilities, salaries, other
-  paymentAccount String   @default("cash")  // cash, instapay_visa, wallet
+  category       String   @default("other")   // marketing, shipping_ops, packaging, utilities, salaries, purchase_invoice, capital, external_profit, supplier_refund, other
+  paymentAccount String   @default("cash")    // cash, instapay_visa, wallet
   date           DateTime @default(now())
   notes          String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  @@index([date, category])
+  @@index([date, category, type])
 }
 
 model WeeklySettlement {
@@ -413,8 +420,6 @@ model AccountTransfer {
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
 }
-
-
 
 
 

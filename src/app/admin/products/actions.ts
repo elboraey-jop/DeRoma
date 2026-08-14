@@ -462,6 +462,7 @@ export async function createProductBatchAction(formData: FormData) {
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/admin/inventory");
   revalidatePath("/admin/suppliers");
+  revalidatePath("/admin/financials");
   revalidatePath(`/admin/suppliers/invoices/${invoice.id}`);
   revalidatePath(`/shop/${productId}`);
   revalidatePath("/shop");

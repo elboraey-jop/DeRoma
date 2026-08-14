@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import FinancialsClient from "@/components/FinancialsClient";
 import { DatePreset } from "@/components/AdminDailyLogDatePicker";
+import { getOrderProductSales } from "@/lib/orderAccounting";
 
 export const dynamic = "force-dynamic";
 
@@ -34,34 +35,37 @@ function computeDateRange(params: {
   }
 
   switch (preset) {
+    case "all":
+      return { preset: "all", startDate: "2000-01-01", endDate: "2099-12-31" };
+
     case "today":
       return { preset: "today", startDate: todayStr, endDate: todayStr };
 
     case "this_week": {
       const day = now.getDay();
-      const diffToMon = day === 0 ? -6 : 1 - day;
-      const mon = new Date(now);
-      mon.setDate(now.getDate() + diffToMon);
-      const sun = new Date(mon);
-      sun.setDate(mon.getDate() + 6);
+      const diffToSat = (day + 1) % 7;
+      const startSat = new Date(now);
+      startSat.setDate(now.getDate() - diffToSat);
+      const endFri = new Date(startSat);
+      endFri.setDate(startSat.getDate() + 6);
       return {
         preset: "this_week",
-        startDate: formatDateYYYYMMDD(mon),
-        endDate: formatDateYYYYMMDD(sun),
+        startDate: formatDateYYYYMMDD(startSat),
+        endDate: formatDateYYYYMMDD(endFri),
       };
     }
 
     case "last_week": {
       const day = now.getDay();
-      const diffToMon = (day === 0 ? -6 : 1 - day) - 7;
-      const mon = new Date(now);
-      mon.setDate(now.getDate() + diffToMon);
-      const sun = new Date(mon);
-      sun.setDate(mon.getDate() + 6);
+      const diffToSat = (day + 1) % 7;
+      const startSat = new Date(now);
+      startSat.setDate(now.getDate() - diffToSat - 7);
+      const endFri = new Date(startSat);
+      endFri.setDate(startSat.getDate() + 6);
       return {
         preset: "last_week",
-        startDate: formatDateYYYYMMDD(mon),
-        endDate: formatDateYYYYMMDD(sun),
+        startDate: formatDateYYYYMMDD(startSat),
+        endDate: formatDateYYYYMMDD(endFri),
       };
     }
 
@@ -126,14 +130,9 @@ export default async function FinancialsPage({
   const startFilter = new Date(`${timeRange.startDate}T00:00:00.000`);
   const endFilter = new Date(`${timeRange.endDate}T23:59:59.999`);
 
-  // 1. Fetch Orders within date range
-  const orders = await prisma.order.findMany({
-    where: {
-      createdAt: {
-        gte: startFilter,
-        lte: endFilter,
-      },
-    },
+  // Fetch the full financial dataset once. Each financial tab applies its
+  // own date range in the client so changing one tab does not change another.
+  const allOrders = await prisma.order.findMany({
     include: {
       items: {
         include: {
@@ -145,16 +144,23 @@ export default async function FinancialsPage({
     orderBy: { createdAt: "desc" },
   });
 
-  // Filter out cancelled and returned orders for active sales & revenue calculations
-  const isInactiveStatus = (s: string) => s === "cancelled" || s === "returned";
-  const activeOrders = orders.filter((o) => !isInactiveStatus(o.status));
-  const deliveredOrders = orders.filter((o) => o.status === "delivered" || o.status === "shipped");
+  const orders = allOrders.filter(
+    (order) => order.createdAt >= startFilter && order.createdAt <= endFilter,
+  );
+
+  // Financial sales are recognized only after delivery. Cancelled and returned
+  // orders, as well as unconfirmed online payments, therefore never enter the
+  // financial dataset.
+  const isFinancialOrder = (o: { status: string; paymentMethod?: string | null }) =>
+    o.status === "delivered";
+  const activeOrders = orders.filter(isFinancialOrder);
+  const allActiveOrders = allOrders.filter(isFinancialOrder);
+  const deliveredOrders = activeOrders;
   const returnedOrders = orders.filter((o) => o.status === "returned");
-  const totalReturnedAmount = returnedOrders.reduce((sum, o) => sum + Number(o.totalPrice || 0), 0);
+  const totalReturnedAmount = returnedOrders.reduce((sum, o) => sum + getOrderProductSales(o), 0);
 
 
-  const totalSales = activeOrders.reduce((sum, o) => sum + Number(o.totalPrice || 0), 0);
-  const totalShipping = activeOrders.reduce((sum, o) => sum + Number(o.shippingCost || 0), 0);
+  const totalSales = activeOrders.reduce((sum, o) => sum + getOrderProductSales(o), 0);
   const totalDiscounts = activeOrders.reduce((sum, o) => sum + Number(o.discountAmount || 0), 0);
 
   // Compute Cost of Goods Sold (COGS)
@@ -173,32 +179,46 @@ export default async function FinancialsPage({
     });
   });
 
-  // 2. Fetch Expenses within date range
+  // 2. Fetch all Purchase Invoices. The active tab date range is applied below.
+  let purchaseInvoicesRaw: any[] = [];
+  try {
+    purchaseInvoicesRaw = await (prisma as any).purchaseInvoice.findMany({
+      where: {},
+      include: { supplier: true },
+      orderBy: { invoiceDate: "desc" },
+    });
+  } catch (e) {
+    console.error("PurchaseInvoice query error:", e);
+  }
+  // 3. Fetch all Expenses. The active tab date range is applied below.
   let expensesRaw: any[] = [];
   try {
     expensesRaw = await (prisma as any).expense.findMany({
-      where: {
-        date: {
-          gte: startFilter,
-          lte: endFilter,
-        },
-      },
+      where: {},
       orderBy: { date: "desc" },
     });
   } catch (e) {
     console.error("Expenses query error:", e);
   }
+  const expensesInRange = expensesRaw.filter(
+    (expense) => expense.date >= startFilter && expense.date <= endFilter,
+  );
 
-  const totalExpenses = expensesRaw.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+  const totalExpenses = expensesInRange
+    .filter((exp) => (exp.type || "expense") !== "income")
+    .reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
 
-  const expensesByCategory = expensesRaw.reduce((acc, exp) => {
-    const cat = exp.category || "other";
-    acc[cat] = (acc[cat] || 0) + Number(exp.amount || 0);
-    return acc;
-  }, {} as Record<string, number>);
+  const expensesByCategory = expensesInRange
+    .filter((exp) => (exp.type || "expense") !== "income")
+    .reduce((acc, exp) => {
+      const cat = exp.category || "other";
+      acc[cat] = (acc[cat] || 0) + Number(exp.amount || 0);
+      return acc;
+    }, {} as Record<string, number>);
 
-  const expensesByAccount = expensesRaw.reduce(
+  const expensesByAccount = expensesInRange.reduce(
     (acc, exp) => {
+      if ((exp.type || "expense") === "income") return acc;
       const acct = exp.paymentAccount || "cash";
       acc[acct] = (acc[acct] || 0) + Number(exp.amount || 0);
       return acc;
@@ -206,7 +226,7 @@ export default async function FinancialsPage({
     { cash: 0, instapay_visa: 0, wallet: 0 } as Record<string, number>
   );
 
-  // 3. Fetch Treasury Account Transfers
+  // 4. Fetch Treasury Account Transfers
   let transfersRaw: any[] = [];
   try {
     transfersRaw = await (prisma as any).accountTransfer.findMany({
@@ -235,27 +255,28 @@ export default async function FinancialsPage({
   // Total Expenses includes operational expenses + transfer fees
   const totalCombinedExpenses = totalExpenses + totalTransferFees;
 
-  // Net Profit & Profit Margin Calculations
-  const grossProfit = totalSales - totalCOGS - totalDiscounts;
+  // totalSales is already the amount after the order discount.
+  // Keep totalDiscounts as a reporting metric only; do not subtract it again.
+  const grossProfit = totalSales - totalCOGS;
   const netProfit = grossProfit - totalCombinedExpenses;
   const profitMargin = totalSales > 0 ? Math.round((netProfit / totalSales) * 100) : 0;
   const grossMarginPct = totalSales > 0 ? Math.round((grossProfit / totalSales) * 100) : 0;
 
-  // 4. Payment Accounts Liquidity
+  // 5. Payment Accounts Liquidity
   let cashSales = 0;
   let instapaySales = 0;
   let walletSales = 0;
 
   activeOrders.forEach((o) => {
     const method = (o.paymentMethod || "cod").toLowerCase();
-    const val = Number(o.totalPrice || 0);
+    const val = getOrderProductSales(o);
     if (method.includes("instapay") || method.includes("card") || method.includes("visa")) {
       instapaySales += val;
     } else if (method.includes("wallet") || method.includes("vodafone") || method.includes("cash_app")) {
       walletSales += val;
     } else {
-      // COD Cash on Delivery enters available cash treasury ONLY when order status becomes delivered
-      if (o.status === "delivered" || o.status === "shipped") {
+      // COD Cash on Delivery enters available cash treasury only after delivery.
+      if (o.status === "delivered") {
         cashSales += val;
       }
     }
@@ -267,7 +288,7 @@ export default async function FinancialsPage({
   const totalLiquidity = cashOnHand + instapayVisa + wallet;
 
 
-  // 5. Inventory Valuation & Low Stock Replenishment Forecast
+  // 6. Inventory Valuation & Low Stock Replenishment Forecast
   const variants = await prisma.productVariant.findMany({
     include: {
       product: true,
@@ -308,7 +329,7 @@ export default async function FinancialsPage({
 
   const projectedProfit = Math.max(0, stockRetailValue - stockWholesaleValue);
 
-  // 6. Fetch Weekly Settlements
+  // 7. Fetch Weekly Settlements
   let settlementsRaw: any[] = [];
   try {
     settlementsRaw = await (prisma as any).weeklySettlement.findMany({
@@ -318,8 +339,8 @@ export default async function FinancialsPage({
     console.error("WeeklySettlement query error:", e);
   }
 
-  // 7. Order Profitability List
-  const ordersProfit = activeOrders.map((o) => {
+  // 8. Order Profitability List
+  const ordersProfit = allActiveOrders.map((o) => {
     let itemCosts = 0;
     o.items.forEach((item) => {
       const c =
@@ -333,10 +354,11 @@ export default async function FinancialsPage({
       itemCosts += c * item.quantity;
     });
 
-    const tot = Number(o.totalPrice || 0);
+    const tot = getOrderProductSales(o);
     const disc = Number(o.discountAmount || 0);
-    const ship = Number(o.shippingCost || 0);
-    const orderProfit = tot - itemCosts - disc;
+    // totalPrice already includes the discount, so subtracting disc here would
+    // count the same discount twice.
+    const orderProfit = tot - itemCosts;
     const margin = tot > 0 ? Math.round((orderProfit / tot) * 100) : 0;
 
     return {
@@ -348,7 +370,6 @@ export default async function FinancialsPage({
       totalPrice: tot,
       itemsCost: itemCosts,
       discountAmount: disc,
-      shippingCost: ship,
       orderProfit,
       profitMargin: margin,
       createdAt: o.createdAt.toISOString(),
@@ -362,7 +383,6 @@ export default async function FinancialsPage({
         totalSales,
         totalCOGS,
         totalDiscounts,
-        totalShipping,
         totalExpenses,
         grossProfit,
         grossMarginPct,
@@ -391,15 +411,29 @@ export default async function FinancialsPage({
         walletSales,
       }}
       expensesByCategory={expensesByCategory}
-      expenses={expensesRaw.map((e) => ({
-        id: e.id,
-        title: e.title,
-        amount: Number(e.amount),
-        category: e.category,
-        paymentAccount: e.paymentAccount,
-        date: e.date.toISOString(),
-        notes: e.notes || null,
-      }))}
+      expenses={[
+        ...expensesRaw.map((e) => ({
+          id: e.id,
+          type: (e.type as string) || "expense",
+          title: e.title,
+          amount: Number(e.amount),
+          category: e.category,
+          paymentAccount: e.paymentAccount,
+          date: e.date.toISOString(),
+          notes: e.notes || null,
+        })),
+        ...purchaseInvoicesRaw.map((pi) => ({
+          id: `pi-${pi.id}`,
+          type: "expense",
+          title: `فاتورة شراء: ${pi.invoiceNumber}${pi.supplier?.name ? ` (${pi.supplier.name})` : ""}`,
+          amount: Number(pi.total),
+          category: "purchase_invoice",
+          paymentAccount: "cash",
+          date: pi.invoiceDate.toISOString(),
+          notes: pi.notes || null,
+          isPurchaseInvoice: true,
+        })),
+      ]}
       transfers={transfersRaw.map((t) => ({
         id: t.id,
         fromAccount: t.fromAccount,

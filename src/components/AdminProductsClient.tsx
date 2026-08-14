@@ -95,7 +95,7 @@ export default function AdminProductsClient({
             onClick={() =>
               window.dispatchEvent(new CustomEvent("open-add-product"))
             }
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#942E3A] px-3 py-2.5 text-xs font-bold text-[#FFF9EB] hover:bg-[#7e2732] transition-colors"
+            className="hidden inline-flex items-center justify-center gap-2 rounded-xl bg-[#942E3A] px-3 py-2.5 text-xs font-bold text-[#FFF9EB] hover:bg-[#7e2732] transition-colors"
           >
             <PackagePlus className="h-4 w-4 text-[#D8B46A]" />
             <span>{t("products.addProduct")}</span>

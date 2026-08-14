@@ -1,0 +1,5 @@
+ALTER TABLE "Order"
+ADD COLUMN IF NOT EXISTS "paymentSenderPhone" TEXT;
+
+ALTER TABLE "Order"
+ADD COLUMN IF NOT EXISTS "paymentMethod" TEXT NOT NULL DEFAULT 'cod';

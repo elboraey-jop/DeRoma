@@ -262,31 +262,42 @@ export default async function DailyLogPage({
         <div className="mt-3 sm:mt-4">
           {/* Desktop Table View */}
           <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full min-w-[560px] text-left text-xs">
+            <table className="w-full min-w-[560px] table-fixed text-center text-xs">
+              <colgroup>
+                <col className="w-[18%]" />
+                <col className="w-[18%]" />
+                <col className="w-[24%]" />
+                <col className="w-[20%]" />
+                <col className="w-[20%]" />
+              </colgroup>
               <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
                 <tr>
                   <th className="pb-3">{isMultipleDays ? "Date & Time" : "Time"}</th>
                   <th className="pb-3">Order Number</th>
                   <th className="pb-3">Customer</th>
                   <th className="pb-3">Status</th>
-                  <th className="pb-3 text-right">Total</th>
+                  <th className="pb-3">Total</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#942E3A]/8">
                 {orders.map((order) => (
                   <tr key={order.orderNumber} className="group hover:bg-[#FFF9EB]/60 transition">
                     <td className="py-3.5 text-[#6B1F2A]/70">
-                      {isMultipleDays
-                        ? order.createdAt.toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : order.createdAt.toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                      <span dir="ltr">
+                        {isMultipleDays
+                          ? order.createdAt.toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })
+                          : order.createdAt.toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })}
+                      </span>
                     </td>
                     <td className="py-3.5 font-bold text-[#942E3A]">
                       <Link
@@ -316,8 +327,10 @@ export default async function DailyLogPage({
                         paymentMethod={order.paymentMethod}
                       />
                     </td>
-                    <td className="py-3.5 text-right font-bold text-[#942E3A]">
-                      {formatCurrency(Number(order.totalPrice))}
+                    <td className="py-3.5 font-bold text-[#942E3A]">
+                      <span dir="ltr" className="inline-block">
+                        {formatCurrency(Number(order.totalPrice))}
+                      </span>
                     </td>
                   </tr>
                 ))}

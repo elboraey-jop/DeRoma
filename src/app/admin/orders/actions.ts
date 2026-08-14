@@ -8,6 +8,7 @@ import { requireAdmin } from "@/lib/adminAuth";
 import { getAllowedNextStatuses } from "@/lib/orderStatus";
 import { consumeInventoryLots } from "@/lib/inventoryLots";
 import { formatOrderNumber } from "@/lib/orderNumber";
+import { sendOrderOwnerEmail } from "@/lib/orderEmail";
 import { sendMetaServerEvent } from "@/lib/serverAnalytics";
 
 type ManualOrderItem = { variantId: string; quantity: number };
@@ -132,6 +133,7 @@ export async function createManualOrderAction(formData: FormData) {
   const shippingCost = Number(formData.get("shippingCost") || 0);
   const requestedDiscount = Number(formData.get("discount") || 0);
   const paymentMethod = String(formData.get("paymentMethod") || "cod").trim();
+  const paymentSenderPhone = String(formData.get("paymentSenderPhone") || "").trim() || null;
   const orderSource = String(formData.get("orderSource") || "").trim();
   const notesInput = String(formData.get("notes") || "").trim();
   const itemsInput = parseItems(formData.get("itemsJson"));
@@ -219,7 +221,9 @@ export async function createManualOrderAction(formData: FormData) {
         notes,
         manual: true,
         paymentMethod,
-        status: "pending",
+        paymentSenderPhone: paymentMethod === "cod" ? null : paymentSenderPhone,
+        paymentProofStatus: paymentMethod === "cod" ? "not_required" : "awaiting_whatsapp",
+        status: paymentMethod === "cod" ? "pending" : "pending_payment",
         items: {
           create: itemsInput.map((item) => {
             const variant = variants.find(
@@ -244,12 +248,66 @@ export async function createManualOrderAction(formData: FormData) {
     return tx.order.update({
       where: { id: createdOrder.id },
       data: { orderNumber: formatOrderNumber(createdOrder.orderSequence) },
+      include: { items: true },
     });
+  });
+
+  await sendOrderOwnerEmail({
+    orderNumber: order.orderNumber,
+    customerName: order.customerName,
+    customerPhone: order.customerPhone,
+    customerPhone2: order.customerPhone2,
+    governorate: order.governorate,
+    city: order.city,
+    address: order.address,
+    notes: order.notes,
+    subtotalPrice: Number(order.subtotalPrice),
+    shippingCost: Number(order.shippingCost),
+    totalPrice: Number(order.totalPrice),
+    paymentMethod: order.paymentMethod,
+    paymentSenderPhone: order.paymentSenderPhone,
+    paymentProofStatus: order.paymentProofStatus,
+    items: order.items.map((item) => ({
+      productName: item.productName,
+      color: item.color || "",
+      size: item.size,
+      quantity: item.quantity,
+      price: Number(item.price),
+    })),
   });
 
   revalidatePath("/admin");
   revalidatePath("/admin/orders");
+  revalidatePath("/admin/financials");
   revalidatePath("/admin/inventory");
   revalidatePath("/shop");
   redirect(`/admin/orders/${order.id}`);
+}
+
+export async function confirmOrderPaymentAction(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("orderId") || "");
+  if (!id) throw new Error("Invalid order.");
+
+  const order = await prisma.order.findUnique({
+    where: { id },
+    select: { id: true, paymentMethod: true, status: true },
+  });
+  if (!order) throw new Error("Order not found.");
+  if (["cod", "cash_on_delivery"].includes(order.paymentMethod || "cod")) {
+    throw new Error("Cash-on-delivery orders do not need payment confirmation.");
+  }
+  if (order.status !== "pending_payment") {
+    throw new Error("This order is not waiting for payment confirmation.");
+  }
+
+  await prisma.order.update({
+    where: { id },
+    data: { status: "paid", paymentProofStatus: "verified", paymentProofSentAt: new Date() },
+  });
+  revalidatePath("/admin");
+  revalidatePath("/admin/orders");
+  revalidatePath(`/admin/orders/${id}`);
+  revalidatePath("/admin/analytics");
+  revalidatePath("/admin/financials");
 }
