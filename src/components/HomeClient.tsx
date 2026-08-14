@@ -271,8 +271,6 @@ export default function HomeClient({
       };
 
 
-  const activeReviewData = reviews[activeReview];
-
   const changeReview = (step: number, exitDirection = step > 0 ? 1 : -1) => {
     if (isReviewLeaving) return;
     const departingReview = activeReview;
