@@ -228,7 +228,8 @@ export default function HomeClient({
   const currentCard = heroCards[currentIndex];
   const currentTheme = cardThemes[currentIndex % cardThemes.length];
 
-  const reviews = dbHomeReviews.length > 0 ? dbHomeReviews : settings.homeReviews;
+  const reviews = dbHomeReviews.length > 0 ? dbHomeReviews : (settings.homeReviews || []);
+  const activeReviewData = reviews[activeReview] || reviews[0];
 
   const localizedReviewQuotes: Record<string, string> = lang === "ar"
     ? {
@@ -436,175 +437,180 @@ export default function HomeClient({
         </div>
       </section>
 
-      {/* 1.5. BRAND REVIEWS - Compact deck-style swipe carousel */}
-      <section className="px-2 sm:px-4 lg:px-6">
-        <ScrollReveal>
-          <div className="mx-auto max-w-[94vw] lg:max-w-[1320px]">
-            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-[#942E3A] px-4 py-5 sm:px-8 sm:py-6 lg:px-12 text-[#FFF9EB] shadow-lg">
-              <div className="pointer-events-none absolute -left-16 -top-20 h-48 w-48 rounded-full bg-[#D8B46A]/10 blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-56 rounded-full bg-[#FFF9EB]/10 blur-3xl" />
+      {/* 1.5. BRAND REVIEWS - Only rendered when approved reviews exist */}
+      {reviews.length > 0 && (
+        <section className="px-2 sm:px-4 lg:px-6">
+          <ScrollReveal>
+            <div className="mx-auto max-w-[94vw] lg:max-w-[1320px]">
+              <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-[#942E3A] px-4 py-5 sm:px-8 sm:py-6 lg:px-12 text-[#FFF9EB] shadow-lg">
+                <div className="pointer-events-none absolute -left-16 -top-20 h-48 w-48 rounded-full bg-[#D8B46A]/10 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-56 rounded-full bg-[#FFF9EB]/10 blur-3xl" />
 
-              <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8">
-                <div className="shrink-0 sm:w-[170px] lg:w-[220px]">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">{reviewSectionCopy.eyebrow}</span>
-                  <h2 className="mt-1 font-playfair text-xl font-semibold leading-tight sm:text-2xl">{reviewSectionCopy.title}</h2>
-                  <div className="mt-3 flex items-center gap-1.5 text-[#D8B46A]" aria-label={reviewSectionCopy.ratingAria}>
-                    {Array.from({ length: 5 }).map((_, index) => <Star key={index} className="h-3.5 w-3.5 fill-current" />)}
-                    <span className="ml-1 text-[10px] font-semibold text-[#FFF9EB]/75">4.9 / 5</span>
+                <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8">
+                  <div className="shrink-0 sm:w-[170px] lg:w-[220px]">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">{reviewSectionCopy.eyebrow}</span>
+                    <h2 className="mt-1 font-playfair text-xl font-semibold leading-tight sm:text-2xl">{reviewSectionCopy.title}</h2>
+                    <div className="mt-3 flex items-center gap-1.5 text-[#D8B46A]" aria-label={reviewSectionCopy.ratingAria}>
+                      {Array.from({ length: 5 }).map((_, index) => <Star key={index} className="h-3.5 w-3.5 fill-current" />)}
+                      <span className="ml-1 text-[10px] font-semibold text-[#FFF9EB]/75">4.9 / 5</span>
+                    </div>
+                    <p className="mt-3 hidden max-w-[190px] text-[10px] leading-relaxed text-[#FFF9EB]/60 sm:block">{reviewSectionCopy.hint}</p>
                   </div>
-                  <p className="mt-3 hidden max-w-[190px] text-[10px] leading-relaxed text-[#FFF9EB]/60 sm:block">{reviewSectionCopy.hint}</p>
-                </div>
 
-                <div className="relative min-w-0 flex-1 sm:h-[190px]">
-                  {/* MOBILE VIEW: Ultra-lightweight 60fps single-card transition */}
-                  <div
-                    className="relative h-[210px] w-full sm:hidden"
-                    onTouchStart={handleMobileTouchStart}
-                    onTouchEnd={handleMobileTouchEnd}
-                  >
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.article
-                        key={`mobile-rev-${activeReview}`}
-                        initial={{ opacity: 0, x: reviewDirection * 24 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -reviewDirection * 24 }}
-                        transition={{ duration: 0.18, ease: "easeOut" }}
-                        className="absolute inset-0 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] p-4 text-[#942E3A] shadow-md"
-                        style={{ willChange: "transform, opacity" }}
+                  <div className="relative min-w-0 flex-1 sm:h-[190px]">
+                    {/* MOBILE VIEW: Ultra-lightweight 60fps single-card transition */}
+                    {activeReviewData && (
+                      <div
+                        className="relative min-h-[190px] w-full sm:hidden"
+                        onTouchStart={handleMobileTouchStart}
+                        onTouchEnd={handleMobileTouchEnd}
                       >
-                        <div className="flex h-full flex-col justify-between">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex items-center gap-2.5">
-                              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-xs font-bold text-[#D8B46A]">
-                                {activeReviewData.initials}
-                              </span>
-                              <div>
-                                <p className="text-[10px] font-semibold text-[#942E3A]">
-                                  {activeReviewData.name}
-                                </p>
-                                <div className="mt-0.5 flex items-center gap-1.5">
-                                  <div
-                                    className="flex gap-0.5 text-[#D8B46A]"
-                                    aria-label={`${activeReviewData.rating} out of 5 stars`}
-                                  >
-                                    {Array.from({ length: 5 }).map((_, index) => (
-                                      <Star
-                                        key={index}
-                                        className={`h-3 w-3 ${
-                                          index < activeReviewData.rating
-                                            ? "fill-current"
-                                            : "fill-transparent opacity-40"
-                                        }`}
-                                      />
-                                    ))}
-                                  </div>
-                                  <span className="text-[9px] font-bold tracking-[0.1em] text-[#942E3A]/65">
-                                    {activeReviewData.model}
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.article
+                            key={`mobile-rev-${activeReview}`}
+                            initial={{ opacity: 0, x: reviewDirection * 24 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -reviewDirection * 24 }}
+                            transition={{ duration: 0.18, ease: "easeOut" }}
+                            className="w-full rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] p-4 text-[#942E3A] shadow-md"
+                            style={{ willChange: "transform, opacity" }}
+                          >
+                            <div className="flex h-full flex-col justify-between gap-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-center gap-2.5">
+                                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-xs font-bold text-[#D8B46A]">
+                                    {activeReviewData.initials}
                                   </span>
-                                </div>
-                              </div>
-                            </div>
-                            <Quote className="h-5 w-5 rotate-180 text-[#942E3A]/20" />
-                          </div>
-
-                          <p className="font-playfair text-sm leading-snug">
-                            “{localizedReviewQuotes[activeReviewData.id || ""] || activeReviewData.quote}”
-                          </p>
-
-                          <div className="flex items-center justify-between gap-2 text-[9px]">
-                            <span className="font-bold tracking-[0.12em] text-[#D8B46A]">
-                              {lang === "ar" && activeReviewData.brand.toLowerCase() === "shoes"
-                                ? reviewSectionCopy.shoes
-                                : activeReviewData.brand}
-                            </span>
-                            <span className="text-[#942E3A]/55">
-                              {lang === "ar"
-                                ? activeReviewData.detail.toLowerCase().includes("verified")
-                                  ? reviewSectionCopy.verifiedCustomer
-                                  : reviewSectionCopy.customer
-                                : activeReviewData.detail}
-                            </span>
-                          </div>
-                        </div>
-                      </motion.article>
-                    </AnimatePresence>
-                  </div>
-
-                  {/* DESKTOP VIEW: Rich 3D Stack Deck Animation */}
-                  <div className="relative mx-auto hidden h-full w-full max-w-[620px] sm:block">
-                    {[0, 1, 2, ...(returningReview !== null ? [3] : [])].map((stackPosition) => {
-                      const isReturning = stackPosition === 3 && returningReview !== null;
-                      const reviewIndex = isReturning ? returningReview : (activeReview + stackPosition) % reviews.length;
-                      const review = reviews[reviewIndex];
-                      const isFront = stackPosition === 0;
-
-                      return (
-                        <motion.article
-                          key={`${review.id || review.model}-${isReturning ? "returning" : stackPosition}`}
-                          drag={isFront ? "x" : false}
-                          dragConstraints={{ left: -520, right: 520 }}
-                          dragElastic={0.18}
-                          onDragEnd={isFront ? handleReviewDragEnd : undefined}
-                          initial={{
-                            x: isReturning ? reviewDirection * 760 : isFront ? reviewDirection * 34 : stackPosition * 10,
-                            y: stackPosition * 7,
-                            rotate: stackPosition === 0 ? 0 : stackPosition === 1 ? 3 : -3,
-                            opacity: isReturning ? 0.95 : isFront ? 0.65 : 1 - stackPosition * 0.12,
-                            scale: 1 - stackPosition * 0.035,
-                          }}
-                          animate={{
-                            x: isFront && isReviewLeaving ? reviewDirection * 760 : stackPosition * 10,
-                            y: stackPosition * 7,
-                            rotate: stackPosition === 0 ? 0 : stackPosition === 1 ? 3 : -3,
-                            scale: 1 - stackPosition * 0.035,
-                            opacity: 1 - stackPosition * 0.12,
-                          }}
-                          transition={isFront && isReviewLeaving
-                            ? { duration: 0.25, ease: "easeOut" }
-                            : isReturning
-                              ? { duration: 0.3, ease: "easeOut" }
-                            : { type: "spring", stiffness: 220, damping: 24, mass: 0.8 }}
-                          className={`absolute inset-y-0 left-0 right-0 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] p-4 text-[#942E3A] shadow-xl sm:p-5 ${isFront ? "z-30 cursor-grab active:cursor-grabbing" : stackPosition === 1 ? "z-20" : "z-10"}`}
-                          style={{ transformOrigin: "bottom center" }}
-                        >
-                          <div className="flex h-full flex-col justify-between">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex items-center gap-2.5">
-                                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-xs font-bold text-[#D8B46A]">{review.initials}</span>
-                                <div>
-                                  <p className="text-[10px] font-semibold text-[#942E3A]">{review.name}</p>
-                                  <div className="mt-1 flex items-center gap-2">
-                                    <div className="flex gap-0.5 text-[#D8B46A]" aria-label={`${review.rating} out of 5 stars`}>{Array.from({ length: 5 }).map((_, index) => <Star key={index} className={`h-3 w-3 ${index < review.rating ? "fill-current" : "fill-transparent opacity-40"}`} />)}</div>
-                                    <span className="text-[9px] font-bold tracking-[0.12em] text-[#942E3A]/65">{review.model}</span>
+                                  <div>
+                                    <p className="text-[10px] font-semibold text-[#942E3A]">
+                                      {activeReviewData.name}
+                                    </p>
+                                    <div className="mt-0.5 flex items-center gap-1.5">
+                                      <div
+                                        className="flex gap-0.5 text-[#D8B46A]"
+                                        aria-label={`${activeReviewData.rating} out of 5 stars`}
+                                      >
+                                        {Array.from({ length: 5 }).map((_, index) => (
+                                          <Star
+                                            key={index}
+                                            className={`h-3 w-3 ${
+                                              index < activeReviewData.rating
+                                                ? "fill-current"
+                                                : "fill-transparent opacity-40"
+                                            }`}
+                                          />
+                                        ))}
+                                      </div>
+                                      <span className="text-[9px] font-bold tracking-[0.1em] text-[#942E3A]/65">
+                                        {activeReviewData.model}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
+                                <Quote className="h-5 w-5 rotate-180 text-[#942E3A]/20" />
                               </div>
-                              <Quote className="h-6 w-6 rotate-180 text-[#942E3A]/20" />
-                            </div>
-                            <p className="max-w-[540px] font-playfair text-base leading-snug sm:text-lg">“{localizedReviewQuotes[review.id || ""] || review.quote}”</p>
-                            <div className="flex items-center justify-between gap-3 text-[10px]">
-                              <span className="font-bold tracking-[0.14em] text-[#D8B46A]">{lang === "ar" && review.brand.toLowerCase() === "shoes" ? reviewSectionCopy.shoes : review.brand}</span>
-                              <span className="text-[#942E3A]/55">{lang === "ar" ? (review.detail.toLowerCase().includes("verified") ? reviewSectionCopy.verifiedCustomer : reviewSectionCopy.customer) : review.detail}</span>
-                            </div>
-                          </div>
-                        </motion.article>
-                      );
-                    })}
-                  </div>
-                  <div className="absolute -bottom-1 left-0 right-0 z-40 flex items-center justify-center gap-1.5 sm:-bottom-3">
-                    {reviews.map((review, index) => <button key={`${review.brand}-${index}`} type="button" onClick={() => selectReview(index)} aria-label={`${reviewSectionCopy.showAria} ${review.brand}`} className={`h-1.5 rounded-full transition-all duration-300 ${index === activeReview ? "w-6 bg-[#D8B46A]" : "w-1.5 bg-[#FFF9EB]/45 hover:bg-[#FFF9EB]"}`} />)}
-                  </div>
-                </div>
 
-                <div className={`absolute top-0 z-40 flex gap-1.5 sm:top-auto sm:bottom-1 ${dir === "rtl" ? "left-0 sm:left-0" : "right-0 sm:right-0"}`}>
-                  <button type="button" onClick={() => changeReview(-1)} aria-label={reviewSectionCopy.previousAria} className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]">{dir === "rtl" ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}</button>
-                  <button type="button" onClick={() => changeReview(1)} aria-label={reviewSectionCopy.nextAria} className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]">{dir === "rtl" ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</button>
+                              <p className="font-playfair text-sm leading-snug">
+                                “{localizedReviewQuotes[activeReviewData.id || ""] || activeReviewData.quote}”
+                              </p>
+
+                              <div className="flex items-center justify-between gap-2 text-[9px]">
+                                <span className="font-bold tracking-[0.12em] text-[#D8B46A]">
+                                  {lang === "ar" && activeReviewData.brand.toLowerCase() === "shoes"
+                                    ? reviewSectionCopy.shoes
+                                    : activeReviewData.brand}
+                                </span>
+                                <span className="text-[#942E3A]/55">
+                                  {lang === "ar"
+                                    ? activeReviewData.detail.toLowerCase().includes("verified")
+                                      ? reviewSectionCopy.verifiedCustomer
+                                      : reviewSectionCopy.customer
+                                    : activeReviewData.detail}
+                                </span>
+                              </div>
+                            </div>
+                          </motion.article>
+                        </AnimatePresence>
+                      </div>
+                    )}
+
+                    {/* DESKTOP VIEW: Rich 3D Stack Deck Animation */}
+                    <div className="relative mx-auto hidden h-full w-full max-w-[620px] sm:block">
+                      {[0, 1, 2, ...(returningReview !== null ? [3] : [])].map((stackPosition) => {
+                        const isReturning = stackPosition === 3 && returningReview !== null;
+                        const reviewIndex = isReturning ? returningReview : (activeReview + stackPosition) % reviews.length;
+                        const review = reviews[reviewIndex];
+                        if (!review) return null;
+                        const isFront = stackPosition === 0;
+
+                        return (
+                          <motion.article
+                            key={`${review.id || review.model}-${isReturning ? "returning" : stackPosition}`}
+                            drag={isFront ? "x" : false}
+                            dragConstraints={{ left: -520, right: 520 }}
+                            dragElastic={0.18}
+                            onDragEnd={isFront ? handleReviewDragEnd : undefined}
+                            initial={{
+                              x: isReturning ? reviewDirection * 760 : isFront ? reviewDirection * 34 : stackPosition * 10,
+                              y: stackPosition * 7,
+                              rotate: stackPosition === 0 ? 0 : stackPosition === 1 ? 3 : -3,
+                              opacity: isReturning ? 0.95 : isFront ? 0.65 : 1 - stackPosition * 0.12,
+                              scale: 1 - stackPosition * 0.035,
+                            }}
+                            animate={{
+                              x: isFront && isReviewLeaving ? reviewDirection * 760 : stackPosition * 10,
+                              y: stackPosition * 7,
+                              rotate: stackPosition === 0 ? 0 : stackPosition === 1 ? 3 : -3,
+                              scale: 1 - stackPosition * 0.035,
+                              opacity: 1 - stackPosition * 0.12,
+                            }}
+                            transition={isFront && isReviewLeaving
+                              ? { duration: 0.25, ease: "easeOut" }
+                              : isReturning
+                                ? { duration: 0.3, ease: "easeOut" }
+                              : { type: "spring", stiffness: 220, damping: 24, mass: 0.8 }}
+                            className={`absolute inset-y-0 left-0 right-0 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] p-4 text-[#942E3A] shadow-xl sm:p-5 ${isFront ? "z-30 cursor-grab active:cursor-grabbing" : stackPosition === 1 ? "z-20" : "z-10"}`}
+                            style={{ transformOrigin: "bottom center" }}
+                          >
+                            <div className="flex h-full flex-col justify-between">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-center gap-2.5">
+                                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#942E3A] font-playfair text-xs font-bold text-[#D8B46A]">{review.initials}</span>
+                                  <div>
+                                    <p className="text-[10px] font-semibold text-[#942E3A]">{review.name}</p>
+                                    <div className="mt-1 flex items-center gap-2">
+                                      <div className="flex gap-0.5 text-[#D8B46A]" aria-label={`${review.rating} out of 5 stars`}>{Array.from({ length: 5 }).map((_, index) => <Star key={index} className={`h-3 w-3 ${index < review.rating ? "fill-current" : "fill-transparent opacity-40"}`} />)}</div>
+                                      <span className="text-[9px] font-bold tracking-[0.12em] text-[#942E3A]/65">{review.model}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <Quote className="h-6 w-6 rotate-180 text-[#942E3A]/20" />
+                              </div>
+                              <p className="max-w-[540px] font-playfair text-base leading-snug sm:text-lg">“{localizedReviewQuotes[review.id || ""] || review.quote}”</p>
+                              <div className="flex items-center justify-between gap-3 text-[10px]">
+                                <span className="font-bold tracking-[0.14em] text-[#D8B46A]">{lang === "ar" && review.brand.toLowerCase() === "shoes" ? reviewSectionCopy.shoes : review.brand}</span>
+                                <span className="text-[#942E3A]/55">{lang === "ar" ? (review.detail.toLowerCase().includes("verified") ? reviewSectionCopy.verifiedCustomer : reviewSectionCopy.customer) : review.detail}</span>
+                              </div>
+                            </div>
+                          </motion.article>
+                        );
+                      })}
+                    </div>
+                    <div className="absolute -bottom-1 left-0 right-0 z-40 flex items-center justify-center gap-1.5 sm:-bottom-3">
+                      {reviews.map((review, index) => <button key={`${review.brand}-${index}`} type="button" onClick={() => selectReview(index)} aria-label={`${reviewSectionCopy.showAria} ${review.brand}`} className={`h-1.5 rounded-full transition-all duration-300 ${index === activeReview ? "w-6 bg-[#D8B46A]" : "w-1.5 bg-[#FFF9EB]/45 hover:bg-[#FFF9EB]"}`} />)}
+                    </div>
+                  </div>
+
+                  <div className={`absolute top-0 z-40 flex gap-1.5 sm:top-auto sm:bottom-1 ${dir === "rtl" ? "left-0 sm:left-0" : "right-0 sm:right-0"}`}>
+                    <button type="button" onClick={() => changeReview(-1)} aria-label={reviewSectionCopy.previousAria} className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]">{dir === "rtl" ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}</button>
+                    <button type="button" onClick={() => changeReview(1)} aria-label={reviewSectionCopy.nextAria} className="rounded-full border border-[#FFF9EB]/25 bg-[#942E3A]/60 p-1.5 transition-colors hover:border-[#D8B46A] hover:text-[#D8B46A]">{dir === "rtl" ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </ScrollReveal>
-      </section>
+          </ScrollReveal>
+        </section>
+      )}
 
       {/* 2. CUSTOM BENTO GRID BOUTIQUE BRANDS SECTION (Matches Hand-Drawn Sketch Exactly) */}
       <section className="px-2 sm:px-4 lg:px-6">
