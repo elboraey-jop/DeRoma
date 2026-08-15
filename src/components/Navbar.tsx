@@ -329,7 +329,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
 
               {/* Navigation Links */}
               <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
-                <p className="text-[10px] uppercase font-bold tracking-wider text-[#D8B46A] px-3 mb-2">
+                <p className="text-[10px] uppercase font-bold tracking-wider text-[#FFF9EC]/65 px-3 mb-2">
                   {t("nav.navigation")}
                 </p>
                 {navLinks.map((link) => {
@@ -364,11 +364,11 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
                                 key={category.href}
                                 href={category.href}
                                 onClick={() => setIsOpen(false)}
-                                className="flex items-center justify-between gap-2 px-1 py-1 text-[10px] font-semibold text-[#D8B46A] transition-colors hover:text-[#FFF9EB]"
+                                className="flex items-center justify-between gap-2 px-1 py-1 text-[10px] font-semibold text-[#FFF9EC]/80 transition-colors hover:text-white"
                               >
                                 <span>{t(category.labelKey)}</span>
                                 {category.comingSoon && (
-                                  <span className="text-[8px] font-bold uppercase tracking-wide text-[#D8B46A]">
+                                  <span className="text-[8px] font-bold uppercase tracking-wide text-[#FFF9EC]/60 bg-white/10 px-1.5 py-0.5 rounded-full border border-white/10">
                                     {t("nav.categories.comingSoon")}
                                   </span>
                                 )}
@@ -383,7 +383,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
 
                 {/* Additional Pages */}
                 <div className="pt-4 border-t border-white/10 mt-4 space-y-1">
-                  <p className="text-[10px] uppercase font-bold tracking-wider text-[#D8B46A] px-3 mb-2">
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-[#FFF9EC]/65 px-3 mb-2">
                     {t("nav.shopAndOrders")}
                   </p>
                   
