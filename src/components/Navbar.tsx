@@ -231,10 +231,10 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
         {/* ELEMENT 2: Independent Wishlist Circle Button */}
         <Link
           href="/wishlist"
-          className="relative pointer-events-auto h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-full bg-[#D8B46A]/95 text-[#FFF9EB] backdrop-blur-xl border border-white/20 shadow-xl flex items-center justify-center hover:bg-[#B8934A] transition-all hover:scale-105 active:scale-95"
+          className="relative pointer-events-auto h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-full bg-[#EADFC8] text-[#6B1F2A] backdrop-blur-xl border border-white/20 shadow-xl flex items-center justify-center hover:bg-[#DFD4BC] transition-all hover:scale-105 active:scale-95"
           aria-label="Wishlist"
         >
-          <Heart className={`h-4 w-4 ${isWishlisted ? "fill-[#942E3A] text-[#942E3A]" : "text-stone-200"}`} />
+          <Heart className={`h-4 w-4 ${isWishlisted ? "fill-[#942E3A] text-[#942E3A]" : "text-[#6B1F2A]"}`} />
           {count > 0 && (
             <span className="absolute -top-1 -right-1 rtl:-left-1 rtl:right-auto flex h-5 w-5 items-center justify-center rounded-full bg-[#942E3A] text-[10px] font-extrabold text-[#FFF9EB] border border-white/20 shadow-md animate-in zoom-in-75 duration-200">
               {count}
@@ -245,11 +245,11 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
         {/* ELEMENT 3: Independent Shopping Bag Floating Pill Button */}
         <button
           onClick={() => setCartOpen(true)}
-          className="pointer-events-auto h-11 sm:h-12 shrink-0 rounded-full bg-[#D8B46A] text-[#FFF9EB] backdrop-blur-xl px-2.5 sm:px-4 shadow-md border border-white/20 flex items-center gap-1 sm:gap-1.5 hover:bg-[#B8934A] transition-all hover:scale-105 active:scale-95"
+          className="pointer-events-auto h-11 sm:h-12 shrink-0 rounded-full bg-[#EADFC8] text-[#6B1F2A] backdrop-blur-xl px-2.5 sm:px-4 shadow-md border border-white/20 flex items-center gap-1 sm:gap-1.5 hover:bg-[#DFD4BC] transition-all hover:scale-105 active:scale-95"
           aria-label="Shopping Bag"
         >
-          <ShoppingBag className="h-3.5 w-3.5" />
-          <span className="text-[11px] font-extrabold hidden sm:inline">{t("nav.bag")}</span>
+          <ShoppingBag className="h-3.5 w-3.5 text-[#6B1F2A]" />
+          <span className="text-[11px] font-extrabold hidden sm:inline text-[#6B1F2A]">{t("nav.bag")}</span>
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#942E3A] text-[10px] font-extrabold text-[#FFF9EB] shadow-xs border border-white/20 sm:ml-0.5">
             {cartCount}
           </span>
