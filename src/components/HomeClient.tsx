@@ -35,9 +35,11 @@ export type HomeReviewItem = {
 export default function HomeClient({
   products,
   dbHomeReviews = [],
+  showReviewsSection = true,
 }: {
   products: ProductWithVariants[];
   dbHomeReviews?: HomeReviewItem[];
+  showReviewsSection?: boolean;
 }) {
   const settings = useSiteSettings();
   const { t, lang, dir, formatNumber } = useStoreI18n();
@@ -435,8 +437,8 @@ export default function HomeClient({
         </div>
       </section>
 
-      {/* 1.5. BRAND REVIEWS - Only rendered when approved reviews exist */}
-      {reviews.length > 0 && (
+      {/* 1.5. BRAND REVIEWS - Only rendered when enabled and approved reviews exist */}
+      {showReviewsSection && reviews.length > 0 && (
         <section className="px-2 sm:px-4 lg:px-6">
           <ScrollReveal>
             <div className="mx-auto max-w-[94vw] lg:max-w-[1320px]">
@@ -447,7 +449,7 @@ export default function HomeClient({
                 <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8">
                   <div className="shrink-0 sm:w-[170px] lg:w-[220px]">
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-[#D8B46A]">{reviewSectionCopy.eyebrow}</span>
-                    <h2 className="mt-1 font-playfair text-xl font-semibold leading-tight sm:text-2xl">{reviewSectionCopy.title}</h2>
+                    <h2 className="mt-1 font-heading text-xl font-light leading-tight sm:text-2xl">{reviewSectionCopy.title}</h2>
                     <div className="mt-3 flex items-center gap-1.5 text-[#D8B46A]" aria-label={reviewSectionCopy.ratingAria}>
                       {Array.from({ length: 5 }).map((_, index) => <Star key={index} className="h-3.5 w-3.5 fill-current" />)}
                       <span className="ml-1 text-[10px] font-semibold text-[#FFF9EB]/75">4.9 / 5</span>
@@ -615,13 +617,13 @@ export default function HomeClient({
         <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] space-y-3">
           <ScrollReveal>
             <div className="flex items-center justify-center py-2">
-              <h2 className="text-xl sm:text-2xl font-extrabold text-[#942E3A] font-playfair tracking-[0.2em] uppercase text-center">
+              <h2 className="text-xl sm:text-2xl font-light text-[#942E3A] font-heading tracking-[0.2em] uppercase text-center">
                 {lang === "ar" ? "مجموعاتنا" : "OUR COLLECTIONS"}
               </h2>
             </div>
           </ScrollReveal>
 
-          {/* UNIFIED 6-BOX BENTO GRID - PERFECT SYMMETRY (1:2:1) & ENLARGED LOGOS */}
+          {/* UNIFIED 6-BOX BENTO GRID - PERFECT SYMMETRY (1:2:1) */}
           <StaggerContainer className="flex flex-row flex-nowrap items-stretch w-full gap-1.5 sm:gap-2.5 lg:gap-3.5">
             
             {/* LEFT COLUMN (flex-[1]) -> Full Height Tall Vertical Box: New Balance */}
@@ -695,7 +697,7 @@ export default function HomeClient({
                   className="group relative flex-[2] h-full rounded-lg sm:rounded-2xl bg-transparent border border-[#942E3A]/15 hover:border-[#942E3A] hover:bg-black/[0.02] transition-all duration-300 flex items-center justify-center p-0.5 sm:p-3 lg:p-4 text-center overflow-hidden"
                 >
                   <div className="flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                    <span className="font-serif font-black text-xs sm:text-xl lg:text-2xl tracking-[0.15em] sm:tracking-[0.25em] text-[#942E3A] uppercase">
+                    <span className="font-heading font-light text-xs sm:text-xl lg:text-2xl tracking-[0.15em] sm:tracking-[0.25em] text-[#942E3A] uppercase">
                       DIOR
                     </span>
                   </div>
@@ -725,8 +727,8 @@ export default function HomeClient({
       <section className="px-2 sm:px-4 lg:px-6">
         <ScrollReveal>
           <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] text-center border-b border-[#D8B46A]/40 pb-4">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">DE ROMA</span>
-            <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair tracking-tight mt-1">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-[#D8B46A] block">DE ROMA</span>
+            <h2 className="text-lg sm:text-2xl font-light text-[#942E3A] font-heading tracking-tight mt-1">
               {t("home.featuredCollection")}
             </h2>
           </div>
@@ -740,7 +742,7 @@ export default function HomeClient({
             {displayForYouProducts.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-2xl border border-[#D8B46A] p-6">
                 <ShoppingBag className="h-8 w-8 text-[#D8B46A] mx-auto mb-2" />
-                <h3 className="text-sm font-bold text-[#942E3A]">{t("shopPage.noProductsFound")}</h3>
+                <h3 className="text-sm font-medium text-[#942E3A]">{t("shopPage.noProductsFound")}</h3>
                 <p className="text-[11px] text-[#D8B46A] mt-1">{t("shopPage.subtitle")}</p>
               </div>
             ) : (
@@ -780,8 +782,8 @@ export default function HomeClient({
         <ScrollReveal>
           <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] space-y-6">
             <div className="text-center border-b border-[#D8B46A]/40 pb-4">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A] block">DE ROMA</span>
-              <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair tracking-tight mt-1">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-[#D8B46A] block">DE ROMA</span>
+              <h2 className="text-lg sm:text-2xl font-light text-[#942E3A] font-heading tracking-tight mt-1">
                 {t("home.bestSellers")}
               </h2>
             </div>

@@ -99,3 +99,30 @@ export async function deleteReviewAction(formData: FormData) {
   revalidatePath("/");
   revalidatePath(`/shop/${review.productId}`);
 }
+
+export async function toggleHomeReviewsSectionAction(formData: FormData) {
+  await requireAdmin();
+  const enabled = formData.get("enabled") === "true";
+  await prisma.catalogOption.upsert({
+    where: {
+      category_type_name: {
+        category: "settings",
+        type: "home_sections",
+        name: "reviews_section",
+      },
+    },
+    create: {
+      category: "settings",
+      type: "home_sections",
+      name: "reviews_section",
+      active: enabled,
+      value: enabled ? "true" : "false",
+    },
+    update: {
+      active: enabled,
+      value: enabled ? "true" : "false",
+    },
+  });
+  revalidatePath("/admin/reviews");
+  revalidatePath("/");
+}

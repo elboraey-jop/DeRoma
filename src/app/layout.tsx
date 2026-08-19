@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Outfit, Cairo } from "next/font/google";
+import { Montserrat, Comfortaa, Playfair_Display, Cairo } from "next/font/google";
 import SiteChrome from "@/components/SiteChrome";
 import { CartProvider } from "@/lib/cartStore";
 import { ToastProvider } from "@/providers/ToastProvider";
@@ -12,14 +12,22 @@ import AnalyticsScripts from "@/components/AnalyticsScripts";
 import "./globals.css";
 
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
   display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const comfortaa = Comfortaa({
+  variable: "--font-comfortaa",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
   display: "swap",
 });
@@ -105,7 +113,7 @@ export default function RootLayout({
         />
       </head>
 
-      <body className={`${playfair.variable} ${outfit.variable} ${cairo.variable} font-playfair antialiased`}>
+      <body className={`${montserrat.variable} ${comfortaa.variable} ${playfair.variable} ${cairo.variable} font-montserrat antialiased`}>
         <ToastProvider>
           <StoreI18nProvider>
             <RoutePrefetcher />

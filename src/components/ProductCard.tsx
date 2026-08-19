@@ -235,18 +235,18 @@ export default function ProductCard({
           </div>
 
             <Link href={getProductPath(product)} onClick={handleProductSelect} className="block px-8 sm:px-9 text-center transition-colors group-hover:text-[#942E3A]">
-            <h3 className="product-card-name text-[10px] font-extrabold leading-[1.15] tracking-tight text-[#6B1F2A] line-clamp-2 sm:text-[11px]">
+            <h3 className="product-card-name text-[10px] font-normal leading-[1.2] tracking-tight text-[#6B1F2A] line-clamp-2 sm:text-[11px]">
               {product.name}
             </h3>
           </Link>
         </div>
 
         <div className="mb-1 flex flex-row items-baseline justify-center gap-1.5 leading-none">
-          <span className="text-[15px] font-semibold text-[#6B1F2A] sm:text-[18px]">
+          <span className="font-numeric text-[15px] font-light text-[#6B1F2A] sm:text-[18px]">
             {formatCardPrice(priceNum)}
           </span>
           {compareAtPriceNum && (
-            <span className="text-[9px] font-normal text-[#6B1F2A]/55 line-through sm:text-[10px]">
+            <span className="font-numeric text-[9px] font-light text-[#6B1F2A]/55 line-through sm:text-[10px]">
               {formatCardPrice(compareAtPriceNum)}
             </span>
           )}

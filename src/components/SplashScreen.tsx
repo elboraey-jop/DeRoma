@@ -39,7 +39,7 @@ export default function SplashScreen() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="font-playfair text-4xl font-extrabold tracking-wider text-[#942E3A]"
+              className="font-brand text-4xl font-extrabold tracking-wider text-[#942E3A]"
             >
               DeRoma
             </motion.span>

@@ -274,7 +274,7 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
   );
 }
 
-export default function AdminReviewsClient({ reviews, products }: { reviews: Review[]; products: Product[] }) {
+export default function AdminReviewsClient({ reviews, products, isHomeReviewsSectionVisible }: { reviews: Review[]; products: Product[]; isHomeReviewsSectionVisible?: boolean }) {
   const { lang, t, formatNumber } = useAdminI18n();
   const isRtl = lang === "ar";
   const reviewDateLocale = isRtl ? "ar-EG-u-nu-latn" : "en-US";

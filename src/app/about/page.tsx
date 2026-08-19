@@ -33,7 +33,7 @@ export default function AboutAndContactPage() {
   const settings = useSiteSettings();
   const { t, dir } = useStoreI18n();
   const isArabic = dir === "rtl";
-  const [activeTab, setActiveTab] = useState<"about" | "contact">("contact");
+  const [activeTab, setActiveTab] = useState<"about" | "contact">("about");
 
   const copy = isArabic
     ? {
@@ -240,7 +240,7 @@ export default function AboutAndContactPage() {
               className={`flex items-center gap-1.5 px-3.5 sm:px-6 py-1.5 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-bold transition-all ${
                 activeTab === "about"
                   ? "bg-[#942E3A] text-white shadow-md"
-                  : "text-[#942E3A] hover:bg-[#942E3A]/10"
+                  : "bg-transparent text-[#942E3A] hover:text-[#942E3A]/80"
               }`}
             >
               <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -252,7 +252,7 @@ export default function AboutAndContactPage() {
               className={`flex items-center gap-1.5 px-3.5 sm:px-6 py-1.5 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-bold transition-all ${
                 activeTab === "contact"
                   ? "bg-[#942E3A] text-white shadow-md"
-                  : "text-[#942E3A] hover:bg-[#942E3A]/10"
+                  : "bg-transparent text-[#942E3A] hover:text-[#942E3A]/80"
               }`}
             >
               <Headphones className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

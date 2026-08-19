@@ -411,7 +411,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             
             {/* Title */}
             <div className="w-full">
-              <h1 className="text-[22px] sm:text-3xl lg:text-4xl font-extrabold text-[#942E3A] font-playfair tracking-tight leading-snug text-center">
+              <h1 className="text-[22px] sm:text-3xl lg:text-4xl font-normal text-[#942E3A] font-product tracking-tight leading-snug text-center">
                 {product.name}
               </h1>
 
@@ -422,7 +422,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                     <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <span className="font-numeric text-[11px] sm:text-xs font-bold text-[#942E3A]">
+                <span className="font-numeric text-[11px] sm:text-xs font-normal text-[#942E3A]">
                   {formatNumber(product.rating ? product.rating.toFixed(1) : "4.8")}
                 </span>
                 <span className="font-numeric text-[11px] sm:text-xs text-[#D8B46A]">
@@ -433,11 +433,11 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
 
             {/* Price Row */}
             <div className="flex items-baseline justify-center gap-x-2.5 py-3 border-y border-[#D8B46A]/30 w-full">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#942E3A]">
+              <span className="font-numeric text-2xl sm:text-3xl font-light text-[#942E3A]">
                 {formatPrice(priceNum)}
               </span>
               {compareAtPriceNum && (
-                <span className="text-sm text-[#D8B46A] line-through">
+                <span className="font-numeric text-sm text-[#D8B46A] font-light line-through">
                   {formatPrice(compareAtPriceNum)}
                 </span>
               )}

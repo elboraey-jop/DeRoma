@@ -71,7 +71,7 @@
 .stat-value {
   margin-top: 0.15rem;
   color: #942e3a;
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-numeric);
   font-size: 1.45rem;
   font-weight: 900;
 }
@@ -242,8 +242,11 @@
   --shadow: 0 10px 30px rgba(95, 85, 152, 0.12);
   --radius: var(--border-radius, 4px);
   --radius-sm: 2px;
-  --font-heading: var(--font-heading, 'Playfair Display', serif);
-  --font-body: var(--font-playfair), serif;
+  --font-heading: var(--font-montserrat), sans-serif;
+  --font-body: var(--font-montserrat), sans-serif;
+  --font-product: var(--font-comfortaa), cursive, sans-serif;
+  --font-numeric: var(--font-montserrat), sans-serif;
+  --font-brand: var(--font-playfair), serif;
   --container: 1300px;
 }
 html.dark {
@@ -336,7 +339,7 @@ body {
 .summary-row,
 .qty,
 .price-number {
-  font-family: var(--font-playfair), serif;
+  font-family: var(--font-numeric) !important;
   font-variant-numeric: lining-nums tabular-nums;
   letter-spacing: 0;
 }
@@ -351,13 +354,13 @@ h6 {
   margin-top: 0;
 }
 .product-card-name {
-  font-family: var(--font-playfair), serif !important;
+  font-family: var(--font-product) !important;
 }
 .product-card-badge-number {
-  font-family: var(--font-playfair), serif !important;
+  font-family: var(--font-numeric) !important;
 }
 .product-detail-discount-badge {
-  font-family: var(--font-playfair), serif !important;
+  font-family: var(--font-numeric) !important;
 }
 .container {
   max-width: var(--container);

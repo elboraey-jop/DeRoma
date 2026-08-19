@@ -107,7 +107,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
 
             {/* Brand Logo - Desktop */}
             <Link href="/" className="hidden lg:flex min-w-0 items-center gap-1.5 group shrink">
-              <span className="truncate text-base sm:text-lg font-extrabold tracking-tight text-white font-playfair">
+              <span className="truncate text-base sm:text-lg font-extrabold tracking-tight text-white font-brand">
                 DeRoma
               </span>
             </Link>
@@ -115,7 +115,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
 
           {/* Absolutely centered Brand Logo for Mobile */}
           <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:hidden flex min-w-0 items-center gap-1.5 group z-0">
-            <span className="text-base sm:text-lg font-extrabold tracking-tight text-white font-playfair">
+            <span className="text-base sm:text-lg font-extrabold tracking-tight text-white font-brand">
               DeRoma
             </span>
           </Link>
@@ -285,7 +285,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
               {/* Header inside drawer */}
               <div className="flex items-center justify-between px-5 pt-5 pb-1">
                 <Link href="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2">
-                  <span className="text-xl font-extrabold tracking-tight text-white font-playfair">
+                  <span className="text-xl font-extrabold tracking-tight text-white font-brand">
                     DeRoma
                   </span>
                 </Link>
