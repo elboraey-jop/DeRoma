@@ -26,6 +26,7 @@ async function isValidSession(token?: string) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (!pathname.startsWith("/admin") || pathname === "/admin/login") return NextResponse.next();
+  if (pathname.startsWith("/admin/api/")) return NextResponse.next();
   if (await isValidSession(request.cookies.get(COOKIE)?.value)) return NextResponse.next();
 
   const loginUrl = new URL("/admin/login", request.url);

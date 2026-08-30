@@ -44,7 +44,7 @@ export async function uploadAdminImage(file: File): Promise<string> {
     throw new Error("Image size cannot exceed 8 MB.");
   }
 
-  const signatureResponse = await fetch("/api/admin/upload/signature", {
+  const signatureResponse = await fetch("/admin/api/upload/signature", {
     method: "POST",
     headers: { Accept: "application/json" },
   });
