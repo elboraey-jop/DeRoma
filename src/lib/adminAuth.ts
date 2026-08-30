@@ -6,11 +6,12 @@ import prisma from "@/lib/prisma";
 
 export const ADMIN_SESSION_COOKIE = "deroma_admin_session";
 const SESSION_MAX_AGE = 60 * 60 * 12;
+const adminAuthConfigError = "ADMIN_SECRET is not configured.";
 
 function getSecret() {
   const secret = process.env.ADMIN_SECRET || process.env.NEXTAUTH_SECRET;
   if (!secret || secret === "your-admin-secret-here" || secret === "your-nextauth-secret-here") {
-    throw new Error("ADMIN_SECRET is not configured.");
+    throw new Error(adminAuthConfigError);
   }
   return secret;
 }
@@ -68,6 +69,9 @@ export async function requireAdmin() {
 }
 
 export async function loginAdmin(email: string, password: string) {
+  // Validate configuration before touching the database so callers can
+  // distinguish a missing secret from a transient database failure.
+  getSecret();
   const user = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() } });
   if (!user || user.role !== "admin" || !(await bcrypt.compare(password, user.passwordHash))) {
     return { success: false as const, error: "Invalid admin email or password." };

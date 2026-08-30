@@ -19,7 +19,10 @@ export async function loginAdminAction(_previousState: { error: string } | null,
     if (!result.success) return { error: result.error };
   } catch (error) {
     console.error("Admin login failed", error);
-    return { error: "Admin login is not configured yet. Add ADMIN_SECRET (or NEXTAUTH_SECRET) and an admin user first." };
+    if (error instanceof Error && error.message === "ADMIN_SECRET is not configured.") {
+      return { error: "Admin login is not configured yet. Add ADMIN_SECRET (or NEXTAUTH_SECRET) and an admin user first." };
+    }
+    return { error: "The admin service is temporarily unavailable. Please try again." };
   }
 
   redirect("/admin");
