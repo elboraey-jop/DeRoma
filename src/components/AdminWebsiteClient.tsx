@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { HeroBanner, HomeReview, SiteSettingsData } from "@/lib/siteSettings";
 import { updateSiteSettingsAction } from "@/app/admin/website/actions";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
+import { uploadAdminImage } from "@/lib/clientImageUpload";
 
 interface SimpleProduct {
   id: string;
@@ -307,12 +308,7 @@ export default function AdminWebsiteClient({
     if (!file) return;
     setUploadingField(fieldKey);
     try {
-      const formData = new FormData();
-      formData.set("file", file);
-      const res = await fetch("/admin/api/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.error || "Upload failed");
-      onSuccess(data.url);
+      onSuccess(await uploadAdminImage(file));
       toast.success(isRtl ? "تم رفع الصورة بنجاح!" : "Image uploaded successfully!");
     } catch (err) {
       console.error("Upload error", err);

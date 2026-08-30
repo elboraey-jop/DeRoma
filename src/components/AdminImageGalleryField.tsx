@@ -2,6 +2,7 @@
 
 import { DragEvent, useEffect, useMemo, useState } from "react";
 import { GripVertical, ImagePlus, LoaderCircle, Star, X } from "lucide-react";
+import { uploadAdminImage } from "@/lib/clientImageUpload";
 
 export default function AdminImageGalleryField({ defaultValue = "" }: { defaultValue?: string }) {
   const parseImages = (value: string) =>
@@ -26,12 +27,7 @@ export default function AdminImageGalleryField({ defaultValue = "" }: { defaultV
     try {
       const uploaded: string[] = [];
       for (const file of Array.from(files)) {
-        const body = new FormData();
-        body.set("file", file);
-        const response = await fetch("/admin/api/upload", { method: "POST", body });
-        const result = await response.json() as { url?: string; error?: string };
-        if (!response.ok || !result.url) throw new Error(result.error || "Image upload failed.");
-        uploaded.push(result.url);
+        uploaded.push(await uploadAdminImage(file));
       }
       setImages((current) => [...current, ...uploaded]);
     } catch (uploadError) {
