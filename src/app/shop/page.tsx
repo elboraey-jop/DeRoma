@@ -6,14 +6,24 @@ import prisma from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function ShopPage() {
-  const [products, colorOptions] = await Promise.all([
-    getActiveProducts(),
-    prisma.catalogOption.findMany({
+  let products: any[] = [];
+  let colorOptions: Array<{ name: string; value: string | null }> = [];
+
+  try {
+    products = await getActiveProducts();
+  } catch (err) {
+    console.error("Failed to load active products for shop:", err);
+  }
+
+  try {
+    colorOptions = await prisma.catalogOption.findMany({
       where: { type: "color", active: true },
       select: { name: true, value: true },
       orderBy: { name: "asc" },
-    }),
-  ]);
+    });
+  } catch (err) {
+    console.warn("Failed to load catalog color options for shop:", err);
+  }
 
   return (
     <main className="flex-1 bg-[#FFF9EB] min-h-screen">

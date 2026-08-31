@@ -56,7 +56,7 @@ function getColorHex(colorName: string): string {
   }
 }
 
-export default function ShopClient({ initialProducts, catalogColors = [] }: ShopClientProps) {
+export default function ShopClient({ initialProducts = [], catalogColors = [] }: ShopClientProps) {
   const { t, lang, dir, formatNumber } = useStoreI18n();
   const copy = lang === "ar"
     ? {
