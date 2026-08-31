@@ -12,7 +12,7 @@ export type InvoiceCard = { id: string; invoiceNumber: string; supplierId: strin
 const tabs = ["suppliers", "invoices"] as const;
 
 export default function AdminSuppliersWorkspace({ suppliers, invoices }: { suppliers: SupplierCard[]; invoices: InvoiceCard[] }) {
-  const { lang, t, formatPrice, formatNumber } = useAdminI18n();
+  const { lang, t, formatPrice, formatNumber, formatDate } = useAdminI18n();
   const isRtl = lang === "ar";
   const [tab, setTab] = useState<(typeof tabs)[number]>("suppliers");
   const [showModal, setShowModal] = useState(false);
@@ -213,7 +213,7 @@ function SupplierGrid({ suppliers }: { suppliers: SupplierCard[] }) {
 }
 
 function InvoiceGrid({ invoices }: { invoices: InvoiceCard[] }) {
-  const { lang, formatPrice, formatNumber } = useAdminI18n();
+  const { lang, formatPrice, formatNumber, formatDate } = useAdminI18n();
   const isRtl = lang === "ar";
 
   if (!invoices.length) return <EmptyState icon={<FileText />} title={isRtl ? "لا توجد فواتير توريد" : "No invoices yet"} text={isRtl ? "قم بإنشاء فاتورة توريد جديدة لإضافة وتعديل المخزون." : "Create a purchase invoice to receive stock and record its cost."} />;
@@ -244,7 +244,7 @@ function InvoiceGrid({ invoices }: { invoices: InvoiceCard[] }) {
           </h2>
 
           <p className="mt-1 text-[10px] text-[#6B1F2A]/60 truncate sm:mt-2 sm:text-xs">
-            <span dir={isRtl ? "rtl" : "ltr"}>{new Date(invoice.invoiceDate).toLocaleDateString(isRtl ? "ar-EG-u-nu-latn" : "en-US", { dateStyle: "medium" })}</span> · {formatNumber(invoice.itemCount)} {isRtl ? "صنف" : "items"}
+            <span>{formatDate(invoice.invoiceDate)}</span> · {formatNumber(invoice.itemCount)} {isRtl ? "صنف" : "items"}
           </p>
 
           <div className="mt-3 flex items-end justify-between border-t border-[#942E3A]/10 pt-2.5 sm:mt-5 sm:pt-4">

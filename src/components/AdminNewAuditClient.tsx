@@ -393,19 +393,23 @@ export default function AdminNewAuditClient({
       <div className="flex flex-col gap-3 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] p-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 flex-col gap-2.5 sm:flex-row sm:items-center">
           <div className="relative flex-1 sm:min-w-[280px] lg:min-w-[440px]">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
+            <Search className={`pointer-events-none absolute ${isRtl ? "right-3.5" : "left-3.5"} top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]`} />
             <input
               type="text"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder={isScopedCategory ? `Search ${categoryName} items to audit...` : "Search product name, SKU, color, or size to audit..."}
-              className="w-full rounded-xl border border-[#942E3A]/15 bg-white py-2.5 pl-10 pr-3 text-xs text-[#942E3A] outline-none transition focus:border-[#942E3A] focus:ring-2 focus:ring-[#D8B46A]/20"
+              placeholder={
+                isScopedCategory
+                  ? (isRtl ? `ابحث في منتجات ${categoryName}...` : `Search ${categoryName} items to audit...`)
+                  : (isRtl ? "ابحث باسم المنتج، كود SKU، اللون، أو المقاس..." : "Search product name, SKU, color, or size to audit...")
+              }
+              className={`w-full rounded-xl border border-[#942E3A]/15 bg-white py-2.5 ${isRtl ? "pr-10 pl-3 text-right" : "pl-10 pr-3 text-left"} text-xs text-[#942E3A] outline-none transition focus:border-[#942E3A] focus:ring-2 focus:ring-[#D8B46A]/20`}
             />
           </div>
           {isScopedCategory ? (
             <div className="flex items-center gap-2 rounded-xl border border-[#D8B46A]/40 bg-white px-3.5 py-2 text-xs font-bold text-[#942E3A] shrink-0">
-              <span className="text-[#6B1F2A]/60">Scope:</span>
-              <span>{categoryName} Only</span>
+              <span className="text-[#6B1F2A]/60">{isRtl ? "النطاق:" : "Scope:"}</span>
+              <span>{isRtl ? `${categoryName} فقط` : `${categoryName} Only`}</span>
             </div>
           ) : (
             <AdminCategorySelect value={selectedCategory} onChange={setSelectedCategory} />
@@ -417,7 +421,7 @@ export default function AdminNewAuditClient({
           className="flex items-center justify-center gap-1.5 rounded-xl border border-[#D8B46A]/40 bg-white px-3 py-2.5 text-xs font-bold text-[#942E3A] transition hover:bg-[#F2DFC0] shrink-0"
         >
           <RotateCcw className="h-3.5 w-3.5 text-[#D8B46A]" />
-          <span>Match All System Counts</span>
+          <span>{isRtl ? "مطابقة جميع كميات النظام" : "Match All System Counts"}</span>
         </button>
       </div>
 
@@ -454,20 +458,24 @@ export default function AdminNewAuditClient({
                       {item.category.toLowerCase() !== "perfumes" && item.color ? `${item.color} · ` : ""}
                       <span className="font-bold">{item.size}</span>
                     </p>
-                    <p className="font-mono text-[10px] text-[#6B1F2A]/50">SKU: {item.sku || "N/A"}</p>
+                    <p className="font-mono text-[10px] text-[#6B1F2A]/50">SKU: {item.sku || (isRtl ? "بدون كود" : "N/A")}</p>
                   </div>
                   <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${isMatch ? "bg-emerald-100 text-emerald-800" : isShortage ? "bg-rose-100 text-rose-800" : "bg-blue-100 text-blue-800"}`}>
-                    {isMatch ? "Match (0)" : isShortage ? `Shortage (${diff})` : `Surplus (+${diff})`}
+                    {isMatch
+                      ? (isRtl ? "مطابق (0)" : "Match (0)")
+                      : isShortage
+                      ? `${isRtl ? "عجز" : "Shortage"} (${formatNumber(diff)})`
+                      : `${isRtl ? "زيادة" : "Surplus"} (+${formatNumber(diff)})`}
                   </span>
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-[#942E3A]/8 bg-[#FFF9EB]/60 p-2.5 text-center text-xs">
                   <div>
-                    <span className="block text-[10px] font-bold uppercase text-[#6B1F2A]/50">System Stock</span>
+                    <span className="block text-[10px] font-bold uppercase text-[#6B1F2A]/50">{isRtl ? "مخزون النظام" : "System Stock"}</span>
                     <span className="font-playfair text-lg font-black text-[#942E3A]">{formatNumber(item.systemStock)}</span>
                   </div>
                   <div>
-                    <span className="block text-[10px] font-bold uppercase text-[#6B1F2A]/50">Physical Actual</span>
+                    <span className="block text-[10px] font-bold uppercase text-[#6B1F2A]/50">{isRtl ? "المحصور الفعلي" : "Physical Actual"}</span>
                     <span className="font-playfair text-lg font-black text-[#942E3A]">{formatNumber(actual)}</span>
                   </div>
                 </div>
@@ -483,9 +491,9 @@ export default function AdminNewAuditClient({
                     <Plus className="h-3.5 w-3.5" />
                   </button>
                   {!isMatch && (
-                    <button type="button" onClick={() => handleMatchSystem(item.variantId, item.systemStock)} className="ml-auto flex items-center gap-1 rounded-xl border border-[#D8B46A]/40 bg-[#FFF9EB] px-2.5 py-1.5 text-[10px] font-bold text-[#942E3A] hover:bg-[#F2DFC0]">
+                    <button type="button" onClick={() => handleMatchSystem(item.variantId, item.systemStock)} className={`${isRtl ? "mr-auto" : "ml-auto"} flex items-center gap-1 rounded-xl border border-[#D8B46A]/40 bg-[#FFF9EB] px-2.5 py-1.5 text-[10px] font-bold text-[#942E3A] hover:bg-[#F2DFC0]`}>
                       <Check className="h-3 w-3 text-[#D8B46A]" />
-                      <span>Reset</span>
+                      <span>{isRtl ? "إعادة ضبط" : "Reset"}</span>
                     </button>
                   )}
                 </div>
@@ -498,19 +506,23 @@ export default function AdminNewAuditClient({
       {filteredItems.length === 0 && (
         <div className="rounded-3xl border border-dashed border-[#942E3A]/20 bg-white p-10 text-center">
           <Package className="mx-auto h-8 w-8 text-[#D8B46A]" />
-          <p className="mt-3 text-sm font-bold text-[#942E3A]">No products found</p>
-          <p className="mt-1 text-xs text-[#6B1F2A]/60">Try clearing the search or choosing another category.</p>
+          <p className="mt-3 text-sm font-bold text-[#942E3A]">{isRtl ? "لم يتم العثور على منتجات" : "No products found"}</p>
+          <p className="mt-1 text-xs text-[#6B1F2A]/60">{isRtl ? "حاول مسح البحث أو اختيار قسم آخر." : "Try clearing the search or choosing another category."}</p>
         </div>
       )}
 
       <div className="sticky bottom-4 z-30 flex items-center justify-between gap-4 rounded-3xl border border-[#D8B46A]/40 bg-[#FFF9EB] p-4 shadow-xl backdrop-blur sm:p-5">
         <div>
-          <span className="block text-xs font-bold text-[#942E3A]">Ready to apply reconciliation?</span>
-          <span className="text-[11px] text-[#6B1F2A]/60">This will record the audit session and update stock for {filteredItems.length} items.</span>
+          <span className="block text-xs font-bold text-[#942E3A]">{isRtl ? "جاهز لتطبيق تسوية الجرد؟" : "Ready to apply reconciliation?"}</span>
+          <span className="text-[11px] text-[#6B1F2A]/60">
+            {isRtl
+              ? `سيتم تسجيل جلسة الجرد وتحديث المخزون لـ ${formatNumber(filteredItems.length)} صنف.`
+              : `This will record the audit session and update stock for ${filteredItems.length} items.`}
+          </span>
         </div>
-        <button type="button" onClick={handleSubmitAudit} disabled={isPending} className="flex items-center gap-2 rounded-2xl bg-[#942E3A] px-6 py-3 text-xs font-bold text-[#FFF9EB] shadow-md transition hover:bg-[#802832] active:scale-95 disabled:opacity-50">
+        <button type="button" onClick={handleSubmitAudit} disabled={isPending} className="flex items-center gap-2 rounded-2xl bg-[#942E3A] px-6 py-3 text-xs font-bold text-[#FFF9EB] shadow-md transition hover:bg-[#802832] active:scale-95 disabled:opacity-50 shrink-0">
           <ClipboardCheck className="h-4 w-4 text-[#D8B46A]" />
-          <span>Finalize &amp; Apply Adjustments</span>
+          <span>{isRtl ? "تأكيد وتطبيق تسوية الجرد" : "Finalize & Apply Adjustments"}</span>
         </button>
       </div>
     </div>

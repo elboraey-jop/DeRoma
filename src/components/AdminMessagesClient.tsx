@@ -280,8 +280,11 @@ export default function AdminMessagesClient({
                 <div className="mt-2 flex items-center justify-between text-[10px] text-stone-400">
                   <span>
                     {new Date(msg.createdAt).toLocaleString(isRtl ? "ar-EG-u-nu-latn" : "en-US", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
                     })}
                   </span>
                 </div>

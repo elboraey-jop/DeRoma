@@ -11,6 +11,7 @@ interface AdminI18nContextType {
   t: (path: string, fallback?: string) => string;
   formatPrice: (amount: number | string) => string;
   formatNumber: (value: number | string) => string;
+  formatDate: (date: Date | string | number | null | undefined, options?: Intl.DateTimeFormatOptions) => string;
 }
 
 const STORAGE_KEY = "deroma_admin_lang";
@@ -1313,6 +1314,21 @@ export function AdminI18nProvider({ children }: { children: React.ReactNode }) {
     return `EGP ${formattedNum}`;
   };
 
+  const formatDate = (
+    date: Date | string | number | null | undefined,
+    options?: Intl.DateTimeFormatOptions,
+  ): string => {
+    if (!date) return "";
+    const d = typeof date === "string" || typeof date === "number" ? new Date(date) : date;
+    if (!d || isNaN(d.getTime())) return "";
+    const defaultOptions: Intl.DateTimeFormatOptions = {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    };
+    return d.toLocaleDateString(lang === "ar" ? "ar-EG-u-nu-latn" : "en-US", options || defaultOptions);
+  };
+
   return (
     <AdminI18nContext.Provider
       value={{
@@ -1323,6 +1339,7 @@ export function AdminI18nProvider({ children }: { children: React.ReactNode }) {
         t,
         formatPrice,
         formatNumber,
+        formatDate,
       }}
     >
       <div suppressHydrationWarning data-admin-i18n-root dir={dir} className={lang === "ar" ? "font-sans-ar text-right" : ""}>
@@ -1349,6 +1366,12 @@ export function useAdminI18n() {
       formatNumber: (val: number | string) => {
         const num = typeof val === "string" ? parseFloat(val) : val;
         return isNaN(num) ? "0" : new Intl.NumberFormat("en-US").format(num);
+      },
+      formatDate: (date: Date | string | number | null | undefined, options?: Intl.DateTimeFormatOptions) => {
+        if (!date) return "";
+        const d = typeof date === "string" || typeof date === "number" ? new Date(date) : date;
+        if (!d || isNaN(d.getTime())) return "";
+        return d.toLocaleDateString("ar-EG-u-nu-latn", options || { day: "numeric", month: "short", year: "numeric" });
       },
     };
   }

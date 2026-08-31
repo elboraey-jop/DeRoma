@@ -203,16 +203,17 @@ function AdminFilterDropdown({
     Active: "نشط",
     Archived: "مؤرشف",
     "All Statuses": "كل الحالات",
+    "All Statuss": "كل الحالات",
     "All Brands": "كل العلامات التجارية",
     "All Sizes": "كل المقاسات",
     "All Colors": "كل الألوان",
     "All Types": "كل الأنواع",
   };
-  const rawSelectedLabel = value === "all" ? `All ${label}s` : options.find((opt) => opt.id.toLowerCase() === value.toLowerCase())?.label || value;
+  const rawSelectedLabel = value === "all" ? (label.toLowerCase() === "status" ? "All Statuses" : `All ${label}s`) : options.find((opt) => opt.id.toLowerCase() === value.toLowerCase())?.label || value;
   const selectedLabel = isRtl ? labelMap[rawSelectedLabel] || rawSelectedLabel : rawSelectedLabel;
 
   return (
-    <div ref={ref} className="relative shrink-0 text-left">
+    <div ref={ref} className={`relative shrink-0 ${isRtl ? "text-right" : "text-left"}`}>
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
@@ -1052,10 +1053,10 @@ export default function AdminInventoryClient({
         <div className="mt-4 hidden sm:block overflow-x-auto">
           {viewMode === "variants" ? (
             /* Table 1: By Variant View */
-            <table className="w-full min-w-[850px] text-left text-xs">
+            <table className={`w-full min-w-[850px] ${isRtl ? "text-right" : "text-left"} text-xs`}>
               <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
                 <tr>
-                  <th className="w-10 pb-3 pl-2">
+                  <th className="w-10 pb-3 px-3">
                     <button
                       type="button"
                       onClick={toggleSelectAllVariants}
@@ -1068,13 +1069,13 @@ export default function AdminInventoryClient({
                       )}
                     </button>
                   </th>
-                  <th className="w-[30%] pb-3 px-3">Product</th>
-                  <th className="w-[10%] pb-3 px-3">SKU</th>
-                  <th className="w-[14%] pb-3 px-3">Variant</th>
-                  <th className="w-[12%] pb-3 px-3">Category</th>
-                  <th className="w-[15%] pb-3 px-3">Product Status</th>
-                  <th className="w-[13%] pb-3 px-3">Stock Status</th>
-                  <th className="w-[10%] pb-3 px-3 text-right pr-2">Stock Quantity</th>
+                  <th className={`w-[28%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "المنتج" : "Product"}</th>
+                  <th className={`w-[12%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "رمز المنتج (SKU)" : "SKU"}</th>
+                  <th className={`w-[14%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "المتغير / المقاس" : "Variant"}</th>
+                  <th className={`w-[12%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "القسم" : "Category"}</th>
+                  <th className={`w-[15%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "حالة المنتج" : "Product Status"}</th>
+                  <th className={`w-[13%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "حالة المخزون" : "Stock Status"}</th>
+                  <th className={`w-[10%] pb-3 px-3 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "كمية المخزون" : "Stock Quantity"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#942E3A]/8">
@@ -1091,7 +1092,7 @@ export default function AdminInventoryClient({
                         isSelected ? "bg-[#FFF9EB]" : "hover:bg-[#FFF9EB]/50"
                       }`}
                     >
-                      <td className="py-3.5 pl-2">
+                      <td className="py-3.5 px-3">
                         <button
                           type="button"
                           onClick={() => toggleSelectRow(row.variantId)}
@@ -1144,7 +1145,7 @@ export default function AdminInventoryClient({
                         {row.category.toLowerCase() !== "perfumes" && row.color ? `${row.color} · ` : ""}
                         <span className="font-bold">{row.size}</span>
                         {row.subcategory && row.subcategory !== "General" && (
-                          <span className="ml-1.5 text-[10px] text-[#6B1F2A]/50">
+                          <span className={`${isRtl ? "mr-1.5" : "ml-1.5"} text-[10px] text-[#6B1F2A]/50`}>
                             ({row.subcategory})
                           </span>
                         )}
@@ -1165,7 +1166,7 @@ export default function AdminInventoryClient({
                             handleToggleProductStatus(row.productId, row.productStatus)
                           }
                           disabled={isPending}
-                          title="Click to toggle product status"
+                          title={isRtl ? "انقر لتغيير حالة المنتج" : "Click to toggle product status"}
                           className={`group relative inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all shadow-sm hover:shadow-md active:scale-95 border ${
                             row.productStatus === "active"
                               ? "border-emerald-600/40 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-600"
@@ -1180,7 +1181,7 @@ export default function AdminInventoryClient({
                             }`}
                           />
                           <span className="capitalize">
-                            {row.productStatus === "active" ? "Active" : "Archived"}
+                            {row.productStatus === "active" ? (isRtl ? "مفعّل" : "Active") : (isRtl ? "مؤرشف" : "Archived")}
                           </span>
                           <RefreshCw className="h-3 w-3 opacity-40 group-hover:opacity-100 transition-transform group-hover:rotate-180 text-current ml-0.5" />
                         </button>
@@ -1206,14 +1207,14 @@ export default function AdminInventoryClient({
                                 : "bg-emerald-600"
                             }`}
                           />
-                          {isOut ? "Out of stock" : isLow ? "Low stock" : "Healthy"}{" "}
-                          ({row.stock})
+                          {isOut ? (isRtl ? "نفد المخزون" : "Out of stock") : isLow ? (isRtl ? "مخزون منخفض" : "Low stock") : (isRtl ? "متوفر" : "Healthy")}{" "}
+                          ({formatNumber(row.stock)})
                         </span>
                       </td>
 
                       {/* Clean Stock Quantity Column (Display only) */}
-                      <td className="py-3.5 px-3 text-right font-mono font-bold text-[#942E3A] text-sm pr-2">
-                        {row.stock.toLocaleString("en-US")} <span className="text-[10px] font-sans font-medium text-[#6B1F2A]/50">units</span>
+                      <td className={`py-3.5 px-3 ${isRtl ? "text-left" : "text-right"} font-mono font-bold text-[#942E3A] text-sm`}>
+                        {formatNumber(row.stock)} <span className="text-[10px] font-sans font-medium text-[#6B1F2A]/50">{isRtl ? "قطعة" : "units"}</span>
                       </td>
                     </tr>
                   );
@@ -1222,10 +1223,10 @@ export default function AdminInventoryClient({
             </table>
           ) : (
             /* Table 2: By Product View */
-            <table className="w-full min-w-[850px] text-left text-xs">
+            <table className={`w-full min-w-[850px] ${isRtl ? "text-right" : "text-left"} text-xs`}>
               <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
                 <tr>
-                  <th className="w-10 pb-3 pl-2">
+                  <th className="w-10 pb-3 px-3">
                     <button
                       type="button"
                       onClick={toggleSelectAllProducts}
@@ -1238,11 +1239,11 @@ export default function AdminInventoryClient({
                       )}
                     </button>
                   </th>
-                  <th className="w-[32%] pb-3 px-3">Product</th>
-                  <th className="w-[20%] pb-3 px-3">Variants Breakdown</th>
-                  <th className="w-[14%] pb-3 px-3">Category</th>
-                  <th className="w-[15%] pb-3 px-3">Product Status</th>
-                  <th className="w-[12%] pb-3 px-3 text-right pr-2">Total Units</th>
+                  <th className={`w-[32%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "المنتج" : "Product"}</th>
+                  <th className={`w-[22%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "تفاصيل المقاسات والمتغيرات" : "Variants Breakdown"}</th>
+                  <th className={`w-[14%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "القسم" : "Category"}</th>
+                  <th className={`w-[15%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "حالة المنتج" : "Product Status"}</th>
+                  <th className={`w-[12%] pb-3 px-3 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "إجمالي القطع" : "Total Units"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#942E3A]/8">
@@ -1258,7 +1259,7 @@ export default function AdminInventoryClient({
                         isSelected ? "bg-[#FFF9EB]" : "hover:bg-[#FFF9EB]/50"
                       }`}
                     >
-                      <td className="py-3.5 pl-2">
+                      <td className="py-3.5 px-3">
                         <button
                           type="button"
                           onClick={() => toggleSelectProduct(pRow)}
@@ -1305,10 +1306,10 @@ export default function AdminInventoryClient({
                       <td className="py-3.5 px-3">
                         <div className="space-y-0.5">
                           <span className="font-bold text-[#942E3A] text-xs">
-                            {pRow.variantsCount} variants
+                            {formatNumber(pRow.variantsCount)} {isRtl ? "متغيرات" : "variants"}
                           </span>
                           <div className="text-[10px] text-[#6B1F2A]/70 truncate max-w-[220px]">
-                            {pRow.sizesList.length > 0 && `Sizes: ${pRow.sizesList.join(", ")}`}
+                            {pRow.sizesList.length > 0 && `${isRtl ? "المقاسات: " : "Sizes: "}${pRow.sizesList.join("، ")}`}
                           </div>
                         </div>
                       </td>
@@ -1328,7 +1329,7 @@ export default function AdminInventoryClient({
                             handleToggleProductStatus(pRow.productId, pRow.productStatus)
                           }
                           disabled={isPending}
-                          title="Click to toggle product status"
+                          title={isRtl ? "انقر لتغيير حالة المنتج" : "Click to toggle product status"}
                           className={`group relative inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all shadow-sm hover:shadow-md active:scale-95 border ${
                             pRow.productStatus === "active"
                               ? "border-emerald-600/40 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-600"
@@ -1343,17 +1344,17 @@ export default function AdminInventoryClient({
                             }`}
                           />
                           <span className="capitalize">
-                            {pRow.productStatus === "active" ? "Active" : "Archived"}
+                            {pRow.productStatus === "active" ? (isRtl ? "مفعّل" : "Active") : (isRtl ? "مؤرشف" : "Archived")}
                           </span>
                           <RefreshCw className="h-3 w-3 opacity-40 group-hover:opacity-100 transition-transform group-hover:rotate-180 text-current ml-0.5" />
                         </button>
                       </td>
 
                       {/* Total Stock Quantity */}
-                      <td className="py-3.5 px-3 text-right font-mono font-bold text-[#942E3A] text-sm pr-2">
-                        {pRow.totalStock.toLocaleString("en-US")}{" "}
+                      <td className={`py-3.5 px-3 ${isRtl ? "text-left" : "text-right"} font-mono font-bold text-[#942E3A] text-sm`}>
+                        {formatNumber(pRow.totalStock)}{" "}
                         <span className="text-[10px] font-sans font-medium text-[#6B1F2A]/50">
-                          units
+                          {isRtl ? "قطعة" : "units"}
                         </span>
                       </td>
                     </tr>
@@ -1377,10 +1378,12 @@ export default function AdminInventoryClient({
               ) : (
                 <Square className="h-4 w-4 text-[#942E3A]/40" />
               )}
-              <span>Select All</span>
+              <span>{isRtl ? "تحديد الكل" : "Select All"}</span>
             </button>
             <span>
-              {viewMode === "variants" ? `${filteredRows.length} items` : `${productGroupRows.length} items`}
+              {viewMode === "variants"
+                ? `${formatNumber(filteredRows.length)} ${isRtl ? "عنصر" : "items"}`
+                : `${formatNumber(productGroupRows.length)} ${isRtl ? "منتج" : "products"}`}
             </span>
           </div>
 
@@ -1423,7 +1426,7 @@ export default function AdminInventoryClient({
                         }`}
                       >
                         <span className={`h-1.5 w-1.5 rounded-full ${row.productStatus === "active" ? "bg-emerald-600" : "bg-gray-500"}`} />
-                        <span className="capitalize">{row.productStatus}</span>
+                        <span className="capitalize">{row.productStatus === "active" ? (isRtl ? "مفعّل" : "Active") : (isRtl ? "مؤرشف" : "Archived")}</span>
                       </button>
                     </div>
                     <span className="font-mono text-[10px] font-semibold text-[#6B1F2A]/60 truncate">
@@ -1460,7 +1463,7 @@ export default function AdminInventoryClient({
                         </span>
                       </div>
                       <p className="text-[11px] text-[#6B1F2A]/80 font-medium">
-                        Variant: {row.category.toLowerCase() !== "perfumes" && row.color ? `${row.color} · ` : ""}
+                        {isRtl ? "المتغير: " : "Variant: "}{row.category.toLowerCase() !== "perfumes" && row.color ? `${row.color} · ` : ""}
                         <span className="font-bold">{row.size}</span>
                         {row.subcategory && row.subcategory !== "General" && ` (${row.subcategory})`}
                       </p>
@@ -1479,11 +1482,11 @@ export default function AdminInventoryClient({
                       }`}
                     >
                       <span className={`h-1.5 w-1.5 rounded-full ${isOut ? "bg-rose-600" : isLow ? "bg-amber-600" : "bg-emerald-600"}`} />
-                      {isOut ? "Out of stock" : isLow ? "Low stock" : "Healthy"}
+                      {isOut ? (isRtl ? "نفد المخزون" : "Out of stock") : isLow ? (isRtl ? "مخزون منخفض" : "Low stock") : (isRtl ? "متوفر" : "Healthy")}
                     </span>
 
                     <span className="font-mono font-bold text-[#942E3A]">
-                      {row.stock.toLocaleString("en-US")} <span className="font-sans text-[10px] text-[#6B1F2A]/50">units</span>
+                      {formatNumber(row.stock)} <span className="font-sans text-[10px] text-[#6B1F2A]/50">{isRtl ? "قطعة" : "units"}</span>
                     </span>
                   </div>
                 </div>
@@ -1525,7 +1528,7 @@ export default function AdminInventoryClient({
                         }`}
                       >
                         <span className={`h-1.5 w-1.5 rounded-full ${pRow.productStatus === "active" ? "bg-emerald-600" : "bg-gray-500"}`} />
-                        <span className="capitalize">{pRow.productStatus}</span>
+                        <span className="capitalize">{pRow.productStatus === "active" ? (isRtl ? "مفعّل" : "Active") : (isRtl ? "مؤرشف" : "Archived")}</span>
                       </button>
                     </div>
 
@@ -1558,8 +1561,8 @@ export default function AdminInventoryClient({
                         {formatPrice(pRow.price)}
                       </span>
                       <p className="text-[10px] text-[#6B1F2A]/70 truncate">
-                        <span className="font-bold">{pRow.variantsCount} variants</span>
-                        {pRow.sizesList.length > 0 && ` (${pRow.sizesList.join(", ")})`}
+                        <span className="font-bold">{formatNumber(pRow.variantsCount)} {isRtl ? "متغيرات" : "variants"}</span>
+                        {pRow.sizesList.length > 0 && ` (${pRow.sizesList.join("، ")})`}
                       </p>
                     </div>
                   </div>
@@ -1567,10 +1570,10 @@ export default function AdminInventoryClient({
                   {/* Bottom Row: Total Units */}
                   <div className="flex items-center justify-between gap-2 border-t border-[#942E3A]/10 pt-2 text-[11px]">
                     <span className="text-[10px] font-bold text-[#6B1F2A]/50 uppercase tracking-wide">
-                      Total Stock
+                      {isRtl ? "إجمالي المخزون" : "Total Stock"}
                     </span>
                     <span className="font-mono font-bold text-[#942E3A]">
-                      {pRow.totalStock.toLocaleString("en-US")} <span className="font-sans text-[10px] text-[#6B1F2A]/50">units</span>
+                      {formatNumber(pRow.totalStock)} <span className="font-sans text-[10px] text-[#6B1F2A]/50">{isRtl ? "قطعة" : "units"}</span>
                     </span>
                   </div>
                 </div>

@@ -318,9 +318,13 @@ export default function AdminDailyLogDatePicker({
     }
   };
 
-  const monthNames = [
+  const monthNamesEn = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
+  ];
+  const monthNamesAr = [
+    "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+    "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
   ];
 
   const todayStr = formatDateForInput(new Date());
@@ -348,7 +352,7 @@ export default function AdminDailyLogDatePicker({
       {/* Preset Dropdown Menu */}
       {isDropdownOpen && (
         <div className={`absolute ${isRtl ? "left-0 right-auto" : "right-0 left-auto"} top-[calc(100%+8px)] z-[100] w-56 overflow-hidden rounded-2xl border border-[#D8B46A]/35 bg-[#FFF9EB] p-2 shadow-[0_16px_36px_rgba(67,25,31,0.18)] animate-in fade-in zoom-in-95`}>
-          <div className="px-3 py-2 border-b border-[#942E3A]/10">
+          <div className={`px-3 py-2 border-b border-[#942E3A]/10 ${isRtl ? "text-right" : "text-left"}`}>
             <p className="text-[10px] font-bold uppercase tracking-wider text-[#D8B46A]">
               {isRtl ? "تحديد النطاق الزمني" : "Filter Date Range"}
             </p>
@@ -361,7 +365,7 @@ export default function AdminDailyLogDatePicker({
                   key={option.id}
                   type="button"
                   onClick={() => handleSelectPreset(option.id)}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-start transition cursor-pointer ${
+                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 ${isRtl ? "text-right" : "text-left"} transition cursor-pointer ${
                     isSelected
                       ? "bg-[#942E3A] text-[#FFF9EB] font-bold"
                       : "text-[#6B1F2A] hover:bg-[#F2DFC0]/60 hover:text-[#942E3A]"
@@ -378,7 +382,7 @@ export default function AdminDailyLogDatePicker({
 
       {/* Custom Date Range Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+        <div dir={isRtl ? "rtl" : "ltr"} className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-[#8B7CC7]/45 backdrop-blur-[2px] transition-opacity"
@@ -386,7 +390,7 @@ export default function AdminDailyLogDatePicker({
           />
 
           {/* Modal Card */}
-          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border border-[#D8B46A]/30 bg-[#FFF9EB] p-5 shadow-[0_25px_60px_rgba(44,16,24,0.35)] sm:p-7">
+          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border border-[#D8B46A]/30 bg-[#FFF9EB] p-5 shadow-[0_25px_60px_rgba(44,16,24,0.35)] sm:p-7 text-start">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-[#942E3A]/10 pb-4">
               <div className="flex items-center gap-2.5">
@@ -395,7 +399,7 @@ export default function AdminDailyLogDatePicker({
                 </div>
                 <div>
                   <h3 className="font-playfair text-lg font-bold text-[#942E3A]">
-                    Select Date Range
+                    {isRtl ? "تحديد النطاق الزمني" : "Select Date Range"}
                   </h3>
                 </div>
               </div>
@@ -414,17 +418,17 @@ export default function AdminDailyLogDatePicker({
               <button
                 type="button"
                 onClick={() => setActiveInput("start")}
-                className={`flex flex-col items-start rounded-2xl border p-3 text-left transition ${
+                className={`flex flex-col items-start rounded-2xl border p-3 ${isRtl ? "text-right" : "text-left"} transition ${
                   activeInput === "start"
                     ? "border-[#942E3A] bg-white ring-2 ring-[#D8B46A]/40 shadow-sm"
                     : "border-[#942E3A]/15 bg-white/70 hover:bg-white"
                 }`}
               >
                 <span className="text-[9px] font-bold uppercase tracking-wider text-[#D8B46A]">
-                  Start Date
+                  {isRtl ? "تاريخ البداية" : "Start Date"}
                 </span>
                 <span className="mt-1 text-xs font-bold text-[#942E3A]">
-                  {tempStartDate ? formatDisplayDate(tempStartDate) : "Pick start date"}
+                  {tempStartDate ? formatDisplayDate(tempStartDate) : (isRtl ? "اختر البداية" : "Pick start date")}
                 </span>
               </button>
 
@@ -432,17 +436,17 @@ export default function AdminDailyLogDatePicker({
               <button
                 type="button"
                 onClick={() => setActiveInput("end")}
-                className={`flex flex-col items-start rounded-2xl border p-3 text-left transition ${
+                className={`flex flex-col items-start rounded-2xl border p-3 ${isRtl ? "text-right" : "text-left"} transition ${
                   activeInput === "end"
                     ? "border-[#942E3A] bg-white ring-2 ring-[#D8B46A]/40 shadow-sm"
                     : "border-[#942E3A]/15 bg-white/70 hover:bg-white"
                 }`}
               >
                 <span className="text-[9px] font-bold uppercase tracking-wider text-[#D8B46A]">
-                  End Date
+                  {isRtl ? "تاريخ النهاية" : "End Date"}
                 </span>
                 <span className="mt-1 text-xs font-bold text-[#942E3A]">
-                  {tempEndDate ? formatDisplayDate(tempEndDate) : "Pick end date"}
+                  {tempEndDate ? formatDisplayDate(tempEndDate) : (isRtl ? "اختر النهاية" : "Pick end date")}
                 </span>
               </button>
             </div>
@@ -456,29 +460,29 @@ export default function AdminDailyLogDatePicker({
                   onClick={handlePrevMonth}
                   className="rounded-lg p-1 text-[#942E3A] hover:bg-[#F2DFC0]/60 transition"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className={`h-4 w-4 ${isRtl ? "rotate-180" : ""}`} />
                 </button>
                 <span className="font-playfair text-sm font-bold text-[#942E3A]">
-                  {monthNames[viewMonth]} {viewYear}
+                  {isRtl ? `${monthNamesAr[viewMonth]} ${viewYear}` : `${monthNamesEn[viewMonth]} ${viewYear}`}
                 </span>
                 <button
                   type="button"
                   onClick={handleNextMonth}
                   className="rounded-lg p-1 text-[#942E3A] hover:bg-[#F2DFC0]/60 transition"
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className={`h-4 w-4 ${isRtl ? "rotate-180" : ""}`} />
                 </button>
               </div>
 
               {/* Days of week header */}
               <div className="mt-3 grid grid-cols-7 text-center text-[10px] font-bold uppercase tracking-wider text-[#D8B46A]">
-                <span>Su</span>
-                <span>Mo</span>
-                <span>Tu</span>
-                <span>We</span>
-                <span>Th</span>
-                <span>Fr</span>
-                <span>Sa</span>
+                <span>{isRtl ? "أحد" : "Su"}</span>
+                <span>{isRtl ? "إثن" : "Mo"}</span>
+                <span>{isRtl ? "ثلا" : "Tu"}</span>
+                <span>{isRtl ? "أرب" : "We"}</span>
+                <span>{isRtl ? "خمي" : "Th"}</span>
+                <span>{isRtl ? "جمع" : "Fr"}</span>
+                <span>{isRtl ? "سبت" : "Sa"}</span>
               </div>
 
               {/* Day Grid */}
@@ -533,7 +537,7 @@ export default function AdminDailyLogDatePicker({
                 }}
                 className="rounded-lg bg-[#F2DFC0]/50 px-2.5 py-1 text-[10px] font-bold text-[#942E3A] hover:bg-[#F2DFC0]"
               >
-                Today
+                {isRtl ? "اليوم" : "Today"}
               </button>
               <button
                 type="button"
@@ -546,7 +550,7 @@ export default function AdminDailyLogDatePicker({
                 }}
                 className="rounded-lg bg-[#F2DFC0]/50 px-2.5 py-1 text-[10px] font-bold text-[#942E3A] hover:bg-[#F2DFC0]"
               >
-                Last 7 Days
+                {isRtl ? "آخر 7 أيام" : "Last 7 Days"}
               </button>
               <button
                 type="button"
@@ -559,7 +563,7 @@ export default function AdminDailyLogDatePicker({
                 }}
                 className="rounded-lg bg-[#F2DFC0]/50 px-2.5 py-1 text-[10px] font-bold text-[#942E3A] hover:bg-[#F2DFC0]"
               >
-                Last 30 Days
+                {isRtl ? "آخر 30 يوم" : "Last 30 Days"}
               </button>
             </div>
 
@@ -570,15 +574,15 @@ export default function AdminDailyLogDatePicker({
                 onClick={() => setIsModalOpen(false)}
                 className="rounded-xl px-4 py-2.5 text-xs font-semibold text-[#6B1F2A]/70 hover:bg-[#942E3A]/5 hover:text-[#942E3A] transition"
               >
-                Cancel
+                {isRtl ? "إلغاء" : "Cancel"}
               </button>
               <button
                 type="button"
                 onClick={handleApplyCustomRange}
                 className="flex items-center gap-2 rounded-xl bg-[#942E3A] px-5 py-2.5 text-xs font-bold text-[#FFF9EB] shadow-md transition hover:bg-[#802832] active:scale-95"
               >
-                <span>Apply Range</span>
-                <ArrowRight className="h-3.5 w-3.5 text-[#D8B46A]" />
+                <span>{isRtl ? "تطبيق النطاق" : "Apply Range"}</span>
+                <ArrowRight className={`h-3.5 w-3.5 text-[#D8B46A] ${isRtl ? "rotate-180" : ""}`} />
               </button>
             </div>
           </div>

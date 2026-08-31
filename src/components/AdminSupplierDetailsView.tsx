@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Building2, FileText, Mail, MapPin, Phone, Package, Plus } from "lucide-react";
@@ -35,7 +35,7 @@ export default function AdminSupplierDetailsView({
   totalPurchases,
   totalUnits,
 }: SupplierDetailsProps) {
-  const { lang, formatPrice, formatNumber } = useAdminI18n();
+  const { lang, formatPrice, formatNumber, formatDate } = useAdminI18n();
   const isRtl = lang === "ar";
 
   return (
@@ -160,12 +160,7 @@ export default function AdminSupplierDetailsView({
                     {invoice.invoiceNumber}
                   </p>
                   <p className="mt-0.5 text-[10px] text-[#6B1F2A]/60">
-                    <span dir="ltr">
-                      {new Date(invoice.invoiceDate).toLocaleDateString(
-                        isRtl ? "ar-EG-u-nu-latn" : "en-US",
-                        { dateStyle: "medium" },
-                      )}
-                    </span>{" "}
+                    <span>{formatDate(invoice.invoiceDate)}</span>{" "}
                     · {formatNumber(invoice.itemCount)} {isRtl ? "منتج" : "products"}
                   </p>
                 </div>

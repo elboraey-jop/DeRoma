@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Banknote, Check, ChevronDown, CircleDollarSign, ClipboardCheck, Instagram,
   MapPin, MessageCircle, PackagePlus, Phone, Plus, ReceiptText, Search, ShoppingBag,
-  Trash2, UserRound, Wallet,
+  Trash2, UserCheck, UserPlus, UserRound, Wallet,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { CENTERS_BY_GOVERNORATE, GOVERNORATES } from "@/lib/locations";
@@ -127,10 +127,29 @@ export default function AdminManualOrderForm({
         <div className="space-y-5">
           <section id="manual-step-1" className={`${step === 1 ? "" : "hidden md:block"} manual-order-card scroll-mt-5`}>
             <SectionHeading step="01" title={isRtl ? "بيانات العميل والتوصيل" : "Customer & delivery"} icon={UserRound} subtitle={isRtl ? "تسجيل أرقام التواصل وعنوان التسليم التفصيلي." : "Capture contact details and the exact delivery destination."} />
-            <div className="mb-5 grid grid-cols-2 rounded-xl border border-[#942E3A]/10 bg-[#FFF9EB]/70 p-1">
+            <div className="mb-5 grid grid-cols-2 gap-1.5 rounded-2xl border border-[#942E3A]/15 bg-[#FFF9EB]/70 p-1.5">
               {(["new", "existing"] as const).map((mode) => (
-                <button key={mode} type="button" onClick={() => setCustomerMode(mode)} className={`rounded-lg px-3 py-2 text-[11px] font-bold transition ${customerMode === mode ? "bg-white text-[#942E3A] shadow-xs" : "text-[#6B1F2A]/50"}`}>
-                  {mode === "new" ? (isRtl ? "عميل جديد" : "New customer") : (isRtl ? "عميل مسجل سابقاً" : "Returning customer")}
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setCustomerMode(mode)}
+                  className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold transition-all duration-200 ${
+                    customerMode === mode
+                      ? "bg-[#942E3A] text-[#FFF9EB] shadow-sm"
+                      : "text-[#6B1F2A]/60 hover:bg-white/60 hover:text-[#942E3A]"
+                  }`}
+                >
+                  {mode === "new" ? (
+                    <>
+                      <UserPlus className={`h-4 w-4 ${customerMode === mode ? "text-[#D8B46A]" : "text-[#942E3A]/60"}`} />
+                      <span>{isRtl ? "عميل جديد" : "New customer"}</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserCheck className={`h-4 w-4 ${customerMode === mode ? "text-[#D8B46A]" : "text-[#942E3A]/60"}`} />
+                      <span>{isRtl ? "عميل مسجل سابقاً" : "Returning customer"}</span>
+                    </>
+                  )}
                 </button>
               ))}
             </div>
