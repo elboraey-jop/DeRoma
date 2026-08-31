@@ -15,6 +15,7 @@ import {
   AdminCatalogProductPicker,
   AdminSupplierPicker,
 } from "@/components/AdminProcurementPickers";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 type ProductVariant = {
   id: string;
@@ -45,6 +46,8 @@ export default function AdminAddProductModal({
   products: Product[];
   suppliers: { id: string; name: string }[];
 }) {
+  const { lang, formatNumber } = useAdminI18n();
+  const isRtl = lang === "ar";
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"choice" | "batch">("choice");
   const [productId, setProductId] = useState("");
@@ -172,6 +175,7 @@ export default function AdminAddProductModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-[#8B7CC7]/45 p-4 backdrop-blur-[2px]"
+      dir={isRtl ? "rtl" : "ltr"}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) close();
       }}
@@ -189,20 +193,20 @@ export default function AdminAddProductModal({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
-              Catalog intake
+              {isRtl ? "إدخال المخزون" : "Catalog intake"}
             </p>
             <h2 className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
-              Add product stock
+              {isRtl ? "إضافة مخزون للمنتج" : "Add product stock"}
             </h2>
             <p className="mt-1 text-xs text-[#6B1F2A]/65">
-              Receive stock using the same size and volume logic as the product
-              editor.
+              {isRtl ? "استلام مخزون جديد للمقاسات والأحجام بنفس منطق محرر المنتجات." : "Receive stock using the same size and volume logic as the product editor."}
             </p>
           </div>
           <button
             type="button"
             onClick={close}
             className="rounded-full p-2 text-[#942E3A] hover:bg-[#FFF9EB]"
+            aria-label={isRtl ? "إغلاق" : "Close"}
           >
             <X className="h-5 w-5" />
           </button>
@@ -212,31 +216,31 @@ export default function AdminAddProductModal({
             <Link
               href="/admin/products/new?fromInvoice=1"
               onClick={close}
-              className="group rounded-2xl border border-[#942E3A]/12 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[#D8B46A]"
+              className={`group rounded-2xl border border-[#942E3A]/12 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[#D8B46A] ${isRtl ? "text-right" : "text-left"}`}
             >
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#942E3A] text-[#D8B46A]">
                 <FilePlus2 className="h-5 w-5" />
               </div>
               <h3 className="mt-5 font-playfair text-xl font-bold text-[#942E3A]">
-                New product
+                {isRtl ? "منتج جديد" : "New product"}
               </h3>
               <p className="mt-2 text-xs leading-5 text-[#6B1F2A]/65">
-                Create the complete product, variants, pricing and stock.
+                {isRtl ? "إنشاء المنتج بالكامل، الموديلات، التسعير والمخزون." : "Create the complete product, variants, pricing and stock."}
               </p>
             </Link>
             <button
               type="button"
               onClick={() => setMode("batch")}
-              className="group rounded-2xl border border-[#D8B46A]/50 bg-[#fff7df] p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#942E3A]"
+              className={`group rounded-2xl border border-[#D8B46A]/50 bg-[#fff7df] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[#942E3A] ${isRtl ? "text-right" : "text-left"}`}
             >
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#942E3A]">
                 <Boxes className="h-5 w-5" />
               </div>
               <h3 className="mt-5 font-playfair text-xl font-bold text-[#942E3A]">
-                New batch
+                {isRtl ? "دفعة جديدة" : "New batch"}
               </h3>
               <p className="mt-2 text-xs leading-5 text-[#6B1F2A]/65">
-                Add stock to an existing product by size or volume.
+                {isRtl ? "إضافة مخزون لمنتج موجود مسبقاً بالمقاس أو الحجم." : "Add stock to an existing product by size or volume."}
               </p>
             </button>
           </div>
@@ -279,13 +283,14 @@ export default function AdminAddProductModal({
                 type="button"
                 onClick={() => setMode("choice")}
                 className="rounded-xl border border-[#942E3A]/15 p-2 text-[#942E3A]"
+                aria-label={isRtl ? "رجوع" : "Back"}
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className={`h-4 w-4 ${isRtl ? "rotate-180" : ""}`} />
               </button>
-              <p className="text-xs text-[#6B1F2A]/65">Batch details</p>
+              <p className="text-xs text-[#6B1F2A]/65">{isRtl ? "تفاصيل الدفعة" : "Batch details"}</p>
             </div>
             <label>
-              <span className="field-label">Existing product *</span>
+              <span className="field-label">{isRtl ? "المنتج الحالي *" : "Existing product *"}</span>
               <AdminCatalogProductPicker
                 products={products.map((product) => ({
                   id: product.id,
@@ -304,17 +309,17 @@ export default function AdminAddProductModal({
                     <div>
                       <p className="step-kicker">
                         {isShoes
-                          ? "Size matrix"
+                          ? (isRtl ? "جدول المقاسات" : "Size matrix")
                           : isPerfume
-                            ? "Volume matrix"
-                            : "Stock matrix"}
+                            ? (isRtl ? "جدول الأحجام" : "Volume matrix")
+                            : (isRtl ? "جدول المخزون" : "Stock matrix")}
                       </p>
                       <h3 className="mt-1 font-playfair text-xl font-bold text-[#942E3A]">
-                        Select what this batch contains
+                        {isRtl ? "حدد ما تحتويه هذه الدفعة" : "Select what this batch contains"}
                       </h3>
                     </div>
                     <span className="text-xs font-bold text-[#6B1F2A]/55">
-                      {totalQuantity} total units
+                      {formatNumber(totalQuantity)} {isRtl ? "إجمالي القطع" : "total units"}
                     </span>
                   </div>
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -344,17 +349,17 @@ export default function AdminAddProductModal({
                             {isShoes
                               ? `EU ${option.size}`
                               : !isPerfume
-                                ? "Total stock"
+                                ? (isRtl ? "إجمالي المخزون" : "Total stock")
                                 : option.size}
                           </span>
                           <span className="ml-auto text-[10px] font-bold uppercase tracking-wide text-[#D8B46A]">
-                            {enabled[option.key] ? "Included" : "Off"}
+                            {enabled[option.key] ? (isRtl ? "مضمن" : "Included") : (isRtl ? "مستبعد" : "Off")}
                           </span>
                         </label>
                         {enabled[option.key] && (
                           <>
                             <label className="mt-3 block">
-                              <span className="field-label">Quantity</span>
+                              <span className="field-label">{isRtl ? "الكمية" : "Quantity"}</span>
                               <input
                                 type="number"
                                 min="0"
@@ -365,14 +370,14 @@ export default function AdminAddProductModal({
                                     [option.key]: event.target.value,
                                   }))
                                 }
-                                className="admin-input"
+                                className="admin-input text-right"
                                 placeholder="0"
                               />
                             </label>
                             {isPerfume && (
                               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                                 <label>
-                                  <span className="field-label">Wholesale</span>
+                                  <span className="field-label">{isRtl ? "سعر الجملة" : "Wholesale"}</span>
                                   <input
                                     type="number"
                                     min="0"
@@ -393,11 +398,11 @@ export default function AdminAddProductModal({
                                         },
                                       }))
                                     }
-                                    className="admin-input"
+                                    className="admin-input text-right"
                                   />
                                 </label>
                                 <label>
-                                  <span className="field-label">Selling</span>
+                                  <span className="field-label">{isRtl ? "سعر البيع" : "Selling"}</span>
                                   <input
                                     type="number"
                                     min="0"
@@ -417,7 +422,7 @@ export default function AdminAddProductModal({
                                         },
                                       }))
                                     }
-                                    className="admin-input"
+                                    className="admin-input text-right"
                                   />
                                 </label>
                               </div>
@@ -429,7 +434,7 @@ export default function AdminAddProductModal({
                   </div>
                 </div>
                 <div>
-                  <span className="field-label">Supplier *</span>
+                  <span className="field-label">{isRtl ? "المورد *" : "Supplier *"}</span>
                   <AdminSupplierPicker
                     suppliers={suppliers}
                     value={supplierId}
@@ -443,7 +448,7 @@ export default function AdminAddProductModal({
                     <input
                       name="supplierName"
                       required
-                      placeholder="New supplier name"
+                      placeholder={isRtl ? "اسم المورد الجديد" : "New supplier name"}
                       value={supplierName}
                       onChange={(event) => setSupplierName(event.target.value)}
                       className="admin-input mt-3"
@@ -453,19 +458,23 @@ export default function AdminAddProductModal({
                 {!isPerfume && (
                   <div className="grid gap-3 sm:grid-cols-2">
                     <PriceField
-                      label="Wholesale price / unit"
+                      label={isRtl ? "سعر الشراء / للقطعة" : "Wholesale price / unit"}
+                      isWholesale
                       value={wholesale}
                       onChange={setWholesale}
                       same={sameWholesale}
                       onSameChange={setSameWholesale}
                       disabled={!wholesale}
+                      isRtl={isRtl}
                     />
                     <PriceField
-                      label="Selling price / unit"
+                      label={isRtl ? "سعر البيع / للقطعة" : "Selling price / unit"}
+                      isWholesale={false}
                       value={retail}
                       onChange={setRetail}
                       same={sameRetail}
                       onSameChange={setSameRetail}
+                      isRtl={isRtl}
                     />
                   </div>
                 )}
@@ -477,7 +486,7 @@ export default function AdminAddProductModal({
                 onClick={close}
                 className="rounded-xl border border-[#942E3A]/15 bg-white px-4 py-3 text-xs font-bold text-[#942E3A]"
               >
-                Cancel
+                {isRtl ? "إلغاء" : "Cancel"}
               </button>
               <button
                 type="submit"
@@ -492,7 +501,7 @@ export default function AdminAddProductModal({
                 className="inline-flex items-center gap-2 rounded-xl bg-[#942E3A] px-5 py-3 text-xs font-bold text-[#FFF9EB] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <PackagePlus className="h-4 w-4" />
-                {submitting ? "Saving…" : "Receive batch"}
+                {submitting ? (isRtl ? "جاري الحفظ..." : "Saving…") : (isRtl ? "استلام الدفعة" : "Receive batch")}
               </button>
             </div>
           </form>
@@ -504,22 +513,24 @@ export default function AdminAddProductModal({
 
 function PriceField({
   label,
+  isWholesale,
   value,
   onChange,
   same,
   onSameChange,
   disabled = false,
+  isRtl = false,
 }: {
   label: string;
+  isWholesale: boolean;
   value: string;
   onChange: (value: string) => void;
   same: boolean;
   onSameChange: (value: boolean) => void;
   disabled?: boolean;
+  isRtl?: boolean;
 }) {
-  const inputName = label.startsWith("Wholesale")
-    ? "wholesalePrice"
-    : "retailPrice";
+  const inputName = isWholesale ? "wholesalePrice" : "retailPrice";
   return (
     <label className="block">
       <span className="flex items-center justify-between gap-2">
@@ -536,10 +547,10 @@ function PriceField({
             className={`relative h-5 w-9 rounded-full transition ${same ? "bg-[#942E3A]" : "bg-[#D8B46A]/50"}`}
           >
             <span
-              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition ${same ? "left-[18px]" : "left-0.5"}`}
+              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition ${same ? (isRtl ? "right-[18px]" : "left-[18px]") : (isRtl ? "right-0.5" : "left-0.5")}`}
             />
           </span>
-          {same ? "Same as previous" : "New price"}
+          {same ? (isRtl ? "نفس السعر السابق" : "Same as previous") : (isRtl ? "سعر جديد" : "New price")}
         </button>
       </span>
       <input
@@ -551,7 +562,7 @@ function PriceField({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         disabled={same || disabled}
-        className="admin-input mt-2 disabled:cursor-not-allowed disabled:bg-[#FFF9EB] disabled:text-[#6B1F2A]/55"
+        className="admin-input mt-2 text-right disabled:cursor-not-allowed disabled:bg-[#FFF9EB] disabled:text-[#6B1F2A]/55"
       />
     </label>
   );

@@ -8,6 +8,7 @@ import {
   Store,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 export type ProcurementVariant = {
   id: string;
@@ -25,6 +26,15 @@ export type ProcurementProduct = {
   category: string;
   image: string | null;
 };
+
+function getCategoryLabel(cat: string, isRtl: boolean) {
+  if (cat === "all") return isRtl ? "الكل" : "All";
+  if (cat === "shoes") return isRtl ? "أحذية" : "Shoes";
+  if (cat === "bags") return isRtl ? "حقائب" : "Bags";
+  if (cat === "perfumes") return isRtl ? "عطور" : "Perfumes";
+  if (cat === "accessories") return isRtl ? "إكسسوارات" : "Accessories";
+  return cat;
+}
 
 function useOutsideClose(
   ref: React.RefObject<HTMLDivElement | null>,
@@ -50,6 +60,8 @@ export function AdminSupplierPicker({
   onChange: (value: string) => void;
   onAddNew?: () => void;
 }) {
+  const { lang } = useAdminI18n();
+  const isRtl = lang === "ar";
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const ref = useRef<HTMLDivElement>(null);
@@ -59,18 +71,18 @@ export function AdminSupplierPicker({
     supplier.name.toLowerCase().includes(query.toLowerCase()),
   );
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative" dir={isRtl ? "rtl" : "ltr"}>
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="admin-input flex min-h-[54px] items-center justify-between gap-3 text-left"
+        className={`admin-input flex min-h-[54px] items-center justify-between gap-3 ${isRtl ? "text-right" : "text-left"}`}
       >
         <span
           className={
             selected ? "font-semibold text-[#942E3A]" : "text-[#6B1F2A]/65"
           }
         >
-          {selected?.name || "Choose supplier"}
+          {selected?.name || (isRtl ? "اختر المورد" : "Choose supplier")}
         </span>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-[#D8B46A] transition-transform ${open ? "rotate-180" : ""}`}
@@ -79,13 +91,13 @@ export function AdminSupplierPicker({
       {open && (
         <div className="absolute left-0 top-[calc(100%+8px)] z-40 w-full min-w-[240px] overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-2 shadow-[0_18px_40px_rgba(67,25,31,0.2)]">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
+            <Search className={`pointer-events-none absolute ${isRtl ? "right-3" : "left-3"} top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]`} />
             <input
               autoFocus
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search supplier..."
-              className="w-full rounded-xl border border-[#942E3A]/10 bg-white px-9 py-2.5 text-xs text-[#942E3A] outline-none focus:border-[#942E3A]"
+              placeholder={isRtl ? "ابحث عن مورد..." : "Search supplier..."}
+              className={`w-full rounded-xl border border-[#942E3A]/10 bg-white ${isRtl ? "pr-9 pl-3 text-right" : "px-9 text-left"} py-2.5 text-xs text-[#942E3A] outline-none focus:border-[#942E3A]`}
             />
           </div>
           <div
@@ -101,7 +113,7 @@ export function AdminSupplierPicker({
                   setOpen(false);
                   setQuery("");
                 }}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-bold transition ${supplier.id === value ? "bg-[#942E3A] text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 ${isRtl ? "text-right" : "text-left"} text-xs font-bold transition ${supplier.id === value ? "bg-[#942E3A] text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
               >
                 <span className="flex items-center gap-2">
                   <Store className="h-3.5 w-3.5 text-[#D8B46A]" />
@@ -114,7 +126,7 @@ export function AdminSupplierPicker({
             ))}
             {!filtered.length && (
               <p className="px-3 py-5 text-center text-xs text-[#6B1F2A]/60">
-                No suppliers found.
+                {isRtl ? "لم يتم العثور على موردين." : "No suppliers found."}
               </p>
             )}
           </div>
@@ -126,10 +138,10 @@ export function AdminSupplierPicker({
                 setOpen(false);
                 setQuery("");
               }}
-              className="mt-2 flex w-full items-center gap-2 rounded-xl border-t border-[#D8B46A]/35 px-3 py-3 text-left text-xs font-bold text-[#942E3A] hover:bg-[#F2DFC0]"
+              className={`mt-2 flex w-full items-center gap-2 rounded-xl border-t border-[#D8B46A]/35 px-3 py-3 ${isRtl ? "text-right" : "text-left"} text-xs font-bold text-[#942E3A] hover:bg-[#F2DFC0]`}
             >
               <PlusIcon />
-              Add new supplier
+              {isRtl ? "إضافة مورد جديد" : "Add new supplier"}
             </button>
           )}
         </div>
@@ -151,6 +163,8 @@ export function AdminProductPicker({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { lang } = useAdminI18n();
+  const isRtl = lang === "ar";
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
@@ -198,11 +212,11 @@ export function AdminProductPicker({
     [category, query, variants],
   );
   return (
-    <div ref={ref} className="relative flex-1">
+    <div ref={ref} className="relative flex-1" dir={isRtl ? "rtl" : "ltr"}>
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="admin-input flex min-h-[54px] items-center gap-3 text-left"
+        className={`admin-input flex min-h-[54px] items-center gap-3 ${isRtl ? "text-right" : "text-left"}`}
       >
         <span className="flex min-w-0 flex-1 items-center gap-3">
           {selected?.image ? (
@@ -221,7 +235,7 @@ export function AdminProductPicker({
           >
             {selected
               ? `${selected.productName} · ${selected.label}`
-              : "Choose product variant to add"}
+              : (isRtl ? "اختر موديل المنتج للإضافة" : "Choose product variant to add")}
           </span>
         </span>
         <ChevronDown
@@ -238,13 +252,13 @@ export function AdminProductPicker({
           className="fixed z-[100] max-h-[calc(100dvh-1rem)] min-w-0 max-w-[calc(100vw-1rem)] overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-2 shadow-[0_18px_40px_rgba(67,25,31,0.2)] sm:min-w-[300px]"
         >
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
+            <Search className={`pointer-events-none absolute ${isRtl ? "right-3" : "left-3"} top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]`} />
             <input
               autoFocus
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search product, color, size or SKU..."
-              className="w-full rounded-xl border border-[#942E3A]/10 bg-white px-9 py-2.5 text-xs text-[#942E3A] outline-none focus:border-[#942E3A]"
+              placeholder={isRtl ? "ابحث بالمنتج، اللون، المقاس أو الكود..." : "Search product, color, size or SKU..."}
+              className={`w-full rounded-xl border border-[#942E3A]/10 bg-white ${isRtl ? "pr-9 pl-3 text-right" : "px-9 text-left"} py-2.5 text-xs text-[#942E3A] outline-none focus:border-[#942E3A]`}
             />
           </div>
           <div className="mt-2 flex gap-1 overflow-x-auto pb-1">
@@ -255,7 +269,7 @@ export function AdminProductPicker({
                 onClick={() => setCategory(item)}
                 className={`whitespace-nowrap rounded-full px-2.5 py-1.5 text-[9px] font-bold capitalize ${category === item ? "bg-[#942E3A] text-[#FFF9EB]" : "bg-white text-[#942E3A]/70"}`}
               >
-                {item}
+                {getCategoryLabel(item, isRtl)}
               </button>
             ))}
           </div>
@@ -272,7 +286,7 @@ export function AdminProductPicker({
                   setOpen(false);
                   setQuery("");
                 }}
-                className={`flex w-full items-center gap-3 rounded-xl p-2 text-left transition ${variant.id === value ? "bg-[#942E3A] text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
+                className={`flex w-full items-center gap-3 rounded-xl p-2 ${isRtl ? "text-right" : "text-left"} transition ${variant.id === value ? "bg-[#942E3A] text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
               >
                 {variant.image ? (
                   <img
@@ -300,7 +314,7 @@ export function AdminProductPicker({
             ))}
             {!filtered.length && (
               <p className="px-3 py-5 text-center text-xs text-[#6B1F2A]/60">
-                No matching products.
+                {isRtl ? "لا توجد منتجات مطابقة." : "No matching products."}
               </p>
             )}
           </div>
@@ -319,6 +333,8 @@ export function AdminCatalogProductPicker({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { lang } = useAdminI18n();
+  const isRtl = lang === "ar";
   const [open, setOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({
     top: 0,
@@ -366,11 +382,11 @@ export function AdminCatalogProductPicker({
     [category, query, products],
   );
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative" dir={isRtl ? "rtl" : "ltr"}>
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="admin-input flex min-h-[54px] w-full items-center gap-3 text-left"
+        className={`admin-input flex min-h-[54px] w-full items-center gap-3 ${isRtl ? "text-right" : "text-left"}`}
       >
         <span className="flex min-w-0 flex-1 items-center gap-3">
           {selected?.image ? (
@@ -388,8 +404,8 @@ export function AdminCatalogProductPicker({
             className={`min-w-0 truncate ${selected ? "font-semibold text-[#942E3A]" : "text-[#6B1F2A]/65"}`}
           >
             {selected
-              ? `${selected.name} · ${selected.category}`
-              : "Select a product"}
+              ? `${selected.name} · ${getCategoryLabel(selected.category, isRtl)}`
+              : (isRtl ? "اختر منتجًا" : "Select a product")}
           </span>
         </span>
         <ChevronDown
@@ -407,13 +423,13 @@ export function AdminCatalogProductPicker({
           className="fixed z-[100] max-h-[calc(100dvh-2rem)] min-w-0 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-2 shadow-[0_18px_40px_rgba(67,25,31,0.2)]"
         >
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]" />
+            <Search className={`pointer-events-none absolute ${isRtl ? "right-3" : "left-3"} top-1/2 h-4 w-4 -translate-y-1/2 text-[#D8B46A]`} />
             <input
               autoFocus
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search product..."
-              className="w-full rounded-xl border border-[#942E3A]/10 bg-white px-9 py-2.5 text-xs text-[#942E3A] outline-none focus:border-[#942E3A]"
+              placeholder={isRtl ? "ابحث عن منتج..." : "Search product..."}
+              className={`w-full rounded-xl border border-[#942E3A]/10 bg-white ${isRtl ? "pr-9 pl-3 text-right" : "px-9 text-left"} py-2.5 text-xs text-[#942E3A] outline-none focus:border-[#942E3A]`}
             />
           </div>
           <div className="mt-2 flex gap-1 overflow-x-auto pb-1">
@@ -424,7 +440,7 @@ export function AdminCatalogProductPicker({
                 onClick={() => setCategory(item)}
                 className={`whitespace-nowrap rounded-full px-2.5 py-1.5 text-[9px] font-bold capitalize ${category === item ? "bg-[#942E3A] text-[#FFF9EB]" : "bg-white text-[#942E3A]/70"}`}
               >
-                {item}
+                {getCategoryLabel(item, isRtl)}
               </button>
             ))}
           </div>
@@ -441,7 +457,7 @@ export function AdminCatalogProductPicker({
                   setOpen(false);
                   setQuery("");
                 }}
-                className={`flex w-full items-center gap-3 rounded-xl p-2 text-left transition ${product.id === value ? "bg-[#942E3A] text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
+                className={`flex w-full items-center gap-3 rounded-xl p-2 ${isRtl ? "text-right" : "text-left"} transition ${product.id === value ? "bg-[#942E3A] text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
               >
                 {product.image ? (
                   <img
@@ -459,7 +475,7 @@ export function AdminCatalogProductPicker({
                     {product.name}
                   </span>
                   <span className="mt-0.5 block truncate text-[10px] opacity-70">
-                    {product.category}
+                    {getCategoryLabel(product.category, isRtl)}
                   </span>
                 </span>
                 {product.id === value && (
@@ -469,7 +485,7 @@ export function AdminCatalogProductPicker({
             ))}
             {!filtered.length && (
               <p className="px-3 py-5 text-center text-xs text-[#6B1F2A]/60">
-                No matching products.
+                {isRtl ? "لا توجد منتجات مطابقة." : "No matching products."}
               </p>
             )}
           </div>

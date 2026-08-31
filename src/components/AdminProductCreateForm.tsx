@@ -21,6 +21,7 @@ import { createProductAction } from "@/app/admin/products/actions";
 import { updateProductAction } from "@/app/admin/products/[id]/actions";
 import { createCatalogOptionAction } from "@/app/admin/products/categories/actions";
 import { createSupplierWithResultAction } from "@/app/admin/suppliers/actions";
+import { nextSkuFromValues } from "@/lib/sku";
 import AdminImageGalleryField from "@/components/AdminImageGalleryField";
 import { AdminCatalogProductPicker } from "@/components/AdminProcurementPickers";
 import { useToast } from "@/providers/ToastProvider";
@@ -103,21 +104,23 @@ type EditProduct = {
 };
 const reviewStep = { label: "Reviews", caption: "Social proof" };
 
-const categories = [
-  { key: "shoes", label: "Shoes" },
-  { key: "bags", label: "Bags" },
-  { key: "perfumes", label: "Perfumes" },
-  { key: "accessories", label: "Accessories" },
-];
+function getCategories(isRtl: boolean) {
+  return [
+    { key: "shoes", label: isRtl ? "أحذية" : "Shoes" },
+    { key: "bags", label: isRtl ? "حقائب" : "Bags" },
+    { key: "perfumes", label: isRtl ? "عطور" : "Perfumes" },
+    { key: "accessories", label: isRtl ? "إكسسوارات" : "Accessories" },
+  ];
+}
 
-const categoryHelp: Record<string, string> = {
-  shoes: "Choose the shoe brand and color, then add stock per size.",
-  bags: "Choose the bag category, brand and color, then add stock per size.",
-  perfumes:
-    "Choose the perfume brand and volume in ml, then add stock per bottle size.",
-  accessories:
-    "Choose the accessory category, brand and material, then add its stock options.",
-};
+function getCategoryHelp(isRtl: boolean): Record<string, string> {
+  return {
+    shoes: isRtl ? "اختر ماركة ولون الحذاء، ثم أضف الكمية لكل مقاس." : "Choose the shoe brand and color, then add stock per size.",
+    bags: isRtl ? "اختر قسم ونوع الحقيبة ولونها، ثم أضف الكمية." : "Choose the bag category, brand and color, then add stock per size.",
+    perfumes: isRtl ? "اختر ماركة العطر والحجم بالمللي، ثم أضف المخزون لكل حجم." : "Choose the perfume brand and volume in ml, then add stock per bottle size.",
+    accessories: isRtl ? "اختر تصنيف الإكسسوار وماركته وخامته، ثم أضف خيارات المخزون." : "Choose the accessory category, brand and material, then add its stock options.",
+  };
+}
 
 const productSteps = [
   { label: "Identity", caption: "Name & category" },
@@ -128,24 +131,11 @@ const productSteps = [
 ];
 const SHOE_SIZES = ["36", "37", "38", "39", "40", "41"];
 
-function skuPrefix(category: string) {
-  return category === "shoes"
-    ? "S"
-    : category === "bags"
-      ? "B"
-      : category === "perfumes"
-        ? "P"
-        : "A";
-}
-
-function nextSku(category: string, products: RelatedProduct[]) {
-  const prefix = skuPrefix(category);
-  const highest = products.reduce((max, product) => {
-    if (product.category !== category) return max;
-    const match = product.sku?.match(new RegExp(`^${prefix}(\\d+)$`, "i"));
-    return match ? Math.max(max, Number(match[1])) : max;
-  }, 0);
-  return `${prefix}${String(highest + 1).padStart(4, "0")}`;
+function nextSku(category: string, products: RelatedProduct[], reservedSkus: string[]) {
+  return nextSkuFromValues(
+    category,
+    products.map((product) => product.sku).concat(reservedSkus),
+  );
 }
 
 const COLOR_PALETTE = [
@@ -199,6 +189,8 @@ function AdminDropdown({
   categoryMode?: boolean;
   materialMode?: boolean;
 }) {
+  const { lang } = useAdminI18n();
+  const isRtl = lang === "ar";
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(defaultValue);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -220,7 +212,7 @@ function AdminDropdown({
         await createCatalogOptionAction(formData);
         return {
           status: "success" as const,
-          message: "Brand added successfully.",
+          message: isRtl ? "تمت إضافة الماركة بنجاح." : "Brand added successfully.",
           value: String(formData.get("name") || "").trim(),
         };
       } catch (error) {
@@ -229,7 +221,7 @@ function AdminDropdown({
           message:
             error instanceof Error
               ? error.message
-              : "Unable to add this brand.",
+              : (isRtl ? "تعذر إضافة هذه الماركة." : "Unable to add this brand."),
           value: "",
         };
       }
@@ -245,7 +237,7 @@ function AdminDropdown({
         await createCatalogOptionAction(formData);
         return {
           status: "success" as const,
-          message: "Category added successfully.",
+          message: isRtl ? "تمت إضافة القسم بنجاح." : "Category added successfully.",
           value: String(formData.get("name") || "").trim(),
         };
       } catch (error) {
@@ -254,7 +246,7 @@ function AdminDropdown({
           message:
             error instanceof Error
               ? error.message
-              : "Unable to add this category.",
+              : (isRtl ? "تعذر إضافة هذا القسم." : "Unable to add this category."),
           value: "",
         };
       }
@@ -380,14 +372,14 @@ function AdminDropdown({
                 <button
                   type="button"
                   onClick={() => setPaletteOpen((current) => !current)}
-                  className="flex w-full items-center gap-2 rounded-xl border border-dashed border-[#D8B46A]/70 px-3 py-2.5 text-left text-xs font-bold text-[#942E3A] hover:bg-[#F2DFC0]"
+                  className={`flex w-full items-center gap-2 rounded-xl border border-dashed border-[#D8B46A]/70 px-3 py-2.5 ${isRtl ? "text-right" : "text-left"} text-xs font-bold text-[#942E3A] hover:bg-[#F2DFC0]`}
                 >
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#D8B46A] text-[#942E3A]">
                     +
                   </span>
-                  Add new color
+                  {isRtl ? "إضافة لون جديد" : "Add new color"}
                   <ChevronDown
-                    className={`ml-auto h-3.5 w-3.5 text-[#D8B46A] transition-transform ${paletteOpen ? "rotate-180" : ""}`}
+                    className={`${isRtl ? "mr-auto" : "ml-auto"} h-3.5 w-3.5 text-[#D8B46A] transition-transform ${paletteOpen ? "rotate-180" : ""}`}
                   />
                 </button>
               </>
@@ -404,17 +396,14 @@ function AdminDropdown({
                     setBrandModalOpen(true);
                   }
                 }}
-                className="mb-1 flex w-full items-center gap-2 rounded-xl border border-dashed border-[#D8B46A]/70 px-3 py-2.5 text-left text-xs font-bold text-[#942E3A] hover:bg-[#F2DFC0]"
+                className={`mb-1 flex w-full items-center gap-2 rounded-xl border border-dashed border-[#D8B46A]/70 px-3 py-2.5 ${isRtl ? "text-right" : "text-left"} text-xs font-bold text-[#942E3A] hover:bg-[#F2DFC0]`}
               >
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#D8B46A] text-[#942E3A]">
                   +
                 </span>
-                Add new{" "}
-                {materialMode
-                  ? "material"
-                  : categoryMode
-                    ? "category"
-                    : "brand"}
+                {isRtl
+                  ? (materialMode ? "إضافة خامة جديدة" : categoryMode ? "إضافة قسم جديد" : "إضافة ماركة جديدة")
+                  : `Add new ${materialMode ? "material" : categoryMode ? "category" : "brand"}`}
               </button>
             )}
             {values.map((item) => (
@@ -425,7 +414,7 @@ function AdminDropdown({
                   setValue(item.value);
                   setOpen(false);
                 }}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs transition ${item.value === value ? "bg-[#942E3A] font-bold text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 ${isRtl ? "text-right" : "text-left"} text-xs transition ${item.value === value ? "bg-[#942E3A] font-bold text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
                 role="option"
                 aria-selected={item.value === value}
               >
@@ -454,6 +443,7 @@ function AdminDropdown({
       {paletteOpen && colorMode && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-[#8B7CC7]/30 p-4 backdrop-blur-[2px]"
+          dir={isRtl ? "rtl" : "ltr"}
           onMouseDown={() => setPaletteOpen(false)}
         >
           <div
@@ -463,27 +453,28 @@ function AdminDropdown({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-                  Product color
+                  {isRtl ? "لون المنتج" : "Product color"}
                 </p>
                 <h3 className="mt-1 font-playfair text-xl font-bold text-[#942E3A]">
-                  Add new color
+                  {isRtl ? "إضافة لون جديد" : "Add new color"}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setPaletteOpen(false)}
                 className="rounded-full px-2 py-1 text-lg text-[#942E3A]/55 hover:bg-[#F2DFC0]"
+                aria-label={isRtl ? "إغلاق" : "Close"}
               >
                 ×
               </button>
             </div>
             <label className="mt-5 block">
-              <span className="field-label">Color name *</span>
+              <span className="field-label">{isRtl ? "اسم اللون *" : "Color name *"}</span>
               <input
                 value={customColorName}
                 onChange={(event) => setCustomColorName(event.target.value)}
                 className="admin-input"
-                placeholder="e.g. Burgundy"
+                placeholder={isRtl ? "مثال: خمري" : "e.g. Burgundy"}
                 autoFocus
               />
             </label>
@@ -494,7 +485,7 @@ function AdminDropdown({
                   style={{ backgroundColor: customHex }}
                 />
                 <span className="text-xs font-bold text-[#942E3A]">
-                  Move through the color palette
+                  {isRtl ? "اختر من لوحة الألوان" : "Move through the color palette"}
                 </span>
                 <input
                   type="color"
@@ -519,7 +510,7 @@ function AdminDropdown({
                 onClick={() => setPaletteOpen(false)}
                 className="rounded-xl border border-[#942E3A]/15 bg-white px-4 py-2.5 text-xs font-bold text-[#942E3A]"
               >
-                Cancel
+                {isRtl ? "إلغاء" : "Cancel"}
               </button>
               <button
                 type="button"
@@ -527,7 +518,7 @@ function AdminDropdown({
                 disabled={!customColorName.trim() || colorPending}
                 className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB] disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {colorPending ? "Adding..." : "Use this color"}
+                {colorPending ? (isRtl ? "جاري الإضافة..." : "Adding...") : (isRtl ? "استخدام هذا اللون" : "Use this color")}
               </button>
             </div>
             {colorError && <p className="mt-3 text-xs font-semibold text-red-600">{colorError}</p>}
@@ -537,6 +528,7 @@ function AdminDropdown({
       {brandModalOpen && brandMode && typeof document !== "undefined" && createPortal(
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-[#8B7CC7]/30 p-4 backdrop-blur-[2px]"
+          dir={isRtl ? "rtl" : "ltr"}
           onMouseDown={() => setBrandModalOpen(false)}
         >
           <div
@@ -546,16 +538,17 @@ function AdminDropdown({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-                  Product catalog
+                  {isRtl ? "كتالوج المنتجات" : "Product catalog"}
                 </p>
                 <h3 className="mt-1 font-playfair text-xl font-bold text-[#942E3A]">
-                  Add new brand
+                  {isRtl ? "إضافة ماركة جديدة" : "Add new brand"}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setBrandModalOpen(false)}
                 className="rounded-full px-2 py-1 text-lg text-[#942E3A]/55 hover:bg-[#F2DFC0]"
+                aria-label={isRtl ? "إغلاق" : "Close"}
               >
                 ×
               </button>
@@ -568,7 +561,7 @@ function AdminDropdown({
               <input type="hidden" name="category" value={optionCategory} />
               <input type="hidden" name="type" value={optionType} />
               <label>
-                <span className="field-label">Brand name</span>
+                <span className="field-label">{isRtl ? "اسم الماركة" : "Brand name"}</span>
                 <input
                   name="name"
                   value={customBrand}
@@ -576,7 +569,7 @@ function AdminDropdown({
                   required
                   autoFocus
                   className="admin-input"
-                  placeholder="e.g. Puma"
+                  placeholder={isRtl ? "مثال: بوما" : "e.g. Puma"}
                 />
               </label>
               {brandState.status === "error" && (
@@ -590,14 +583,14 @@ function AdminDropdown({
                   onClick={() => setBrandModalOpen(false)}
                   className="rounded-xl border border-[#942E3A]/15 bg-white px-4 py-2.5 text-xs font-bold text-[#942E3A]"
                 >
-                  Cancel
+                  {isRtl ? "إلغاء" : "Cancel"}
                 </button>
                 <button
                   type="submit"
                   disabled={brandPending || !customBrand.trim()}
                   className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB] disabled:cursor-wait disabled:opacity-50"
                 >
-                  {brandPending ? "Adding..." : "Add brand"}
+                  {brandPending ? (isRtl ? "جاري الإضافة..." : "Adding...") : (isRtl ? "إضافة الماركة" : "Add brand")}
                 </button>
               </div>
             </form>
@@ -608,6 +601,7 @@ function AdminDropdown({
       {categoryModalOpen && (categoryMode || materialMode) && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-[#8B7CC7]/30 p-4 backdrop-blur-[2px]"
+          dir={isRtl ? "rtl" : "ltr"}
           onMouseDown={() => setCategoryModalOpen(false)}
         >
           <div
@@ -617,16 +611,17 @@ function AdminDropdown({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-                  Product catalog
+                  {isRtl ? "كتالوج المنتجات" : "Product catalog"}
                 </p>
                 <h3 className="mt-1 font-playfair text-xl font-bold text-[#942E3A]">
-                  Add new {materialMode ? "material" : "category"}
+                  {isRtl ? (materialMode ? "إضافة خامة جديدة" : "إضافة قسم جديد") : `Add new ${materialMode ? "material" : "category"}`}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setCategoryModalOpen(false)}
                 className="rounded-full px-2 py-1 text-lg text-[#942E3A]/55 hover:bg-[#F2DFC0]"
+                aria-label={isRtl ? "إغلاق" : "Close"}
               >
                 ×
               </button>
@@ -636,7 +631,7 @@ function AdminDropdown({
               <input type="hidden" name="type" value={optionType} />
               <label>
                 <span className="field-label">
-                  {materialMode ? "Material name" : "Category name"}
+                  {isRtl ? (materialMode ? "اسم الخامة" : "اسم القسم") : (materialMode ? "Material name" : "Category name")}
                 </span>
                 <input
                   name="name"
@@ -646,7 +641,7 @@ function AdminDropdown({
                   autoFocus
                   className="admin-input"
                   placeholder={
-                    materialMode ? "e.g. Stainless steel" : "e.g. Shoulder bags"
+                    materialMode ? (isRtl ? "مثال: ستانلس ستيل" : "e.g. Stainless steel") : (isRtl ? "مثال: حقائب كتف" : "e.g. Shoulder bags")
                   }
                 />
               </label>
@@ -661,7 +656,7 @@ function AdminDropdown({
                   onClick={() => setCategoryModalOpen(false)}
                   className="rounded-xl border border-[#942E3A]/15 bg-white px-4 py-2.5 text-xs font-bold text-[#942E3A]"
                 >
-                  Cancel
+                  {isRtl ? "إلغاء" : "Cancel"}
                 </button>
                 <button
                   type="submit"
@@ -669,8 +664,8 @@ function AdminDropdown({
                   className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB] disabled:cursor-wait disabled:opacity-50"
                 >
                   {categoryPending
-                    ? "Adding..."
-                    : `Add ${materialMode ? "material" : "category"}`}
+                    ? (isRtl ? "جاري الإضافة..." : "Adding...")
+                    : isRtl ? (materialMode ? "إضافة الخامة" : "إضافة القسم") : `Add ${materialMode ? "material" : "category"}`}
                 </button>
               </div>
             </form>
@@ -688,6 +683,8 @@ function SupplierDropdown({
   suppliers: Supplier[];
   defaultValue?: string;
 }) {
+  const { lang } = useAdminI18n();
+  const isRtl = lang === "ar";
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [value, setValue] = useState(defaultValue);
@@ -702,7 +699,7 @@ function SupplierDropdown({
         const created = await createSupplierWithResultAction(formData);
         return {
           status: "success" as const,
-          message: "Supplier added successfully.",
+          message: isRtl ? "تمت إضافة المورد بنجاح." : "Supplier added successfully.",
           id: created.id,
           name: created.name,
         };
@@ -710,7 +707,7 @@ function SupplierDropdown({
         return {
           status: "error" as const,
           message:
-            error instanceof Error ? error.message : "Unable to add supplier.",
+            error instanceof Error ? error.message : (isRtl ? "تعذر إضافة المورد." : "Unable to add supplier."),
           id: "",
           name: "",
         };
@@ -737,17 +734,17 @@ function SupplierDropdown({
   const selected = suppliers.find((supplier) => supplier.id === value);
   return (
     <div ref={supplierRef} className="relative">
-      <span className="field-label">Supplier / merchant</span>
+      <span className="field-label">{isRtl ? "المورد / التاجر" : "Supplier / merchant"}</span>
       <input type="hidden" name="supplierId" value={value} />
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="admin-input flex w-full items-center justify-between text-left"
+        className={`admin-input flex w-full items-center justify-between ${isRtl ? "text-right" : "text-left"}`}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
         <span className={selected ? "text-[#942E3A]" : "text-[#6B1F2A]/60"}>
-          {selected?.name || "No supplier"}
+          {selected?.name || (isRtl ? "بدون مورد" : "No supplier")}
         </span>
         <ChevronDown
           className={`h-4 w-4 text-[#D8B46A] transition-transform ${open ? "rotate-180" : ""}`}
@@ -764,12 +761,12 @@ function SupplierDropdown({
               setModalOpen(true);
               setSupplierName("");
             }}
-            className="mb-1 flex w-full items-center gap-2 rounded-xl border border-dashed border-[#D8B46A]/70 px-3 py-2.5 text-left text-xs font-bold text-[#942E3A] hover:bg-[#F2DFC0]"
+            className={`mb-1 flex w-full items-center gap-2 rounded-xl border border-dashed border-[#D8B46A]/70 px-3 py-2.5 ${isRtl ? "text-right" : "text-left"} text-xs font-bold text-[#942E3A] hover:bg-[#F2DFC0]`}
           >
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#D8B46A]">
               +
             </span>
-            Add new supplier
+            {isRtl ? "إضافة مورد جديد" : "Add new supplier"}
           </button>
           <button
             type="button"
@@ -777,9 +774,9 @@ function SupplierDropdown({
               setValue("");
               setOpen(false);
             }}
-            className="flex w-full rounded-xl px-3 py-2.5 text-left text-xs text-[#942E3A] hover:bg-[#F2DFC0]"
+            className={`flex w-full rounded-xl px-3 py-2.5 ${isRtl ? "text-right" : "text-left"} text-xs text-[#942E3A] hover:bg-[#F2DFC0]`}
           >
-            No supplier
+            {isRtl ? "بدون مورد" : "No supplier"}
           </button>
           {suppliers.map((supplier) => (
             <button
@@ -789,7 +786,7 @@ function SupplierDropdown({
                 setValue(supplier.id);
                 setOpen(false);
               }}
-              className={`flex w-full rounded-xl px-3 py-2.5 text-left text-xs transition ${supplier.id === value ? "bg-[#942E3A] font-bold text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
+              className={`flex w-full rounded-xl px-3 py-2.5 ${isRtl ? "text-right" : "text-left"} text-xs transition ${supplier.id === value ? "bg-[#942E3A] font-bold text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
             >
               {supplier.name}
             </button>
@@ -799,6 +796,7 @@ function SupplierDropdown({
       {modalOpen && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-[#8B7CC7]/30 p-4 backdrop-blur-[2px]"
+          dir={isRtl ? "rtl" : "ltr"}
           onMouseDown={() => setModalOpen(false)}
         >
           <div
@@ -808,23 +806,24 @@ function SupplierDropdown({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-                  Purchasing
+                  {isRtl ? "المشتريات" : "Purchasing"}
                 </p>
                 <h3 className="mt-1 font-playfair text-xl font-bold text-[#942E3A]">
-                  Add new supplier
+                  {isRtl ? "إضافة مورد جديد" : "Add new supplier"}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
                 className="rounded-full px-2 py-1 text-lg text-[#942E3A]/55"
+                aria-label={isRtl ? "إغلاق" : "Close"}
               >
                 ×
               </button>
             </div>
             <form action={supplierAction} className="mt-5 space-y-4">
               <label>
-                <span className="field-label">Supplier name</span>
+                <span className="field-label">{isRtl ? "اسم المورد" : "Supplier name"}</span>
                 <input
                   name="name"
                   required
@@ -832,7 +831,7 @@ function SupplierDropdown({
                   value={supplierName}
                   onChange={(event) => setSupplierName(event.target.value)}
                   className="admin-input"
-                  placeholder="Supplier or company name"
+                  placeholder={isRtl ? "اسم المورد أو الشركة" : "Supplier or company name"}
                 />
               </label>
               {supplierState.status === "error" && (
@@ -846,14 +845,14 @@ function SupplierDropdown({
                   onClick={() => setModalOpen(false)}
                   className="rounded-xl border border-[#942E3A]/15 bg-white px-4 py-2.5 text-xs font-bold text-[#942E3A]"
                 >
-                  Cancel
+                  {isRtl ? "إلغاء" : "Cancel"}
                 </button>
                 <button
                   type="submit"
                   disabled={supplierPending || !supplierName.trim()}
                   className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB] disabled:cursor-wait disabled:opacity-50"
                 >
-                  {supplierPending ? "Adding..." : "Add supplier"}
+                  {supplierPending ? (isRtl ? "جاري الإضافة..." : "Adding...") : (isRtl ? "إضافة المورد" : "Add supplier")}
                 </button>
               </div>
             </form>
@@ -881,9 +880,14 @@ function OptionsSelect({
   required?: boolean;
   defaultValue?: string;
 }) {
+  const { lang } = useAdminI18n();
+  const isRtl = lang === "ar";
   const values = options.filter(
     (option) => option.category === category && option.type === type,
   );
+  const defaultPlaceholder = isRtl
+    ? (type === "brand" ? "اختر الماركة" : type === "color" ? "اختر اللون" : type === "subcategory" ? "اختر القسم" : "اختر الخامة")
+    : `Select ${label.toLowerCase()}`;
   return (
     <label className="relative">
       <AdminDropdown
@@ -899,8 +903,8 @@ function OptionsSelect({
         defaultValue={defaultValue}
         placeholder={
           values.length
-            ? `Select ${label.toLowerCase()}`
-            : `No ${label.toLowerCase()} configured`
+            ? defaultPlaceholder
+            : (isRtl ? `لم يتم تكوين ${label}` : `No ${label.toLowerCase()} configured`)
         }
         values={values.map((option) => ({
           value: option.name,
@@ -913,7 +917,7 @@ function OptionsSelect({
             href="/admin/products/categories"
             className="mt-1 block text-[10px] font-bold text-[#942E3A] underline"
           >
-            Add {label.toLowerCase()} in catalog options
+            {isRtl ? `إضافة ${label} في خيارات الكتالوج` : `Add ${label.toLowerCase()} in catalog options`}
           </Link>
         )}
     </label>
@@ -929,6 +933,7 @@ export default function AdminProductCreateForm({
   embedded = false,
   onCancel,
   onEmbeddedSubmit,
+  reservedSkus = [],
 }: {
   options: CatalogOption[];
   suppliers: Supplier[];
@@ -938,6 +943,7 @@ export default function AdminProductCreateForm({
   embedded?: boolean;
   onCancel?: () => void;
   onEmbeddedSubmit?: (formData: FormData) => void;
+  reservedSkus?: string[];
 }) {
   const { lang, t, formatPrice, formatNumber } = useAdminI18n();
   const isRtl = lang === "ar";
@@ -945,14 +951,20 @@ export default function AdminProductCreateForm({
   const isEdit = Boolean(initialProduct);
   const steps = isEdit
     ? [
-        { label: "Details", caption: "Product information" },
-        { label: "Gallery", caption: "Manage media" },
-        { label: "Inventory", caption: "Manage stock" },
-        { label: "Relations", caption: "Similar products" },
-        { label: "Pricing", caption: "Update costs" },
-        reviewStep,
+        { label: isRtl ? "التفاصيل" : "Details", caption: isRtl ? "بيانات المنتج" : "Product information" },
+        { label: isRtl ? "المعرض" : "Gallery", caption: isRtl ? "إدارة الوسائط" : "Manage media" },
+        { label: isRtl ? "المخزون" : "Inventory", caption: isRtl ? "إدارة المخزون" : "Manage stock" },
+        { label: isRtl ? "المنتجات المشابهة" : "Relations", caption: isRtl ? "منتجات ذات صلة" : "Similar products" },
+        { label: isRtl ? "التسعير" : "Pricing", caption: isRtl ? "تعديل التكاليف" : "Update costs" },
+        { label: isRtl ? "التقييمات" : "Reviews", caption: isRtl ? "آراء العملاء" : "Social proof" },
       ]
-    : productSteps;
+    : [
+        { label: isRtl ? "البيانات الأساسية" : "Identity", caption: isRtl ? "الاسم والقسم" : "Name & category" },
+        { label: isRtl ? "المعرض" : "Gallery", caption: isRtl ? "الصور والوسائط" : "Images & media" },
+        { label: isRtl ? "المخزون" : "Inventory", caption: isRtl ? "الموديلات والمخزون" : "Variants & stock" },
+        { label: isRtl ? "المنتجات المشابهة" : "Relations", caption: isRtl ? "منتجات ذات صلة" : "Similar products" },
+        { label: isRtl ? "التسعير" : "Pricing", caption: isRtl ? "التكاليف والظهور" : "Costs & visibility" },
+      ];
   const [category, setCategory] = useState(initialProduct?.category || "shoes");
   const perfumeVolumes = options
     .filter(
@@ -970,7 +982,7 @@ export default function AdminProductCreateForm({
       })) || [{ size: "36", stock: 0 }],
   );
   const [productSku, setProductSku] = useState(
-    () => initialProduct?.sku || nextSku("shoes", products),
+    () => initialProduct?.sku || nextSku("shoes", products, reservedSkus),
   );
   const [skuEdited, setSkuEdited] = useState(false);
   const [shoeSizes, setShoeSizes] = useState<Record<string, boolean>>(() =>
@@ -1156,7 +1168,12 @@ export default function AdminProductCreateForm({
           onEmbeddedSubmit?.(new FormData(event.currentTarget));
           return;
         }
-        toast.success(isEdit ? "Product changes saved!" : "New product published!", "CATALOG");
+        toast.success(
+          isEdit
+            ? (isRtl ? "تم حفظ تعديلات المنتج!" : "Product changes saved!")
+            : (isRtl ? "تم نشر المنتج الجديد بنجاح!" : "New product published!"),
+          isRtl ? "الكتالوج" : "CATALOG",
+        );
       }}
       className="space-y-5"
     >
@@ -1165,6 +1182,7 @@ export default function AdminProductCreateForm({
       )}
       {isEdit && <input type="hidden" name="category" value={category} />}
       <input type="hidden" name="reviews" value={JSON.stringify(reviews)} />
+      <input type="hidden" name="skuAuto" value={skuEdited ? "false" : "true"} />
       {redirectTo && (
         <input type="hidden" name="redirectTo" value={redirectTo} />
       )}
@@ -1284,28 +1302,30 @@ export default function AdminProductCreateForm({
         className="product-editor-panel p-5 sm:p-6"
       >
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-          Step 1
+          {isRtl ? "الخطوة 1" : "Step 1"}
         </p>
         <h2 className="mt-1 font-playfair text-xl font-bold">
-          {isEdit ? "Product details" : "Product type & identity"}
+          {isEdit ? (isRtl ? "تفاصيل المنتج" : "Product details") : (isRtl ? "نوع وهوية المنتج" : "Product type & identity")}
         </h2>
         {isEdit ? (
           <div className="mt-5 flex items-center justify-between rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] px-4 py-3">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#D8B46A]">
-                Product type
+                {isRtl ? "نوع المنتج" : "Product type"}
               </p>
               <p className="mt-1 font-playfair text-lg font-bold capitalize text-[#942E3A]">
-                {category}
+                {isRtl
+                  ? (category === "shoes" ? "أحذية" : category === "bags" ? "حقائب" : category === "perfumes" ? "عطور" : "إكسسوارات")
+                  : category}
               </p>
             </div>
             <span className="rounded-full bg-[#942E3A]/10 px-3 py-1 text-[10px] font-bold text-[#942E3A]">
-              Fixed after creation
+              {isRtl ? "ثابت بعد الإنشاء" : "Fixed after creation"}
             </span>
           </div>
         ) : (
           <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {categories.map((item) => (
+            {getCategories(isRtl).map((item) => (
               <label
                 key={item.key}
                 className={`cursor-pointer rounded-xl border p-3 text-center text-xs font-bold ${category === item.key ? "border-[#942E3A] bg-[#942E3A] text-[#FFF9EB]" : "border-[#942E3A]/10 bg-[#FFF9EB]/50 text-[#942E3A]"}`}
@@ -1317,9 +1337,9 @@ export default function AdminProductCreateForm({
                   checked={category === item.key}
                   onChange={() => {
                     setCategory(item.key);
-                    if (!skuEdited) setProductSku(nextSku(item.key, products));
+                    if (!skuEdited) setProductSku(nextSku(item.key, products, reservedSkus));
                     setVariants([
-                      { size: category === "shoes" ? "36" : "", stock: 0 },
+                      { size: item.key === "shoes" ? "36" : "", stock: 0 },
                     ]);
                     setBagQuantity(0);
                     setAccessoryQuantity(0);
@@ -1364,18 +1384,18 @@ export default function AdminProductCreateForm({
         )}
         <p className="mt-2 text-[10px] text-[#6B1F2A]/60">
           {isEdit
-            ? "Update the product information below while keeping its type unchanged."
-            : categoryHelp[category]}
+            ? (isRtl ? "قم بتحديث معلومات المنتج أدناه مع الاحتفاظ بنوعه دون تغيير." : "Update the product information below while keeping its type unchanged.")
+            : getCategoryHelp(isRtl)[category]}
         </p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="sm:col-span-2">
-            <span className="field-label">Product name</span>
+            <span className="field-label">{isRtl ? "اسم المنتج *" : "Product name"}</span>
             <input
               name="name"
               required
               defaultValue={initialProduct?.name || ""}
               className="admin-input"
-              placeholder="Product name"
+              placeholder={isRtl ? "أدخل اسم المنتج" : "Product name"}
             />
           </label>
           <OptionsSelect
@@ -1383,7 +1403,7 @@ export default function AdminProductCreateForm({
             category={category}
             type="brand"
             name="brand"
-            label="Brand"
+            label={isRtl ? "الماركة" : "Brand"}
             defaultValue={initialProduct?.brand || ""}
           />
           {category !== "perfumes" && category !== "accessories" && (
@@ -1392,7 +1412,7 @@ export default function AdminProductCreateForm({
               category={category}
               type="color"
               name="color"
-              label="Product color"
+              label={isRtl ? "لون المنتج" : "Product color"}
               defaultValue={initialProduct?.color || ""}
             />
           )}
@@ -1402,7 +1422,7 @@ export default function AdminProductCreateForm({
               category={category}
               type="subcategory"
               name="subcategory"
-              label="Category"
+              label={isRtl ? "القسم الفرعي" : "Category"}
               defaultValue={initialProduct?.subcategory || ""}
             />
           )}
@@ -1412,22 +1432,22 @@ export default function AdminProductCreateForm({
               category={category}
               type="material"
               name="material"
-              label="Material"
+              label={isRtl ? "الخامة" : "Material"}
               defaultValue={initialProduct?.material || ""}
             />
           )}
           <AdminDropdown
             name="status"
-            label="Publishing status"
+            label={isRtl ? "حالة النشر" : "Publishing status"}
             defaultValue={initialProduct?.status || "active"}
-            placeholder="Select publishing status"
+            placeholder={isRtl ? "اختر حالة النشر" : "Select publishing status"}
             values={[
-              { value: "active", label: "Active" },
-              { value: "archived", label: "Archived" },
+              { value: "active", label: isRtl ? "نشط (معروض بالمتجر)" : "Active" },
+              { value: "archived", label: isRtl ? "مؤرشف (مخفي من المتجر)" : "Archived" },
             ]}
           />
           <label>
-            <span className="field-label">Product SKU</span>
+            <span className="field-label">{isRtl ? "كود المنتج (SKU)" : "Product SKU"}</span>
             <input
               name="sku"
               required
@@ -1441,13 +1461,13 @@ export default function AdminProductCreateForm({
             />
           </label>
           <label className="sm:col-span-2">
-            <span className="field-label">Description</span>
+            <span className="field-label">{isRtl ? "وصف المنتج" : "Description"}</span>
             <textarea
               name="description"
               rows={5}
               defaultValue={initialProduct?.description || ""}
               className="admin-input resize-y"
-              placeholder="Description, details and care instructions"
+              placeholder={isRtl ? "الوصف والتفاصيل وتعليمات العناية..." : "Description, details and care instructions"}
             />
           </label>
         </div>
@@ -1458,12 +1478,12 @@ export default function AdminProductCreateForm({
         className="product-editor-panel overflow-visible p-5 sm:p-6"
       >
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-          Step 2
+          {isRtl ? "الخطوة 5" : "Step 5"}
         </p>
         <h2 className="mt-1 font-playfair text-xl font-bold">
           {isEdit
-            ? "Review pricing, sourcing & visibility"
-            : "Pricing, sourcing & visibility"}
+            ? (isRtl ? "مراجعة التسعير والتوريد والظهور" : "Review pricing, sourcing & visibility")
+            : (isRtl ? "التسعير والتوريد والظهور" : "Pricing, sourcing & visibility")}
         </h2>
         {category === "perfumes" &&
           (() => {
@@ -1498,14 +1518,14 @@ export default function AdminProductCreateForm({
                   <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-                        Volume pricing
+                        {isRtl ? "تسعير الأحجام" : "Volume pricing"}
                       </p>
                       <h3 className="mt-1 font-playfair text-xl font-bold text-[#942E3A]">
-                        Price each perfume volume
+                        {isRtl ? "تسعير كل حجم عطر" : "Price each perfume volume"}
                       </h3>
                     </div>
                     <p className="text-[10px] text-[#6B1F2A]/55">
-                      Every bottle size can have its own price and costs
+                      {isRtl ? "يمكن تحديد سعر وتكلفة مستقلة لكل حجم زجاجة" : "Every bottle size can have its own price and costs"}
                     </p>
                   </div>
                   <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -1543,12 +1563,12 @@ export default function AdminProductCreateForm({
                             <span
                               className={`text-xs font-bold ${profit >= 0 ? "text-emerald-700" : "text-red-700"}`}
                             >
-                              {profit.toFixed(0)} EGP profit
+                              {profit.toFixed(0)} EGP {isRtl ? "ربح" : "profit"}
                             </span>
                           </div>
                           <div className="mt-4 grid gap-3 sm:grid-cols-2">
                             <label>
-                              <span className="field-label">Selling price</span>
+                              <span className="field-label">{isRtl ? "سعر البيع" : "Selling price"}</span>
                               <input
                                 type="number"
                                 min="0"
@@ -1562,7 +1582,7 @@ export default function AdminProductCreateForm({
                             </label>
                             <label>
                               <span className="field-label">
-                                Before discount
+                                {isRtl ? "قبل الخصم" : "Before discount"}
                               </span>
                               <input
                                 type="number"
@@ -1577,7 +1597,7 @@ export default function AdminProductCreateForm({
                             </label>
                             <label>
                               <span className="field-label">
-                                Wholesale price
+                                {isRtl ? "سعر الجملة" : "Wholesale price"}
                               </span>
                               <input
                                 type="number"
@@ -1592,7 +1612,7 @@ export default function AdminProductCreateForm({
                             </label>
                             <label>
                               <span className="field-label">
-                                Additional cost
+                                {isRtl ? "تكلفة إضافية" : "Additional cost"}
                               </span>
                               <input
                                 type="number"
@@ -1616,7 +1636,7 @@ export default function AdminProductCreateForm({
           })()}
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <label hidden={category === "perfumes"}>
-            <span className="field-label">Selling price (EGP)</span>
+            <span className="field-label">{isRtl ? "سعر البيع (EGP)" : "Selling price (EGP)"}</span>
             <input
               name="price"
               required={category !== "perfumes"}
@@ -1629,7 +1649,7 @@ export default function AdminProductCreateForm({
             />
           </label>
           <label hidden={category === "perfumes"}>
-            <span className="field-label">Price before discount</span>
+            <span className="field-label">{isRtl ? "السعر قبل الخصم" : "Price before discount"}</span>
             <input
               name="compareAtPrice"
               type="number"
@@ -1641,7 +1661,7 @@ export default function AdminProductCreateForm({
             />
           </label>
           <label hidden={category === "perfumes"}>
-            <span className="field-label">Wholesale price</span>
+            <span className="field-label">{isRtl ? "سعر الجملة" : "Wholesale price"}</span>
             <input
               name="wholesalePrice"
               type="number"
@@ -1653,7 +1673,7 @@ export default function AdminProductCreateForm({
             />
           </label>
           <label hidden={category === "perfumes"}>
-            <span className="field-label">Additional cost</span>
+            <span className="field-label">{isRtl ? "تكلفة إضافية" : "Additional cost"}</span>
             <input
               name="additionalCost"
               type="number"
@@ -1669,7 +1689,7 @@ export default function AdminProductCreateForm({
             defaultValue={initialProduct?.supplierId || ""}
           />
           <label>
-            <span className="field-label">Low-stock warning at</span>
+            <span className="field-label">{isRtl ? "تنبيه نقص المخزون عند" : "Low-stock warning at"}</span>
             <input
               name="lowStockLimit"
               type="number"
@@ -1692,35 +1712,35 @@ export default function AdminProductCreateForm({
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-                    Profit after discount
+                    {isRtl ? "الربح بعد الخصم" : "Profit after discount"}
                   </p>
                   <p className="mt-2 font-playfair text-2xl font-black text-emerald-800">
                     {saleProfit.toFixed(0)} EGP
                   </p>
                   <p className="mt-1 text-[10px] text-emerald-700">
-                    Per unit · {margin}% margin
+                    {isRtl ? `لكل قطعة · هامش ربح ${margin}%` : `Per unit · ${margin}% margin`}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-[#D8B46A]/45 bg-[#fff7df] p-4">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-[#8D6A22]">
-                    Profit before discount
+                    {isRtl ? "الربح قبل الخصم" : "Profit before discount"}
                   </p>
                   <p className="mt-2 font-playfair text-2xl font-black text-[#942E3A]">
                     {fullPriceProfit.toFixed(0)} EGP
                   </p>
                   <p className="mt-1 text-[10px] text-[#8D6A22]">
-                    Based on price before discount
+                    {isRtl ? "بناءً على السعر قبل الخصم" : "Based on price before discount"}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB] p-4">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-[#6B1F2A]/60">
-                    Discount impact
+                    {isRtl ? "تأثير الخصم" : "Discount impact"}
                   </p>
                   <p className="mt-2 font-playfair text-2xl font-black text-[#942E3A]">
                     {Math.max(0, fullPriceProfit - saleProfit).toFixed(0)} EGP
                   </p>
                   <p className="mt-1 text-[10px] text-[#6B1F2A]/60">
-                    Profit reduced per unit
+                    {isRtl ? "الربح المفقود لكل قطعة" : "Profit reduced per unit"}
                   </p>
                 </div>
               </div>
@@ -1736,10 +1756,10 @@ export default function AdminProductCreateForm({
           <ImagePlus className="h-4 w-4 text-[#D8B46A]" />
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-              Step 3
+              {isRtl ? "الخطوة 2" : "Step 2"}
             </p>
             <h2 className="font-playfair text-xl font-bold">
-              {isEdit ? "Manage product gallery" : "Main image & gallery"}
+              {isEdit ? (isRtl ? "إدارة معرض صور المنتج" : "Manage product gallery") : (isRtl ? "الصورة الرئيسية والمعرض" : "Main image & gallery")}
             </h2>
           </div>
         </div>
@@ -1755,10 +1775,10 @@ export default function AdminProductCreateForm({
             <PackagePlus className="h-4 w-4 text-[#D8B46A]" />
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-                Step 4
+                {isRtl ? "الخطوة 3" : "Step 3"}
               </p>
               <h2 className="font-playfair text-xl font-bold">
-                {isEdit ? "Manage variants & stock" : "Variants & stock"}
+                {isEdit ? (isRtl ? "إدارة الموديلات والمخزون" : "Manage variants & stock") : (isRtl ? "الموديلات والمخزون" : "Variants & stock")}
               </h2>
             </div>
           </div>
@@ -1774,7 +1794,7 @@ export default function AdminProductCreateForm({
               }
               className="hidden inline-flex items-center gap-1 rounded-xl bg-[#D8B46A] px-3 py-2 text-[10px] font-bold text-[#942E3A] shadow-sm transition hover:bg-[#E5C57F]"
             >
-              <Plus className="h-3.5 w-3.5" /> Add new batch
+              <Plus className="h-3.5 w-3.5" /> {isRtl ? "إضافة دفعة جديدة" : "Add new batch"}
             </button>
           ) : (
             category !== "shoes" &&
@@ -1788,7 +1808,7 @@ export default function AdminProductCreateForm({
                 }
                 className="inline-flex items-center gap-1 rounded-xl bg-[#D8B46A] px-3 py-2 text-[10px] font-bold text-[#942E3A]"
               >
-                <Plus className="h-3.5 w-3.5" /> Add variant
+                <Plus className="h-3.5 w-3.5" /> {isRtl ? "إضافة مقاس" : "Add variant"}
               </button>
             )
           )}
@@ -1799,23 +1819,23 @@ export default function AdminProductCreateForm({
         >
           <p className="text-[10px] text-[#6B1F2A]/55">
             {isEdit
-              ? "Update the product SKU and adjust the available stock options below."
-              : "One SKU identifies the whole product. Sizes are managed below."}
+              ? (isRtl ? "قم بتعديل كود المنتج وخيارات المخزون المتاحة أدناه." : "Update the product SKU and adjust the available stock options below.")
+              : (isRtl ? "كود SKU واحد يحدد المنتج بالكامل. يتم ضبط المقاسات أدناه." : "One SKU identifies the whole product. Sizes are managed below.")}
           </p>
           {category === "shoes" ? (
             <div className="mt-4 rounded-3xl border border-[#942E3A]/10 bg-gradient-to-br from-[#FFF9EB] to-white p-4 sm:p-6">
               <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-                    Size matrix
+                    {isRtl ? "جدول المقاسات" : "Size matrix"}
                   </p>
                   <h3 className="mt-1 font-playfair text-xl font-bold text-[#942E3A]">
                     {isEdit
-                      ? "Update available sizes"
-                      : "Choose available sizes"}
+                      ? (isRtl ? "تحديث المقاسات المتاحة" : "Update available sizes")
+                      : (isRtl ? "اختر المقاسات المتاحة" : "Choose available sizes")}
                   </h3>
                 </div>
-                <p className="text-[10px] text-[#6B1F2A]/55">EU sizes 36–41</p>
+                <p className="text-[10px] text-[#6B1F2A]/55">{isRtl ? "المقاسات الأوروبية 36–41" : "EU sizes 36–41"}</p>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {SHOE_SIZES.map((size) => (
@@ -1843,13 +1863,13 @@ export default function AdminProductCreateForm({
                       <span className="font-numeric text-base font-bold text-[#942E3A]">
                         EU {size}
                       </span>
-                      <span className="ml-auto text-[10px] font-bold uppercase tracking-wide text-[#D8B46A]">
-                        {shoeSizes[size] ? "Available" : "Off"}
+                      <span className={`${isRtl ? "mr-auto" : "ml-auto"} text-[10px] font-bold uppercase tracking-wide text-[#D8B46A]`}>
+                        {shoeSizes[size] ? (isRtl ? "متاح" : "Available") : (isRtl ? "مستبعد" : "Off")}
                       </span>
                     </label>
                     {shoeSizes[size] && (
                       <label className="mt-3 block">
-                        <span className="field-label">Quantity</span>
+                        <span className="field-label">{isRtl ? "الكمية" : "Quantity"}</span>
                         <input
                           type="number"
                           min="0"
@@ -1873,16 +1893,16 @@ export default function AdminProductCreateForm({
               <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-                    Volume matrix
+                    {isRtl ? "جدول الأحجام" : "Volume matrix"}
                   </p>
                   <h3 className="mt-1 font-playfair text-xl font-bold text-[#942E3A]">
                     {isEdit
-                      ? "Update available bottle sizes"
-                      : "Choose available bottle sizes"}
+                      ? (isRtl ? "تحديث أحجام الزجاجات المتاحة" : "Update available bottle sizes")
+                      : (isRtl ? "اختر أحجام الزجاجات المتاحة" : "Choose available bottle sizes")}
                   </h3>
                 </div>
                 <p className="text-[10px] text-[#6B1F2A]/55">
-                  Select each volume and add its quantity
+                  {isRtl ? "حدد كل حجم وأضف كميته" : "Select each volume and add its quantity"}
                 </p>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -1911,13 +1931,13 @@ export default function AdminProductCreateForm({
                       <span className="font-numeric text-base font-bold text-[#942E3A]">
                         {volume}
                       </span>
-                      <span className="ml-auto text-[10px] font-bold uppercase tracking-wide text-[#D8B46A]">
-                        {perfumeVolumesEnabled[volume] ? "Available" : "Off"}
+                      <span className={`${isRtl ? "mr-auto" : "ml-auto"} text-[10px] font-bold uppercase tracking-wide text-[#D8B46A]`}>
+                        {perfumeVolumesEnabled[volume] ? (isRtl ? "متاح" : "Available") : (isRtl ? "مستبعد" : "Off")}
                       </span>
                     </label>
                     {perfumeVolumesEnabled[volume] && (
                       <label className="mt-3 block">
-                        <span className="field-label">Quantity</span>
+                        <span className="field-label">{isRtl ? "الكمية" : "Quantity"}</span>
                         <input
                           type="number"
                           min="0"
@@ -1941,12 +1961,12 @@ export default function AdminProductCreateForm({
               <div className="flex items-center justify-between border-b border-[#D8B46A]/25 bg-[#942E3A] px-5 py-4 text-[#FFF9EB] sm:px-6">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-                    {category === "bags"
-                      ? "Bag inventory"
-                      : "Accessory inventory"}
+                    {isRtl
+                      ? (category === "bags" ? "مخزون الحقائب" : "مخزون الإكسسوارات")
+                      : (category === "bags" ? "Bag inventory" : "Accessory inventory")}
                   </p>
                   <h3 className="mt-1 font-playfair text-xl font-bold">
-                    Total pieces in stock
+                    {isRtl ? "إجمالي القطع في المخزون" : "Total pieces in stock"}
                   </h3>
                 </div>
                 <PackagePlus className="h-7 w-7 text-[#D8B46A]" />
@@ -1954,19 +1974,20 @@ export default function AdminProductCreateForm({
               <div className="grid gap-5 p-5 sm:grid-cols-[1fr_260px] sm:items-center sm:p-6">
                 <div>
                   <p className="font-playfair text-2xl font-bold text-[#942E3A]">
-                    One quantity for the whole{" "}
-                    {category === "bags" ? "bag" : "accessory"}
+                    {isRtl
+                      ? (category === "bags" ? "كمية واحدة للحقيبة بالكامل" : "كمية واحدة للإكسسوار بالكامل")
+                      : `One quantity for the whole ${category === "bags" ? "bag" : "accessory"}`}
                   </p>
                   <p className="mt-2 max-w-lg text-xs leading-5 text-[#6B1F2A]/60">
-                    {category === "bags"
-                      ? "Bags do not have sizes."
-                      : "Accessories do not have size variants."}{" "}
-                    Enter the total number of pieces available and the
-                    storefront will manage it as one stock item.
+                    {isRtl
+                      ? (category === "bags"
+                          ? "الحقائب لا تحتوي على مقاسات متعددة. أدخل إجمالي القطع المتاحة وسيديرها المتجر كصنف واحد."
+                          : "الإكسسوارات لا تحتوي على مقاسات متعددة. أدخل إجمالي القطع المتاحة وسيديرها المتجر كصنف واحد.")
+                      : `${category === "bags" ? "Bags do not have sizes." : "Accessories do not have size variants."} Enter the total number of pieces available and the storefront will manage it as one stock item.`}
                   </p>
                 </div>
                 <label className="rounded-2xl border border-[#D8B46A]/45 bg-white p-4 shadow-sm">
-                  <span className="field-label">Quantity</span>
+                  <span className="field-label">{isRtl ? "الكمية" : "Quantity"}</span>
                   <input
                     type="number"
                     min="0"
@@ -1991,7 +2012,7 @@ export default function AdminProductCreateForm({
                   className="grid gap-2 rounded-2xl bg-[#FFF9EB]/70 p-3 sm:grid-cols-[1fr_1fr_1fr_0.7fr_auto]"
                 >
                   <label>
-                    <span className="field-label">{sizeLabel}</span>
+                    <span className="field-label">{isRtl ? "المقاس" : sizeLabel}</span>
                     {categoryOptions(sizeType).length ? (
                       <select
                         required
@@ -2002,7 +2023,7 @@ export default function AdminProductCreateForm({
                         className="admin-input"
                       >
                         <option value="">
-                          Select {sizeLabel.toLowerCase()}
+                          {isRtl ? "اختر المقاس" : `Select ${sizeLabel.toLowerCase()}`}
                         </option>
                         {categoryOptions(sizeType).map((option) => (
                           <option key={option.name}>{option.name}</option>
@@ -2021,13 +2042,13 @@ export default function AdminProductCreateForm({
                             ? "100 ml"
                             : category === "shoes"
                               ? "38"
-                              : "One size"
+                              : (isRtl ? "مقاس موحد" : "One size")
                         }
                       />
                     )}
                   </label>
                   <label>
-                    <span className="field-label">Quantity</span>
+                    <span className="field-label">{isRtl ? "الكمية" : "Quantity"}</span>
                     <input
                       required
                       type="number"
@@ -2047,7 +2068,7 @@ export default function AdminProductCreateForm({
                         current.filter((_, itemIndex) => itemIndex !== index),
                       )
                     }
-                    aria-label="Remove variant"
+                    aria-label={isRtl ? "حذف المقاس" : "Remove variant"}
                     className="self-end rounded-xl p-3 text-red-600 disabled:opacity-30"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -2064,10 +2085,10 @@ export default function AdminProductCreateForm({
         className="product-editor-panel overflow-visible p-5 sm:p-6"
       >
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-          Step 5
+          {isRtl ? "الخطوة 4" : "Step 4"}
         </p>
         <h2 className="mt-1 font-playfair text-xl font-bold">
-          {isEdit ? "Manage related products" : "Similar products"}
+          {isEdit ? (isRtl ? "إدارة المنتجات المشابهة" : "Manage related products") : (isRtl ? "المنتجات المشابهة" : "Similar products")}
         </h2>
         <div className="mt-4">
           <AdminCatalogProductPicker
@@ -2076,8 +2097,9 @@ export default function AdminProductCreateForm({
             onChange={addRelated}
           />
           <p className="mt-2 text-[10px] text-[#6B1F2A]/55">
-            Choose products from the dropdown, then drag them to set their
-            storefront order.
+            {isRtl
+              ? "اختر منتجات من القائمة، ثم اسحبها لتحديد ترتيب ظهورها في المتجر."
+              : "Choose products from the dropdown, then drag them to set their storefront order."}
           </p>
         </div>
         {relatedProducts.length > 0 && (
@@ -2117,7 +2139,7 @@ export default function AdminProductCreateForm({
                   type="button"
                   onClick={() => removeRelated(product.id)}
                   className="rounded-lg p-1.5 text-red-600 hover:bg-white"
-                  aria-label={`Remove ${product.name}`}
+                  aria-label={`${isRtl ? "إزالة" : "Remove"} ${product.name}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -2127,7 +2149,7 @@ export default function AdminProductCreateForm({
         )}
         {!products.length && (
           <p className="mt-3 text-xs text-[#6B1F2A]/55">
-            Add more products to configure recommendations.
+            {isRtl ? "أضف المزيد من المنتجات لتهيئة التوصيات." : "Add more products to configure recommendations."}
           </p>
         )}
       </section>
@@ -2142,10 +2164,10 @@ export default function AdminProductCreateForm({
               <Star className="h-4 w-4 text-[#D8B46A]" />
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">
-                  Step 6
+                  {isRtl ? "الخطوة 6" : "Step 6"}
                 </p>
                 <h2 className="font-playfair text-xl font-bold">
-                  Initial reviews
+                  {isRtl ? "التقييمات الأولية" : "Initial reviews"}
                 </h2>
               </div>
             </div>
@@ -2162,7 +2184,7 @@ export default function AdminProductCreateForm({
               }}
               className="inline-flex items-center gap-1 rounded-xl border border-[#942E3A]/15 px-3 py-2 text-[10px] font-bold text-[#942E3A]"
             >
-              <Plus className="h-3.5 w-3.5" /> Add review
+              <Plus className="h-3.5 w-3.5" /> {isRtl ? "إضافة تقييم" : "Add review"}
             </button>
           </div>
           <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -2194,7 +2216,7 @@ export default function AdminProductCreateForm({
                         setReviewModalOpen(true);
                       }}
                       className="rounded-xl border border-[#942E3A]/12 p-2 text-[#942E3A] hover:bg-[#F2DFC0]"
-                      aria-label="Edit review"
+                      aria-label={isRtl ? "تعديل التقييم" : "Edit review"}
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
@@ -2206,7 +2228,7 @@ export default function AdminProductCreateForm({
                         )
                       }
                       className="rounded-xl border border-red-200 p-2 text-red-600 hover:bg-red-50"
-                      aria-label="Delete review"
+                      aria-label={isRtl ? "حذف التقييم" : "Delete review"}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -2221,10 +2243,10 @@ export default function AdminProductCreateForm({
               <div className="lg:col-span-2 rounded-3xl border-2 border-dashed border-[#D8B46A]/45 bg-[#FFF9EB]/45 p-10 text-center">
                 <Star className="mx-auto h-9 w-9 text-[#D8B46A]" />
                 <p className="mt-3 font-playfair text-xl font-bold text-[#942E3A]">
-                  No reviews yet
+                  {isRtl ? "لا توجد تقييمات حتى الآن" : "No reviews yet"}
                 </p>
                 <p className="mt-1 text-xs text-[#6B1F2A]/55">
-                  Add the first customer review for this product.
+                  {isRtl ? "أضف أول تقييم عميل لهذا المنتج." : "Add the first customer review for this product."}
                 </p>
               </div>
             )}
@@ -2232,6 +2254,7 @@ export default function AdminProductCreateForm({
           {reviewModalOpen && (
             <div
               className="fixed inset-0 z-[100] flex items-center justify-center bg-[#8B7CC7]/35 p-4 backdrop-blur-[2px]"
+              dir={isRtl ? "rtl" : "ltr"}
               onMouseDown={() => setReviewModalOpen(false)}
             >
               <div
@@ -2240,24 +2263,25 @@ export default function AdminProductCreateForm({
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="step-kicker">Customer voice</p>
+                    <p className="step-kicker">{isRtl ? "رأي العميل" : "Customer voice"}</p>
                     <h3 className="mt-1 font-playfair text-2xl font-bold text-[#942E3A]">
                       {editingReviewIndex === null
-                        ? "Add review"
-                        : "Edit review"}
+                        ? (isRtl ? "إضافة تقييم" : "Add review")
+                        : (isRtl ? "تعديل التقييم" : "Edit review")}
                     </h3>
                   </div>
                   <button
                     type="button"
                     onClick={() => setReviewModalOpen(false)}
                     className="rounded-full p-2 text-[#942E3A]/60 hover:bg-[#F2DFC0]"
+                    aria-label={isRtl ? "إغلاق" : "Close"}
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </div>
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
                   <label>
-                    <span className="field-label">Customer name</span>
+                    <span className="field-label">{isRtl ? "اسم العميل" : "Customer name"}</span>
                     <input
                       value={reviewDraft.customerName}
                       onChange={(event) =>
@@ -2271,10 +2295,10 @@ export default function AdminProductCreateForm({
                     />
                   </label>
                   <div className="relative" ref={ratingMenuRef}>
-                    <span className="field-label">Rating</span>
-                    <div className="mt-2 flex items-center gap-1.5" role="radiogroup" aria-label="Rating">
+                    <span className="field-label">{isRtl ? "التقييم" : "Rating"}</span>
+                    <div className="mt-2 flex items-center gap-1.5" role="radiogroup" aria-label={isRtl ? "التقييم" : "Rating"}>
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <button key={star} type="button" role="radio" aria-checked={reviewDraft.rating === star} aria-label={`${star} out of 5 stars`} onClick={() => setReviewDraft((current) => ({ ...current, rating: star }))} className="rounded-lg p-1 transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#D8B46A]/50">
+                        <button key={star} type="button" role="radio" aria-checked={reviewDraft.rating === star} aria-label={`${star} ${isRtl ? "من 5 نجوم" : "out of 5 stars"}`} onClick={() => setReviewDraft((current) => ({ ...current, rating: star }))} className="rounded-lg p-1 transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#D8B46A]/50">
                           <Star className={`h-7 w-7 ${star <= reviewDraft.rating ? "fill-[#D8B46A] text-[#D8B46A]" : "text-[#d9c8b8] hover:text-[#D8B46A]/70"}`} />
                         </button>
                       ))}
@@ -2299,7 +2323,7 @@ export default function AdminProductCreateForm({
                     {ratingMenuOpen && (
                       <div
                         role="listbox"
-                        aria-label="Rating"
+                        aria-label={isRtl ? "التقييم" : "Rating"}
                         className="absolute left-0 right-0 top-[calc(100%+0.45rem)] z-20 overflow-hidden rounded-2xl border border-[#D8B46A]/45 bg-[#FFF9EB] p-1.5 shadow-[0_18px_40px_rgba(67,25,31,0.2)]"
                       >
                         {[5, 4, 3, 2, 1].map((rating) => (
@@ -2332,7 +2356,7 @@ export default function AdminProductCreateForm({
                     )}
                   </div>
                   <label className="sm:col-span-2">
-                    <span className="field-label">Review</span>
+                    <span className="field-label">{isRtl ? "نص التقييم" : "Review"}</span>
                     <textarea
                       rows={5}
                       value={reviewDraft.body}
@@ -2343,7 +2367,7 @@ export default function AdminProductCreateForm({
                         }))
                       }
                       className="admin-input resize-y"
-                      placeholder="Write the customer experience..."
+                      placeholder={isRtl ? "اكتب تفاصيل تجربة العميل..." : "Write the customer experience..."}
                     />
                   </label>
                 </div>
@@ -2353,7 +2377,7 @@ export default function AdminProductCreateForm({
                     onClick={() => setReviewModalOpen(false)}
                     className="rounded-xl border border-[#942E3A]/15 bg-white px-4 py-2.5 text-xs font-bold text-[#942E3A]"
                   >
-                    Cancel
+                    {isRtl ? "إلغاء" : "Cancel"}
                   </button>
                   <button
                     type="button"
@@ -2376,8 +2400,8 @@ export default function AdminProductCreateForm({
                     className="rounded-xl bg-[#942E3A] px-5 py-2.5 text-xs font-bold text-[#FFF9EB] disabled:opacity-50"
                   >
                     {editingReviewIndex === null
-                      ? "Add review"
-                      : "Save changes"}
+                      ? (isRtl ? "إضافة التقييم" : "Add review")
+                      : (isRtl ? "حفظ التعديلات" : "Save changes")}
                   </button>
                 </div>
               </div>
@@ -2393,14 +2417,14 @@ export default function AdminProductCreateForm({
             onClick={onCancel}
             className="rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-center text-xs font-bold text-[#942E3A] shrink-0"
           >
-            Cancel
+            {isRtl ? "إلغاء" : "Cancel"}
           </button>
         ) : (
           <Link
             href="/admin/products"
             className="rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-center text-xs font-bold text-[#942E3A] shrink-0"
           >
-            Cancel
+            {isRtl ? "إلغاء" : "Cancel"}
           </Link>
         )}
         <div className="flex gap-2">
@@ -2410,7 +2434,7 @@ export default function AdminProductCreateForm({
               onClick={() => setActiveStep((step) => step - 1)}
               className="inline-flex items-center gap-1.5 rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2.5 text-xs font-bold text-[#942E3A]"
             >
-              <ArrowLeft className="h-3.5 w-3.5" /> Back
+              <ArrowLeft className={`h-3.5 w-3.5 ${isRtl ? "rotate-180" : ""}`} /> {isRtl ? "السابق" : "Back"}
             </button>
           )}
           {activeStep < steps.length - 1 ? (
@@ -2419,15 +2443,15 @@ export default function AdminProductCreateForm({
               onClick={() => setActiveStep((step) => step + 1)}
               className="inline-flex items-center gap-1.5 rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB]"
             >
-              {isEdit ? "Next" : "Continue"}{" "}
-              <ArrowRight className="h-3.5 w-3.5 text-[#D8B46A]" />
+              {isEdit ? (isRtl ? "التالي" : "Next") : (isRtl ? "متابعة" : "Continue")}{" "}
+              <ArrowRight className={`h-3.5 w-3.5 text-[#D8B46A] ${isRtl ? "rotate-180" : ""}`} />
             </button>
           ) : (
             <button
               type="submit"
               className="rounded-xl bg-[#942E3A] px-4 py-2.5 text-xs font-bold text-[#FFF9EB]"
             >
-              {isEdit ? "Update product" : "Create product"}
+              {isEdit ? (isRtl ? "حفظ التعديلات" : "Update product") : (isRtl ? "إنشاء المنتج" : "Create product")}
             </button>
           )}
         </div>

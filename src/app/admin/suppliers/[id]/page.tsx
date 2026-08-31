@@ -1,24 +1,48 @@
-import Link from "next/link";
-import { Building2, FileText, Mail, MapPin, Phone, Package } from "lucide-react";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
-import { formatCurrency } from "@/lib/utils";
-import AdminBackButton from "@/components/AdminBackButton";
+import AdminSupplierDetailsView from "@/components/AdminSupplierDetailsView";
 
 export const dynamic = "force-dynamic";
 
 export default async function SupplierDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
   const { id } = await params;
-  const supplier = await prisma.supplier.findUnique({ where: { id }, include: { products: { include: { variants: { select: { stock: true } } }, orderBy: { name: "asc" } }, invoices: { include: { items: true }, orderBy: { invoiceDate: "desc" } } } });
+  const supplier = await prisma.supplier.findUnique({
+    where: { id },
+    include: {
+      products: { include: { variants: { select: { stock: true } } }, orderBy: { name: "asc" } },
+      invoices: { include: { items: true }, orderBy: { invoiceDate: "desc" } },
+    },
+  });
   if (!supplier) notFound();
   const totalPurchases = supplier.invoices.reduce((sum, invoice) => sum + Number(invoice.total), 0);
   const totalUnits = supplier.invoices.reduce((sum, invoice) => sum + invoice.items.reduce((items, item) => items + item.quantity, 0), 0);
 
-  return <div className="mx-auto max-w-6xl space-y-4 sm:space-y-5"><div className="flex items-center gap-3"><AdminBackButton fallbackHref="/admin/suppliers" /><div><p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">Procurement profile</p><h1 className="mt-0.5 sm:mt-1 font-playfair text-2xl sm:text-3xl font-black">{supplier.name}</h1></div></div>
-    <section className="grid gap-3 sm:gap-4 lg:grid-cols-[1.2fr_0.8fr]"><div className="rounded-2xl bg-[#942E3A] p-4 text-[#FFF9EB] sm:rounded-3xl sm:p-8"><div className="flex items-start gap-3 sm:gap-4"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#D8B46A] text-[#942E3A] sm:h-14 sm:w-14 sm:rounded-2xl"><Building2 className="h-5 w-5 sm:h-7 sm:w-7" /></div><div><p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.22em] text-[#D8B46A]">Supplier account</p><h2 className="mt-0.5 font-playfair text-xl sm:text-3xl font-black">{supplier.name}</h2></div></div><div className="mt-4 grid gap-2.5 text-xs sm:mt-7 sm:grid-cols-2 sm:gap-3"><div className="space-y-2 rounded-xl bg-white/10 p-3 sm:space-y-3 sm:rounded-2xl sm:p-4"><p className="flex items-center gap-2 text-[11px] sm:text-xs"><Phone className="h-3.5 w-3.5 shrink-0 text-[#D8B46A]" />{supplier.phone || "No phone"}</p><p className="flex items-center gap-2 text-[11px] sm:text-xs break-all"><Mail className="h-3.5 w-3.5 shrink-0 text-[#D8B46A]" />{supplier.email || "No email"}</p><p className="flex items-center gap-2 text-[11px] sm:text-xs"><MapPin className="h-3.5 w-3.5 shrink-0 text-[#D8B46A]" />{supplier.address || "No address"}</p></div><div className="rounded-xl bg-white/10 p-3 sm:rounded-2xl sm:p-4"><p className="text-[11px] font-bold text-[#D8B46A] sm:text-xs">Notes</p><p className="mt-1 text-[11px] leading-relaxed text-white/80 sm:mt-2 sm:text-xs">{supplier.notes || "No purchasing notes added yet."}</p></div></div></div><div className="grid grid-cols-2 gap-2.5 sm:gap-3"><div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3.5 sm:rounded-3xl sm:p-5"><FileText className="h-4 w-4 text-[#D8B46A] sm:h-5 sm:w-5" /><p className="mt-3 text-[9px] uppercase tracking-wide text-[#6B1F2A]/55 sm:mt-5 sm:text-[10px]">Invoices</p><p className="mt-0.5 font-playfair text-xl font-black text-[#942E3A] sm:mt-1 sm:text-3xl">{supplier.invoices.length}</p></div><div className="rounded-2xl border border-[#D8B46A]/35 bg-[#fff7df] p-3.5 sm:rounded-3xl sm:p-5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/55 sm:text-[10px]">Purchases</p><p className="mt-3 font-playfair text-base font-black text-[#942E3A] sm:mt-5 sm:text-xl">{formatCurrency(totalPurchases)}</p></div><div className="col-span-2 rounded-2xl border border-[#942E3A]/10 bg-white p-3.5 sm:rounded-3xl sm:p-5"><p className="text-[9px] uppercase tracking-wide text-[#6B1F2A]/55 sm:text-[10px]">Units received</p><p className="mt-0.5 font-playfair text-xl font-black text-[#942E3A] sm:mt-1 sm:text-3xl">{totalUnits}</p></div></div></section>
-    <section className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-xs sm:rounded-3xl sm:p-7"><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-[#D8B46A]" /><h2 className="font-playfair text-base sm:text-xl font-bold">Supplier invoices</h2></div><Link href="/admin/suppliers/invoices/new" className="rounded-xl bg-[#942E3A] px-3 py-1.5 text-[10px] font-bold text-[#FFF9EB] sm:px-3 sm:py-2">New invoice</Link></div><div className="mt-3 space-y-2 sm:mt-4">{supplier.invoices.length ? supplier.invoices.map((invoice) => <Link href={`/admin/suppliers/invoices/${invoice.id}`} key={invoice.id} className="flex items-center justify-between rounded-xl border border-[#942E3A]/10 p-3 transition hover:border-[#D8B46A] sm:rounded-2xl sm:p-4"><div><p className="text-xs font-bold text-[#942E3A] sm:text-sm">{invoice.invoiceNumber}</p><p className="mt-0.5 text-[10px] text-[#6B1F2A]/60">{invoice.invoiceDate.toLocaleDateString("en-US", { dateStyle: "medium" })} · {invoice.items.length} products</p></div><div className="text-right"><p className="font-playfair text-sm font-bold text-[#942E3A] sm:text-lg">{formatCurrency(Number(invoice.total))}</p></div></Link>) : <p className="py-8 text-center text-xs text-[#6B1F2A]/60">No invoices for this supplier yet.</p>}</div></section>
-    <section className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-xs sm:rounded-3xl sm:p-7"><div className="flex items-center gap-2"><Package className="h-4 w-4 text-[#D8B46A]" /><h2 className="font-playfair text-base sm:text-xl font-bold">Linked product catalog</h2></div><div className="mt-3 grid gap-2 sm:mt-4 sm:grid-cols-2">{supplier.products.length ? supplier.products.map((product) => <Link key={product.id} href={`/admin/products/${product.id}`} className="flex items-center justify-between rounded-xl bg-[#FFF9EB] px-3.5 py-2.5 text-xs sm:rounded-2xl sm:px-4 sm:py-3"><span className="font-bold text-[#942E3A] truncate">{product.name}</span><span className="text-[10px] sm:text-xs text-[#6B1F2A]/60 shrink-0 ml-2">{product.variants.reduce((sum, variant) => sum + variant.stock, 0)} in stock</span></Link>) : <p className="py-6 text-center text-xs text-[#6B1F2A]/60">No products linked yet.</p>}</div></section>
-  </div>;
+  return (
+    <AdminSupplierDetailsView
+      supplier={{
+        id: supplier.id,
+        name: supplier.name,
+        phone: supplier.phone,
+        email: supplier.email,
+        address: supplier.address,
+        notes: supplier.notes,
+        products: supplier.products.map((p) => ({
+          id: p.id,
+          name: p.name,
+          stock: p.variants.reduce((sum, v) => sum + v.stock, 0),
+        })),
+        invoices: supplier.invoices.map((inv) => ({
+          id: inv.id,
+          invoiceNumber: inv.invoiceNumber,
+          invoiceDate: inv.invoiceDate.toISOString(),
+          itemCount: inv.items.length,
+          total: Number(inv.total),
+        })),
+      }}
+      totalPurchases={totalPurchases}
+      totalUnits={totalUnits}
+    />
+  );
 }

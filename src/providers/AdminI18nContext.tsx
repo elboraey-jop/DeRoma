@@ -469,6 +469,167 @@ const LEGACY_ARABIC_LABELS: Record<string, string> = {
   "Supplier relationships": "علاقات الموردين",
 };
 
+const SUPPLIERS_INVOICES_ARABIC_LABELS: Record<string, string> = {
+  // Intake modal & headers
+  "Product intake": "إدخال المنتجات",
+  "PRODUCT INTAKE": "إدخال المنتجات",
+  "Add to this invoice": "إضافة إلى هذه الفاتورة",
+  "Add an existing batch": "إضافة دفعة من الكتالوج",
+  "Create a new product": "إنشاء منتج جديد",
+  "Choose how you want to build the next stock line.": "اختر كيف تريد بناء سطر المخزون التالي.",
+  "Pick a catalog variant, then add its cost and quantity below.": "اختر صنفاً من الكتالوج ثم حدد التكلفة والكمية.",
+  "Complete the product setup without leaving the invoice.": "أكمل تجهيز المنتج بالكامل دون مغادرة الفاتورة.",
+  "New product": "منتج جديد",
+  "NEW PRODUCT": "منتج جديد",
+  "Create the complete product, variants, pricing and gallery in this modal.": "إنشاء المنتج بالكامل والموديلات والأسعار ومعرض الصور داخل هذه النافذة.",
+  "Open product editor →": "فتح محرر المنتج ←",
+  "OPEN PRODUCT EDITOR →": "فتح محرر المنتج ←",
+  "Existing batch": "دفعة حالية",
+  "EXISTING BATCH": "دفعة حالية",
+  "Select a product variant already in the catalog and add it to this invoice.": "اختر موديل منتج موجود بالفعل في الكتالوج وأضفه إلى هذه الفاتورة.",
+  "Choose from catalog →": "اختر من الكتالوج ←",
+  "CHOOSE FROM CATALOG →": "اختر من الكتالوج ←",
+  "Catalog batch": "دفعة من الكتالوج",
+  "Choose a product variant": "اختر موديل المنتج",
+  "Select quantities for each size / volume.": "حدد الكميات لكل مقاس / حجم.",
+  "Old selling price": "سعر البيع الحالي",
+  "New selling price": "سعر بيع جديد",
+  "Wholesale price for this batch": "سعر الجملة لهذه الدفعة",
+  "Old wholesale": "سعر الجملة الحالي",
+  "New wholesale": "سعر جملة جديد",
+  "Receive quantity": "الكمية المستلمة",
+  "Included": "مضمن",
+  "Excluded": "مستبعد",
+  "Adding…": "جاري الإضافة...",
+  "Add to invoice": "إضافة للفاتورة",
+  "Add product": "إضافة منتج",
+  "In progress": "قيد التجهيز",
+  "Ready to add": "جاهز للإضافة",
+  "Ready to receive stock": "جاهز لإضافة القطع فور الحفظ",
+  "Save invoice & receive stock": "حفظ الفاتورة وتأكيد استلام المخزون",
+  "Saving invoice…": "جاري حفظ الفاتورة...",
+  
+  // Table & card headers and labels
+  "Category": "القسم",
+  "Selling": "سعر البيع",
+  "Wholesale": "سعر الجملة",
+  "Additional": "تكلفة إضافية",
+  "ADDITIONAL": "تكلفة إضافية",
+  "Extra cost": "تكلفة إضافية",
+  "Low stock": "حد المخزون",
+  "Size / volume": "المقاس / الحجم",
+  "Qty": "الكمية",
+  "Line total": "إجمالي البند",
+  "Selling / unit": "سعر البيع / للقطعة",
+  "Wholesale / unit": "سعر الجملة / للقطعة",
+  "Wholesale price / unit": "سعر الجملة / للقطعة",
+  "Selling price / unit": "سعر البيع / للقطعة",
+  "Sizes / quantities": "المقاسات / الكميات",
+  "Remaining": "المتبقي",
+  "Product total": "إجمالي المنتج",
+  "Total Invoice Paid": "إجمالي الفاتورة المدفوع",
+  "Received products": "المنتجات المستلمة",
+  "Purchase invoice": "فاتورة شراء",
+  "Purchase invoices": "فواتير التوريد",
+  "Create purchase invoice": "إنشاء فاتورة شراء",
+  "Live overview": "ملخص الشراء",
+  "Invoice summary": "إجمالي الفاتورة",
+  "Purchase total": "إجمالي الشراء بالجملة",
+  "Expected retail value": "القيمة البيعية المتوقعة",
+  "Invoice information": "بيانات فاتورة الشراء",
+  "Supplier & invoice": "المورد وتاريخ الفاتورة",
+  "Invoice date *": "تاريخ الفاتورة *",
+  "Stock receipt": "استلام المخزون",
+  "Products on this invoice": "المنتجات المسجلة بالفاتورة",
+  "New stock receipt": "استلام مخزون جديد",
+  "New batch": "دفعة جديدة",
+  "NEW BATCH": "دفعة جديدة",
+  
+  // Pickers & Search
+  "Choose supplier": "اختر المورد",
+  "Search supplier...": "ابحث عن مورد...",
+  "No suppliers found.": "لم يتم العثور على موردين.",
+  "Add new supplier": "إضافة مورد جديد",
+  "Choose product variant to add": "اختر موديل المنتج للإضافة",
+  "Search product, color, size or SKU...": "ابحث بالمنتج، اللون، المقاس أو الكود...",
+  "No matching products.": "لا توجد منتجات مطابقة.",
+  "Select a product": "اختر منتجًا",
+  "Search product...": "ابحث عن منتج...",
+  "Supplier / factory name *": "اسم المورد / المصنع *",
+  "Enter supplier name": "أدخل اسم المورد أو المصنع",
+  "Create supplier": "إضافة المورد",
+  "Creating...": "جاري الإنشاء...",
+  "Add the name now; you can complete the supplier details later.": "أضف الاسم الآن، ويمكنك إكمال تفاصيل المورد لاحقًا.",
+  
+  // Add Product Modal & Product Steps
+  "Catalog intake": "إدخال الكتالوج",
+  "Add product stock": "إضافة مخزون للمنتج",
+  "Receive stock using the same size and volume logic as the product editor.": "استلام المخزون بنفس منطق المقاسات والأحجام في محرر المنتجات.",
+  "Create the complete product, variants, pricing and stock.": "إنشاء المنتج بالكامل والموديلات والأسعار والمخزون.",
+  "Add stock to an existing product by size or volume.": "إضافة مخزون لمنتج موجود مسبقًا حسب المقاس أو الحجم.",
+  "Batch details": "تفاصيل الدفعة",
+  "Existing product *": "المنتج الحالي *",
+  "Size matrix": "مصفوفة المقاسات",
+  "Volume matrix": "مصفوفة الأحجام",
+  "Stock matrix": "مصفوفة المخزون",
+  "Select what this batch contains": "اختر محتويات هذه الدفعة",
+  "Total stock": "إجمالي المخزون",
+  "New supplier name": "اسم المورد الجديد",
+  "Same as previous": "نفس السعر السابق",
+  "New price": "سعر جديد",
+  "Receive batch": "استلام الدفعة",
+  "Saving…": "جاري الحفظ...",
+  "Identity": "البيانات الأساسية",
+  "Name & category": "الاسم والقسم",
+  "Gallery": "المعرض",
+  "Images & media": "الصور والوسائط",
+  "Manage media": "إدارة الوسائط",
+  "Inventory": "المخزون",
+  "Variants & stock": "الموديلات والمخزون",
+  "Manage stock": "إدارة المخزون",
+  "Relations": "المنتجات المشابهة",
+  "Similar products": "منتجات ذات صلة",
+  "Pricing": "التسعير",
+  "Costs & visibility": "التكاليف والظهور",
+  "Update costs": "تعديل التكاليف",
+  "Reviews": "التقييمات",
+  "Social proof": "آراء العملاء",
+  "Product details": "تفاصيل المنتج",
+  "Product type & identity": "نوع وهوية المنتج",
+  "Product type": "نوع المنتج",
+  "Fixed after creation": "ثابت بعد الإنشاء",
+  "Step 1": "الخطوة 1",
+  "Step 2": "الخطوة 2",
+  "Step 3": "الخطوة 3",
+  "Step 4": "الخطوة 4",
+  "Step 5": "الخطوة 5",
+  "Step 6": "الخطوة 6",
+  "Continue": "متابعة",
+  "Next": "التالي",
+  "Create product": "إنشاء المنتج",
+  "Update product": "حفظ التعديلات",
+  "Volume pricing": "تسعير الأحجام",
+  "Price each perfume volume": "تسعير كل حجم عطر",
+  "Every bottle size can have its own price and costs": "يمكن تحديد سعر وتكلفة مستقلة لكل حجم زجاجة",
+  "Main image & gallery": "الصورة الرئيسية والمعرض",
+  "Manage product gallery": "إدارة معرض صور المنتج",
+  "Manage variants & stock": "إدارة الموديلات والمخزون",
+  "Review pricing, sourcing & visibility": "مراجعة التسعير والتوريد والظهور",
+  "Pricing, sourcing & visibility": "التسعير، التوريد والظهور",
+  "Linked product catalog": "كتالوج المنتجات المرتبط",
+  "No products linked yet.": "لا توجد منتجات مرتبطة بعد.",
+  "No invoices for this supplier yet.": "لا توجد فواتير لهذا المورد بعد.",
+  "No purchasing notes added yet.": "لم تتم إضافة ملاحظات شراء بعد.",
+  "Procurement profile": "ملف التوريد",
+  "Supplier account": "حساب المورد",
+  "No phone": "لم يحدد هاتف",
+  "No email": "لم يحدد بريد إلكتروني",
+  "No address": "لم يحدد عنوان",
+  "Units received": "القطع المستلمة",
+  "Total purchases": "إجمالي المشتريات",
+  "Delete supplier?": "هل أنت متأكد من حذف هذا المورد؟",
+};
+
 // Analytics contains a large reporting surface with labels rendered directly
 // by the chart/table components. Keep these labels in one place so the Arabic
 // admin view remains complete, including modal and empty-state copy.
@@ -961,7 +1122,7 @@ export function localizeLegacyAdminDom(root: HTMLElement) {
     const value = textNode.nodeValue || "";
     const trimmed = value.trim();
     if (!trimmed) continue;
-    let localized = LEGACY_ARABIC_LABELS[trimmed] || ANALYTICS_ARABIC_LABELS[trimmed] || DAILY_LOG_ARABIC_LABELS[trimmed] || TEAM_ARABIC_LABELS[trimmed] || ORDERS_ARABIC_LABELS[trimmed];
+    let localized = LEGACY_ARABIC_LABELS[trimmed] || SUPPLIERS_INVOICES_ARABIC_LABELS[trimmed] || ANALYTICS_ARABIC_LABELS[trimmed] || DAILY_LOG_ARABIC_LABELS[trimmed] || TEAM_ARABIC_LABELS[trimmed] || ORDERS_ARABIC_LABELS[trimmed];
     const optionCount = trimmed.match(/^Showing (.+) of (.+) options in this category\.$/);
     if (optionCount) localized = `عرض ${optionCount[1]} من ${optionCount[2]} خيارًا في هذا القسم.`;
     const editing = trimmed.match(/^Editing (.+)$/);
@@ -988,11 +1149,33 @@ export function localizeLegacyAdminDom(root: HTMLElement) {
     if (lastCustomerOrder) localized = `آخر طلب: ${lastCustomerOrder[1]}`;
     const accountCount = trimmed.match(/^accounts (.+)$/i);
     if (accountCount) localized = `حسابات ${accountCount[1]}`;
+    const newProductCreated = trimmed.match(/^(.+) · New product to be created with this invoice$/i);
+    if (newProductCreated) localized = `${newProductCreated[1]} · منتج جديد سيتم إنشاؤه مع هذه الفاتورة`;
+    const newStockReceiptSizes = trimmed.match(/^New stock receipt · (\d+) sizes \/ volumes$/i);
+    if (newStockReceiptSizes) localized = `استلام مخزون جديد · ${newStockReceiptSizes[1]} مقاسات / أحجام`;
+    const variantsUnitsAdded = trimmed.match(/^(\d+) variants · (.+) units will be added to this invoice\.$/i);
+    if (variantsUnitsAdded) localized = `${variantsUnitsAdded[1]} موديلات · ${variantsUnitsAdded[2]} قطعة ستتم إضافتها لهذه الفاتورة.`;
+    const piecesCount = trimmed.match(/^(.+) pieces$/i);
+    if (piecesCount) localized = `${piecesCount[1]} قطعة`;
+    const sellingTotal = trimmed.match(/^(.+) selling total$/i);
+    if (sellingTotal) localized = `إجمالي البيع: ${sellingTotal[1]}`;
+    const purchaseTotal = trimmed.match(/^(.+) purchase total$/i);
+    if (purchaseTotal) localized = `إجمالي الشراء: ${purchaseTotal[1]}`;
+    const totalUnits = trimmed.match(/^(\d+) total units$/i);
+    if (totalUnits) localized = `إجمالي القطع ${totalUnits[1]}`;
+    const unitsRemaining = trimmed.match(/^(\d+) units · (\d+) remaining$/i);
+    if (unitsRemaining) localized = `${unitsRemaining[1]} قطعة · ${unitsRemaining[2]} متبقي`;
+    const sizeQty = trimmed.match(/^Size (.+) · Qty (\d+)$/i);
+    if (sizeQty) localized = `مقاس ${sizeQty[1]} · كمية ${sizeQty[2]}`;
+    const inStockCount = trimmed.match(/^(\d+) in stock$/i);
+    if (inStockCount) localized = `${inStockCount[1]} متوفر بالمخزون`;
+    const productsCount = trimmed.match(/^(\d+) products?$/i);
+    if (productsCount) localized = `${productsCount[1]} منتج`;
     const ordersOn = trimmed.match(/^Orders on (.+)$/);
     const ordersOnFragment = trimmed.match(/^on (.+)$/i);
     if (ordersOnFragment) {
       let translatedDate = ordersOnFragment[1];
-      const dateLabels = Object.entries({ ...LEGACY_ARABIC_LABELS, ...DAILY_LOG_ARABIC_LABELS })
+      const dateLabels = Object.entries({ ...LEGACY_ARABIC_LABELS, ...SUPPLIERS_INVOICES_ARABIC_LABELS, ...DAILY_LOG_ARABIC_LABELS })
         .filter(([english]) => english.length > 2)
         .sort(([a], [b]) => b.length - a.length);
       for (const [english, arabic] of dateLabels) {
@@ -1003,7 +1186,7 @@ export function localizeLegacyAdminDom(root: HTMLElement) {
     if (ordersOn) localized = `الطلبات في ${ordersOn[1]}`;
     if (!localized) {
       let replaced = value;
-      const entries = Object.entries({ ...LEGACY_ARABIC_LABELS, ...ANALYTICS_ARABIC_LABELS, ...DAILY_LOG_ARABIC_LABELS, ...TEAM_ARABIC_LABELS, ...ORDERS_ARABIC_LABELS })
+      const entries = Object.entries({ ...LEGACY_ARABIC_LABELS, ...SUPPLIERS_INVOICES_ARABIC_LABELS, ...ANALYTICS_ARABIC_LABELS, ...DAILY_LOG_ARABIC_LABELS, ...TEAM_ARABIC_LABELS, ...ORDERS_ARABIC_LABELS })
         .filter(([english]) => english.length > 2)
         .sort(([a], [b]) => b.length - a.length);
       for (const [english, arabic] of entries) {
@@ -1018,7 +1201,7 @@ export function localizeLegacyAdminDom(root: HTMLElement) {
     for (const attribute of ["placeholder", "title", "aria-label"] as const) {
       const value = element.getAttribute(attribute);
       if (value) {
-        const localized = LEGACY_ARABIC_LABELS[value] || ANALYTICS_ARABIC_LABELS[value] || DAILY_LOG_ARABIC_LABELS[value] || TEAM_ARABIC_LABELS[value] || ORDERS_ARABIC_LABELS[value];
+        const localized = LEGACY_ARABIC_LABELS[value] || SUPPLIERS_INVOICES_ARABIC_LABELS[value] || ANALYTICS_ARABIC_LABELS[value] || DAILY_LOG_ARABIC_LABELS[value] || TEAM_ARABIC_LABELS[value] || ORDERS_ARABIC_LABELS[value];
         if (localized) element.setAttribute(attribute, localized);
       }
     }

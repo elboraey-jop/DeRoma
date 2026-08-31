@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
+import { nextSkuFromValues } from "@/lib/sku";
 
 type InvoiceItemInput = {
   variantId: string;
@@ -28,6 +29,7 @@ type NewProductVariantInput = {
 type NewProductInput = {
   name: string;
   sku: string;
+  skuAuto?: boolean;
   category: string;
   description?: string;
   subcategory?: string;
@@ -100,14 +102,16 @@ function parseInvoiceItems(value: FormDataEntryValue | null): InvoiceItemInput[]
   }
 }
 
-function parseNewProduct(value: FormDataEntryValue | null): NewProductInput | null {
-  if (!value || !String(value).trim()) return null;
+function parseNewProducts(value: FormDataEntryValue | null, legacyValue: FormDataEntryValue | null): NewProductInput[] {
+  const rawValue = value && String(value).trim() ? value : legacyValue;
+  if (!rawValue || !String(rawValue).trim()) return [];
   try {
-    const parsed = JSON.parse(String(value)) as NewProductInput;
+    const parsed = JSON.parse(String(rawValue)) as NewProductInput | NewProductInput[];
+    if (Array.isArray(parsed)) return parsed;
     if (!parsed || typeof parsed !== "object") throw new Error();
-    return parsed;
+    return [parsed];
   } catch {
-    throw new Error("New product data is invalid.");
+    throw new Error("New products data is invalid.");
   }
 }
 
@@ -128,20 +132,20 @@ export async function createPurchaseInvoiceAction(formData: FormData) {
   const shippingCost = Number(formData.get("shippingCost") || 0);
   const discount = Number(formData.get("discount") || 0);
   const items = parseInvoiceItems(formData.get("items"));
-  const newProduct = parseNewProduct(formData.get("newProduct"));
+  const newProducts = parseNewProducts(formData.get("newProducts"), formData.get("newProduct"));
 
   if (!supplierId || Number.isNaN(invoiceDate.getTime())) throw new Error("Supplier and invoice date are required.");
   if ([shippingCost, discount].some((value) => !Number.isFinite(value) || value < 0)) throw new Error("Invoice totals must be valid positive numbers.");
-  if (!items.length && !newProduct) throw new Error("Add at least one complete invoice product.");
+  if (!items.length && !newProducts.length) throw new Error("Add at least one complete invoice product.");
   if (items.some((item) => !item.variantId || !Number.isInteger(Number(item.quantity)) || Number(item.quantity) < 1 || !Number.isFinite(Number(item.wholesalePrice)) || Number(item.wholesalePrice) < 0 || !Number.isFinite(Number(item.retailPrice)) || Number(item.retailPrice) < 0)) throw new Error("Add at least one complete invoice product.");
   if (new Set(items.map((item) => item.variantId)).size !== items.length) throw new Error("Each product variant can only be added once per invoice.");
-  if (newProduct) {
+  for (const newProduct of newProducts) {
     const productPrice = Number(newProduct.price);
     const lowStockLimit = Number(newProduct.lowStockLimit);
     if (!newProduct.name?.trim() || !newProduct.sku?.trim() || !["shoes", "bags", "perfumes", "accessories"].includes(newProduct.category) || !Number.isFinite(productPrice) || productPrice < 0) throw new Error("New product details are incomplete.");
     if (!Number.isInteger(lowStockLimit) || lowStockLimit < 0) throw new Error("New product low-stock warning is invalid.");
     if (!Array.isArray(newProduct.variants) || !newProduct.variants.length || newProduct.variants.some((variant) => !variant.size?.trim() || !Number.isInteger(Number(variant.stock)) || Number(variant.stock) < 0)) throw new Error("New product stock variants are incomplete.");
-    if (!newProduct.variants.some((variant) => Number(variant.stock) > 0)) throw new Error("Add at least one unit for the new product.");
+    if (!newProduct.variants.some((variant) => Number(variant.stock) > 0)) throw new Error("Add at least one unit for each new product.");
   }
 
   const existingVariantIds = items.filter((item) => !item.variantId.startsWith("new:")).map((item) => item.variantId);
@@ -157,6 +161,14 @@ export async function createPurchaseInvoiceAction(formData: FormData) {
     let invoiceItems = [...items];
     let allVariants = [...variants];
     const virtualVariantIds = new Map<string, string>();
+    const existingSkus = await tx.product.findMany({
+      select: { sku: true },
+    });
+    const usedSkus = new Set(
+      existingSkus
+        .map((product) => product.sku?.trim().toUpperCase())
+        .filter((sku): sku is string => Boolean(sku)),
+    );
 
     for (const item of items.filter((candidate) => candidate.variantId.startsWith("new:"))) {
       if (!item.productId || !item.variantSize?.trim()) throw new Error("A new batch size is incomplete.");
@@ -174,11 +186,16 @@ export async function createPurchaseInvoiceAction(formData: FormData) {
       variantId: virtualVariantIds.get(item.variantId) || item.variantId,
     }));
 
-    if (newProduct) {
+    for (const newProduct of newProducts) {
+      const sku = newProduct.skuAuto
+        ? nextSkuFromValues(newProduct.category, Array.from(usedSkus))
+        : newProduct.sku.trim().toUpperCase();
+      if (usedSkus.has(sku)) throw new Error(`SKU ${sku} is already in use.`);
+      usedSkus.add(sku);
       const createdProduct = await tx.product.create({
         data: {
           name: newProduct.name.trim(),
-          sku: newProduct.sku.trim().toUpperCase(),
+          sku,
           category: newProduct.category,
           description: newProduct.description?.trim() || null,
           subcategory: newProduct.subcategory?.trim() || null,
