@@ -1053,7 +1053,7 @@ export default function AdminInventoryClient({
         <div className="mt-4 hidden sm:block overflow-x-auto">
           {viewMode === "variants" ? (
             /* Table 1: By Variant View */
-            <table className={`w-full min-w-[850px] ${isRtl ? "text-right" : "text-left"} text-xs`}>
+            <table className="w-full min-w-[850px] text-start text-xs">
               <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
                 <tr>
                   <th className="w-10 pb-3 px-3">
@@ -1069,13 +1069,13 @@ export default function AdminInventoryClient({
                       )}
                     </button>
                   </th>
-                  <th className={`w-[28%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "المنتج" : "Product"}</th>
-                  <th className={`w-[12%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "رمز المنتج (SKU)" : "SKU"}</th>
-                  <th className={`w-[14%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "المتغير / المقاس" : "Variant"}</th>
-                  <th className={`w-[12%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "القسم" : "Category"}</th>
-                  <th className={`w-[15%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "حالة المنتج" : "Product Status"}</th>
-                  <th className={`w-[13%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "حالة المخزون" : "Stock Status"}</th>
-                  <th className={`w-[10%] pb-3 px-3 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "كمية المخزون" : "Stock Quantity"}</th>
+                  <th className="w-[28%] pb-3 px-3 text-start">{isRtl ? "المنتج" : "Product"}</th>
+                  <th className="w-[12%] pb-3 px-3 text-start">{isRtl ? "رمز المنتج (SKU)" : "SKU"}</th>
+                  <th className="w-[14%] pb-3 px-3 text-start">{isRtl ? "المتغير / المقاس" : "Variant"}</th>
+                  <th className="w-[12%] pb-3 px-3 text-start">{isRtl ? "القسم" : "Category"}</th>
+                  <th className="w-[15%] pb-3 px-3 text-start">{isRtl ? "حالة المنتج" : "Product Status"}</th>
+                  <th className="w-[13%] pb-3 px-3 text-start">{isRtl ? "حالة المخزون" : "Stock Status"}</th>
+                  <th className="w-[10%] pb-3 px-3 text-end">{isRtl ? "كمية المخزون" : "Stock Quantity"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#942E3A]/8">
@@ -1213,7 +1213,7 @@ export default function AdminInventoryClient({
                       </td>
 
                       {/* Clean Stock Quantity Column (Display only) */}
-                      <td className={`py-3.5 px-3 ${isRtl ? "text-left" : "text-right"} font-mono font-bold text-[#942E3A] text-sm`}>
+                      <td className="py-3.5 px-3 text-end font-mono font-bold text-[#942E3A] text-sm">
                         {formatNumber(row.stock)} <span className="text-[10px] font-sans font-medium text-[#6B1F2A]/50">{isRtl ? "قطعة" : "units"}</span>
                       </td>
                     </tr>
@@ -1223,7 +1223,7 @@ export default function AdminInventoryClient({
             </table>
           ) : (
             /* Table 2: By Product View */
-            <table className={`w-full min-w-[850px] ${isRtl ? "text-right" : "text-left"} text-xs`}>
+            <table className="w-full min-w-[850px] text-start text-xs">
               <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
                 <tr>
                   <th className="w-10 pb-3 px-3">
@@ -1239,11 +1239,11 @@ export default function AdminInventoryClient({
                       )}
                     </button>
                   </th>
-                  <th className={`w-[32%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "المنتج" : "Product"}</th>
-                  <th className={`w-[22%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "تفاصيل المقاسات والمتغيرات" : "Variants Breakdown"}</th>
-                  <th className={`w-[14%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "القسم" : "Category"}</th>
-                  <th className={`w-[15%] pb-3 px-3 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "حالة المنتج" : "Product Status"}</th>
-                  <th className={`w-[12%] pb-3 px-3 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "إجمالي القطع" : "Total Units"}</th>
+                  <th className="w-[32%] pb-3 px-3 text-start">{isRtl ? "المنتج" : "Product"}</th>
+                  <th className="w-[22%] pb-3 px-3 text-start">{isRtl ? "تفاصيل المقاسات والمتغيرات" : "Variants Breakdown"}</th>
+                  <th className="w-[14%] pb-3 px-3 text-start">{isRtl ? "القسم" : "Category"}</th>
+                  <th className="w-[15%] pb-3 px-3 text-start">{isRtl ? "حالة المنتج" : "Product Status"}</th>
+                  <th className="w-[12%] pb-3 px-3 text-end">{isRtl ? "إجمالي القطع" : "Total Units"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#942E3A]/8">
@@ -1351,7 +1351,7 @@ export default function AdminInventoryClient({
                       </td>
 
                       {/* Total Stock Quantity */}
-                      <td className={`py-3.5 px-3 ${isRtl ? "text-left" : "text-right"} font-mono font-bold text-[#942E3A] text-sm`}>
+                      <td className="py-3.5 px-3 text-end font-mono font-bold text-[#942E3A] text-sm">
                         {formatNumber(pRow.totalStock)}{" "}
                         <span className="text-[10px] font-sans font-medium text-[#6B1F2A]/50">
                           {isRtl ? "قطعة" : "units"}

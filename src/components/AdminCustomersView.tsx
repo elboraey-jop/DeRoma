@@ -82,20 +82,20 @@ export default function AdminCustomersView({
 
         {/* Desktop Table View */}
         <div className="mt-4 hidden overflow-x-auto sm:block">
-          <table className={`w-full min-w-[650px] ${isRtl ? "text-right" : "text-left"} text-xs`}>
+          <table className="w-full min-w-[650px] text-start text-xs">
             <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
               <tr>
-                <th className="pb-3">{isRtl ? "العميل" : "Customer"}</th>
-                <th className="pb-3">{isRtl ? "رقم الهاتف" : "Phone"}</th>
-                <th className="pb-3">{isRtl ? "عدد الطلبات" : "Orders"}</th>
-                <th className="pb-3">{isRtl ? "آخر طلب" : "Last order"}</th>
-                <th className={`pb-3 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "إجمالي المشتريات" : "Lifetime value"}</th>
+                <th className="pb-3 text-start">{isRtl ? "العميل" : "Customer"}</th>
+                <th className="pb-3 text-start">{isRtl ? "رقم الهاتف" : "Phone"}</th>
+                <th className="pb-3 text-center">{isRtl ? "عدد الطلبات" : "Orders"}</th>
+                <th className="pb-3 text-start">{isRtl ? "آخر طلب" : "Last order"}</th>
+                <th className="pb-3 text-end">{isRtl ? "إجمالي المشتريات" : "Lifetime value"}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#942E3A]/8">
               {customers.map((customer) => (
                 <tr key={customer.phone} className="hover:bg-[#FFF9EB]/60 transition">
-                  <td className="py-3 font-bold text-[#942E3A]">
+                  <td className="py-3 text-start font-bold text-[#942E3A]">
                     <Link
                       href={`/admin/customers/${encodeURIComponent(customer.phone)}`}
                       className="inline-block max-w-[220px] truncate hover:underline"
@@ -103,23 +103,23 @@ export default function AdminCustomersView({
                       {customer.name}
                     </Link>
                   </td>
-                  <td className="py-3 text-[#6B1F2A]">
+                  <td className="py-3 text-start text-[#6B1F2A]">
                     <span dir="ltr" className="inline-flex items-center gap-1 whitespace-nowrap">
                       {customer.phone}
                       <AdminCopyButton value={customer.phone} />
                     </span>
                   </td>
-                  <td className="py-3 text-[#6B1F2A]">
+                  <td className="py-3 text-center text-[#6B1F2A]">
                     {formatNumber(customer.orders)}
                   </td>
-                  <td className="py-3 whitespace-nowrap text-[#6B1F2A]/65">
+                  <td className="py-3 text-start whitespace-nowrap text-[#6B1F2A]/65">
                     {customer.lastOrder ? (
                       <span>{formatDate(customer.lastOrder)}</span>
                     ) : (
                       isRtl ? "لا توجد طلبات بعد" : "No orders yet"
                     )}
                   </td>
-                  <td className={`py-3 whitespace-nowrap ${isRtl ? "text-left" : "text-right"} font-bold text-[#942E3A]`}>
+                  <td className="py-3 whitespace-nowrap text-end font-bold text-[#942E3A]">
                     {formatPrice(customer.spent)}
                   </td>
                 </tr>

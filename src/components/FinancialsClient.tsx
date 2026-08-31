@@ -1522,86 +1522,86 @@ export default function FinancialsClient({
           </div>
 
           <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 sm:p-6 shadow-xs">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-start text-xs">
               <thead>
                 <tr className="border-b border-[#942E3A]/15 text-[10px] uppercase text-[#6B1F2A]/60">
-                  <th className="pb-3">{isRtl ? "البند المالي" : "Financial Line Item"}</th>
-                  <th className="pb-3 text-right">Amount (EGP)</th>
-                  <th className="pb-3 text-right">{isRtl ? "% من إجمالي المبيعات" : "% of Gross Sales"}</th>
+                  <th className="pb-3 text-start">{isRtl ? "البند المالي" : "Financial Line Item"}</th>
+                  <th className="pb-3 text-end">{isRtl ? "المبلغ (ج.م)" : "Amount (EGP)"}</th>
+                  <th className="pb-3 text-end">{isRtl ? "% من إجمالي المبيعات" : "% of Gross Sales"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#942E3A]/10">
                 {/* Gross Revenue */}
                 <tr className="bg-[#FFF9EB]/30">
-                  <td className="py-3 font-bold text-[#942E3A]">1. Gross Sales Revenue</td>
-                  <td className="py-3 text-right font-bold text-[#942E3A]">{formatCurrency(grossSalesBeforeDiscounts)}</td>
-                  <td className="py-3 text-right font-bold text-[#942E3A]">100%</td>
+                  <td className="py-3 text-start font-bold text-[#942E3A]">{isRtl ? "1. إجمالي إيرادات المبيعات" : "1. Gross Sales Revenue"}</td>
+                  <td className="py-3 text-end font-bold text-[#942E3A]">{formatCurrency(grossSalesBeforeDiscounts)}</td>
+                  <td className="py-3 text-end font-bold text-[#942E3A]">100%</td>
                 </tr>
 
                 {/* Promotional Discounts */}
                 <tr>
-                  <td className="py-2.5 pl-4 text-[#6B1F2A]">{isRtl ? "مطروحًا: الخصومات الترويجية" : "Less: Promotional Discounts"}</td>
-                  <td className="py-2.5 text-right text-red-600">({formatCurrency(summary.totalDiscounts)})</td>
-                  <td className="py-2.5 text-right text-[#6B1F2A]/70">
+                  <td className="py-2.5 px-4 text-start text-[#6B1F2A]">{isRtl ? "مطروحًا: الخصومات الترويجية" : "Less: Promotional Discounts"}</td>
+                  <td className="py-2.5 text-end text-red-600">({formatCurrency(summary.totalDiscounts)})</td>
+                  <td className="py-2.5 text-end text-[#6B1F2A]/70">
                     {grossSalesBeforeDiscounts > 0 ? ((summary.totalDiscounts / grossSalesBeforeDiscounts) * 100).toFixed(1) : 0}%
                   </td>
                 </tr>
 
                 {/* Net Sales */}
                 <tr className="font-semibold text-[#942E3A]">
-                  <td className="py-2.5">2. Net Sales Revenue</td>
-                  <td className="py-2.5 text-right">{formatCurrency(summary.totalSales)}</td>
-                  <td className="py-2.5 text-right">
+                  <td className="py-2.5 text-start">{isRtl ? "2. صافي إيرادات المبيعات" : "2. Net Sales Revenue"}</td>
+                  <td className="py-2.5 text-end">{formatCurrency(summary.totalSales)}</td>
+                  <td className="py-2.5 text-end">
                     {grossSalesBeforeDiscounts > 0 ? ((summary.totalSales / grossSalesBeforeDiscounts) * 100).toFixed(1) : 0}%
                   </td>
                 </tr>
 
                 {/* Cost of Goods Sold */}
                 <tr>
-                  <td className="py-2.5 pl-4 text-[#6B1F2A]">{isRtl ? "مطروحًا: تكلفة المنتجات النقدية (COGS)" : "Less: Cash Product Cost (COGS)"}</td>
-                  <td className="py-2.5 text-right text-red-600">({formatCurrency(summary.totalCOGS)})</td>
-                  <td className="py-2.5 text-right text-[#6B1F2A]/70">
+                  <td className="py-2.5 px-4 text-start text-[#6B1F2A]">{isRtl ? "مطروحًا: تكلفة المنتجات النقدية (COGS)" : "Less: Cash Product Cost (COGS)"}</td>
+                  <td className="py-2.5 text-end text-red-600">({formatCurrency(summary.totalCOGS)})</td>
+                  <td className="py-2.5 text-end text-[#6B1F2A]/70">
                     {summary.totalSales > 0 ? ((summary.totalCOGS / summary.totalSales) * 100).toFixed(1) : 0}%
                   </td>
                 </tr>
 
                 {/* Gross Profit */}
                 <tr className="bg-[#FFF9EB] font-bold text-[#942E3A]">
-                  <td className="py-3">3. Gross Operating Profit</td>
-                  <td className="py-3 text-right font-black">{formatCurrency(summary.grossProfit)}</td>
-                  <td className="py-3 text-right font-black">{summary.grossMarginPct}%</td>
+                  <td className="py-3 text-start">{isRtl ? "3. إجمالي أرباح التشغيل" : "3. Gross Operating Profit"}</td>
+                  <td className="py-3 text-end font-black">{formatCurrency(summary.grossProfit)}</td>
+                  <td className="py-3 text-end font-black">{summary.grossMarginPct}%</td>
                 </tr>
 
                 {/* Operating Expenses Section */}
                 <tr className="bg-[#f7f1e8]/40">
-                  <td colSpan={3} className="py-2 font-bold text-[11px] text-[#942E3A] uppercase tracking-wider">
+                  <td colSpan={3} className="py-2 text-start font-bold text-[11px] text-[#942E3A] uppercase tracking-wider">
                     {isRtl ? "4. تفاصيل المصروفات التشغيلية" : "4. Operating Expenses Breakdown"}
                   </td>
                 </tr>
 
                 {Object.entries(expensesByCategory).map(([catKey, catAmt]) => (
                   <tr key={catKey}>
-                    <td className="py-2 pl-6 text-[#6B1F2A]/80">{CATEGORY_LABELS[catKey] || catKey}</td>
-                    <td className="py-2 text-right text-red-600">({formatCurrency(catAmt)})</td>
-                    <td className="py-2 text-right text-[#6B1F2A]/60">
+                    <td className="py-2 px-6 text-start text-[#6B1F2A]/80">{CATEGORY_LABELS[catKey] || catKey}</td>
+                    <td className="py-2 text-end text-red-600">({formatCurrency(catAmt)})</td>
+                    <td className="py-2 text-end text-[#6B1F2A]/60">
                       {summary.totalSales > 0 ? ((catAmt / summary.totalSales) * 100).toFixed(1) : 0}%
                     </td>
                   </tr>
                 ))}
 
                 <tr className="font-semibold text-[#6B1F2A]">
-                  <td className="py-2.5 pl-4">{isRtl ? "إجمالي المصروفات التشغيلية" : "Total Operating Expenses"}</td>
-                  <td className="py-2.5 text-right text-red-700">({formatCurrency(summary.totalExpenses)})</td>
-                  <td className="py-2.5 text-right">
+                  <td className="py-2.5 px-4 text-start">{isRtl ? "إجمالي المصروفات التشغيلية" : "Total Operating Expenses"}</td>
+                  <td className="py-2.5 text-end text-red-700">({formatCurrency(summary.totalExpenses)})</td>
+                  <td className="py-2.5 text-end">
                     {summary.totalSales > 0 ? ((summary.totalExpenses / summary.totalSales) * 100).toFixed(1) : 0}%
                   </td>
                 </tr>
 
                 {/* Net Income */}
                 <tr className="bg-[#942E3A] text-[#FFF9EB] font-black text-sm">
-                  <td className="py-3.5 pl-3 rounded-l-xl">{isRtl ? "5. صافي الدخل التشغيلي (صافي الربح)" : "5. Net Operating Income (Net Profit)"}</td>
-                  <td className="py-3.5 text-right font-extrabold">{formatCurrency(summary.netProfit)}</td>
-                  <td className="py-3.5 text-right pr-3 rounded-r-xl">{summary.profitMargin}%</td>
+                  <td className="py-3.5 px-3 text-start rounded-s-xl">{isRtl ? "5. صافي الدخل التشغيلي (صافي الربح)" : "5. Net Operating Income (Net Profit)"}</td>
+                  <td className="py-3.5 text-end font-extrabold">{formatCurrency(summary.netProfit)}</td>
+                  <td className="py-3.5 text-end px-3 rounded-e-xl">{summary.profitMargin}%</td>
                 </tr>
               </tbody>
             </table>
@@ -2026,15 +2026,15 @@ export default function FinancialsClient({
               <>
                 {/* Desktop View Table */}
                 <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full text-start text-xs">
                     <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase text-[#6B1F2A]/60">
                       <tr>
-                        <th className="pb-2.5">{isRtl ? "التاريخ" : "Date"}</th>
-                        <th className="pb-2.5">{isRtl ? "نوع الحركة" : "Type"}</th>
-                        <th className="pb-2.5">{isRtl ? "البيان والتفاصيل" : "Title & Details"}</th>
-                        <th className="pb-2.5">{isRtl ? "الفئة" : "Category"}</th>
-                        <th className="pb-2.5">{isRtl ? "الحساب المالي" : "Payment Account"}</th>
-                        <th className="pb-2.5 text-right">{isRtl ? "المبلغ" : "Amount"}</th>
+                        <th className="pb-2.5 text-start">{isRtl ? "التاريخ" : "Date"}</th>
+                        <th className="pb-2.5 text-start">{isRtl ? "نوع الحركة" : "Type"}</th>
+                        <th className="pb-2.5 text-start">{isRtl ? "البيان والتفاصيل" : "Title & Details"}</th>
+                        <th className="pb-2.5 text-start">{isRtl ? "الفئة" : "Category"}</th>
+                        <th className="pb-2.5 text-start">{isRtl ? "الحساب المالي" : "Payment Account"}</th>
+                        <th className="pb-2.5 text-end">{isRtl ? "المبلغ" : "Amount"}</th>
                         <th className="pb-2.5 text-center">{isRtl ? "الإجراءات والتحكم" : "Control"}</th>
                       </tr>
                     </thead>
@@ -2046,10 +2046,10 @@ export default function FinancialsClient({
 
                         return (
                           <tr key={expense.id} className="hover:bg-[#FFF9EB]/50 transition">
-                            <td className="py-3 text-[#6B1F2A]/70 font-medium whitespace-nowrap">
-                              {new Date(expense.date).toLocaleDateString("ar-EG", { month: "short", day: "numeric", year: "numeric" })}
+                            <td className="py-3 text-start text-[#6B1F2A]/70 font-medium whitespace-nowrap">
+                              {new Date(expense.date).toLocaleDateString(isRtl ? "ar-EG" : "en-GB", { month: "short", day: "numeric", year: "numeric" })}
                             </td>
-                            <td className="py-3 whitespace-nowrap">
+                            <td className="py-3 text-start whitespace-nowrap">
                               {isIncome ? (
                                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-300">
                                   <ArrowUpRight className="h-3 w-3" />
@@ -2067,13 +2067,13 @@ export default function FinancialsClient({
                                 </span>
                               )}
                             </td>
-                            <td className="py-3 font-bold text-[#942E3A]">
+                            <td className="py-3 text-start font-bold text-[#942E3A]">
                               <span>{expense.title}</span>
                               {expense.notes && (
                                 <span className="block text-[10px] font-normal text-[#6B1F2A]/60 mt-0.5">{expense.notes}</span>
                               )}
                             </td>
-                            <td className="py-3 whitespace-nowrap">
+                            <td className="py-3 text-start whitespace-nowrap">
                               <span className="rounded-md bg-[#FFF9EB] px-2 py-0.5 text-[10px] font-bold text-[#942E3A] border border-[#D8B46A]/30">
                                 {isRtl
                                   ? (expense.category === "capital" ? "رأس مال / استثمارات"
@@ -2090,10 +2090,10 @@ export default function FinancialsClient({
                                   : expense.category}
                               </span>
                             </td>
-                            <td className="py-3 text-[#6B1F2A] whitespace-nowrap">
+                            <td className="py-3 text-start text-[#6B1F2A] whitespace-nowrap">
                               {ACCOUNT_LABELS[expense.paymentAccount] || expense.paymentAccount}
                             </td>
-                            <td className="py-3 text-right font-black whitespace-nowrap">
+                            <td className="py-3 text-end font-black whitespace-nowrap">
                               {isIncome ? (
                                 <span className="text-emerald-700 font-extrabold text-sm">+{formatCurrency(expense.amount)}</span>
                               ) : (
@@ -2515,18 +2515,18 @@ export default function FinancialsClient({
           </div>
 
           <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-xs overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-start text-xs">
               <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase text-[#6B1F2A]/60">
                 <tr>
-                  <th className="pb-2">{isRtl ? "رقم الطلب" : "Order #"}</th>
-                  <th className="pb-2">{isRtl ? "العميل" : "Customer"}</th>
-                  <th className="pb-2">{isRtl ? "الحالة" : "Status"}</th>
-                  <th className="pb-2">{isRtl ? "إجمالي المبيعات" : "Total Sales"}</th>
-                  <th className="pb-2">{isRtl ? "تكلفة المنتج" : "Product Cost"}</th>
-                  <th className="pb-2">{isRtl ? "الخصم" : "Discount"}</th>
-                  <th className="pb-2">{isRtl ? "ربح الطلب" : "Order Profit"}</th>
+                  <th className="pb-2 text-start">{isRtl ? "رقم الطلب" : "Order #"}</th>
+                  <th className="pb-2 text-start">{isRtl ? "العميل" : "Customer"}</th>
+                  <th className="pb-2 text-center">{isRtl ? "الحالة" : "Status"}</th>
+                  <th className="pb-2 text-end">{isRtl ? "إجمالي المبيعات" : "Total Sales"}</th>
+                  <th className="pb-2 text-end">{isRtl ? "تكلفة المنتج" : "Product Cost"}</th>
+                  <th className="pb-2 text-end">{isRtl ? "الخصم" : "Discount"}</th>
+                  <th className="pb-2 text-end">{isRtl ? "ربح الطلب" : "Order Profit"}</th>
                   <th className="pb-2 text-center">{isRtl ? "الهامش %" : "Margin %"}</th>
-                  <th className="pb-2">{isRtl ? "صافي ربح الأوردر" : "Net Profit / Order"}</th>
+                  <th className="pb-2 text-end">{isRtl ? "صافي ربح الأوردر" : "Net Profit / Order"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#942E3A]/10">
@@ -2540,22 +2540,22 @@ export default function FinancialsClient({
                   </tr>
                 ) : filteredOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-[#FFF9EB]/50 transition">
-                    <td className="py-2.5 font-bold text-[#942E3A]">
+                    <td className="py-2.5 text-start font-bold text-[#942E3A]">
                       <Link href={`/admin/orders/${order.id}`} className="hover:underline flex items-center gap-1">
                         <span>{order.orderNumber}</span>
                         <ArrowUpRight className="h-3 w-3 text-[#D8B46A]" />
                       </Link>
                     </td>
-                    <td className="py-2.5 text-[#6B1F2A]">{order.customerName}</td>
-                    <td className="py-2.5">
+                    <td className="py-2.5 text-start text-[#6B1F2A]">{order.customerName}</td>
+                    <td className="py-2.5 text-center">
                       <span className="rounded-md bg-[#FFF9EB] px-2 py-0.5 text-[10px] font-bold text-[#942E3A]">
-                        {order.status}
+                        {order.status === "delivered" ? (isRtl ? "تم التسليم" : "delivered") : order.status}
                       </span>
                     </td>
-                    <td className="py-2.5 font-bold text-[#942E3A]">{formatCurrency(order.totalPrice)}</td>
-                    <td className="py-2.5 text-[#6B1F2A]">{formatCurrency(order.itemsCost)}</td>
-                    <td className="py-2.5 text-red-600">{formatCurrency(order.discountAmount)}</td>
-                    <td className="py-2.5 font-black text-[#942E3A]">{formatCurrency(order.orderProfit)}</td>
+                    <td className="py-2.5 text-end font-bold text-[#942E3A]">{formatCurrency(order.totalPrice)}</td>
+                    <td className="py-2.5 text-end text-[#6B1F2A]">{formatCurrency(order.itemsCost)}</td>
+                    <td className="py-2.5 text-end text-red-600">{formatCurrency(order.discountAmount)}</td>
+                    <td className="py-2.5 text-end font-black text-[#942E3A]">{formatCurrency(order.orderProfit)}</td>
                     <td className="py-2.5 text-center">
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
@@ -2570,7 +2570,7 @@ export default function FinancialsClient({
                       </span>
                     </td>
                     <td
-                      className={`py-2.5 font-black ${
+                      className={`py-2.5 text-end font-black ${
                         order.netOrderProfit >= 0 ? "text-emerald-700" : "text-red-700"
                       }`}
                       title={formatCurrency(order.weeklyExpenseShare)}
@@ -3139,25 +3139,25 @@ export default function FinancialsClient({
                     <div className="p-6 text-center text-xs text-[#6B1F2A]/60">{isRtl ? "لا توجد طلبيات مسجلة في هذا الأسبوع." : "No orders in this week."}</div>
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs">
+                      <table className="w-full text-start text-xs">
                         <thead className="bg-[#FFF9EB] border-b border-[#942E3A]/10 text-[10px] uppercase text-[#6B1F2A]/70">
                           <tr>
-                            <th className="p-2.5">{isRtl ? "رقم الطلب" : "Order #"}</th>
-                            <th className="p-2.5">{isRtl ? "العميل" : "Customer"}</th>
-                            <th className="p-2.5">{isRtl ? "طريقة الدفع" : "Payment"}</th>
-                            <th className="p-2.5">{isRtl ? "إجمالي المبلغ" : "Total Sales"}</th>
-                            <th className="p-2.5">{isRtl ? "الربح" : "Profit"}</th>
+                            <th className="p-2.5 text-start">{isRtl ? "رقم الطلب" : "Order #"}</th>
+                            <th className="p-2.5 text-start">{isRtl ? "العميل" : "Customer"}</th>
+                            <th className="p-2.5 text-center">{isRtl ? "طريقة الدفع" : "Payment"}</th>
+                            <th className="p-2.5 text-end">{isRtl ? "إجمالي المبلغ" : "Total Sales"}</th>
+                            <th className="p-2.5 text-end">{isRtl ? "الربح" : "Profit"}</th>
                             <th className="p-2.5 text-center">{isRtl ? "الهامش %" : "Margin %"}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[#942E3A]/10">
                           {inspectingWeek.orders.map((ord) => (
                             <tr key={ord.id} className="hover:bg-[#FFF9EB]/40">
-                              <td className="p-2.5 font-bold text-[#942E3A]">{ord.orderNumber}</td>
-                              <td className="p-2.5 text-[#6B1F2A]">{ord.customerName}</td>
-                              <td className="p-2.5 uppercase text-[10px] font-bold text-[#6B1F2A]/70">{ord.paymentMethod}</td>
-                              <td className="p-2.5 font-bold text-[#942E3A]">{formatCurrency(ord.totalPrice)}</td>
-                              <td className="p-2.5 font-bold text-emerald-700">{formatCurrency(ord.orderProfit)}</td>
+                              <td className="p-2.5 text-start font-bold text-[#942E3A]">{ord.orderNumber}</td>
+                              <td className="p-2.5 text-start text-[#6B1F2A]">{ord.customerName}</td>
+                              <td className="p-2.5 text-center uppercase text-[10px] font-bold text-[#6B1F2A]/70">{ord.paymentMethod}</td>
+                              <td className="p-2.5 text-end font-bold text-[#942E3A]">{formatCurrency(ord.totalPrice)}</td>
+                              <td className="p-2.5 text-end font-bold text-emerald-700">{formatCurrency(ord.orderProfit)}</td>
                               <td className="p-2.5 text-center font-bold">{ord.profitMargin}%</td>
                             </tr>
                           ))}
@@ -3175,24 +3175,24 @@ export default function FinancialsClient({
                     <div className="p-6 text-center text-xs text-[#6B1F2A]/60">{isRtl ? "لا توجد مصروفات مسجلة في هذا الأسبوع." : "No expenses in this week."}</div>
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs">
+                      <table className="w-full text-start text-xs">
                         <thead className="bg-[#FFF9EB] border-b border-[#942E3A]/10 text-[10px] uppercase text-[#6B1F2A]/70">
                           <tr>
-                            <th className="p-2.5">{isRtl ? "عنوان المصروف" : "Title"}</th>
-                            <th className="p-2.5">{isRtl ? "الفئة" : "Category"}</th>
-                            <th className="p-2.5">{isRtl ? "المبلغ" : "Amount"}</th>
-                            <th className="p-2.5">{isRtl ? "الحساب المالي" : "Account"}</th>
-                            <th className="p-2.5">{isRtl ? "التاريخ" : "Date"}</th>
+                            <th className="p-2.5 text-start">{isRtl ? "عنوان المصروف" : "Title"}</th>
+                            <th className="p-2.5 text-start">{isRtl ? "الفئة" : "Category"}</th>
+                            <th className="p-2.5 text-end">{isRtl ? "المبلغ" : "Amount"}</th>
+                            <th className="p-2.5 text-start">{isRtl ? "الحساب المالي" : "Account"}</th>
+                            <th className="p-2.5 text-end">{isRtl ? "التاريخ" : "Date"}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[#942E3A]/10">
                           {inspectingWeek.expenses.map((exp) => (
                             <tr key={exp.id} className="hover:bg-[#FFF9EB]/40">
-                              <td className="p-2.5 font-bold text-[#942E3A]">{exp.title}</td>
-                              <td className="p-2.5 text-[#6B1F2A]">{exp.category}</td>
-                              <td className="p-2.5 font-bold text-red-600">{formatCurrency(exp.amount)}</td>
-                              <td className="p-2.5 uppercase text-[10px] font-bold text-[#6B1F2A]/70">{exp.paymentAccount}</td>
-                              <td className="p-2.5 text-[10px] text-[#6B1F2A]/70">{new Date(exp.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</td>
+                              <td className="p-2.5 text-start font-bold text-[#942E3A]">{exp.title}</td>
+                              <td className="p-2.5 text-start text-[#6B1F2A]">{exp.category}</td>
+                              <td className="p-2.5 text-end font-bold text-red-600">{formatCurrency(exp.amount)}</td>
+                              <td className="p-2.5 text-start uppercase text-[10px] font-bold text-[#6B1F2A]/70">{exp.paymentAccount}</td>
+                              <td className="p-2.5 text-end text-[10px] text-[#6B1F2A]/70">{new Date(exp.date).toLocaleDateString(isRtl ? "ar-EG" : "en-GB", { month: "short", day: "numeric" })}</td>
                             </tr>
                           ))}
                         </tbody>

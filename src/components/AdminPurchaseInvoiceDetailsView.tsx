@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Package } from "lucide-react";
@@ -73,15 +73,15 @@ export default function AdminPurchaseInvoiceDetailsView({
         </div>
 
         <div className="mt-4 hidden overflow-x-auto sm:block">
-          <table className={`w-full min-w-[900px] ${isRtl ? "text-right" : "text-left"} text-xs`}>
+          <table className="w-full min-w-[900px] text-start text-xs">
             <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
               <tr>
-                <th className="pb-3">{isRtl ? "المنتج" : "Product"}</th>
-                <th className="pb-3">{isRtl ? "المقاسات / الكميات" : "Sizes / quantities"}</th>
-                <th className="pb-3">{isRtl ? "سعر الجملة" : "Wholesale"}</th>
-                <th className="pb-3">{isRtl ? "سعر البيع" : "Selling"}</th>
-                <th className="pb-3">{isRtl ? "المتبقي" : "Remaining"}</th>
-                <th className={`pb-3 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "إجمالي المنتج" : "Product total"}</th>
+                <th className="pb-3 text-start">{isRtl ? "المنتج" : "Product"}</th>
+                <th className="pb-3 text-start">{isRtl ? "المقاسات / الكميات" : "Sizes / quantities"}</th>
+                <th className="pb-3 text-start">{isRtl ? "سعر الجملة" : "Wholesale"}</th>
+                <th className="pb-3 text-start">{isRtl ? "سعر البيع" : "Selling"}</th>
+                <th className="pb-3 text-start">{isRtl ? "المتبقي" : "Remaining"}</th>
+                <th className="pb-3 text-end">{isRtl ? "إجمالي المنتج" : "Product total"}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#942E3A]/8">
@@ -91,7 +91,7 @@ export default function AdminPurchaseInvoiceDetailsView({
                 const totalLine = items.reduce((sum, item) => sum + item.lineTotal, 0);
                 return (
                   <tr key={product.id}>
-                    <td className="py-4 font-bold text-[#942E3A]">
+                    <td className="py-4 text-start font-bold text-[#942E3A]">
                       <Link href={`/admin/products/${product.id}`} className="flex items-center gap-3 hover:underline">
                         {product.image ? (
                           <img src={product.image} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
@@ -106,7 +106,7 @@ export default function AdminPurchaseInvoiceDetailsView({
                         </span>
                       </Link>
                     </td>
-                    <td className="py-4 text-[#6B1F2A]/70">
+                    <td className="py-4 text-start text-[#6B1F2A]/70">
                       <div className="space-y-1.5">
                         {items.map((item) => (
                           <div key={item.id}>
@@ -116,24 +116,24 @@ export default function AdminPurchaseInvoiceDetailsView({
                         ))}
                       </div>
                     </td>
-                    <td className="py-4">
+                    <td className="py-4 text-start">
                       <div className="space-y-1.5">
                         {items.map((item) => (
                           <div key={item.id}>{formatPrice(item.wholesalePrice)}</div>
                         ))}
                       </div>
                     </td>
-                    <td className="py-4">
+                    <td className="py-4 text-start">
                       <div className="space-y-1.5">
                         {items.map((item) => (
                           <div key={item.id}>{formatPrice(item.retailPrice)}</div>
                         ))}
                       </div>
                     </td>
-                    <td className="py-4 font-bold text-[#D8B46A]">
+                    <td className="py-4 text-start font-bold text-[#D8B46A]">
                       {formatNumber(totalRemaining)}
                     </td>
-                    <td className={`py-4 ${isRtl ? "text-left" : "text-right"} font-bold text-[#942E3A]`}>
+                    <td className="py-4 text-end font-bold text-[#942E3A]">
                       {formatPrice(totalLine)}
                       <span className="mt-1 block text-[10px] font-normal text-[#6B1F2A]/55">
                         {formatNumber(totalQuantity)} {isRtl ? "قطعة" : "units"}

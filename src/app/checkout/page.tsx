@@ -192,6 +192,7 @@ export default function CheckoutPage() {
   const [promoIsFreeShipping, setPromoIsFreeShipping] = useState(false);
   const [promoMessage, setPromoMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const isSubmittingRef = useRef(false);
   const hasTrackedBeginCheckout = useRef(false);
   const lastTrackedShippingInfo = useRef("");
 
@@ -439,6 +440,7 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (loading || isSubmittingRef.current) return;
     setError("");
 
     setTouched({
@@ -483,6 +485,7 @@ export default function CheckoutPage() {
       items: analyticsItems,
     });
 
+    isSubmittingRef.current = true;
     setLoading(true);
     try {
       const result = await createOrder({
@@ -535,6 +538,7 @@ export default function CheckoutPage() {
       trackCheckoutError("connection_error", "place_order");
     } finally {
       setLoading(false);
+      isSubmittingRef.current = false;
     }
   };
 
@@ -574,14 +578,22 @@ export default function CheckoutPage() {
   };
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#fffaf0] px-3 py-6 text-[#481827] sm:px-6 sm:py-12 lg:px-8" dir={dir}>
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#fffaf0] px-3 pt-8 pb-14 sm:px-6 sm:pt-12 sm:pb-20 lg:px-8" dir={dir}>
       <div className="mx-auto w-full min-w-0 max-w-6xl">
-        <div className="mb-8 flex flex-col items-center gap-5 border-b border-[#eadfd6] pb-7 text-center sm:flex-row sm:items-end sm:justify-between rtl:sm:text-right ltr:sm:text-left">
+        {/* Back Link on Left */}
+        <div className="mb-2 flex items-center justify-start">
+          <Link
+            href="/shop"
+            className="inline-flex items-center gap-2 rounded-full border border-[#eadfd6] bg-white/90 px-3.5 py-1.5 text-xs font-semibold text-[#806e73] shadow-xs backdrop-blur-xs transition hover:border-[#942e3a]/30 hover:bg-white hover:text-[#942e3a] hover:shadow-sm"
+          >
+            {dir === "rtl" ? <ArrowLeft className="h-3.5 w-3.5 rotate-180" /> : <ArrowLeft className="h-3.5 w-3.5" />}
+            <span>{t("nav.shop")}</span>
+          </Link>
+        </div>
+
+        <div className="mb-8 flex flex-col items-center justify-center gap-4 border-b border-[#eadfd6] pb-7 text-center">
           <div>
-            <Link href="/shop" className="flex w-full items-center justify-start gap-2 text-xs font-semibold text-[#806e73] transition hover:text-[#942e3a] sm:inline-flex sm:w-auto">
-              {dir === "rtl" ? <ArrowLeft className="h-4 w-4 rotate-180" /> : <ArrowLeft className="h-4 w-4" />} {t("nav.shop")}
-            </Link>
-            <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.3em] text-[#c49a50]">DeRoma</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#c49a50]">DeRoma</p>
             <h1 className="mt-1 font-playfair text-3xl font-semibold sm:text-4xl">{t("checkout.title")}</h1>
           </div>
 
@@ -791,6 +803,48 @@ export default function CheckoutPage() {
                 </div>
               )}
             </section>
+
+            {/* Second Confirm & Place Order Button (Under Payment Method) */}
+            <div className="rounded-3xl border border-[#eadfd6] bg-white p-5 text-center shadow-[0_14px_40px_rgba(73,24,39,0.05)] sm:p-7">
+              <div className="mb-5 flex flex-col items-center justify-center gap-2.5">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#806e73]">
+                    {isArabic ? "المبلغ الإجمالي للدفع" : "Total to pay"}
+                  </p>
+                  <p className="mt-1 font-playfair text-3xl font-bold text-[#481827]">
+                    {formatPrice(grandTotal)}
+                  </p>
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-1.5 text-xs font-medium text-emerald-700">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                  <span>{isArabic ? "دفع آمن ومشفر 100%" : "100% Secure Checkout"}</span>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-[#942e3a] px-6 py-4 text-base font-bold text-white shadow-lg shadow-[#942e3a]/25 transition-all duration-200 hover:bg-[#7a242f] hover:shadow-xl active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span>{isArabic ? "جاري تأكيد الطلب..." : "Processing Order..."}</span>
+                  </div>
+                ) : (
+                  <>
+                    <span>{t("checkout.placeOrder")}</span>
+                    {dir === "rtl" ? <ArrowLeft className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5 rotate-180" />}
+                  </>
+                )}
+              </button>
+
+              {error && (
+                <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 p-3 text-center text-xs font-semibold text-rose-700">
+                  {error}
+                </div>
+              )}
+            </div>
           </form>
 
           <aside className="order-1 min-w-0 space-y-5 lg:order-2 lg:sticky lg:top-6">
@@ -824,7 +878,24 @@ export default function CheckoutPage() {
                   <span className="font-playfair text-2xl font-semibold">{formatPrice(grandTotal)}</span>
                 </div>
               </div>
-              <button form="checkout-form" type="submit" disabled={loading} className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#d8b46a] px-5 py-3.5 text-sm font-bold text-[#481827] shadow-lg transition hover:bg-[#e5c785] disabled:cursor-not-allowed disabled:opacity-60">{loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#481827] border-t-transparent" /> : <><span>{t("checkout.placeOrder")}</span>{dir === "rtl" ? <ArrowLeft className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4 rotate-180" />}</>}</button>
+              <button
+                form="checkout-form"
+                type="submit"
+                disabled={loading}
+                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#d8b46a] px-5 py-3.5 text-sm font-bold text-[#481827] shadow-lg transition hover:bg-[#e5c785] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#481827] border-t-transparent" />
+                    <span className="text-xs font-bold">{isArabic ? "جاري تأكيد الطلب..." : "Processing Order..."}</span>
+                  </div>
+                ) : (
+                  <>
+                    <span>{t("checkout.placeOrder")}</span>
+                    {dir === "rtl" ? <ArrowLeft className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4 rotate-180" />}
+                  </>
+                )}
+              </button>
             </section>
           </aside>
         </div>

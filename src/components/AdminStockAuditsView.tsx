@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import {
@@ -113,28 +113,28 @@ export default function AdminStockAuditsView({
         </div>
 
         <div className="mt-4 overflow-x-auto">
-          <table className={`w-full min-w-[650px] ${isRtl ? "text-right" : "text-left"} text-xs`}>
+          <table className="w-full min-w-[650px] text-start text-xs">
             <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
               <tr>
-                <th className="pb-3">{isRtl ? "رقم الجرد" : "Audit #"}</th>
-                <th className="pb-3">{isRtl ? "العنوان / النطاق" : "Title / Scope"}</th>
-                <th className="pb-3">{isRtl ? "التاريخ" : "Date"}</th>
-                <th className="pb-3">{isRtl ? "تم الجرد بواسطة" : "Audited By"}</th>
+                <th className="pb-3 text-start">{isRtl ? "رقم الجرد" : "Audit #"}</th>
+                <th className="pb-3 text-start">{isRtl ? "العنوان / النطاق" : "Title / Scope"}</th>
+                <th className="pb-3 text-start">{isRtl ? "التاريخ" : "Date"}</th>
+                <th className="pb-3 text-start">{isRtl ? "تم الجرد بواسطة" : "Audited By"}</th>
                 <th className="pb-3 text-center">{isRtl ? "المتوقع / الفعلي" : "Expected / Actual"}</th>
                 <th className="pb-3 text-center">{isRtl ? "الفرق" : "Discrepancy"}</th>
-                <th className={`pb-3 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "الإجراء" : "Action"}</th>
+                <th className="pb-3 text-end">{isRtl ? "الإجراء" : "Action"}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#942E3A]/8">
               {audits.map((audit) => (
                 <tr key={audit.id} className="group hover:bg-[#FFF9EB]/60 transition">
-                  <td className="py-3.5 font-mono font-bold text-[#942E3A]">
+                  <td className="py-3.5 text-start font-mono font-bold text-[#942E3A]">
                     {audit.auditNumber}
                   </td>
-                  <td className="py-3.5 font-bold text-[#6B1F2A]">
+                  <td className="py-3.5 text-start font-bold text-[#6B1F2A]">
                     {audit.title || (isRtl ? "جرد شامل للمخزون" : "Full Stock Audit")}
                   </td>
-                  <td className="py-3.5 text-[#6B1F2A]/70">
+                  <td className="py-3.5 text-start text-[#6B1F2A]/70">
                     <span dir="ltr">
                       {new Date(audit.createdAt).toLocaleDateString(
                         isRtl ? "ar-EG-u-nu-latn" : "en-US",
@@ -148,7 +148,7 @@ export default function AdminStockAuditsView({
                       )}
                     </span>
                   </td>
-                  <td className="py-3.5 font-medium text-[#6B1F2A]">
+                  <td className="py-3.5 text-start font-medium text-[#6B1F2A]">
                     {audit.auditedBy || (isRtl ? "المسؤول" : "Admin")}
                   </td>
                   <td className="py-3.5 text-center font-semibold text-[#6B1F2A]">
@@ -168,7 +168,7 @@ export default function AdminStockAuditsView({
                         : `${formatNumber(audit.totalDiscrepancy)} ${isRtl ? "فرق" : "diff"}`}
                     </span>
                   </td>
-                  <td className={`py-3.5 ${isRtl ? "text-left" : "text-right"}`}>
+                  <td className="py-3.5 text-end">
                     <Link
                       href={`/admin/inventory/audits/${audit.id}`}
                       className="inline-flex items-center gap-1 rounded-xl bg-[#FFF9EB] border border-[#D8B46A]/40 px-3 py-1.5 text-[11px] font-bold text-[#942E3A] hover:bg-[#942E3A] hover:text-[#FFF9EB] transition"

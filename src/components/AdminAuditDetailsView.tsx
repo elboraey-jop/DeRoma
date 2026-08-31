@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { ClipboardCheck, PackageCheck } from "lucide-react";
 import AdminBackButton from "@/components/AdminBackButton";
@@ -138,16 +138,16 @@ export default function AdminAuditDetailsView({ audit }: AuditDetailProps) {
         </div>
 
         <div className="mt-4 overflow-x-auto">
-          <table className={`w-full min-w-[650px] ${isRtl ? "text-right" : "text-left"} text-xs`}>
+          <table className="w-full min-w-[650px] text-start text-xs">
             <thead className="border-b border-[#942E3A]/10 text-[10px] uppercase tracking-wide text-[#6B1F2A]/55">
               <tr>
-                <th className="pb-3">{isRtl ? "اسم المنتج" : "Product Name"}</th>
-                <th className="pb-3">{isRtl ? "كود SKU" : "SKU"}</th>
-                <th className="pb-3">{isRtl ? "الموديل / المقاس" : "Variant"}</th>
+                <th className="pb-3 text-start">{isRtl ? "اسم المنتج" : "Product Name"}</th>
+                <th className="pb-3 text-start">{isRtl ? "كود SKU" : "SKU"}</th>
+                <th className="pb-3 text-start">{isRtl ? "الموديل / المقاس" : "Variant"}</th>
                 <th className="pb-3 text-center">{isRtl ? "المتوقع" : "Expected"}</th>
                 <th className="pb-3 text-center">{isRtl ? "الفعلي" : "Actual"}</th>
                 <th className="pb-3 text-center">{isRtl ? "الفرق" : "Discrepancy"}</th>
-                <th className={`pb-3 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "أثر القيمة" : "Value Impact"}</th>
+                <th className="pb-3 text-end">{isRtl ? "أثر القيمة" : "Value Impact"}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#942E3A]/8">
@@ -159,13 +159,13 @@ export default function AdminAuditDetailsView({ audit }: AuditDetailProps) {
 
                 return (
                   <tr key={item.id} className="hover:bg-[#FFF9EB]/50 transition">
-                    <td className="py-3 font-bold text-[#942E3A]">
+                    <td className="py-3 text-start font-bold text-[#942E3A]">
                       {item.productName}
                     </td>
-                    <td className="py-3 font-mono text-[10px] text-[#6B1F2A]/60">
+                    <td className="py-3 text-start font-mono text-[10px] text-[#6B1F2A]/60">
                       {item.sku || (isRtl ? "بدون كود" : "N/A")}
                     </td>
-                    <td className="py-3 text-[#6B1F2A]">
+                    <td className="py-3 text-start text-[#6B1F2A]">
                       {item.color ? `${item.color} · ` : ""}
                       <span className="font-bold">{item.size}</span>
                     </td>
@@ -193,7 +193,7 @@ export default function AdminAuditDetailsView({ audit }: AuditDetailProps) {
                       </span>
                     </td>
                     <td
-                      className={`py-3 ${isRtl ? "text-left" : "text-right"} font-bold ${
+                      className={`py-3 text-end font-bold ${
                         isMatch
                           ? "text-[#6B1F2A]/60"
                           : isShortage

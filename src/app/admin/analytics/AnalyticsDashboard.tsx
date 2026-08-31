@@ -1902,47 +1902,47 @@ export default function AnalyticsDashboard({
             </h3>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "المؤشر المالي والبيعي" : "Financial & Sales Metric"}</th>
- <th className="p-2.5 text-center">{isRtl ? "الفترة المحددة" : "Selected Period"}</th>
- <th className="p-2.5 text-center">{isRtl ? "الفترة السابقة المقارنة" : "Previous Period Baseline"}</th>
- <th className="p-2.5 text-center">{isRtl ? "نسبة التغير %" : "Growth Variance %"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "حالة الأداء" : "Performance Status"}</th>
+ <th className="w-[32%] p-2.5 text-start">{isRtl ? "المؤشر المالي والبيعي" : "Financial & Sales Metric"}</th>
+ <th className="w-[17%] p-2.5 text-center">{isRtl ? "الفترة المحددة" : "Selected Period"}</th>
+ <th className="w-[17%] p-2.5 text-center">{isRtl ? "الفترة السابقة المقارنة" : "Previous Period Baseline"}</th>
+ <th className="w-[17%] p-2.5 text-center">{isRtl ? "نسبة التغير %" : "Growth Variance %"}</th>
+ <th className="w-[17%] p-2.5 text-end">{isRtl ? "حالة الأداء" : "Performance Status"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{isRtl ? "إجمالي إيرادات المبيعات" : "Total Gross Sales Revenue"}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "إجمالي إيرادات المبيعات" : "Total Gross Sales Revenue"}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{formatCurrency(currentRevenue)}</td>
  <td className="p-2.5 text-center text-gray-500">{formatCurrency(prevRevenue)}</td>
  <td className="p-2.5 text-center font-bold">{renderGrowthBadge(revGrowth)}</td>
- <td className="p-2.5 text-right font-bold text-emerald-600">{isRtl ? "نمو مالي قوي" : "Strong Revenue Velocity"}</td>
+ <td className="p-2.5 text-end font-bold text-emerald-600">{isRtl ? "نمو مالي قوي" : "Strong Revenue Velocity"}</td>
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{isRtl ? "الطلبات المكتملة الصحيحة" : "Valid Completed Orders"}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "الطلبات المكتملة الصحيحة" : "Valid Completed Orders"}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{formatNumber(validCurrentOrders.length)} {isRtl ? "طلب" : "orders"}</td>
  <td className="p-2.5 text-center text-gray-500">{formatNumber(validPrevOrders.length)} {isRtl ? "طلب" : "orders"}</td>
  <td className="p-2.5 text-center font-bold">{renderGrowthBadge(ordersGrowth)}</td>
- <td className="p-2.5 text-right font-bold text-emerald-600">{isRtl ? "وتيرة طلبات ممتازة" : "Healthy Order Pace"}</td>
+ <td className="p-2.5 text-end font-bold text-emerald-600">{isRtl ? "وتيرة طلبات ممتازة" : "Healthy Order Pace"}</td>
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{isRtl ? "متوسط قيمة الطلب (AOV)" : "Average Order Value (AOV)"}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "متوسط قيمة الطلب (AOV)" : "Average Order Value (AOV)"}</td>
  <td className="p-2.5 text-center font-bold text-purple-700">{formatCurrency(currentAOV)}</td>
  <td className="p-2.5 text-center text-gray-500">{formatCurrency(prevAOV)}</td>
  <td className="p-2.5 text-center font-bold">{renderGrowthBadge(aovGrowth)}</td>
- <td className="p-2.5 text-right font-bold text-purple-600">{isRtl ? "حجم سلة مميز" : "Premium Basket Size"}</td>
+ <td className="p-2.5 text-end font-bold text-purple-600">{isRtl ? "حجم سلة مميز" : "Premium Basket Size"}</td>
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{isRtl ? "هامش صافي الربح التقديري" : "Est. Net Profit Margin"}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "هامش صافي الربح التقديري" : "Est. Net Profit Margin"}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{profitMarginPercent.toFixed(1)}%</td>
  <td className="p-2.5 text-center text-gray-500">~62.0%</td>
  <td className="p-2.5 text-center font-bold">{renderGrowthBadge(3.2)}</td>
- <td className="p-2.5 text-right font-bold text-emerald-600">{isRtl ? "ربحية مثالية" : "Optimal Profitability"}</td>
+ <td className="p-2.5 text-end font-bold text-emerald-600">{isRtl ? "ربحية مثالية" : "Optimal Profitability"}</td>
  </tr>
  </tbody>
  </table>
@@ -1962,24 +1962,24 @@ export default function AnalyticsDashboard({
  </div>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "اسم المنتج" : "Product Name"}</th>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "القسم" : "Category"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "القطع المباعة" : "Units Sold"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "إيرادات المبيعات" : "Sales Revenue"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "نسبة الإيراد" : "Revenue Share"}</th>
+ <th className="w-[36%] p-2.5 text-start">{isRtl ? "اسم المنتج" : "Product Name"}</th>
+ <th className="w-[16%] p-2.5 text-start">{isRtl ? "القسم" : "Category"}</th>
+ <th className="w-[16%] p-2.5 text-center">{isRtl ? "القطع المباعة" : "Units Sold"}</th>
+ <th className="w-[16%] p-2.5 text-end">{isRtl ? "إيرادات المبيعات" : "Sales Revenue"}</th>
+ <th className="w-[16%] p-2.5 text-end">{isRtl ? "نسبة الإيراد" : "Revenue Share"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {productPerformance.topSelling.map((prod, idx) => (
  <tr key={idx} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{prod.name}</td>
- <td className="p-2.5 capitalize text-gray-500">{isRtl ? (prod.category === "shoes" ? "أحذية" : prod.category === "bags" ? "حقائب" : prod.category === "perfumes" ? "عطور" : prod.category === "accessories" ? "إكسسوارات" : prod.category) : prod.category}</td>
- <td className="p-2.5 text-right font-mono font-bold text-emerald-700">{prod.units}</td>
- <td className="p-2.5 text-right font-bold text-gray-900">{formatCurrency(prod.revenue)}</td>
- <td className="p-2.5 text-right font-bold text-purple-700">
+ <td className="p-2.5 text-start font-bold text-gray-900">{prod.name}</td>
+ <td className="p-2.5 text-start capitalize text-gray-500">{isRtl ? (prod.category === "shoes" ? "أحذية" : prod.category === "bags" ? "حقائب" : prod.category === "perfumes" ? "عطور" : prod.category === "accessories" ? "إكسسوارات" : prod.category) : prod.category}</td>
+ <td className="p-2.5 text-center font-mono font-bold text-emerald-700">{formatNumber(prod.units)}</td>
+ <td className="p-2.5 text-end font-bold text-gray-900">{formatCurrency(prod.revenue)}</td>
+ <td className="p-2.5 text-end font-bold text-purple-700">
  {currentRevenue ? ((prod.revenue / currentRevenue) * 100).toFixed(1) : 0}%
  </td>
  </tr>
@@ -1998,22 +1998,22 @@ export default function AnalyticsDashboard({
             </h3>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "المحافظة" : "Governorate Name"}</th>
- <th className="p-2.5 text-center">{isRtl ? "عدد الطلبات" : "Orders Count"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "إجمالي الإيرادات" : "Total Revenue"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "متوسط قيمة الطلب بالمحافظة" : "Regional AOV"}</th>
+ <th className="w-[34%] p-2.5 text-start">{isRtl ? "المحافظة" : "Governorate Name"}</th>
+ <th className="w-[20%] p-2.5 text-center">{isRtl ? "عدد الطلبات" : "Orders Count"}</th>
+ <th className="w-[23%] p-2.5 text-end">{isRtl ? "إجمالي الإيرادات" : "Total Revenue"}</th>
+ <th className="w-[23%] p-2.5 text-end">{isRtl ? "متوسط قيمة الطلب بالمحافظة" : "Regional AOV"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {governorateSplit.map((gov, idx) => (
  <tr key={idx} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{gov.name}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{gov.name}</td>
  <td className="p-2.5 text-center font-bold text-purple-700">{gov.orders}</td>
- <td className="p-2.5 text-right font-bold text-emerald-700">{formatCurrency(gov.revenue)}</td>
- <td className="p-2.5 text-right font-bold text-gray-900">
+ <td className="p-2.5 text-end font-bold text-emerald-700">{formatCurrency(gov.revenue)}</td>
+ <td className="p-2.5 text-end font-bold text-gray-900">
  {formatCurrency(gov.orders ? gov.revenue / gov.orders : 0)}
  </td>
  </tr>
@@ -2035,13 +2035,13 @@ export default function AnalyticsDashboard({
  <ul className="text-xs text-gray-700 space-y-1.5 list-disc list-inside">
  <li>
  <strong>{isRtl ? "اتجاه الإيرادات:" : "Revenue Trend:"}</strong> {isRtl ? "بلغت المبيعات " : "Gross sales reached "}{" "}
- <span className="font-bold text-[#6B1F2A]">{formatCurrency(currentRevenue)}</span> across{" "}
- <span className="font-bold text-emerald-700">{validCurrentOrders.length} valid orders</span>.
+ <span className="font-bold text-[#6B1F2A]">{formatCurrency(currentRevenue)}</span> {isRtl ? "عبر " : "across "}{" "}
+ <span className="font-bold text-emerald-700">{validCurrentOrders.length} {isRtl ? "طلب مؤكد مكتمل" : "valid orders"}</span>.
  </li>
  <li>
  <strong>{isRtl ? "عمق السلة:" : "Basket Depth:"}</strong> {isRtl ? "يقف متوسط قيمة الطلب عند " : "Average Order Value stands at "}{" "}
- <span className="font-bold text-purple-700">{formatCurrency(currentAOV)}</span> with an average of{" "}
- <span className="font-bold text-gray-900">{unitsPerOrder.toFixed(2)} {isRtl ? "قطعة" : "items"}</span> per transaction.
+ <span className="font-bold text-purple-700">{formatCurrency(currentAOV)}</span> {isRtl ? "بمتوسط " : "with an average of "}{" "}
+ <span className="font-bold text-gray-900">{unitsPerOrder.toFixed(2)} {isRtl ? "قطعة" : "items"}</span> {isRtl ? "لكل معاملة وطلب." : "per transaction."}
  </li>
  </ul>
  </div>
@@ -2236,30 +2236,30 @@ export default function AnalyticsDashboard({
  <div className="flex items-center gap-2 mb-4">
  <BarChart3 className="h-4 w-4 text-[#D8B46A]" />
  <h3 className="font-playfair text-lg font-bold text-gray-900">
- Full 5-Stage Purchase Conversion Funnel Drop-off Analysis
+ {isRtl ? "تحليل مسار قمع الشراء والتحويل ومعدلات التسرب" : "Full 5-Stage Purchase Conversion Funnel Drop-off Analysis"}
  </h3>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className="p-2.5">Funnel Stage</th>
- <th className="p-2.5 text-center">Visitors Volume</th>
- <th className="p-2.5 text-center">Stage Conversion %</th>
- <th className="p-2.5 text-center">Stage Drop-off Count</th>
- <th className="p-2.5 text-center">Drop-off Loss %</th>
- <th className="p-2.5 text-right">Optimization Recommendation</th>
+ <th className="p-2.5 text-start">{isRtl ? "مرحلة القمع" : "Funnel Stage"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "حجم الزيارات" : "Visitors Volume"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "معدل التحويل %" : "Stage Conversion %"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "عدد المنسحبين" : "Stage Drop-off Count"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "نسبة التسرب %" : "Drop-off Loss %"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "توصية التحسين" : "Optimization Recommendation"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {webAnalytics.funnelMatrix.map((fn, idx) => (
  <tr key={idx} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{fn.step}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{fn.step}</td>
  <td className="p-2.5 text-center font-bold text-purple-700">{fn.count.toLocaleString()}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{fn.conversion.toFixed(1)}%</td>
  <td className="p-2.5 text-center font-bold text-rose-600">{fn.dropCount.toLocaleString()}</td>
  <td className="p-2.5 text-center font-bold text-rose-700">{fn.lossRate.toFixed(1)}%</td>
- <td className="p-2.5 text-right font-medium text-gray-600">{fn.action}</td>
+ <td className="p-2.5 text-end font-medium text-gray-600">{fn.action}</td>
  </tr>
  ))}
  </tbody>
@@ -2398,27 +2398,27 @@ export default function AnalyticsDashboard({
  <div className="flex items-center gap-2">
  <Search className="h-4 w-4 text-[#D8B46A]" />
  <h3 className="font-playfair text-lg font-bold text-gray-900">
- On-Site Search Terms & Zero-Result Query Warnings
+ {isRtl ? "عبارات البحث بالموقع وتنبيهات الكلمات بدون نتائج" : "On-Site Search Terms & Zero-Result Query Warnings"}
  </h3>
  </div>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className="p-2.5">Search Query Term</th>
- <th className="p-2.5 text-center">Search Count</th>
- <th className="p-2.5 text-center">Search CVR %</th>
- <th className="p-2.5 text-right">Result Status</th>
+ <th className="p-2.5 text-start">{isRtl ? "عبارة البحث" : "Search Query Term"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "مرات البحث" : "Search Count"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "معدل التحويل %" : "Search CVR %"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "حالة النتيجة" : "Result Status"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {webAnalytics.searchAnalytics.map((st, idx) => (
  <tr key={idx} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900 font-mono">{st.query}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900 font-mono">{st.query}</td>
  <td className="p-2.5 text-center font-bold text-purple-700">{st.count}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{st.conversion}</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-end">
  <span
  className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
  st.zeroResult
@@ -2439,27 +2439,27 @@ export default function AnalyticsDashboard({
  {/* Table 2: Traffic Acquisition Source Channel Performance */}
  <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-xs">
  <h3 className="font-playfair text-lg font-bold text-gray-900 mb-3">
- GA4 Traffic Acquisition Source Channel Performance
+ {isRtl ? "أداء قنوات ومصادر الزيارات وحركة المرور (GA4)" : "GA4 Traffic Acquisition Source Channel Performance"}
  </h3>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className="p-2.5">Traffic Source Channel</th>
- <th className="p-2.5 text-center">Visitors Volume</th>
- <th className="p-2.5 text-center">Bounce Rate %</th>
- <th className="p-2.5 text-center">Orders Driven</th>
- <th className="p-2.5 text-right">Driven Revenue</th>
+ <th className="p-2.5 text-start">{isRtl ? "قناة ومصدر الزيارة" : "Traffic Source Channel"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "عدد الزوار" : "Visitors Volume"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "معدل الارتداد %" : "Bounce Rate %"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "الطلبات المحققة" : "Orders Driven"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "الإيرادات المحققة" : "Driven Revenue"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {webAnalytics.trafficSources.map((ts, idx) => (
  <tr key={idx} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{ts.name}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{ts.name}</td>
  <td className="p-2.5 text-center font-bold text-purple-700">{ts.visitors}</td>
  <td className="p-2.5 text-center text-gray-600 font-mono">{ts.bounce}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{ts.orders}</td>
- <td className="p-2.5 text-right font-bold text-gray-900">{formatCurrency(ts.revenue)}</td>
+ <td className="p-2.5 text-end font-bold text-gray-900">{formatCurrency(ts.revenue)}</td>
  </tr>
  ))}
  </tbody>
@@ -2670,60 +2670,60 @@ export default function AnalyticsDashboard({
  <div className="flex items-center gap-2 mb-4">
  <BarChart3 className="h-4 w-4 text-[#D8B46A]" />
  <h3 className="font-playfair text-lg font-bold text-gray-900">
- Fast-Moving Best Sellers vs Slow-Moving Dead Stock Comparison
+ {isRtl ? "مقارنة المنتجات الأكثر مبيعاً مقابل الأصناف الراكدة" : "Fast-Moving Best Sellers vs Slow-Moving Dead Stock Comparison"}
  </h3>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "تصنيف القسم" : "Category Segment"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "المؤشر المالي والمخزوني" : "Category Segment"}</th>
  <th className="p-2.5 text-center">{isRtl ? "أفضل 5 منتجات مبيعاً" : "Top 5 Best Sellers"}</th>
  <th className="p-2.5 text-center">{isRtl ? "أصناف راكدة / غير مباعة" : "Dead Stock / Unsold Items"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "الإجراء الاستراتيجي المطلوب" : "Strategic Action Required"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "الإجراء الاستراتيجي المطلوب" : "Strategic Action Required"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">Product Count</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "عدد المنتجات" : "Product Count"}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{productPerformance.topSelling.length}</td>
  <td className="p-2.5 text-center font-bold text-rose-700">{prodInvAnalytics.deadStockItems.length}</td>
- <td className="p-2.5 text-right text-gray-600">Balance catalog breadth</td>
+ <td className="p-2.5 text-end text-gray-600">{isRtl ? "موازنة تنوع الكتالوج" : "Balance catalog breadth"}</td>
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">Total Units Sold</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "إجمالي القطع المباعة" : "Total Units Sold"}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">
- {productPerformance.topSelling.reduce((sum, p) => sum + p.units, 0)} units
+ {productPerformance.topSelling.reduce((sum, p) => sum + p.units, 0)} {isRtl ? "قطعة" : "units"}
  </td>
- <td className="p-2.5 text-center font-bold text-rose-700">0 units</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-center font-bold text-rose-700">0 {isRtl ? "قطعة" : "units"}</td>
+ <td className="p-2.5 text-end">
  <span className="bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full text-[10px]">
- Apply 15% Promo Offer
+ {isRtl ? "تطبيق خصم ترويجي 15%" : "Apply 15% Promo Offer"}
  </span>
  </td>
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">Sales Revenue Generated</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "إيرادات المبيعات المحققة" : "Sales Revenue Generated"}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">
  {formatCurrency(productPerformance.topSelling.reduce((sum, p) => sum + p.revenue, 0))}
  </td>
  <td className="p-2.5 text-center font-bold text-rose-700">{formatCurrency(0)}</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-end">
  <span className="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-[10px]">
- Reorder Top Sellers
+ {isRtl ? "إعادة توريد الأكثر مبيعاً" : "Reorder Top Sellers"}
  </span>
  </td>
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">Tied Inventory Capital</td>
- <td className="p-2.5 text-center font-bold text-gray-700">High Velocity Capital</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "رأس المال المجمد في المخزون" : "Tied Inventory Capital"}</td>
+ <td className="p-2.5 text-center font-bold text-gray-700">{isRtl ? "دوران سريع لرأس المال" : "High Velocity Capital"}</td>
  <td className="p-2.5 text-center font-bold text-rose-700">
  {formatCurrency(prodInvAnalytics.deadStockItems.reduce((sum, p) => sum + p.tiedCapital, 0))}
  </td>
- <td className="p-2.5 text-right font-bold text-purple-700">Liquidate Dead Stock</td>
+ <td className="p-2.5 text-end font-bold text-purple-700">{isRtl ? "تصفية المخزون الراكد" : "Liquidate Dead Stock"}</td>
  </tr>
  </tbody>
  </table>
@@ -2841,24 +2841,24 @@ export default function AnalyticsDashboard({
  </div>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "اسم المنتج" : "Product Name"}</th>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "القسم" : "Category"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "القطع المباعة" : "Units Sold"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "إيرادات المبيعات" : "Sales Revenue"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "المخزون المتاح" : "Available Stock"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "اسم المنتج" : "Product Name"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "القسم" : "Category"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "القطع المباعة" : "Units Sold"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "إيرادات المبيعات" : "Sales Revenue"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "المخزون المتاح" : "Available Stock"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {productPerformance.topSelling.map((prod, idx) => (
  <tr key={idx} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{prod.name}</td>
- <td className="p-2.5 capitalize text-gray-500">{isRtl ? (prod.category === "shoes" ? "أحذية" : prod.category === "bags" ? "حقائب" : prod.category === "perfumes" ? "عطور" : prod.category === "accessories" ? "إكسسوارات" : prod.category) : prod.category}</td>
- <td className="p-2.5 text-right font-mono font-bold text-emerald-700">{prod.units}</td>
- <td className="p-2.5 text-right font-bold text-gray-900">{formatCurrency(prod.revenue)}</td>
- <td className="p-2.5 text-right font-mono font-bold text-blue-700">{isRtl ? "متوفر بالمخزون" : "In-Stock"}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{prod.name}</td>
+ <td className="p-2.5 text-start capitalize text-gray-500">{isRtl ? (prod.category === "shoes" ? "أحذية" : prod.category === "bags" ? "حقائب" : prod.category === "perfumes" ? "عطور" : prod.category === "accessories" ? "إكسسوارات" : prod.category) : prod.category}</td>
+ <td className="p-2.5 text-center font-mono font-bold text-emerald-700">{prod.units}</td>
+ <td className="p-2.5 text-end font-bold text-gray-900">{formatCurrency(prod.revenue)}</td>
+ <td className="p-2.5 text-end font-mono font-bold text-blue-700">{isRtl ? "متوفر بالمخزون" : "In-Stock"}</td>
  </tr>
  ))}
  </tbody>
@@ -2875,23 +2875,23 @@ export default function AnalyticsDashboard({
             </h3>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "اسم المنتج" : "Product Name"}</th>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "القسم" : "Category"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "القطع الراكدة بالمخزن" : "Physical Stock Stuck"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "قيمة رأس المال المجمد" : "Tied Capital Valuation"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "اسم المنتج" : "Product Name"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "القسم" : "Category"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "القطع الراكدة بالمخزن" : "Physical Stock Stuck"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "قيمة رأس المال المجمد" : "Tied Capital Valuation"}</th>
  <th className="p-2.5 text-center">{isRtl ? "الإجراء المقترح" : "Suggested Action"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {prodInvAnalytics.deadStockItems.slice(0, 6).map((prod) => (
  <tr key={prod.id} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{prod.name}</td>
- <td className="p-2.5 capitalize text-gray-500">{isRtl ? (prod.category === "shoes" ? "أحذية" : prod.category === "bags" ? "حقائب" : prod.category === "perfumes" ? "عطور" : prod.category === "accessories" ? "إكسسوارات" : prod.category) : prod.category}</td>
- <td className="p-2.5 text-right font-mono font-bold text-rose-700">{formatNumber(prod.stock)} {isRtl ? "قطعة" : "units"}</td>
- <td className="p-2.5 text-right font-bold text-[#942E3A]">{formatCurrency(prod.tiedCapital)}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{prod.name}</td>
+ <td className="p-2.5 text-start capitalize text-gray-500">{isRtl ? (prod.category === "shoes" ? "أحذية" : prod.category === "bags" ? "حقائب" : prod.category === "perfumes" ? "عطور" : prod.category === "accessories" ? "إكسسوارات" : prod.category) : prod.category}</td>
+ <td className="p-2.5 text-center font-mono font-bold text-rose-700">{formatNumber(prod.stock)} {isRtl ? "قطعة" : "units"}</td>
+ <td className="p-2.5 text-end font-bold text-[#942E3A]">{formatCurrency(prod.tiedCapital)}</td>
  <td className="p-2.5 text-center">
  <span className="bg-purple-100 text-purple-800 font-extrabold px-2 py-0.5 rounded-full text-[10px]">
  {isRtl ? "إدراجه في عرض ترويجي" : "Feature in Promo Offer"}
@@ -2920,21 +2920,21 @@ export default function AnalyticsDashboard({
             </h3>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "اسم المنتج" : "Product Name"}</th>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "القسم" : "Category"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "القطع المتاحة بالمخزن" : "Available Stock Units"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "اسم المنتج" : "Product Name"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "القسم" : "Category"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "القطع المتاحة بالمخزن" : "Available Stock Units"}</th>
  <th className="p-2.5 text-center">{isRtl ? "حالة أولوية إعادة الطلب" : "Reorder Urgency Status"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {inventoryAnalytics.lowStockItems.map((prod) => (
  <tr key={prod.id} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{prod.name}</td>
- <td className="p-2.5 capitalize text-gray-500">{isRtl ? (prod.category === "shoes" ? "أحذية" : prod.category === "bags" ? "حقائب" : prod.category === "perfumes" ? "عطور" : prod.category === "accessories" ? "إكسسوارات" : prod.category) : prod.category}</td>
- <td className="p-2.5 text-right font-mono font-bold text-rose-700">{formatNumber(prod.stock)} {isRtl ? "قطعة" : "units"}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{prod.name}</td>
+ <td className="p-2.5 text-start capitalize text-gray-500">{isRtl ? (prod.category === "shoes" ? "أحذية" : prod.category === "bags" ? "حقائب" : prod.category === "perfumes" ? "عطور" : prod.category === "accessories" ? "إكسسوارات" : prod.category) : prod.category}</td>
+ <td className="p-2.5 text-center font-mono font-bold text-rose-700">{formatNumber(prod.stock)} {isRtl ? "قطعة" : "units"}</td>
  <td className="p-2.5 text-center">
  <span className="bg-rose-100 text-rose-800 font-extrabold px-2.5 py-0.5 rounded-full text-[10px]">
  {prod.stock === 0 ? (isRtl ? "نفد من المخزن - توريد عاجل" : "Out of Stock - Urgent Restock") : (isRtl ? "تنبيه مخزون منخفض" : "Low Stock Warning")}
@@ -3163,25 +3163,25 @@ export default function AnalyticsDashboard({
  <div className="flex items-center gap-2 mb-4">
  <BarChart3 className="h-4 w-4 text-[#D8B46A]" />
  <h3 className="font-playfair text-lg font-bold text-gray-900">
- New First-Time Buyers vs Returning Loyal Buyers Comparison
+ {isRtl ? "مقارنة المشترين الجدد لأول مرة مقابل العملاء الدائمين" : "New First-Time Buyers vs Returning Loyal Buyers Comparison"}
  </h3>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className="p-2.5">Customer Segment Metric</th>
- <th className="p-2.5 text-center">Repeat Returning Buyers</th>
- <th className="p-2.5 text-center">New First-Time Buyers</th>
- <th className="p-2.5 text-right">Variance / Impact</th>
+ <th className="p-2.5 text-start">{isRtl ? "مؤشر شريحة العملاء" : "Customer Segment Metric"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "العملاء الدائمون المتكررون" : "Repeat Returning Buyers"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "العملاء الجدد لأول مرة" : "New First-Time Buyers"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "الفارق / الأثر" : "Variance / Impact"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">Buyers Count</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "عدد المشترين" : "Buyers Count"}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{custAnalytics.repeatBuyersCount}</td>
  <td className="p-2.5 text-center font-bold text-blue-700">{custAnalytics.newBuyersCount}</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-end">
  {renderGrowthBadge(
  custAnalytics.newBuyersCount
  ? ((custAnalytics.repeatBuyersCount - custAnalytics.newBuyersCount) / custAnalytics.newBuyersCount) * 100
@@ -3191,10 +3191,10 @@ export default function AnalyticsDashboard({
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">Total Sales Revenue</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "إجمالي إيرادات المبيعات" : "Total Sales Revenue"}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{formatCurrency(custAnalytics.returningRevenue)}</td>
  <td className="p-2.5 text-center font-bold text-blue-700">{formatCurrency(custAnalytics.newBuyerRevenue)}</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-end">
  {renderGrowthBadge(
  custAnalytics.newBuyerRevenue
  ? ((custAnalytics.returningRevenue - custAnalytics.newBuyerRevenue) / custAnalytics.newBuyerRevenue) * 100
@@ -3204,10 +3204,10 @@ export default function AnalyticsDashboard({
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{isRtl ? "متوسط قيمة الطلب (AOV)" : "Average Order Value (AOV)"}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "متوسط قيمة الطلب (AOV)" : "Average Order Value (AOV)"}</td>
  <td className="p-2.5 text-center font-bold text-purple-700">{formatCurrency(custAnalytics.repeatBuyerAOV)}</td>
  <td className="p-2.5 text-center font-bold text-gray-600">{formatCurrency(custAnalytics.newBuyerAOV)}</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-end">
  {renderGrowthBadge(
  custAnalytics.newBuyerAOV
  ? ((custAnalytics.repeatBuyerAOV - custAnalytics.newBuyerAOV) / custAnalytics.newBuyerAOV) * 100
@@ -3217,10 +3217,10 @@ export default function AnalyticsDashboard({
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">Units Per Transaction (UPT)</td>
- <td className="p-2.5 text-center font-bold text-purple-700">{custAnalytics.repeatBuyerUPT.toFixed(2)} items</td>
- <td className="p-2.5 text-center font-bold text-gray-600">{custAnalytics.newBuyerUPT.toFixed(2)} items</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "متوسط القطع لكل عملية (UPT)" : "Units Per Transaction (UPT)"}</td>
+ <td className="p-2.5 text-center font-bold text-purple-700">{custAnalytics.repeatBuyerUPT.toFixed(2)} {isRtl ? "قطعة" : "items"}</td>
+ <td className="p-2.5 text-center font-bold text-gray-600">{custAnalytics.newBuyerUPT.toFixed(2)} {isRtl ? "قطعة" : "items"}</td>
+ <td className="p-2.5 text-end">
  {renderGrowthBadge(
  custAnalytics.newBuyerUPT
  ? ((custAnalytics.repeatBuyerUPT - custAnalytics.newBuyerUPT) / custAnalytics.newBuyerUPT) * 100
@@ -3325,27 +3325,27 @@ export default function AnalyticsDashboard({
  {isRtl ? "دليل كبار العملاء (VIP) الأعلى إنفاقاً" : "Top VIP Customers Master Directory (Lifetime Spend)"}
             </h3>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "اسم العميل" : "Customer Name"}</th>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "رقم الهاتف" : "Phone"}</th>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "الموقع" : "Location"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "اسم العميل" : "Customer Name"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "رقم الهاتف" : "Phone"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "الموقع" : "Location"}</th>
  <th className="p-2.5 text-center">{isRtl ? "الطلبات المنفذة" : "Orders Placed"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "إجمالي الإنفاق" : "Lifetime Spend"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "متوسط السلة (AOV)" : "Avg Basket (AOV)"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "إجمالي الإنفاق" : "Lifetime Spend"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "متوسط السلة (AOV)" : "Avg Basket (AOV)"}</th>
  <th className="p-2.5 text-center">{isRtl ? "فئة العميل (VIP)" : "VIP Tier"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {custAnalytics.vipCustomers.map((cust, idx) => (
  <tr key={idx} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{cust.name}</td>
- <td className="p-2.5 font-mono text-gray-500">{cust.phone}</td>
- <td className="p-2.5 text-gray-600">{cust.governorate}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{cust.name}</td>
+ <td className="p-2.5 text-start font-mono text-gray-500">{cust.phone}</td>
+ <td className="p-2.5 text-start text-gray-600">{cust.governorate}</td>
  <td className="p-2.5 text-center font-bold text-blue-700">{cust.ordersCount}</td>
- <td className="p-2.5 text-right font-bold text-[#942E3A]">{formatCurrency(cust.spend)}</td>
- <td className="p-2.5 text-right font-bold text-purple-700">{formatCurrency(cust.avgOrderValue)}</td>
+ <td className="p-2.5 text-end font-bold text-[#942E3A]">{formatCurrency(cust.spend)}</td>
+ <td className="p-2.5 text-end font-bold text-purple-700">{formatCurrency(cust.avgOrderValue)}</td>
  <td className="p-2.5 text-center">
  <span className={`px-2 py-0.5 rounded-full text-[10px] border ${cust.tierColor}`}>
  {cust.tierLabel}
@@ -3371,21 +3371,21 @@ export default function AnalyticsDashboard({
  {isRtl ? "تقييمات وآراء العملاء الواردة" : "Customer Reviews & Feedback Submissions"}
             </h3>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "رقم التقييم" : "Review ID"}</th>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "المنتج" : "Product ID"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "رقم التقييم" : "Review ID"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "المنتج" : "Product ID"}</th>
  <th className="p-2.5 text-center">{isRtl ? "التقييم" : "Rating"}</th>
  <th className="p-2.5 text-center">{isRtl ? "الحالة" : "Status"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "تاريخ الإرسال" : "Submitted Date"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "تاريخ الإرسال" : "Submitted Date"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {reviews.slice(0, 5).map((r) => (
  <tr key={r.id} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold font-mono text-[#942E3A]">{r.id.substring(0, 8)}</td>
- <td className="p-2.5 font-mono text-gray-600">{r.productId.substring(0, 12)}...</td>
+ <td className="p-2.5 text-start font-bold font-mono text-[#942E3A]">{r.id.substring(0, 8)}</td>
+ <td className="p-2.5 text-start font-mono text-gray-600">{r.productId.substring(0, 12)}...</td>
  <td className="p-2.5 text-center">
  <span className="font-bold text-amber-600 flex items-center justify-center gap-1">
  {r.rating} <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
@@ -3396,8 +3396,8 @@ export default function AnalyticsDashboard({
  {r.status}
  </span>
  </td>
- <td className="p-2.5 text-right text-gray-500 font-mono">
- {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+ <td className="p-2.5 text-end text-gray-500 font-mono">
+ {new Date(r.createdAt).toLocaleDateString(isRtl ? "ar-EG-u-nu-latn" : "en-US", { month: "short", day: "numeric" })}
  </td>
  </tr>
  ))}
@@ -3615,38 +3615,38 @@ export default function AnalyticsDashboard({
  <div className="flex items-center gap-2 mb-3">
  <Layers className="h-4 w-4 text-[#D8B46A]" />
  <h3 className="font-playfair text-lg font-bold text-gray-900">
- Order Pipeline Stage Breakdown Matrix
+ {isRtl ? "مصفوفة مراحل وحالات تنفيذ الطلبات" : "Order Pipeline Stage Breakdown Matrix"}
  </h3>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className="p-2.5">Pipeline Stage</th>
+ <th className="p-2.5 text-start">{isRtl ? "مرحلة الطلب" : "Pipeline Stage"}</th>
  <th className="p-2.5 text-center">{isRtl ? "عدد الطلبات" : "Orders Count"}</th>
  <th className="p-2.5 text-center">{isRtl ? "الحصة %" : "Share %"}</th>
- <th className="p-2.5 text-right">Monetary Value</th>
- <th className="p-2.5 text-right">Avg Order Basket</th>
- <th className="p-2.5 text-center">Operational Action Required</th>
+ <th className="p-2.5 text-end">{isRtl ? "القيمة المالية" : "Monetary Value"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "متوسط السلة" : "Avg Order Basket"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "الإجراء التشغيلي المطلوب" : "Operational Action Required"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-amber-800 flex items-center gap-2">
- <span className="w-2 h-2 rounded-full bg-amber-500"></span> Pending
+ <td className="p-2.5 text-start font-bold text-amber-800 flex items-center gap-2">
+ <span className="w-2 h-2 rounded-full bg-amber-500"></span> {isRtl ? "قيد الانتظار" : "Pending"}
  </td>
  <td className="p-2.5 text-center font-bold text-amber-700">{opsAnalytics.pendingCount}</td>
  <td className="p-2.5 text-center">
  {opsAnalytics.totalOrdersCount ? ((opsAnalytics.pendingCount / opsAnalytics.totalOrdersCount) * 100).toFixed(1) : 0}%
  </td>
- <td className="p-2.5 text-right font-bold">
+ <td className="p-2.5 text-end font-bold">
  {formatCurrency(
  currentOrders
  .filter((o) => o.status === "pending")
   .reduce((sum, o) => sum + Number(o.totalPrice), 0)
  )}
  </td>
- <td className="p-2.5 text-right font-bold text-gray-600">
+ <td className="p-2.5 text-end font-bold text-gray-600">
  {formatCurrency(
  opsAnalytics.pendingCount
  ? currentOrders
@@ -3657,27 +3657,27 @@ export default function AnalyticsDashboard({
  </td>
  <td className="p-2.5 text-center">
  <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
- Confirm & Pack Items
+ {isRtl ? "تأكيد وتجهيز الطلب" : "Confirm & Pack Items"}
  </span>
  </td>
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-blue-800 flex items-center gap-2">
- <span className="w-2 h-2 rounded-full bg-blue-500"></span> Shipped
+ <td className="p-2.5 text-start font-bold text-blue-800 flex items-center gap-2">
+ <span className="w-2 h-2 rounded-full bg-blue-500"></span> {isRtl ? "تم الشحن" : "Shipped"}
  </td>
  <td className="p-2.5 text-center font-bold text-blue-700">{opsAnalytics.shippedCount}</td>
  <td className="p-2.5 text-center">
  {opsAnalytics.totalOrdersCount ? ((opsAnalytics.shippedCount / opsAnalytics.totalOrdersCount) * 100).toFixed(1) : 0}%
  </td>
- <td className="p-2.5 text-right font-bold">
+ <td className="p-2.5 text-end font-bold">
  {formatCurrency(
  currentOrders
  .filter((o) => o.status === "shipped")
   .reduce((sum, o) => sum + Number(o.totalPrice), 0)
  )}
  </td>
- <td className="p-2.5 text-right font-bold text-gray-600">
+ <td className="p-2.5 text-end font-bold text-gray-600">
  {formatCurrency(
  opsAnalytics.shippedCount
  ? currentOrders
@@ -3688,27 +3688,27 @@ export default function AnalyticsDashboard({
  </td>
  <td className="p-2.5 text-center">
  <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
- Track Courier Delivery
+ {isRtl ? "متابعة شركة الشحن" : "Track Courier Delivery"}
  </span>
  </td>
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-emerald-800 flex items-center gap-2">
- <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Delivered
+ <td className="p-2.5 text-start font-bold text-emerald-800 flex items-center gap-2">
+ <span className="w-2 h-2 rounded-full bg-emerald-500"></span> {isRtl ? "تم التسليم بنجاح" : "Delivered"}
  </td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{opsAnalytics.deliveredCount}</td>
  <td className="p-2.5 text-center">
  {opsAnalytics.totalOrdersCount ? ((opsAnalytics.deliveredCount / opsAnalytics.totalOrdersCount) * 100).toFixed(1) : 0}%
  </td>
- <td className="p-2.5 text-right font-bold text-emerald-700">
+ <td className="p-2.5 text-end font-bold text-emerald-700">
  {formatCurrency(
  currentOrders
  .filter((o) => o.status === "delivered")
   .reduce((sum, o) => sum + Number(o.totalPrice), 0)
  )}
  </td>
- <td className="p-2.5 text-right font-bold text-gray-600">
+ <td className="p-2.5 text-end font-bold text-gray-600">
  {formatCurrency(
  opsAnalytics.deliveredCount
  ? currentOrders
@@ -3719,27 +3719,27 @@ export default function AnalyticsDashboard({
  </td>
  <td className="p-2.5 text-center">
  <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
- Order Complete
+ {isRtl ? "اكتمل الطلب" : "Order Complete"}
  </span>
  </td>
  </tr>
 
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-rose-800 flex items-center gap-2">
- <span className="w-2 h-2 rounded-full bg-rose-500"></span> Cancelled
+ <td className="p-2.5 text-start font-bold text-rose-800 flex items-center gap-2">
+ <span className="w-2 h-2 rounded-full bg-rose-500"></span> {isRtl ? "ملغي / مسترجع" : "Cancelled"}
  </td>
  <td className="p-2.5 text-center font-bold text-rose-700">{opsAnalytics.cancelledCount}</td>
  <td className="p-2.5 text-center">
  {opsAnalytics.totalOrdersCount ? ((opsAnalytics.cancelledCount / opsAnalytics.totalOrdersCount) * 100).toFixed(1) : 0}%
  </td>
- <td className="p-2.5 text-right font-bold text-rose-600">
+ <td className="p-2.5 text-end font-bold text-rose-600">
  {formatCurrency(
  currentOrders
  .filter((o) => o.status === "cancelled")
   .reduce((sum, o) => sum + Number(o.totalPrice), 0)
  )}
  </td>
- <td className="p-2.5 text-right font-bold text-gray-600">
+ <td className="p-2.5 text-end font-bold text-gray-600">
  {formatCurrency(
  opsAnalytics.cancelledCount
  ? currentOrders
@@ -3750,7 +3750,7 @@ export default function AnalyticsDashboard({
  </td>
  <td className="p-2.5 text-center">
  <span className="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
- Restock Inventory Lot
+ {isRtl ? "إعادة القطع للمخزون" : "Restock Inventory Lot"}
  </span>
  </td>
  </tr>
@@ -3856,35 +3856,35 @@ export default function AnalyticsDashboard({
  <span className="text-xs text-gray-400">{isRtl ? "آخر 10 طلبات" : "Latest 10 Orders"}</span>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "رقم الطلب" : "Order ID"}</th>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "العميل" : "Customer"}</th>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "الوجهة" : "Destination"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "رقم الطلب" : "Order ID"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "العميل" : "Customer"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "الوجهة" : "Destination"}</th>
  <th className="p-2.5 text-center">{isRtl ? "القطع" : "Items"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "الإجمالي" : "Total Price"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "الإجمالي" : "Total Price"}</th>
  <th className="p-2.5 text-center">{isRtl ? "الدفع" : "Payment"}</th>
  <th className="p-2.5 text-center">{isRtl ? "الحالة" : "Status"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "تاريخ الطلب" : "Placed At"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "تاريخ الطلب" : "Placed At"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {opsAnalytics.recentOrdersQueue.map((o) => (
  <tr key={o.id} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold font-mono text-[#942E3A]">{o.orderNumber}</td>
- <td className="p-2.5">
+ <td className="p-2.5 text-start font-bold font-mono text-[#942E3A]">{o.orderNumber}</td>
+ <td className="p-2.5 text-start">
  <div className="font-bold text-gray-900">{o.customerName}</div>
  <div className="text-[10px] text-gray-400 font-mono">{o.customerPhone}</div>
  </td>
- <td className="p-2.5">
+ <td className="p-2.5 text-start">
  <div className="font-semibold text-gray-800">{o.governorate}</div>
  <div className="text-[10px] text-gray-400">{o.city}</div>
  </td>
  <td className="p-2.5 text-center font-bold text-gray-700">
  {formatNumber(o.items.reduce((sum, item) => sum + Number(item.quantity), 0))} {isRtl ? "قطع" : "items"}
  </td>
- <td className="p-2.5 text-right font-bold text-gray-900">{formatCurrency(o.totalPrice)}</td>
+ <td className="p-2.5 text-end font-bold text-gray-900">{formatCurrency(o.totalPrice)}</td>
  <td className="p-2.5 text-center">
  <span className="uppercase text-[10px] font-extrabold bg-gray-100 px-2 py-0.5 rounded-md text-gray-600">
  {o.paymentMethod || "COD"}
@@ -3902,11 +3902,11 @@ export default function AnalyticsDashboard({
  : "bg-rose-100 text-rose-700 border border-rose-300"
  }`}
  >
- {o.status}
+ {o.status === "delivered" ? (isRtl ? "تم التسليم" : "delivered") : o.status === "shipped" ? (isRtl ? "تم الشحن" : "shipped") : o.status === "pending" ? (isRtl ? "قيد الانتظار" : "pending") : (isRtl ? "ملغي" : "cancelled")}
  </span>
  </td>
- <td className="p-2.5 text-right text-[11px] text-gray-500 font-mono">
- {new Date(o.createdAt).toLocaleDateString("en-US", {
+ <td className="p-2.5 text-end text-[11px] text-gray-500 font-mono">
+ {new Date(o.createdAt).toLocaleDateString(isRtl ? "ar-EG-u-nu-latn" : "en-US", {
  month: "short",
  day: "numeric",
  hour: "2-digit",
@@ -3933,23 +3933,23 @@ export default function AnalyticsDashboard({
  {isRtl ? "مصفوفة كفاءة تسليم وشحن المحافظات" : "Governorate Regional Delivery Performance Matrix"}
             </h3>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "المحافظة" : "Governorate"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "المحافظة" : "Governorate"}</th>
  <th className="p-2.5 text-center">{isRtl ? "حجم الطلبات" : "Orders Volume"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "إجمالي الإيرادات" : "Total Revenue"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "متوسط رسوم الشحن" : "Avg Shipping Fee"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "إجمالي الإيرادات" : "Total Revenue"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "متوسط رسوم الشحن" : "Avg Shipping Fee"}</th>
  <th className="p-2.5 text-center">{isRtl ? "معدل نجاح التوصيل" : "Delivery Success Rate"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {opsAnalytics.governoratePerformance.map((gov, idx) => (
  <tr key={idx} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{gov.name}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{gov.name}</td>
  <td className="p-2.5 text-center font-bold text-blue-700">{gov.orders}</td>
- <td className="p-2.5 text-right font-bold text-gray-900">{formatCurrency(gov.revenue)}</td>
- <td className="p-2.5 text-right font-semibold text-gray-600">{formatCurrency(gov.avgShipping)}</td>
+ <td className="p-2.5 text-end font-bold text-gray-900">{formatCurrency(gov.revenue)}</td>
+ <td className="p-2.5 text-end font-semibold text-gray-600">{formatCurrency(gov.avgShipping)}</td>
  <td className="p-2.5 text-center">
  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-md text-[11px]">
  {gov.deliveryRate.toFixed(1)}% {isRtl ? "نجاح التوصيل" : "Success"}
@@ -4152,25 +4152,25 @@ export default function AnalyticsDashboard({
  <div className="flex items-center gap-2 mb-4">
  <BarChart3 className="h-4 w-4 text-[#D8B46A]" />
  <h3 className="font-playfair text-lg font-bold text-gray-900">
- Full-Price vs Promo Orders Comparative Analysis
+ {isRtl ? "تحليل مقارن: طلبات العروض الترويجية مقابل الطلبات بالسعر الكامل" : "Full-Price vs Promo Orders Comparative Analysis"}
  </h3>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className="p-2.5">Performance Metric</th>
- <th className="p-2.5 text-center">Promo-Assisted Orders</th>
- <th className="p-2.5 text-center">Full-Price Orders</th>
- <th className="p-2.5 text-right">Variance / Impact</th>
+ <th className="p-2.5 text-start">{isRtl ? "مؤشر الأداء" : "Performance Metric"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "طلبات الخصومات والعروض" : "Promo-Assisted Orders"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "الطلبات بالسعر الكامل" : "Full-Price Orders"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "الفارق / الأثر" : "Variance / Impact"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">Orders Volume</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "حجم الطلبات" : "Orders Volume"}</td>
  <td className="p-2.5 text-center font-bold text-purple-700">{promoAnalytics.discountedOrdersCount}</td>
  <td className="p-2.5 text-center font-bold text-gray-600">{promoAnalytics.fullPriceOrdersCount}</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-end">
  {renderGrowthBadge(
  promoAnalytics.fullPriceOrdersCount
  ? ((promoAnalytics.discountedOrdersCount - promoAnalytics.fullPriceOrdersCount) / promoAnalytics.fullPriceOrdersCount) * 100
@@ -4179,10 +4179,10 @@ export default function AnalyticsDashboard({
  </td>
  </tr>
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">Gross Sales Revenue</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "إجمالي إيرادات المبيعات" : "Gross Sales Revenue"}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{formatCurrency(promoAnalytics.promoDrivenRevenue)}</td>
  <td className="p-2.5 text-center font-bold text-gray-600">{formatCurrency(promoAnalytics.fullPriceRevenue)}</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-end">
  {renderGrowthBadge(
  promoAnalytics.fullPriceRevenue
  ? ((promoAnalytics.promoDrivenRevenue - promoAnalytics.fullPriceRevenue) / promoAnalytics.fullPriceRevenue) * 100
@@ -4191,10 +4191,10 @@ export default function AnalyticsDashboard({
  </td>
  </tr>
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{isRtl ? "متوسط قيمة الطلب (AOV)" : "Average Order Value (AOV)"}</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "متوسط قيمة الطلب (AOV)" : "Average Order Value (AOV)"}</td>
  <td className="p-2.5 text-center font-bold text-purple-700">{formatCurrency(promoAnalytics.promoAOV)}</td>
  <td className="p-2.5 text-center font-bold text-gray-600">{formatCurrency(promoAnalytics.fullPriceAOV)}</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-end">
  {renderGrowthBadge(
  promoAnalytics.fullPriceAOV
  ? ((promoAnalytics.promoAOV - promoAnalytics.fullPriceAOV) / promoAnalytics.fullPriceAOV) * 100
@@ -4203,10 +4203,10 @@ export default function AnalyticsDashboard({
  </td>
  </tr>
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">Units Per Transaction (UPT)</td>
- <td className="p-2.5 text-center font-bold text-purple-700">{promoAnalytics.promoUPT.toFixed(2)} items</td>
- <td className="p-2.5 text-center font-bold text-gray-600">{promoAnalytics.fullPriceUPT.toFixed(2)} items</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "متوسط القطع لكل عملية (UPT)" : "Units Per Transaction (UPT)"}</td>
+ <td className="p-2.5 text-center font-bold text-purple-700">{promoAnalytics.promoUPT.toFixed(2)} {isRtl ? "قطعة" : "items"}</td>
+ <td className="p-2.5 text-center font-bold text-gray-600">{promoAnalytics.fullPriceUPT.toFixed(2)} {isRtl ? "قطعة" : "items"}</td>
+ <td className="p-2.5 text-end">
  {renderGrowthBadge(
  promoAnalytics.fullPriceUPT
  ? ((promoAnalytics.promoUPT - promoAnalytics.fullPriceUPT) / promoAnalytics.fullPriceUPT) * 100
@@ -4215,10 +4215,10 @@ export default function AnalyticsDashboard({
  </td>
  </tr>
  <tr className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">Delivery Fulfillment Rate</td>
+ <td className="p-2.5 text-start font-bold text-gray-900">{isRtl ? "معدل نجاح تسليم الطلبات" : "Delivery Fulfillment Rate"}</td>
  <td className="p-2.5 text-center font-bold text-emerald-700">{promoAnalytics.promoDeliveryRate.toFixed(1)}%</td>
  <td className="p-2.5 text-center font-bold text-gray-600">{promoAnalytics.fullPriceDeliveryRate.toFixed(1)}%</td>
- <td className="p-2.5 text-right">
+ <td className="p-2.5 text-end">
  {renderGrowthBadge(
  promoAnalytics.fullPriceDeliveryRate
  ? promoAnalytics.promoDeliveryRate - promoAnalytics.fullPriceDeliveryRate
@@ -4366,39 +4366,39 @@ export default function AnalyticsDashboard({
  ️ {isRtl ? "دليل أداء أكواد الخصم والعروض الترويجية" : "Promotion Code Master Performance Directory"}
             </h3>
  <div className="overflow-x-auto">
- <table className="w-full text-left text-xs">
+ <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "اسم العرض / الكوبون" : "Promotion Name"}</th>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "كود الخصم" : "Coupon Code"}</th>
- <th className={`p-2.5 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "النوع" : "Type"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "القيمة" : "Value"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "مرات الاستخدام" : "Redemptions"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "إجمالي توفير العملاء" : "Est. Customer Savings"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "المبيعات المحققة" : "Est. Driven Sales"}</th>
- <th className={`p-2.5 ${isRtl ? "text-left" : "text-right"}`}>{isRtl ? "متوسط السلة (AOV)" : "Avg Basket (AOV)"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "اسم العرض / الكوبون" : "Promotion Name"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "كود الخصم" : "Coupon Code"}</th>
+ <th className="p-2.5 text-start">{isRtl ? "النوع" : "Type"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "القيمة" : "Value"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "مرات الاستخدام" : "Redemptions"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "إجمالي توفير العملاء" : "Est. Customer Savings"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "المبيعات المحققة" : "Est. Driven Sales"}</th>
+ <th className="p-2.5 text-end">{isRtl ? "متوسط السلة (AOV)" : "Avg Basket (AOV)"}</th>
  <th className="p-2.5 text-center">{isRtl ? "الحالة" : "Status"}</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
  {promoAnalytics.enhancedPromotions.map((p) => (
  <tr key={p.id} className="hover:bg-gray-50">
- <td className="p-2.5 font-bold text-gray-900">{p.name}</td>
- <td className="p-2.5 font-mono text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-md inline-block my-1">
+ <td className="p-2.5 text-start font-bold text-gray-900">{p.name}</td>
+ <td className="p-2.5 text-start font-mono text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-md inline-block my-1">
  {p.code || (isRtl ? "تلقائي" : "Automatic")}
  </td>
- <td className="p-2.5">
+ <td className="p-2.5 text-start">
  <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md font-semibold capitalize text-[10px]">
- {p.type}
+ {p.type === "percentage" ? (isRtl ? "نسبة مئوية" : "percentage") : p.type === "fixed" ? (isRtl ? "مبلغ ثابت" : "fixed") : p.type}
  </span>
  </td>
- <td className="p-2.5 text-right font-bold text-gray-900">
+ <td className="p-2.5 text-end font-bold text-gray-900">
  {p.type === "percentage" ? `${p.value}%` : formatCurrency(p.value)}
  </td>
- <td className="p-2.5 text-right font-mono font-bold text-emerald-700">{p.usedCount}</td>
- <td className="p-2.5 text-right font-bold text-rose-600">{formatCurrency(p.estSavings)}</td>
- <td className="p-2.5 text-right font-bold text-emerald-700">{formatCurrency(p.estDrivenRevenue)}</td>
- <td className="p-2.5 text-right font-bold text-purple-700">{formatCurrency(p.avgBasket)}</td>
+ <td className="p-2.5 text-center font-mono font-bold text-emerald-700">{p.usedCount}</td>
+ <td className="p-2.5 text-end font-bold text-rose-600">{formatCurrency(p.estSavings)}</td>
+ <td className="p-2.5 text-end font-bold text-emerald-700">{formatCurrency(p.estDrivenRevenue)}</td>
+ <td className="p-2.5 text-end font-bold text-purple-700">{formatCurrency(p.avgBasket)}</td>
  <td className="p-2.5 text-center">
  <span
  className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
