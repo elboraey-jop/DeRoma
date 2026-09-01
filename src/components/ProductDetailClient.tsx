@@ -416,19 +416,30 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
               </h1>
 
               {/* Star rating */}
-              <div className="flex items-center justify-center gap-1.5 mt-2">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  ))}
+              {((product.reviewsCount ?? reviews.length) > 0 || (product.rating && Number(product.rating) > 0)) ? (
+                <div className="flex items-center justify-center gap-1.5 mt-2">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < Math.round(Number(product.rating) || 5)
+                            ? "fill-amber-400 text-amber-400"
+                            : "fill-stone-200 text-stone-200"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  {product.rating && Number(product.rating) > 0 ? (
+                    <span className="font-numeric text-[11px] sm:text-xs font-normal text-[#942E3A]">
+                      {formatNumber(Number(product.rating).toFixed(1))}
+                    </span>
+                  ) : null}
+                  <span className="font-numeric text-[11px] sm:text-xs text-[#D8B46A]">
+                    ({formatNumber(product.reviewsCount ?? reviews.length)} {t("productDetail.reviews")})
+                  </span>
                 </div>
-                <span className="font-numeric text-[11px] sm:text-xs font-normal text-[#942E3A]">
-                  {formatNumber(product.rating ? product.rating.toFixed(1) : "4.8")}
-                </span>
-                <span className="font-numeric text-[11px] sm:text-xs text-[#D8B46A]">
-                  ({formatNumber(product.reviewsCount ?? reviews.length)} {t("productDetail.reviews")})
-                </span>
-              </div>
+              ) : null}
             </div>
 
             {/* Price Row */}

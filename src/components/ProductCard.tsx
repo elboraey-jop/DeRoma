@@ -137,6 +137,9 @@ export default function ProductCard({
   };
 
   const isTotalSoldOut = sizesForProduct.length > 0 && sizesForProduct.every((v) => v.stock <= 0);
+  const hasRealRating = Boolean(
+    product.rating && Number(product.rating) > 0 && (product.reviewsCount === undefined || product.reviewsCount > 0)
+  );
   const analyticsItem = {
     productId: product.id,
     variantId: selectedVariant?.id,
@@ -180,12 +183,12 @@ export default function ProductCard({
       ref={cardRef}
       dir={dir}
       whileHover={mobileOptimized || isTotalSoldOut ? undefined : { y: -5, transition: { duration: 0.25, ease: "easeOut" } }}
-      className={`product-card-shell group relative flex h-[330px] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_30px_rgba(148,46,58,0.06)] hover:shadow-[0_18px_38px_rgba(148,46,58,0.13)] sm:h-[380px] sm:max-w-[230px] sm:rounded-[1.65rem] transition-all duration-300 ${
+      className={`product-card-shell group relative flex h-[340px] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_30px_rgba(148,46,58,0.06)] hover:shadow-[0_18px_38px_rgba(148,46,58,0.13)] sm:h-[390px] sm:max-w-[230px] sm:rounded-[1.65rem] transition-all duration-300 ${
         isTotalSoldOut ? "opacity-75 grayscale bg-stone-100" : ""
       }`}
     >
       {/* Top Product Image Container */}
-      <div className="relative h-[71%] sm:h-[72%] w-full shrink-0 overflow-hidden bg-[#FFF9EB]">
+      <div className="relative h-[68%] sm:h-[69%] w-full shrink-0 overflow-hidden bg-[#FFF9EB]">
         
         {/* Badges */}
         {isTotalSoldOut ? (
@@ -221,20 +224,28 @@ export default function ProductCard({
 
       {/* Card Details */}
       <div
-        className={`relative z-10 -mt-7 flex flex-1 flex-col rounded-t-[1.15rem] px-2.5 pb-2 pt-2 text-[#6B1F2A] sm:-mt-9 sm:rounded-t-[1.35rem] sm:px-3 sm:pb-2.5 sm:pt-2.5 ${
+        className={`relative z-10 -mt-7 flex flex-1 flex-col rounded-t-[1.15rem] px-2.5 pb-3.5 pt-2 text-[#6B1F2A] sm:-mt-9 sm:rounded-t-[1.35rem] sm:px-3 sm:pb-4 sm:pt-2.5 ${
           isTotalSoldOut ? "bg-stone-700 text-stone-200" : "bg-[#EADFC8] text-[#6B1F2A]"
         }`}
         style={!isTotalSoldOut ? { backgroundColor: "#EADFC8" } : undefined}
       >
         <div className="relative mb-0.5 min-h-[1.75rem]">
-          <div className="absolute left-0 rtl:left-auto rtl:right-0 top-0 flex items-center gap-0.5 text-xs font-semibold text-amber-500">
-            <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
-            <span className="product-card-badge-number text-[#6B1F2A] text-[10px] font-medium sm:text-[11px]">
-              {formatNumber(product.rating ? product.rating.toFixed(1) : "4.8")}
-            </span>
-          </div>
+          {hasRealRating && (
+            <div className="absolute left-0 rtl:left-auto rtl:right-0 top-0 flex items-center gap-0.5 text-xs font-semibold text-amber-500">
+              <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+              <span className="product-card-badge-number text-[#6B1F2A] text-[10px] font-medium sm:text-[11px]">
+                {formatNumber(Number(product.rating).toFixed(1))}
+              </span>
+            </div>
+          )}
 
-            <Link href={getProductPath(product)} onClick={handleProductSelect} className="block px-8 sm:px-9 text-center transition-colors group-hover:text-[#942E3A]">
+          <Link
+            href={getProductPath(product)}
+            onClick={handleProductSelect}
+            className={`block text-center transition-colors group-hover:text-[#942E3A] ${
+              hasRealRating ? "px-8 sm:px-9" : "px-1 sm:px-2"
+            }`}
+          >
             <h3 className="product-card-name text-[10px] font-normal leading-[1.2] tracking-tight text-[#6B1F2A] line-clamp-2 sm:text-[11px]">
               {product.name}
             </h3>
@@ -287,7 +298,7 @@ export default function ProductCard({
         </div>}
 
         {/* Action Buttons */}
-        <div className="mt-auto border-t border-[#942E3A]/20 pt-1">
+        <div className="mt-auto border-t border-[#942E3A]/20 pt-1.5 pb-0.5">
           {isTotalSoldOut ? (
             <div className="flex h-7 sm:h-8 w-full items-center justify-center rounded-full bg-stone-500 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-white shadow-inner">
               {soldOutLabel}
