@@ -169,7 +169,7 @@ function AdminShellContent({ children }: { children: React.ReactNode }) {
       {isSidebarOpen && (
         <>
           <button
-            className="fixed inset-0 z-40 bg-[#8B7CC7]/45 backdrop-blur-[2px] lg:hidden"
+            className="fixed inset-0 z-40 bg-black/60 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
             aria-label="Close admin menu"
           />

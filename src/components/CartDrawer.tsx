@@ -73,7 +73,7 @@ export default function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setCartOpen(false)}
-            className="fixed inset-0 z-[70] bg-[#8B7CC7]/35 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[70] bg-black/60"
           />
 
           {/* Drawer Panel */}

@@ -13,6 +13,7 @@ import { formatCurrency } from "@/lib/utils";
 import AdminStatusSelect from "@/components/AdminStatusSelect";
 import AdminBackButton from "@/components/AdminBackButton";
 import AdminCopyButton from "@/components/AdminCopyButton";
+import AdminInvoiceButton from "@/components/AdminInvoiceButton";
 import { confirmOrderPaymentAction } from "@/app/admin/orders/actions";
 
 const statusMessages: Record<string, string> = {
@@ -81,12 +82,13 @@ export default async function AdminOrderDetailsPage({
             </h1>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 print:hidden">
+        <div className="flex flex-wrap items-center gap-2 print:hidden">
+          <AdminInvoiceButton order={order} />
           <a
             href={whatsappHref}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-3 py-2.5 text-xs font-bold text-white"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-3 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#20ba5a]"
           >
             <MessageCircle className="h-4 w-4" /> WhatsApp
           </a>
