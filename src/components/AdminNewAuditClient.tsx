@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { createStockAuditAction } from "@/app/admin/inventory/actions";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
+import { toast } from "@/lib/toast";
 
 export interface AuditItemSource {
   variantId: string;
@@ -253,9 +254,10 @@ export default function AdminNewAuditClient({
       });
 
       if (res.success) {
+        toast.success(isRtl ? "تم حفظ جلسة الجرد بنجاح!" : "Stock audit saved successfully!");
         router.push("/admin/inventory/audits");
       } else {
-        alert(res.error || (isRtl ? "حدث خطأ أثناء حفظ جلسة الجرد." : "Failed to save stock audit."));
+        toast.error(res.error || (isRtl ? "حدث خطأ أثناء حفظ جلسة الجرد." : "Failed to save stock audit."));
       }
     });
   };

@@ -3,6 +3,7 @@
 import { Check, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { updateProductStatusAction } from "@/app/admin/products/actions";
+import { toast } from "@/lib/toast";
 
 const options = [
   { value: "active", label: "Active" },
@@ -73,7 +74,14 @@ export default function AdminProductStatusSelect({
     const statusInput = formRef.current?.elements.namedItem("status");
     if (statusInput instanceof HTMLInputElement) statusInput.value = nextStatus;
     setIsOpen(false);
-    if (nextStatus !== status) formRef.current?.requestSubmit();
+    if (nextStatus !== status) {
+      toast.success(
+        isRtl
+          ? `تم تحديث حالة المنتج إلى "${labelFor(nextStatus)}"`
+          : `Status updated to ${nextStatus}`
+      );
+      formRef.current?.requestSubmit();
+    }
   };
 
   return (

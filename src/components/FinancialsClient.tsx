@@ -46,6 +46,7 @@ import {
   createSettlementAction,
   createTransferAction,
 } from "@/app/admin/financials/actions";
+import { toast } from "@/lib/toast";
 import AdminDailyLogDatePicker, { DatePreset } from "@/components/AdminDailyLogDatePicker";
 import Link from "next/link";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
@@ -643,8 +644,9 @@ export default function FinancialsClient({
     startTransition(async () => {
       try {
         await deleteExpenseAction(id);
+        toast.success(isRtl ? "تم حذف المصروف بنجاح!" : "Expense deleted successfully!");
       } catch (err: any) {
-        alert(err.message || (isRtl ? "تعذر حذف المصروف." : "Failed to delete expense."));
+        toast.error(err.message || (isRtl ? "تعذر حذف المصروف." : "Failed to delete expense."));
       }
     });
   };
@@ -1084,7 +1086,7 @@ export default function FinancialsClient({
   const handleExportPdf = () => {
     const reportWindow = window.open("", "_blank", "width=1200,height=900");
     if (!reportWindow) {
-      alert(isRtl ? "يرجى السماح بالنوافذ المنبثقة لتصدير التقرير." : "Please allow pop-ups to export the report.");
+      toast.warning(isRtl ? "يرجى السماح بالنوافذ المنبثقة لتصدير التقرير." : "Please allow pop-ups to export the report.");
       return;
     }
 

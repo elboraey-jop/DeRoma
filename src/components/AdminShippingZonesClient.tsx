@@ -11,6 +11,7 @@ import AdminShippingExceptionsPicker, {
 } from "@/components/AdminShippingExceptionsPicker";
 import { CENTERS_BY_GOVERNORATE } from "@/lib/locations";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
+import { toast } from "@/lib/toast";
 
 type Zone = {
   id: string;
@@ -211,7 +212,12 @@ export default function AdminShippingZonesClient({ zones }: { zones: Zone[] }) {
                     <Edit3 className="h-3.5 w-3.5" />
                     {t("common.edit")}
                   </button>
-                  <form action={deleteShippingZoneAction}>
+                  <form
+                    action={deleteShippingZoneAction}
+                    onSubmit={() => {
+                      toast.success(isRtl ? `تم حذف منطقة "${zone.name}" بنجاح!` : `Zone "${zone.name}" deleted successfully!`);
+                    }}
+                  >
                     <input type="hidden" name="id" value={zone.id} />
                     <button
                       type="submit"

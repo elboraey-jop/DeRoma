@@ -4,6 +4,7 @@ import { Percent, Tag, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { updateProductDiscountAction } from "@/app/admin/products/actions";
 import { formatCurrency } from "@/lib/utils";
+import { toast } from "@/lib/toast";
 
 export default function AdminProductDiscountModal({
   productId,
@@ -88,11 +89,25 @@ export default function AdminProductDiscountModal({
                 <span className="font-playfair text-lg font-black text-[#942E3A]">{formatCurrency(previewPrice)}</span>
               </div>
             </div>
-            <form id={`remove-discount-${productId}`} action={updateProductDiscountAction} onSubmit={() => setIsOpen(false)}>
+            <form
+              id={`remove-discount-${productId}`}
+              action={updateProductDiscountAction}
+              onSubmit={() => {
+                setIsOpen(false);
+                toast.success(isRtl ? "تمت إزالة الخصم بنجاح!" : "Discount removed successfully!");
+              }}
+            >
               <input type="hidden" name="productId" value={productId} />
               <input type="hidden" name="action" value="remove" />
             </form>
-            <form action={updateProductDiscountAction} onSubmit={() => setIsOpen(false)} className="mt-5 space-y-4">
+            <form
+              action={updateProductDiscountAction}
+              onSubmit={() => {
+                setIsOpen(false);
+                toast.success(isRtl ? "تم تطبيق الخصم بنجاح!" : "Discount applied successfully!");
+              }}
+              className="mt-5 space-y-4"
+            >
               <input type="hidden" name="productId" value={productId} />
               <div>
                 <span className="field-label">{isRtl ? "نوع الخصم" : "Discount type"}</span>

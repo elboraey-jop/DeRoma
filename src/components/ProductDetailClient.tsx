@@ -35,6 +35,7 @@ import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/Scroll
 import ProductCard, { ProductWithVariants, COLOR_TRANSLATIONS } from "@/components/ProductCard";
 import { submitReviewAction } from "@/app/review-actions";
 import { trackAddToWishlist, trackViewItem } from "@/lib/analytics";
+import { toast } from "@/lib/toast";
 
 import { useStoreI18n } from "@/providers/StoreI18nContext";
 
@@ -242,7 +243,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
 
   const handleAddToCart = () => {
     if (!isBag && !selectedSize) {
-      alert(lang === "ar" ? "يرجى اختيار مقاس الحذاء أولاً." : "Please select your shoe size first.");
+      toast.error(lang === "ar" ? "يرجى اختيار مقاس الحذاء أولاً." : "Please select your shoe size first.");
       return;
     }
 
@@ -266,7 +267,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
 
   const handleBuyNow = () => {
     if (!isBag && !selectedSize) {
-      alert(lang === "ar" ? "يرجى اختيار مقاس الحذاء أولاً." : "Please select your shoe size first.");
+      toast.error(lang === "ar" ? "يرجى اختيار مقاس الحذاء أولاً." : "Please select your shoe size first.");
       return;
     }
 
@@ -912,23 +913,31 @@ function ReviewsSection({
   const handleSubmitReview = async () => {
     if (!reviewName.trim() || !reviewComment.trim() || newReviewRating === 0) return;
 
-    const result = await submitReviewAction({ productId: product.id, customerName: reviewName, rating: newReviewRating, body: reviewComment });
-    if (!result.success) return;
+    try {
+      const result = await submitReviewAction({ productId: product.id, customerName: reviewName, rating: newReviewRating, body: reviewComment });
+      if (!result.success) {
+        toast.error(result.error || (lang === "ar" ? "تعذر إرسال التقييم. حاول مرة أخرى." : "Failed to submit review. Please try again."));
+        return;
+      }
 
-    const newReview = {
-      id: reviews.length + 1,
-      name: reviewName,
-      avatar: reviewName.charAt(0).toUpperCase(),
-      rating: newReviewRating,
-      date: "Just now",
-      comment: reviewComment,
-    };
+      const newReview = {
+        id: reviews.length + 1,
+        name: reviewName,
+        avatar: reviewName.charAt(0).toUpperCase(),
+        rating: newReviewRating,
+        date: "Just now",
+        comment: reviewComment,
+      };
 
-    setReviews([newReview, ...reviews]);
-    setShowReviewForm(false);
-    setReviewName("");
-    setReviewComment("");
-    setNewReviewRating(0);
+      setReviews([newReview, ...reviews]);
+      setShowReviewForm(false);
+      setReviewName("");
+      setReviewComment("");
+      setNewReviewRating(0);
+      toast.success(lang === "ar" ? "شكراً لك! تم إرسال تقييمك بنجاح." : "Thank you! Your review has been submitted.");
+    } catch {
+      toast.error(lang === "ar" ? "تعذر إرسال التقييم. حاول مرة أخرى." : "Failed to submit review. Please try again.");
+    }
   };
 
   return (
