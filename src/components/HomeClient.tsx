@@ -20,6 +20,7 @@ import ProductCard, { ProductWithVariants } from "./ProductCard";
 import { useSiteSettings } from "@/providers/SiteSettingsProvider";
 import { useStoreI18n } from "@/providers/StoreI18nContext";
 import { DEFAULT_HOME_REVIEWS } from "@/lib/siteSettings";
+import { useIsMobile } from "@/lib/useIsMobile";
 
 export type HomeReviewItem = {
   id?: string;
@@ -43,6 +44,7 @@ export default function HomeClient({
 }) {
   const settings = useSiteSettings();
   const { t, lang, dir, formatNumber } = useStoreI18n();
+  const isMobile = useIsMobile();
   const [activeSlide, setActiveSlide] = useState(0);
   const [direction, setDirection] = useState(1);
   const [activeReview, setActiveReview] = useState(0);
@@ -232,6 +234,18 @@ export default function HomeClient({
 
   const reviews = dbHomeReviews.length > 0 ? dbHomeReviews : (settings.homeReviews || []);
   const activeReviewData = reviews[activeReview] || reviews[0];
+
+  // Auto-play for reviews on MOBILE ONLY (faster than hero banner 3s)
+  useEffect(() => {
+    if (!showReviewsSection || !isMobile || reviews.length <= 1) return;
+
+    const timer = window.setTimeout(() => {
+      setReviewDirection(1);
+      setActiveReview((prev) => (prev + 1) % reviews.length);
+    }, 2000);
+
+    return () => window.clearTimeout(timer);
+  }, [activeReview, isMobile, showReviewsSection, reviews.length]);
 
   const localizedReviewQuotes: Record<string, string> = lang === "ar"
     ? {
