@@ -266,19 +266,19 @@ export default function ProductCard({
                 title={isOutOfStock ? soldOutLabel : undefined}
                 whileHover={!mobileOptimized && !isOutOfStock ? { scale: 1.1 } : undefined}
                 whileTap={!mobileOptimized && !isOutOfStock ? { scale: 0.9 } : undefined}
-                className={`product-card-badge-number group relative min-w-6 rounded-full border px-1.5 py-0.5 text-[9px] font-medium transition-all sm:text-[10px] ${
+                className={`product-card-badge-number group relative flex h-6 min-w-6 items-center justify-center rounded-full border px-1 text-[9px] font-bold leading-none text-center transition-all sm:h-6.5 sm:min-w-6.5 sm:text-[10px] ${
                   isOutOfStock
-                    ? "border-[#8B7CC7]/35 bg-[#FFF9EC]/70 text-[#8178A8]"
+                    ? "border-stone-400/30 bg-stone-100/50 text-stone-400 opacity-40 cursor-not-allowed"
                     : isSelected
-                    ? "border-[#942E3A] bg-[#942E3A] text-[#FFF9EB]"
-                    : "border-[#942E3A]/30 bg-[#FFF9EB]/65 text-[#6B1F2A] hover:border-[#942E3A]/65"
+                    ? "border-[#942E3A] bg-[#942E3A] text-[#FFF9EB] shadow-xs scale-105"
+                    : "border-[#942E3A]/30 bg-[#FFF9EB]/75 text-[#6B1F2A] hover:border-[#942E3A] hover:bg-[#FFF9EB]"
                 }`}
               >
-                <span className="relative -top-0.5">{formatNumber(variant.size)}</span>
+                <span className="flex items-center justify-center leading-none">{formatNumber(variant.size)}</span>
                 {isOutOfStock && (
                   <span
                     aria-hidden="true"
-                    className="pointer-events-none absolute left-1 right-1 top-1/2 h-[1.5px] -translate-y-1/2 bg-[#8B7CC7]"
+                    className="pointer-events-none absolute left-0.5 right-0.5 top-1/2 h-[1px] -translate-y-1/2 bg-stone-400/80"
                   />
                 )}
               </motion.button>
