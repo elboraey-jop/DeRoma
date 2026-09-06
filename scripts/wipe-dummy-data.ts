@@ -72,26 +72,45 @@ async function wipeDummyData() {
     const contactMessages = await prisma.contactMessage.deleteMany({});
     console.log(`  ✓ Deleted Contact Messages: ${contactMessages.count}`);
 
-    // 10. Clean SiteSettings (reset old product reference IDs)
-    await prisma.siteSettings.upsert({
-      where: { id: "default" },
-      create: {
-        id: "default",
-        forYouProductIds: [],
-        bestSellerProductIds: [],
-        heroBanners: [],
-        homeReviews: [],
-      },
-      update: {
-        forYouProductIds: [],
-        bestSellerProductIds: [],
-        heroBanners: [],
-        homeReviews: [],
-      },
+    // 10. Reset Promotions Usage
+    const promotions = await prisma.promotion.updateMany({
+      data: { usedCount: 0 },
     });
-    console.log("  ✓ Reset SiteSettings product links to clean state.");
+    console.log(`  ✓ Reset Promotion usage counts: ${promotions.count}`);
 
-    // 11. Ensure Admin User exists
+    // 11. Reset Order Sequence so first real order starts at DR-0001
+    try {
+      await prisma.$executeRawUnsafe(`ALTER SEQUENCE "Order_orderSequence_seq" RESTART WITH 1;`);
+      console.log("  ✓ Reset Order Sequence to 1 (next order will be DR-0001)");
+    } catch (seqError) {
+      console.warn("  ⚠️ Notice on sequence reset:", seqError);
+    }
+
+    // 12. Clean SiteSettings (reset old product reference IDs while preserving address, phones, social links)
+    const currentSettings = await prisma.siteSettings.findUnique({ where: { id: "default" } });
+    if (currentSettings) {
+      await prisma.siteSettings.update({
+        where: { id: "default" },
+        data: {
+          forYouProductIds: [],
+          bestSellerProductIds: [],
+          homeReviews: [],
+        },
+      });
+      console.log("  ✓ Reset SiteSettings product links to clean state.");
+    } else {
+      await prisma.siteSettings.create({
+        data: {
+          id: "default",
+          forYouProductIds: [],
+          bestSellerProductIds: [],
+          homeReviews: [],
+        },
+      });
+      console.log("  ✓ Initialized clean SiteSettings.");
+    }
+
+    // 13. Ensure Admin User exists and delete any other demo registered accounts
     const adminEmail = (process.env.ADMIN_EMAIL || "admin@deroma.com").trim().toLowerCase();
     const adminPassword = process.env.ADMIN_PASSWORD || "Admin@123456";
     const passwordHash = await bcrypt.hash(adminPassword, 12);
@@ -111,6 +130,13 @@ async function wipeDummyData() {
       },
     });
     console.log(`  ✓ Verified Admin User: ${adminEmail}`);
+
+    const demoUsers = await prisma.user.deleteMany({
+      where: { email: { not: adminEmail } },
+    });
+    if (demoUsers.count > 0) {
+      console.log(`  ✓ Purged Test User Accounts: ${demoUsers.count}`);
+    }
 
     console.log("\n=======================================================");
     console.log("✨ Database successfully cleaned and prepared for production!");

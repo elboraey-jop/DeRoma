@@ -15,6 +15,7 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:backup": "tsx scripts/backup-db.ts",
     "db:restore": "tsx scripts/restore-db.ts",
+    "db:wipe": "tsx scripts/wipe-dummy-data.ts",
     "worker": "tsx src/worker.ts"
   },
   "dependencies": {

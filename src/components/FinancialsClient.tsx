@@ -199,30 +199,56 @@ const CATEGORY_LABELS: Record<string, string> = {
   marketing: "Marketing & Ads",
   shipping_ops: "Logistics & Shipping",
   packaging: "Bags & Packaging",
-  utilities: "Utilities & Services",
+  utilities: "Utilities & Bills",
   salaries: "Salaries & Commissions",
+  purchase_invoice: "Purchase Invoices",
   other: "Other Expenses",
+  capital: "Capital / Investment",
+  external_profit: "External Profits",
+  supplier_refund: "Supplier Refunds",
+  other_income: "Other Income",
 };
 
 const CATEGORY_LABELS_AR: Record<string, string> = {
   marketing: "تسويق وإعلانات",
-  shipping_ops: "شحن وتوصيل",
+  shipping_ops: "لوجستيات وشحن",
   packaging: "أكياس وتغليف",
   utilities: "خدمات ومرافق",
-  salaries: "مرتبات وعمولات",
-  other: "مصاريف أخرى",
+  salaries: "رواتب وعمولات",
+  purchase_invoice: "فواتير شراء وتوريد",
+  other: "مصروفات أخرى",
+  capital: "رأس مال / استثمارات",
+  external_profit: "أرباح خارجية",
+  supplier_refund: "استرداد ومرتجعات توريد",
+  other_income: "إيرادات أخرى",
 };
 
 const ACCOUNT_LABELS: Record<string, string> = {
   cash: "Cash on Hand",
   instapay_visa: "InstaPay / Visa",
   wallet: "E-Wallets",
+  bank: "Bank Account",
 };
 
 const ACCOUNT_LABELS_AR: Record<string, string> = {
   cash: "خزينة النقود (كاش)",
   instapay_visa: "إنستا باي / فيزا",
   wallet: "المحافظ الإلكترونية",
+  bank: "الحساب البنكي",
+};
+
+const getCategoryLabel = (category: string, isRtl: boolean): string => {
+  if (isRtl) {
+    return CATEGORY_LABELS_AR[category] || category;
+  }
+  return CATEGORY_LABELS[category] || category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+const getAccountLabel = (account: string, isRtl: boolean): string => {
+  if (isRtl) {
+    return ACCOUNT_LABELS_AR[account] || account;
+  }
+  return ACCOUNT_LABELS[account] || account.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
 export default function FinancialsClient({
@@ -366,6 +392,7 @@ export default function FinancialsClient({
   const [settlementNotes, setSettlementNotes] = useState("");
 
   const openSettlingModal = (week: WeeklyPeriodData) => {
+    if (week.isCurrentWeek) return;
     setSettlingWeek(week);
     setCashTransferred(week.cashSales);
     setInstapayTransferred(week.instapaySales);
@@ -882,81 +909,221 @@ export default function FinancialsClient({
     forecasting: "Forecasting",
   };
 
-  const exportTransactions = filteredExpenses.map((expense) => ({
-    Date: new Date(expense.date).toLocaleDateString("en-CA"),
-    Type: expense.type === "income" ? "Income" : expense.isPurchaseInvoice || expense.category === "purchase_invoice" ? "Purchase invoice" : "Expense",
-    Title: expense.title,
-    Category: expense.category,
-    "Payment account": ACCOUNT_LABELS[expense.paymentAccount] || expense.paymentAccount,
-    Amount: Number(expense.amount || 0),
-    Notes: expense.notes || "",
-  }));
+  const getExportRowsByTab = (tab: FinancialTab, rtl: boolean): Record<string, unknown>[] => {
+    switch (tab) {
+      case "expenses":
+        return filteredExpenses.map((expense) => {
+          const isPurchase = Boolean(expense.isPurchaseInvoice || expense.category === "purchase_invoice");
+          const typeLabel = expense.type === "income"
+            ? (rtl ? "إيراد" : "Income")
+            : isPurchase
+              ? (rtl ? "فاتورة شراء وتوريد" : "Purchase Invoice")
+              : (rtl ? "مصروف" : "Expense");
+          const categoryLabel = getCategoryLabel(expense.category, rtl);
+          const accountLabel = getAccountLabel(expense.paymentAccount, rtl);
+
+          if (rtl) {
+            return {
+              "التاريخ": expense.date.slice(0, 10),
+              "النوع": typeLabel,
+              "البيان": expense.title,
+              "التصنيف": categoryLabel,
+              "حساب الدفع": accountLabel,
+              "المبلغ": Number(expense.amount || 0),
+              "ملاحظات": expense.notes || "-",
+            };
+          }
+          return {
+            "Date": expense.date.slice(0, 10),
+            "Type": typeLabel,
+            "Description": expense.title,
+            "Category": categoryLabel,
+            "Payment Account": accountLabel,
+            "Amount": Number(expense.amount || 0),
+            "Notes": expense.notes || "-",
+          };
+        });
+
+      case "overview":
+        if (rtl) {
+          return [
+            { "المؤشر": "إجمالي المبيعات", "القيمة": summary.totalSales },
+            { "المؤشر": "إجمالي السيولة", "القيمة": paymentAccounts.totalLiquidity },
+            { "المؤشر": "صافي الربح", "القيمة": summary.netProfit },
+            { "المؤشر": "خزينة النقود (كاش)", "القيمة": paymentAccounts.cashOnHand },
+            { "المؤشر": "إنستا باي / فيزا", "القيمة": paymentAccounts.instapayVisa },
+            { "المؤشر": "المحافظ الإلكترونية", "القيمة": paymentAccounts.wallet },
+            { "المؤشر": "وحدات المخزون المتوفرة", "القيمة": inventoryStats.totalItemsInStock },
+            { "المؤشر": "قيمة المخزون بسعر الجملة", "القيمة": inventoryStats.stockWholesaleValue },
+            { "المؤشر": "قيمة المخزون بسعر البيع", "القيمة": inventoryStats.stockRetailValue },
+          ];
+        }
+        return [
+          { "Metric": "Total Sales", "Value": summary.totalSales },
+          { "Metric": "Total Liquidity", "Value": paymentAccounts.totalLiquidity },
+          { "Metric": "Net Profit", "Value": summary.netProfit },
+          { "Metric": "Cash on Hand", "Value": paymentAccounts.cashOnHand },
+          { "Metric": "InstaPay / Visa", "Value": paymentAccounts.instapayVisa },
+          { "Metric": "E-Wallets", "Value": paymentAccounts.wallet },
+          { "Metric": "Stock Units", "Value": inventoryStats.totalItemsInStock },
+          { "Metric": "Stock Wholesale Value", "Value": inventoryStats.stockWholesaleValue },
+          { "Metric": "Stock Retail Value", "Value": inventoryStats.stockRetailValue },
+        ];
+
+      case "pnl":
+        if (rtl) {
+          return [
+            { "البند": "إجمالي إيرادات المبيعات", "المبلغ": grossSalesBeforeDiscounts },
+            { "البند": "الخصومات الترويجية", "المبلغ": summary.totalDiscounts },
+            { "البند": "صافي إيرادات المبيعات", "المبلغ": summary.totalSales },
+            { "البند": "تكلفة المنتجات المباعة (COGS)", "المبلغ": summary.totalCOGS },
+            { "البند": "مجمل الربح", "المبلغ": summary.grossProfit },
+            { "البند": "المصروفات التشغيلية", "المبلغ": summary.totalExpenses },
+            { "البند": "صافي دخل النشاط", "المبلغ": summary.netProfit },
+          ];
+        }
+        return [
+          { "Line": "Gross Sales Revenue", "Amount": grossSalesBeforeDiscounts },
+          { "Line": "Promotional Discounts", "Amount": summary.totalDiscounts },
+          { "Line": "Net Sales Revenue", "Amount": summary.totalSales },
+          { "Line": "COGS", "Amount": summary.totalCOGS },
+          { "Line": "Gross Profit", "Amount": summary.grossProfit },
+          { "Line": "Operating Expenses", "Amount": summary.totalExpenses },
+          { "Line": "Net Operating Income", "Amount": summary.netProfit },
+        ];
+
+      case "cashflow":
+        if (rtl) {
+          return [
+            { "المؤشر": "تدفق نقدي داخل (المبيعات)", "المبلغ": cashInflowData.totalSales },
+            { "المؤشر": "تدفق نقدي خارج (تكلفة المنتجات + المصروفات)", "المبلغ": cashOutflowData.totalOutflow },
+            { "المؤشر": "صافي السيولة النقدية", "المبلغ": netCashData.netCash },
+            { "المؤشر": "مبيعات الكاش", "المبلغ": paymentAccounts.cashSales },
+            { "المؤشر": "مبيعات إنستا باي / فيزا", "المبلغ": paymentAccounts.instapaySales },
+            { "المؤشر": "مبيعات المحافظ الإلكترونية", "المبلغ": paymentAccounts.walletSales },
+            ...transfers.map((transfer) => ({
+              "المؤشر": `تحويل من ${ACCOUNT_LABELS_AR[transfer.fromAccount] || transfer.fromAccount} إلى ${ACCOUNT_LABELS_AR[transfer.toAccount] || transfer.toAccount}`,
+              "المبلغ": Number(transfer.amount || 0),
+              "الرسوم": Number(transfer.fee || 0),
+            })),
+          ];
+        }
+        return [
+          { "Metric": "Cash Inflow (Sales)", "Amount": cashInflowData.totalSales },
+          { "Metric": "Cash Outflow (COGS + Expenses)", "Amount": cashOutflowData.totalOutflow },
+          { "Metric": "Net Cash", "Amount": netCashData.netCash },
+          { "Metric": "Cash Sales", "Amount": paymentAccounts.cashSales },
+          { "Metric": "InstaPay / Visa Sales", "Amount": paymentAccounts.instapaySales },
+          { "Metric": "Wallet Sales", "Amount": paymentAccounts.walletSales },
+          ...transfers.map((transfer) => ({
+            "Metric": `Transfer ${ACCOUNT_LABELS[transfer.fromAccount] || transfer.fromAccount} → ${ACCOUNT_LABELS[transfer.toAccount] || transfer.toAccount}`,
+            "Amount": Number(transfer.amount || 0),
+            "Fee": Number(transfer.fee || 0),
+          })),
+        ];
+
+      case "settlements":
+        if (rtl) {
+          return weeklyPeriods.map((week) => ({
+            "الأسبوع": week.weekId,
+            "من": week.startSat.toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" }),
+            "إلى": week.endFri.toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" }),
+            "المبيعات": week.totalSales,
+            "تكلفة المنتجات": week.totalCOGS,
+            "المصروفات": week.totalExpenses,
+            "صافي الربح": week.netProfit,
+            "الحالة": week.isLocked ? "مغلقة ومكتملة" : "مفتوحة (جارية)",
+          }));
+        }
+        return weeklyPeriods.map((week) => ({
+          "Week": week.weekId,
+          "Start": week.startSat.toLocaleDateString("en-CA"),
+          "End": week.endFri.toLocaleDateString("en-CA"),
+          "Sales": week.totalSales,
+          "COGS": week.totalCOGS,
+          "Expenses": week.totalExpenses,
+          "Net Profit": week.netProfit,
+          "Status": week.isLocked ? "Settled" : "Open",
+        }));
+
+      case "orders": {
+        const orderStatusMapAr: Record<string, string> = {
+          pending: "قيد الانتظار",
+          confirmed: "تم التأكيد",
+          processing: "قيد التجهيز",
+          shipped: "تم الشحن",
+          delivered: "تم التوصيل",
+          completed: "مكتمل",
+          cancelled: "ملغي",
+          returned: "مرتجع",
+        };
+        const paymentMethodMapAr: Record<string, string> = {
+          cod: "الدفع عند الاستلام",
+          cash: "كاش",
+          instapay: "إنستا باي",
+          card: "فيزا / بطاقة",
+          visa: "فيزا",
+          wallet: "محفظة إلكترونية",
+          vodafone_cash: "فودافون كاش",
+        };
+        if (rtl) {
+          return filteredOrders.map((order) => ({
+            "التاريخ": new Date(order.createdAt).toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" }),
+            "رقم الطلب": order.orderNumber,
+            "العميل": order.customerName,
+            "الحالة": orderStatusMapAr[order.status] || order.status,
+            "طريقة الدفع": paymentMethodMapAr[order.paymentMethod] || order.paymentMethod,
+            "المبيعات": Number(order.totalPrice || 0),
+            "التكلفة": Number(order.itemsCost || 0),
+            "الخصم": Number(order.discountAmount || 0),
+            "الربح": Number(order.orderProfit || 0),
+            "صافي الربح": Number(order.netOrderProfit || 0),
+          }));
+        }
+        return filteredOrders.map((order) => ({
+          "Date": new Date(order.createdAt).toLocaleDateString("en-CA"),
+          "Order": order.orderNumber,
+          "Customer": order.customerName,
+          "Status": order.status,
+          "Payment Method": order.paymentMethod,
+          "Sales": Number(order.totalPrice || 0),
+          "COGS": Number(order.itemsCost || 0),
+          "Discount": Number(order.discountAmount || 0),
+          "Profit": Number(order.orderProfit || 0),
+          "Net Profit / Order": Number(order.netOrderProfit || 0),
+        }));
+      }
+
+      case "forecasting":
+        if (rtl) {
+          return [
+            { "المؤشر": "وحدات المخزون المتوفرة", "القيمة": inventoryStats.totalItemsInStock },
+            { "المؤشر": "قيمة المخزون بسعر الجملة", "القيمة": inventoryStats.stockWholesaleValue },
+            { "المؤشر": "قيمة المخزون بسعر البيع", "القيمة": inventoryStats.stockRetailValue },
+            { "المؤشر": "الأرباح المتوقعة", "القيمة": inventoryStats.projectedProfit },
+            { "المؤشر": "المنتجات قاربت على النفاد", "القيمة": inventoryStats.lowStockItemsCount },
+            { "المؤشر": "تكلفة إعادة التوريد المطلوبة", "القيمة": inventoryStats.lowStockReplenishmentCost },
+          ];
+        }
+        return [
+          { "Metric": "Stock Units", "Value": inventoryStats.totalItemsInStock },
+          { "Metric": "Wholesale Stock Value", "Value": inventoryStats.stockWholesaleValue },
+          { "Metric": "Retail Stock Value", "Value": inventoryStats.stockRetailValue },
+          { "Metric": "Projected Profit", "Value": inventoryStats.projectedProfit },
+          { "Metric": "Low Stock Items", "Value": inventoryStats.lowStockItemsCount },
+          { "Metric": "Replenishment Cost", "Value": inventoryStats.lowStockReplenishmentCost },
+        ];
+    }
+  };
 
   const exportRowsByTab: Record<FinancialTab, Record<string, unknown>[]> = {
-    overview: [
-      { Metric: "Total sales", Value: summary.totalSales },
-      { Metric: "Total liquidity", Value: paymentAccounts.totalLiquidity },
-      { Metric: "Net profit", Value: summary.netProfit },
-      { Metric: "Cash on hand", Value: paymentAccounts.cashOnHand },
-      { Metric: "InstaPay / Visa", Value: paymentAccounts.instapayVisa },
-      { Metric: "E-Wallets", Value: paymentAccounts.wallet },
-      { Metric: "Stock units", Value: inventoryStats.totalItemsInStock },
-      { Metric: "Stock wholesale value", Value: inventoryStats.stockWholesaleValue },
-      { Metric: "Stock retail value", Value: inventoryStats.stockRetailValue },
-    ],
-    pnl: [
-      { Line: "Gross sales revenue", Amount: grossSalesBeforeDiscounts },
-      { Line: "Promotional discounts", Amount: summary.totalDiscounts },
-      { Line: "Net sales revenue", Amount: summary.totalSales },
-      { Line: "COGS", Amount: summary.totalCOGS },
-      { Line: "Gross profit", Amount: summary.grossProfit },
-      { Line: "Operating expenses", Amount: summary.totalExpenses },
-      { Line: "Net operating income", Amount: summary.netProfit },
-    ],
-    cashflow: [
-      { Metric: "Cash inflow (sales)", Amount: cashInflowData.totalSales },
-      { Metric: "Cash outflow (COGS + expenses)", Amount: cashOutflowData.totalOutflow },
-      { Metric: "Net cash", Amount: netCashData.netCash },
-      { Metric: "Cash sales", Amount: paymentAccounts.cashSales },
-      { Metric: "InstaPay / Visa sales", Amount: paymentAccounts.instapaySales },
-      { Metric: "Wallet sales", Amount: paymentAccounts.walletSales },
-      ...transfers.map((transfer) => ({
-        Metric: `Transfer ${transfer.fromAccount} → ${transfer.toAccount}`,
-        Amount: Number(transfer.amount || 0),
-        Fee: Number(transfer.fee || 0),
-      })),
-    ],
-    expenses: exportTransactions,
-    settlements: weeklyPeriods.map((week) => ({
-      Week: week.weekId,
-      Start: week.startSat.toLocaleDateString("en-CA"),
-      End: week.endFri.toLocaleDateString("en-CA"),
-      Sales: week.totalSales,
-      COGS: week.totalCOGS,
-      Expenses: week.totalExpenses,
-      "Net profit": week.netProfit,
-      Status: week.isLocked ? "Completed" : "Open",
-    })),
-    orders: filteredOrders.map((order) => ({
-      Date: new Date(order.createdAt).toLocaleDateString("en-CA"),
-      Order: order.orderNumber,
-      Customer: order.customerName,
-      Status: order.status,
-      "Payment method": order.paymentMethod,
-      Sales: Number(order.totalPrice || 0),
-      COGS: Number(order.itemsCost || 0),
-      Discount: Number(order.discountAmount || 0),
-      Profit: Number(order.orderProfit || 0),
-      "Net profit / order": Number(order.netOrderProfit || 0),
-    })),
-    forecasting: [
-      { Metric: "Stock units", Value: inventoryStats.totalItemsInStock },
-      { Metric: "Wholesale stock value", Value: inventoryStats.stockWholesaleValue },
-      { Metric: "Retail stock value", Value: inventoryStats.stockRetailValue },
-      { Metric: "Projected profit", Value: inventoryStats.projectedProfit },
-      { Metric: "Low stock items", Value: inventoryStats.lowStockItemsCount },
-      { Metric: "Replenishment cost", Value: inventoryStats.lowStockReplenishmentCost },
-    ],
+    overview: getExportRowsByTab("overview", isRtl),
+    pnl: getExportRowsByTab("pnl", isRtl),
+    cashflow: getExportRowsByTab("cashflow", isRtl),
+    expenses: getExportRowsByTab("expenses", isRtl),
+    settlements: getExportRowsByTab("settlements", isRtl),
+    orders: getExportRowsByTab("orders", isRtl),
+    forecasting: getExportRowsByTab("forecasting", isRtl),
   };
 
   /* Excel export removed by request.
@@ -1095,7 +1262,16 @@ export default function FinancialsClient({
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/\"/g, "&quot;");
-    const money = (value: number) => `${Number(value || 0).toLocaleString("en-US")} EGP`;
+
+    const formatMoney = (val: number, rtl: boolean) => {
+      const num = Math.round(Number(val || 0));
+      const formatted = Math.abs(num).toLocaleString("en-US");
+      if (rtl) {
+        return num < 0 ? `-${formatted} ج.م` : `${formatted} ج.م`;
+      }
+      return num < 0 ? `-EGP ${formatted}` : `EGP ${formatted}`;
+    };
+
     const pdfTabTitles: Record<FinancialTab, string> = {
       overview: isRtl ? "ملخص الخزائن والأرصدة" : exportTabTitles.overview,
       pnl: isRtl ? "قائمة الأرباح والخسائر" : exportTabTitles.pnl,
@@ -1105,60 +1281,110 @@ export default function FinancialsClient({
       orders: isRtl ? "ربحية الطلبات" : exportTabTitles.orders,
       forecasting: isRtl ? "التوقعات وإعادة التوريد" : exportTabTitles.forecasting,
     };
-    const pdfKeyLabels: Record<string, string> = {
-      Metric: "المؤشر",
-      Value: "القيمة",
-      Line: "البند",
-      Amount: "المبلغ",
-      Fee: "الرسوم",
-      Date: "التاريخ",
-      Type: "النوع",
-      Title: "البيان",
-      Category: "التصنيف",
-      "Payment account": "حساب الدفع",
-      Notes: "ملاحظات",
-      Week: "الأسبوع",
-      Start: "من",
-      End: "إلى",
-      Sales: "المبيعات",
-      COGS: "تكلفة المنتجات",
-      Expenses: "المصروفات",
-      "Net profit": "صافي الربح",
-      Status: "الحالة",
-      Order: "رقم الطلب",
-      Customer: "العميل",
-      "Payment method": "طريقة الدفع",
-      Discount: "الخصم",
-      Profit: "الربح",
-      "Net profit / order": "صافي ربح الطلب",
-      From: "من حساب",
-      To: "إلى حساب",
-      "Rows exported": "عدد الصفوف",
-    };
-    const rawRows = exportRowsByTab[activeTab];
-    const rows = isRtl
-      ? rawRows.map((row) => Object.fromEntries(Object.entries(row).map(([key, value]) => [pdfKeyLabels[key] || key, value])))
-      : rawRows;
-    const tableColumns = rows.length ? Object.keys(rows[0]) : [isRtl ? "رسالة" : "Message"];
-    const formatPdfCell = (value: unknown) =>
-      typeof value === "number"
-        ? Math.round(value).toLocaleString("en-US")
-        : value;
-    const tableRows = rows.length
-      ? rows.map((row) => `<tr>${tableColumns.map((column) => `<td>${escapeHtml(formatPdfCell(row[column]))}</td>`).join("")}</tr>`).join("")
-      : `<tr><td colspan="${tableColumns.length}">${isRtl ? "لا توجد بيانات في هذه الفترة." : "No data in this period."}</td></tr>`;
-    const headers = tableColumns.map((column) => `<th>${escapeHtml(column)}</th>`).join("");
+
     const reportTitle = pdfTabTitles[activeTab];
-    const reportPeriodLabel = isRtl ? "الفترة" : "Report period";
+    const rows = getExportRowsByTab(activeTab, isRtl);
+    const tableColumns = rows.length ? Object.keys(rows[0]) : [isRtl ? "رسالة" : "Message"];
+
+    const formatPdfCell = (value: unknown) => {
+      if (typeof value === "number") {
+        return Math.round(value).toLocaleString("en-US");
+      }
+      return value ?? "";
+    };
+
+    const tableRows = rows.length
+      ? rows.map((row) => {
+          return `<tr>${tableColumns.map((column) => {
+            const val = row[column];
+            const isNum = typeof val === "number";
+            const formatted = formatPdfCell(val);
+            let cellClass = isNum ? "amount" : "";
+            if (val === "إيراد" || val === "Income") cellClass += " income";
+            else if (val === "مصروف" || val === "Expense") cellClass += " expense";
+            return `<td class="${cellClass.trim()}">${escapeHtml(formatted)}</td>`;
+          }).join("")}</tr>`;
+        }).join("")
+      : `<tr><td colspan="${tableColumns.length}">${isRtl ? "لا توجد بيانات مسجلة في هذه الفترة." : "No data recorded in this period."}</td></tr>`;
+
+    const headers = tableColumns.map((column) => `<th>${escapeHtml(column)}</th>`).join("");
+    const reportPeriodLabel = isRtl ? "الفترة" : "Report Period";
     const generatedLabel = isRtl ? "تاريخ الإنشاء" : "Generated";
-    const detailsLabel = isRtl ? "تفاصيل" : "details";
-    const totalSalesLabel = isRtl ? "إجمالي المبيعات" : "Total sales";
-    const expensesLabel = isRtl ? "المصروفات التشغيلية" : "Operating expenses";
-    const netProfitLabel = isRtl ? "صافي الربح" : "Net profit";
-    const rowsLabel = isRtl ? "عدد الصفوف" : "Rows exported";
-    reportWindow.document.write(`<!doctype html><html lang="${isRtl ? "ar" : "en"}"><head><meta charset="utf-8"><title>DeRoma ${escapeHtml(reportTitle)}</title><style>
-      *{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#45366f;margin:32px;background:#fffaf0;direction:${isRtl ? "rtl" : "ltr"}}h1{color:#7565b5;margin:0 0 6px}h2{color:#7565b5;margin:28px 0 10px;font-size:18px}.brand{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #d8b46a;padding-bottom:14px}.brandmark{font-size:22px;font-weight:800;color:#7565b5}.meta{color:#66568f;margin:18px 0 24px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card{border:1px solid #d8b46a;border-radius:12px;padding:12px;background:#fffdf5}.card span{display:block;color:#66568f;font-size:11px;margin-bottom:6px}.card strong{font-size:17px;color:#7565b5}table{width:100%;border-collapse:collapse;font-size:11px;background:#fffdf5}th{background:#8b79c6;color:#fffdf5;text-align:${isRtl ? "right" : "left"};padding:9px}td{border-bottom:1px solid #e5ddf4;padding:8px;color:#4b3b76}.amount{text-align:${isRtl ? "left" : "right"};font-weight:bold}.income{color:#087443}.expense{color:#a3263a}@media print{body{margin:12mm;background:#fffaf0;-webkit-print-color-adjust:exact;print-color-adjust:exact}.summary{grid-template-columns:repeat(4,1fr)}}
-    </style></head><body><div class="brand"><div class="brandmark">DeRoma ADMIN</div><div>${escapeHtml(reportTitle)}</div></div><h1>${escapeHtml(reportTitle)}</h1><div class="meta">${reportPeriodLabel}: ${escapeHtml(exportDateLabel)}<br>${generatedLabel}: ${escapeHtml(new Date().toLocaleString(isRtl ? "ar-EG" : "en-GB"))}</div><div class="summary"><div class="card"><span>${totalSalesLabel}</span><strong>${money(summary.totalSales)}</strong></div><div class="card"><span>${expensesLabel}</span><strong>${money(summary.totalExpenses)}</strong></div><div class="card"><span>${netProfitLabel}</span><strong>${money(summary.netProfit)}</strong></div><div class="card"><span>${rowsLabel}</span><strong>${rows.length}</strong></div></div><h2>${escapeHtml(reportTitle)} ${detailsLabel}</h2><table><thead><tr>${headers}</tr></thead><tbody>${tableRows}</tbody></table><script>window.onload=function(){window.focus();window.print();}</script></body></html>`);
+    const detailsHeading = isRtl ? `تفاصيل ${reportTitle}` : `${reportTitle} Details`;
+    const totalSalesLabel = isRtl ? "إجمالي المبيعات" : "Total Sales";
+    const expensesLabel = isRtl ? "المصروفات التشغيلية" : "Operating Expenses";
+    const netProfitLabel = isRtl ? "صافي الربح" : "Net Profit";
+    const rowsLabel = isRtl ? "عدد السجلات" : "Total Entries";
+
+    const pdfPeriodLabel = activeDateFilter.preset === "all"
+      ? (isRtl ? "كافة السجلات المسجلة" : "All Recorded History")
+      : (isRtl
+          ? `${activeDateFilter.startDate || "..."} إلى ${activeDateFilter.endDate || "..."}`
+          : `${activeDateFilter.startDate || "..."} - ${activeDateFilter.endDate || "..."}`);
+
+    const generatedDateStr = new Date().toLocaleString(isRtl ? "ar-EG" : "en-GB", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+
+    reportWindow.document.write(`<!doctype html><html lang="${isRtl ? "ar" : "en"}"><head><meta charset="utf-8"><title>DeRoma ${isRtl ? "تقرير" : "Report"} - ${escapeHtml(reportTitle)}</title><style>
+      *{box-sizing:border-box}
+      body{
+        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+        color:#45366f;
+        margin:32px;
+        background:#fffaf0;
+        direction:${isRtl ? "rtl" : "ltr"};
+      }
+      h1{color:#7565b5;margin:0 0 6px;font-size:22px}
+      h2{color:#7565b5;margin:28px 0 10px;font-size:16px}
+      .brand{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #d8b46a;padding-bottom:14px}
+      .brandmark{font-size:22px;font-weight:800;color:#7565b5}
+      .brandmark span{font-size:13px;font-weight:700;color:#d8b46a;margin-inline-start:6px}
+      .report-tag{font-size:13px;font-weight:bold;color:#7565b5}
+      .meta{color:#66568f;margin:18px 0 24px;font-size:12px;line-height:1.6}
+      .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+      .card{border:1px solid #d8b46a;border-radius:12px;padding:12px;background:#fffdf5}
+      .card span{display:block;color:#66568f;font-size:11px;margin-bottom:6px;font-weight:600}
+      .card strong{font-size:17px;color:#7565b5;font-weight:800}
+      table{width:100%;border-collapse:collapse;font-size:11px;background:#fffdf5;margin-top:8px}
+      th{background:#8b79c6;color:#fffdf5;text-align:${isRtl ? "right" : "left"};padding:10px 8px;font-weight:bold}
+      td{border-bottom:1px solid #e5ddf4;padding:9px 8px;color:#4b3b76;text-align:${isRtl ? "right" : "left"}}
+      .amount{font-weight:bold;text-align:${isRtl ? "left" : "right"}}
+      .income{color:#087443;font-weight:bold}
+      .expense{color:#a3263a;font-weight:bold}
+      @media print{
+        body{margin:10mm;background:#fffaf0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .summary{grid-template-columns:repeat(4,1fr)}
+      }
+    </style></head><body>
+      <div class="brand">
+        <div class="brandmark">DeRoma <span>${isRtl ? "لوحة الإدارة" : "ADMIN"}</span></div>
+        <div class="report-tag">${escapeHtml(reportTitle)}</div>
+      </div>
+      <h1>${escapeHtml(reportTitle)}</h1>
+      <div class="meta">
+        ${reportPeriodLabel}: ${escapeHtml(pdfPeriodLabel)}<br>
+        ${generatedLabel}: ${escapeHtml(generatedDateStr)}
+      </div>
+      <div class="summary">
+        <div class="card"><span>${totalSalesLabel}</span><strong>${formatMoney(summary.totalSales, isRtl)}</strong></div>
+        <div class="card"><span>${expensesLabel}</span><strong>${formatMoney(summary.totalExpenses, isRtl)}</strong></div>
+        <div class="card"><span>${netProfitLabel}</span><strong>${formatMoney(summary.netProfit, isRtl)}</strong></div>
+        <div class="card"><span>${rowsLabel}</span><strong>${rows.length}</strong></div>
+      </div>
+      <h2>${escapeHtml(detailsHeading)}</h2>
+      <table>
+        <thead><tr>${headers}</tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+      <script>window.onload=function(){window.focus();window.print();}</script>
+    </body></html>`);
     reportWindow.document.close();
   };
 
@@ -1497,14 +1723,14 @@ export default function FinancialsClient({
                   <div key={tr.id} className="flex items-center justify-between rounded-xl bg-[#FFF9EB]/60 p-2.5">
                     <div>
                       <span className="font-bold text-[#942E3A]">
-                        {ACCOUNT_LABELS[tr.fromAccount]} → {ACCOUNT_LABELS[tr.toAccount]}
+                        {getAccountLabel(tr.fromAccount, isRtl)} → {getAccountLabel(tr.toAccount, isRtl)}
                       </span>
                       {tr.notes && <span className="block text-[10px] text-[#6B1F2A]/60">{tr.notes}</span>}
                     </div>
                     <div className="text-right">
                       <strong className="text-[#942E3A] font-black">{formatCurrency(tr.amount)}</strong>
                       <span className="block text-[9px] text-[#6B1F2A]/50">
-                        {new Date(tr.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        {new Date(tr.date).toLocaleDateString(isRtl ? "ar-EG" : "en-US", { month: "short", day: "numeric" })}
                       </span>
                     </div>
                   </div>
@@ -2077,23 +2303,11 @@ export default function FinancialsClient({
                             </td>
                             <td className="py-3 text-start whitespace-nowrap">
                               <span className="rounded-md bg-[#FFF9EB] px-2 py-0.5 text-[10px] font-bold text-[#942E3A] border border-[#D8B46A]/30">
-                                {isRtl
-                                  ? (expense.category === "capital" ? "رأس مال / استثمارات"
-                                    : expense.category === "external_profit" ? "أرباح خارجية"
-                                    : expense.category === "supplier_refund" ? "استرداد ومرتجعات توريد"
-                                    : expense.category === "other_income" ? "إيرادات أخرى"
-                                    : expense.category === "marketing" ? "التسويق والإعلانات"
-                                    : expense.category === "shipping_ops" ? "اللوجستيات والشحن"
-                                    : expense.category === "packaging" ? "الحقائب والتغليف"
-                                    : expense.category === "utilities" ? "الخدمات والمرافق"
-                                    : expense.category === "salaries" ? "الرواتب والعمولات"
-                                    : expense.category === "purchase_invoice" ? "فواتير الشراء والتوريد"
-                                    : "مصروفات أخرى")
-                                  : expense.category}
+                                {getCategoryLabel(expense.category, isRtl)}
                               </span>
                             </td>
                             <td className="py-3 text-start text-[#6B1F2A] whitespace-nowrap">
-                              {ACCOUNT_LABELS[expense.paymentAccount] || expense.paymentAccount}
+                              {getAccountLabel(expense.paymentAccount, isRtl)}
                             </td>
                             <td className="py-3 text-end font-black whitespace-nowrap">
                               {isIncome ? (
@@ -2181,23 +2395,11 @@ export default function FinancialsClient({
 
                         <div className="flex items-center justify-between border-t border-[#942E3A]/10 pt-2 text-[10px]">
                           <span className="rounded-md bg-white px-2 py-0.5 font-bold text-[#942E3A] border border-[#D8B46A]/30">
-                            {isRtl
-                              ? (expense.category === "capital" ? "رأس مال"
-                                : expense.category === "external_profit" ? "أرباح خارجية"
-                                : expense.category === "supplier_refund" ? "مرتجعات توريد"
-                                : expense.category === "other_income" ? "إيرادات أخرى"
-                                : expense.category === "marketing" ? "التسويق والإعلانات"
-                                : expense.category === "shipping_ops" ? "اللوجستيات والشحن"
-                                : expense.category === "packaging" ? "الحقائب والتغليف"
-                                : expense.category === "utilities" ? "الخدمات والمرافق"
-                                : expense.category === "salaries" ? "الرواتب والعمولات"
-                                : expense.category === "purchase_invoice" ? "فواتير التوريد"
-                                : "مصروفات أخرى")
-                              : expense.category}
+                            {getCategoryLabel(expense.category, isRtl)}
                           </span>
 
                           <div className="flex items-center gap-2">
-                            <span className="text-[#6B1F2A]/60">{ACCOUNT_LABELS[expense.paymentAccount] || expense.paymentAccount}</span>
+                            <span className="text-[#6B1F2A]/60">{getAccountLabel(expense.paymentAccount, isRtl)}</span>
                             {locked || expense.isPurchaseInvoice ? (
                               <span className="inline-flex items-center gap-1 rounded bg-stone-100 px-1.5 py-0.5 text-[9px] font-bold text-stone-500">
                                 <Lock className="h-2.5 w-2.5" />
@@ -2286,14 +2488,6 @@ export default function FinancialsClient({
                   >
                     <Eye className="h-4 w-4 text-[#D8B46A]" />
                     <span>{isRtl ? "استعراض تفاصيل الأسبوع الحالي" : "Inspect Week Details"}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openSettlingModal(currentWeekPeriod)}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#942E3A] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#7A242F] transition shadow-xs"
-                  >
-                    <CheckCircle2 className="h-4 w-4 text-[#D8B46A]" />
-                    <span>{isRtl ? "إغلاق تسوية الأسبوع" : "Settle & Lock Week"}</span>
                   </button>
                 </div>
               </div>
@@ -3191,9 +3385,9 @@ export default function FinancialsClient({
                           {inspectingWeek.expenses.map((exp) => (
                             <tr key={exp.id} className="hover:bg-[#FFF9EB]/40">
                               <td className="p-2.5 text-start font-bold text-[#942E3A]">{exp.title}</td>
-                              <td className="p-2.5 text-start text-[#6B1F2A]">{exp.category}</td>
+                              <td className="p-2.5 text-start text-[#6B1F2A]">{getCategoryLabel(exp.category, isRtl)}</td>
                               <td className="p-2.5 text-end font-bold text-red-600">{formatCurrency(exp.amount)}</td>
-                              <td className="p-2.5 text-start uppercase text-[10px] font-bold text-[#6B1F2A]/70">{exp.paymentAccount}</td>
+                              <td className="p-2.5 text-start text-[10px] font-bold text-[#6B1F2A]/70">{getAccountLabel(exp.paymentAccount, isRtl)}</td>
                               <td className="p-2.5 text-end text-[10px] text-[#6B1F2A]/70">{new Date(exp.date).toLocaleDateString(isRtl ? "ar-EG" : "en-GB", { month: "short", day: "numeric" })}</td>
                             </tr>
                           ))}
@@ -3215,7 +3409,7 @@ export default function FinancialsClient({
                 {isRtl ? "إغلاق النافذة" : "Close"}
               </button>
 
-              {!inspectingWeek.isLocked && (
+              {!inspectingWeek.isLocked && !inspectingWeek.isCurrentWeek && (
                 <button
                   type="button"
                   onClick={() => {
