@@ -68,7 +68,7 @@ export default function AdminBackupPage() {
   const fetchStats = async () => {
     setLoadingStats(true);
     try {
-      const res = await fetch("/api/admin/backup/stats");
+      const res = await fetch("/admin/api/backup/stats");
       if (!res.ok) throw new Error("Failed to load database stats");
       const data = await res.json();
       setStats(data);
@@ -87,7 +87,7 @@ export default function AdminBackupPage() {
   const handleDownload = async (format: "json" | "sql", categories?: string[]) => {
     setIsExporting(format);
     try {
-      let url = `/api/admin/backup/export?format=${format}`;
+      let url = `/admin/api/backup/export?format=${format}`;
       if (categories && categories.length > 0) {
         url += `&categories=${encodeURIComponent(categories.join(","))}`;
       }
@@ -163,7 +163,7 @@ export default function AdminBackupPage() {
       formData.append("file", file);
       formData.append("action", "preview");
 
-      const res = await fetch("/api/admin/backup/restore", {
+      const res = await fetch("/admin/api/backup/restore", {
         method: "POST",
         body: formData,
       });
@@ -196,7 +196,7 @@ export default function AdminBackupPage() {
       formData.append("file", selectedFile);
       formData.append("action", "restore");
 
-      const res = await fetch("/api/admin/backup/restore", {
+      const res = await fetch("/admin/api/backup/restore", {
         method: "POST",
         body: formData,
       });

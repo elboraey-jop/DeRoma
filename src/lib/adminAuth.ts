@@ -82,7 +82,7 @@ export async function loginAdmin(email: string, password: string) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path: "/admin",
+    path: "/",
     maxAge: SESSION_MAX_AGE,
   });
   return { success: true as const };
@@ -90,5 +90,6 @@ export async function loginAdmin(email: string, password: string) {
 
 export async function logoutAdmin() {
   const cookieStore = await cookies();
+  cookieStore.set(ADMIN_SESSION_COOKIE, "", { httpOnly: true, expires: new Date(0), path: "/" });
   cookieStore.set(ADMIN_SESSION_COOKIE, "", { httpOnly: true, expires: new Date(0), path: "/admin" });
 }
