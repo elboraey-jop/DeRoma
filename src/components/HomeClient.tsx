@@ -66,48 +66,6 @@ export default function HomeClient({
   const displayForYouProducts = forYouProducts.length > 0 ? forYouProducts : products;
   const displayBestsellerProducts = bestsellerProducts.length > 0 ? bestsellerProducts : products;
 
-  const cardWidth = 246; // 230px card + 16px gap
-  const singleCopyWidth = displayForYouProducts.length * cardWidth;
-  const repeatCount = Math.max(8, Math.ceil(8000 / (singleCopyWidth || 1)));
-
-  const repeatedProducts = Array.from({ length: repeatCount }).flatMap(() => displayForYouProducts);
-  const repeatedBestsellerProducts = Array.from({ length: repeatCount }).flatMap(() => displayBestsellerProducts);
-
-  useEffect(() => {
-    const container = scrollRef.current;
-    if (!container || products.length === 0) return;
-
-    let singleWidth = container.scrollWidth / repeatCount;
-    const middleIndex = Math.floor(repeatCount / 2);
-    container.scrollLeft = middleIndex * singleWidth;
-
-    const handleScroll = () => {
-      const scrollLeft = container.scrollLeft;
-      const middleIndex = Math.floor(repeatCount / 2);
-
-      const lowerLimit = (middleIndex - 1) * singleWidth;
-      const upperLimit = (middleIndex + 1) * singleWidth;
-
-      if (scrollLeft > upperLimit) {
-        container.scrollLeft = scrollLeft - singleWidth;
-      } else if (scrollLeft < lowerLimit) {
-        container.scrollLeft = scrollLeft + singleWidth;
-      }
-    };
-
-    const handleResize = () => {
-      singleWidth = container.scrollWidth / repeatCount;
-      const middleIndex = Math.floor(repeatCount / 2);
-      container.scrollLeft = middleIndex * singleWidth;
-    };
-
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleResize);
-    return () => {
-      container.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [products, repeatCount]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const container = scrollRef.current;
@@ -737,22 +695,17 @@ export default function HomeClient({
         </div>
       </section>
 
-      {/* 3. CATEGORY TITLE */}
+      {/* 3. FEATURED COLLECTION SECTION */}
       <section className="px-2 sm:px-4 lg:px-6">
         <ScrollReveal>
-          <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] text-center border-b border-[#D8B46A]/40 pb-4">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-[#D8B46A] block">DE ROMA</span>
-            <h2 className="text-lg sm:text-2xl font-light text-[#942E3A] font-heading tracking-tight mt-1">
-              {t("home.featuredCollection")}
-            </h2>
-          </div>
-        </ScrollReveal>
-      </section>
+          <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] space-y-6">
+            <div className="text-center border-b border-[#D8B46A]/40 pb-4">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-[#D8B46A] block">DE ROMA</span>
+              <h2 className="text-lg sm:text-2xl font-light text-[#942E3A] font-heading tracking-tight mt-1">
+                {t("home.featuredCollection")}
+              </h2>
+            </div>
 
-      {/* 4. PRODUCT GRID (Infinite Scroll Row) */}
-      <section className="px-2 sm:px-4 lg:px-6">
-        <ScrollReveal>
-          <div className="mx-auto max-w-[94vw] lg:max-w-[1320px]">
             {displayForYouProducts.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-2xl border border-[#D8B46A] p-6">
                 <ShoppingBag className="h-8 w-8 text-[#D8B46A] mx-auto mb-2" />
@@ -776,9 +729,9 @@ export default function HomeClient({
                     msOverflowStyle: "none"
                   }}
                 >
-                  {repeatedProducts.map((product, idx) => (
+                  {displayForYouProducts.map((product) => (
                     <div
-                      key={`${product.id}-${idx}`}
+                      key={`featured-${product.id}`}
                       className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"
                     >
                       <ProductCard product={product} />
