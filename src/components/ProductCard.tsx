@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, Check, Heart, Star } from "lucide-react";
@@ -140,7 +140,7 @@ export default function ProductCard({
   const hasRealRating = Boolean(
     product.rating && Number(product.rating) > 0 && (product.reviewsCount === undefined || product.reviewsCount > 0)
   );
-  const analyticsItem = {
+  const analyticsItem = useMemo(() => ({
     productId: product.id,
     variantId: selectedVariant?.id,
     name: product.name,
@@ -148,17 +148,20 @@ export default function ProductCard({
     category: product.category,
     color: product.color || "",
     size: selectedVariant?.size || "",
-  };
+  }), [product.id, selectedVariant?.id, product.name, priceNum, product.category, product.color, selectedVariant?.size]);
+
+  const analyticsItemRef = useRef(analyticsItem);
+  analyticsItemRef.current = analyticsItem;
 
   const handleWishlistToggle = () => {
     if (!isWishlisted) {
-      trackAddToWishlist(analyticsItem);
+      trackAddToWishlist(analyticsItemRef.current);
     }
     toggle(product.id);
   };
 
   const handleProductSelect = () => {
-    trackSelectItem(analyticsItem, product.category || "Shop");
+    trackSelectItem(analyticsItemRef.current, product.category || "Shop");
   };
 
   useEffect(() => {
@@ -168,7 +171,7 @@ export default function ProductCard({
       ([entry]) => {
         if (!entry?.isIntersecting || hasTrackedImpression.current) return;
         hasTrackedImpression.current = true;
-        trackViewItemList(analyticsItem, product.category || "Shop");
+        trackViewItemList(analyticsItemRef.current, product.category || "Shop");
         observer.disconnect();
       },
       { threshold: 0.5 },
@@ -176,7 +179,7 @@ export default function ProductCard({
 
     observer.observe(cardRef.current);
     return () => observer.disconnect();
-  }, [analyticsItem, product.category]);
+  }, [product.id, product.category]);
 
   return (
     <motion.div
@@ -212,7 +215,9 @@ export default function ProductCard({
             src={activeImage}
             alt={product.name}
             fill
-            className={`object-cover transition-all duration-500 group-hover:scale-105 ${
+            loading="lazy"
+            decoding="async"
+            className={`object-cover transition-all duration-300 group-hover:scale-105 ${
               imageLoading ? "opacity-0 scale-95" : "opacity-100 scale-100"
             }`}
             sizes="(max-width: 768px) 50vw, 230px"

@@ -36,7 +36,7 @@ export function ScrollReveal({
           element.classList.remove("is-visible");
         }
       },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+      { rootMargin: "0px 0px 60px 0px", threshold: 0.01 },
     );
 
     observer.observe(element);
@@ -101,7 +101,7 @@ export function StaggerContainer({
           element.classList.remove("is-visible");
         }
       },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+      { rootMargin: "0px 0px 60px 0px", threshold: 0.01 },
     );
     observer.observe(element);
     return () => observer.disconnect();

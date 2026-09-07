@@ -20,7 +20,7 @@ export default function Footer() {
 
   return (
     <footer dir={dir} className="border-t border-[#D8B46A]/35 bg-[#942E3A] px-3 py-4 pb-6 text-[#FFF9EB] sm:px-4 sm:py-8 sm:pb-8 lg:px-6">
-      <ScrollReveal direction="up" duration={0.8}>
+      <ScrollReveal direction="none" duration={0.3}>
         <div className="mx-auto w-full max-w-[1320px] space-y-4 sm:space-y-7" dir={dir}>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-10">
             <div className="flex flex-col gap-3 lg:w-[34%]">

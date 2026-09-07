@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -55,16 +55,33 @@ export default function HomeClient({
   const scrollRef = useRef<HTMLDivElement>(null);
   const bestsellerScrollRef = useRef<HTMLDivElement>(null);
 
-  const forYouProducts = settings.forYouProductIds.length > 0
-    ? settings.forYouProductIds.map((id) => products.find((p) => p.id === id)).filter((p): p is ProductWithVariants => Boolean(p))
-    : products;
+  const MAX_HOME_SHELF_PRODUCTS = 12;
 
-  const bestsellerProducts = settings.bestSellerProductIds.length > 0
-    ? settings.bestSellerProductIds.map((id) => products.find((p) => p.id === id)).filter((p): p is ProductWithVariants => Boolean(p))
-    : products;
+  const forYouProducts = useMemo(() => {
+    return settings.forYouProductIds.length > 0
+      ? settings.forYouProductIds
+          .map((id) => products.find((p) => p.id === id))
+          .filter((p): p is ProductWithVariants => Boolean(p))
+      : products;
+  }, [settings.forYouProductIds, products]);
 
-  const displayForYouProducts = forYouProducts.length > 0 ? forYouProducts : products;
-  const displayBestsellerProducts = bestsellerProducts.length > 0 ? bestsellerProducts : products;
+  const bestsellerProducts = useMemo(() => {
+    return settings.bestSellerProductIds.length > 0
+      ? settings.bestSellerProductIds
+          .map((id) => products.find((p) => p.id === id))
+          .filter((p): p is ProductWithVariants => Boolean(p))
+      : products;
+  }, [settings.bestSellerProductIds, products]);
+
+  const displayForYouProducts = useMemo(() => {
+    const list = forYouProducts.length > 0 ? forYouProducts : products;
+    return list.slice(0, MAX_HOME_SHELF_PRODUCTS);
+  }, [forYouProducts, products]);
+
+  const displayBestsellerProducts = useMemo(() => {
+    const list = bestsellerProducts.length > 0 ? bestsellerProducts : products;
+    return list.slice(0, MAX_HOME_SHELF_PRODUCTS);
+  }, [bestsellerProducts, products]);
 
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -734,9 +751,28 @@ export default function HomeClient({
                       key={`featured-${product.id}`}
                       className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"
                     >
-                      <ProductCard product={product} />
+                      <ProductCard product={product} mobileOptimized={isMobile} />
                     </div>
                   ))}
+
+                  {products.length > MAX_HOME_SHELF_PRODUCTS && (
+                    <div className="h-full w-[130px] sm:w-[170px] shrink-0 pointer-events-auto flex items-center">
+                      <Link
+                        href="/shop"
+                        className="w-full h-[340px] sm:h-[390px] rounded-[1.35rem] sm:rounded-[1.65rem] border-2 border-dashed border-[#942E3A]/25 hover:border-[#942E3A] bg-white/50 hover:bg-white transition-all duration-300 flex flex-col items-center justify-center p-4 text-center group gap-3 shadow-xs hover:shadow-md"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-[#942E3A]/10 text-[#942E3A] flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <ArrowRight className="w-5 h-5 rtl:rotate-180" />
+                        </div>
+                        <span className="text-xs sm:text-sm font-bold text-[#942E3A]">
+                          {lang === "ar" ? "عرض الكل" : "View All"}
+                        </span>
+                        <span className="text-[10px] text-[#D8B46A]">
+                          +{formatNumber(products.length - MAX_HOME_SHELF_PRODUCTS)} {lang === "ar" ? "منتج" : "more"}
+                        </span>
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -770,9 +806,28 @@ export default function HomeClient({
                   key={`bestseller-${product.id}`}
                   className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"
                 >
-                  <ProductCard product={product} />
+                  <ProductCard product={product} mobileOptimized={isMobile} />
                 </div>
               ))}
+
+              {products.length > MAX_HOME_SHELF_PRODUCTS && (
+                <div className="h-full w-[130px] sm:w-[170px] shrink-0 pointer-events-auto flex items-center">
+                  <Link
+                    href="/shop"
+                    className="w-full h-[340px] sm:h-[390px] rounded-[1.35rem] sm:rounded-[1.65rem] border-2 border-dashed border-[#942E3A]/25 hover:border-[#942E3A] bg-white/50 hover:bg-white transition-all duration-300 flex flex-col items-center justify-center p-4 text-center group gap-3 shadow-xs hover:shadow-md"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-[#942E3A]/10 text-[#942E3A] flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <ArrowRight className="w-5 h-5 rtl:rotate-180" />
+                    </div>
+                    <span className="text-xs sm:text-sm font-bold text-[#942E3A]">
+                      {lang === "ar" ? "عرض الكل" : "View All"}
+                    </span>
+                    <span className="text-[10px] text-[#D8B46A]">
+                      +{formatNumber(products.length - MAX_HOME_SHELF_PRODUCTS)} {lang === "ar" ? "منتج" : "more"}
+                    </span>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </ScrollReveal>
