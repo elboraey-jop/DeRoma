@@ -266,33 +266,27 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
 
       </div>
 
-      {/* Mobile Drawer (Sidebar) - Pure CSS GPU-accelerated & 0% Lag on all mobile devices */}
-      {/* Backdrop without expensive blur filters */}
-      <div
-        onClick={() => setIsOpen(false)}
-        className={cn(
-          "fixed inset-0 z-[70] bg-black/60 lg:hidden transition-opacity duration-200 ease-out",
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        )}
-        aria-hidden={!isOpen}
-      />
+      {/* Mobile Drawer (Sidebar) - Instant open without animation */}
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setIsOpen(false)}
+            className="fixed inset-0 z-[70] bg-black/60 lg:hidden"
+            aria-hidden="true"
+          />
 
-      {/* Sidebar Panel */}
-      <aside
-        className={cn(
-          "fixed inset-y-0 z-[75] flex w-full max-w-[290px] flex-col bg-[#942E3A] text-[#FFF9EB] shadow-2xl lg:hidden border-white/10 overflow-hidden transition-transform duration-200 ease-out transform-gpu will-change-transform",
-          dir === "rtl"
-            ? "right-0 border-l rounded-l-[1.75rem]"
-            : "left-0 border-r rounded-r-[1.75rem]",
-          isOpen
-            ? "translate-x-0 pointer-events-auto"
-            : dir === "rtl"
-              ? "translate-x-full pointer-events-none"
-              : "-translate-x-full pointer-events-none"
-        )}
-        dir={dir}
-        aria-hidden={!isOpen}
-      >
+          {/* Sidebar Panel */}
+          <aside
+            className={cn(
+              "fixed inset-y-0 z-[75] flex w-full max-w-[290px] flex-col bg-[#942E3A] text-[#FFF9EB] shadow-2xl lg:hidden border-white/10 overflow-hidden",
+              dir === "rtl"
+                ? "right-0 border-l rounded-l-[1.75rem]"
+                : "left-0 border-r rounded-r-[1.75rem]"
+            )}
+            dir={dir}
+            aria-modal="true"
+          >
         {/* Header inside drawer */}
         <div className="flex items-center justify-between px-5 pt-5 pb-1">
           <Link href="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2">
@@ -461,6 +455,8 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
           )}
         </div>
       </aside>
+        </>
+      )}
     </div>
   );
 }
