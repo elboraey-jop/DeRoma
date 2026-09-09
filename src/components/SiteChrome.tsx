@@ -36,7 +36,10 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
     const chrome = chromeRef.current;
     if (!chrome) return;
 
-    const updateChromeHeight = () => setChromeHeight(Math.ceil(chrome.getBoundingClientRect().height));
+    const updateChromeHeight = () => {
+      const next = Math.ceil(chrome.getBoundingClientRect().height);
+      setChromeHeight((prev) => (prev !== next ? next : prev));
+    };
     updateChromeHeight();
 
     const observer = new ResizeObserver(updateChromeHeight);

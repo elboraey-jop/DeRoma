@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ShoppingBag, Search, Heart, Menu, X, User, Home, Store, Info, ShieldCheck, PackageSearch } from "lucide-react";
@@ -13,7 +14,12 @@ import StoreLangToggle from "@/components/StoreLangToggle";
 
 export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: boolean }) {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,7 +95,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
       <div className="mx-auto flex w-full max-w-[1320px] items-center justify-between gap-2 sm:gap-3">
         
         {/* ELEMENT 1: Main Compact Floating Pill Card */}
-        <header className="relative pointer-events-auto flex min-w-0 flex-1 h-12 sm:h-12 items-center justify-between rounded-[1.35rem] sm:rounded-full bg-[#942E3A]/95 text-white backdrop-blur-xl px-3 sm:px-5 shadow-xl border border-white/20 transition-all duration-300">
+        <header className="relative pointer-events-auto flex min-w-0 flex-1 h-12 sm:h-12 items-center justify-between rounded-[1.35rem] sm:rounded-full bg-[#942E3A]/95 text-white backdrop-blur-xl px-3 sm:px-5 shadow-xl border border-white/20">
           
           {/* Left Side (or Right in RTL): Mobile Menu + Search on mobile; Brand Logo on desktop */}
           <div className="flex items-center gap-1 z-10">
@@ -255,30 +261,32 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
 
       </div>
 
-      {/* Mobile Drawer (Sidebar) - Instant open without animation or lag */}
-      {/* Backdrop */}
-      <div
-        onClick={() => setIsOpen(false)}
-        className={cn(
-          "fixed inset-0 z-[70] bg-black/60 lg:hidden pointer-events-auto touch-none cursor-pointer",
-          isOpen ? "block" : "hidden"
-        )}
-        aria-hidden={!isOpen}
-      />
+      {/* Mobile Drawer (Sidebar) - Portaled to document.body to isolate from SiteChrome/ResizeObserver */}
+      {mounted && createPortal(
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setIsOpen(false)}
+            className={cn(
+              "fixed inset-0 z-[70] bg-black/60 lg:hidden pointer-events-auto touch-none cursor-pointer",
+              isOpen ? "block" : "hidden"
+            )}
+            aria-hidden={!isOpen}
+          />
 
-      {/* Sidebar Panel */}
-      <aside
-        className={cn(
-          "fixed inset-y-0 z-[75] w-full max-w-[290px] flex-col bg-[#942E3A] text-[#FFF9EB] shadow-2xl lg:hidden border-white/10 overflow-hidden pointer-events-auto touch-manipulation overscroll-contain",
-          dir === "rtl"
-            ? "right-0 border-l rounded-l-[1.75rem]"
-            : "left-0 border-r rounded-r-[1.75rem]",
-          isOpen ? "flex" : "hidden"
-        )}
-        dir={dir}
-        aria-hidden={!isOpen}
-        aria-modal={isOpen}
-      >
+          {/* Sidebar Panel */}
+          <aside
+            className={cn(
+              "fixed inset-y-0 z-[75] w-full max-w-[290px] flex-col bg-[#942E3A] text-[#FFF9EB] shadow-2xl lg:hidden border-white/10 overflow-hidden pointer-events-auto touch-manipulation overscroll-contain",
+              dir === "rtl"
+                ? "right-0 border-l rounded-l-[1.75rem]"
+                : "left-0 border-r rounded-r-[1.75rem]",
+              isOpen ? "flex" : "hidden"
+            )}
+            dir={dir}
+            aria-hidden={!isOpen}
+            aria-modal={isOpen}
+          >
         {/* Header inside drawer */}
         <div className="flex items-center justify-between px-5 pt-5 pb-1">
           <Link href="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2">
@@ -447,6 +455,9 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
           )}
         </div>
       </aside>
+    </>,
+    document.body
+  )}
     </div>
   );
 }
