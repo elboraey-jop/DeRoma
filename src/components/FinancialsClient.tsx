@@ -850,6 +850,31 @@ export default function FinancialsClient({
   const netOperatingProfit = summary.totalSales - summary.totalCOGS - totalOperatingExpenses;
   const grossSalesBeforeDiscounts = summary.totalSales + summary.totalDiscounts;
 
+  // 1. Confirmed transfers from already closed weekly settlements
+  const totalClosedSettledTransfers = closedWeeks.reduce((sum, w) => {
+    if (w.dbSettlement) {
+      const tr = Number(w.dbSettlement.cashTransferred || 0) +
+                 Number(w.dbSettlement.instapayTransferred || 0) +
+                 Number(w.dbSettlement.walletTransferred || 0);
+      return sum + (tr > 0 ? tr : Number(w.dbSettlement.netProfit || 0));
+    }
+    return sum + (w.cashSales + w.instapaySales + w.walletSales);
+  }, 0);
+
+  // 2. Sales collections from active/unclosed weeks (تحسب تلقائياً لحظياً دون الحاجة لتقفيل الأسبوع مسبقاً)
+  const unclosedWeeks = weeklyPeriods.filter((w) => !w.isLocked);
+  const unclosedWeeksSales = unclosedWeeks.reduce((sum, w) => sum + w.cashSales + w.instapaySales + w.walletSales, 0);
+
+  // 3. Total projected sales collections (المغلقة + المتوقعة للأسبوع الجاري)
+  const totalSettlementSalesProjected = (closedWeeks.length > 0 || unclosedWeeks.length > 0)
+    ? (totalClosedSettledTransfers + unclosedWeeksSales)
+    : summary.totalSales;
+
+  // 4. Live real-time safe balance after week settlement (الرصيد الفعلي بالخزنة لحظياً بعد تقفيل الأسبوع لكن بدون ما تقفل الأسبوع)
+  // مبيعات التحصيل الفعلية + إجمالي الدخل الخارجي - المصروفات التشغيلية - فواتير الشراء والتوريد
+  const liveSafeBalanceAfterSettlement =
+    totalSettlementSalesProjected + totalIncome - totalOperatingExpenses - totalPurchaseInvoices;
+
   // Filtered Expenses & Income Transactions
   const filteredExpenses = expenses.filter((exp) => {
     const expType = exp.type || "expense";
@@ -949,6 +974,7 @@ export default function FinancialsClient({
           return [
             { "المؤشر": "إجمالي المبيعات", "القيمة": summary.totalSales },
             { "المؤشر": "إجمالي السيولة", "القيمة": paymentAccounts.totalLiquidity },
+            { "المؤشر": "الرصيد الفعلي بالخزنة (بعد التسوية)", "القيمة": liveSafeBalanceAfterSettlement },
             { "المؤشر": "صافي الربح", "القيمة": summary.netProfit },
             { "المؤشر": "خزينة النقود (كاش)", "القيمة": paymentAccounts.cashOnHand },
             { "المؤشر": "إنستا باي / فيزا", "القيمة": paymentAccounts.instapayVisa },
@@ -961,6 +987,7 @@ export default function FinancialsClient({
         return [
           { "Metric": "Total Sales", "Value": summary.totalSales },
           { "Metric": "Total Liquidity", "Value": paymentAccounts.totalLiquidity },
+          { "Metric": "Settled Safe Balance", "Value": liveSafeBalanceAfterSettlement },
           { "Metric": "Net Profit", "Value": summary.netProfit },
           { "Metric": "Cash on Hand", "Value": paymentAccounts.cashOnHand },
           { "Metric": "InstaPay / Visa", "Value": paymentAccounts.instapayVisa },
@@ -1992,7 +2019,7 @@ export default function FinancialsClient({
           </div>
 
           {/* Treasury KPI Summary Cards */}
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
             <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3 shadow-xs">
               <span className="text-[10px] font-bold text-[#6B1F2A]/60 block truncate">
                 {isRtl ? "خزنة المبيعات (الطلبيات)" : "Sales Treasury (Orders)"}
@@ -2051,6 +2078,38 @@ export default function FinancialsClient({
                 {formatCurrency(paymentAccounts.totalLiquidity + totalIncome - totalPurchaseInvoices)}
               </strong>
               <span className="text-[9px] text-[#942E3A]/80 font-bold block mt-0.5">{isRtl ? "رصيد الخزينة الإجمالي" : "Total cash & accounts"}</span>
+            </div>
+
+            {/* Card 7: Live Safe Balance After Week Settlement (Without having to lock week) */}
+            <div className="rounded-2xl border-2 border-[#D8B46A] bg-gradient-to-br from-[#FFFDF5] via-[#FFF9EB] to-[#FCECC9] p-3 shadow-sm relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-[#942E3A] via-[#D8B46A] to-[#942E3A]" />
+              <div>
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-[10px] font-black text-[#942E3A] block truncate">
+                    {isRtl ? "الخزنة (بعد تقفيل الأسبوع)" : "Vault (After Week Close)"}
+                  </span>
+                  <span className="rounded-full bg-[#942E3A]/10 px-1.5 py-0.2 text-[8px] font-extrabold text-[#942E3A] shrink-0" title={isRtl ? "الرقم المحتسب تلقائياً لحظياً لما بعد تقفيل الأسبوع دون الحاجة لإغلاقه" : "Live projected after week close without locking"}>
+                    {isRtl ? "لحظياً" : "Live"}
+                  </span>
+                </div>
+                <strong className={`font-playfair text-base sm:text-lg font-black block mt-1 ${liveSafeBalanceAfterSettlement >= 0 ? "text-[#942E3A]" : "text-rose-700"}`}>
+                  {formatCurrency(liveSafeBalanceAfterSettlement)}
+                </strong>
+              </div>
+              <div className="mt-1 pt-1 border-t border-[#942E3A]/10 flex flex-col gap-0.5">
+                <span className="text-[9px] text-[#6B1F2A]/75 font-semibold block truncate">
+                  {isRtl ? "السيولة الفعلية بالخزنة" : "Net vault balance post-close"}
+                </span>
+                {unclosedWeeksSales > 0 ? (
+                  <span className="text-[8px] text-amber-900 font-bold block truncate" title={isRtl ? "مبيعات محتسبة من الأسبوع الجاري قبل الإغلاق" : "Included current active week sales"}>
+                    {isRtl ? `+ ${formatCurrency(unclosedWeeksSales)} مبيعات الأسبوع` : `+ ${formatCurrency(unclosedWeeksSales)} active week`}
+                  </span>
+                ) : (
+                  <span className="text-[8px] text-[#6B1F2A]/50 block truncate">
+                    {isRtl ? "بعد خصم المصاريف والتوريد" : "After expenses & stock invoices"}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

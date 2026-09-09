@@ -40,7 +40,7 @@ export async function updateProductDiscountAction(formData: FormData) {
   if (!product) throw new Error("Product not found.");
 
   if (action === "remove") {
-    const restoredPrice = product.compareAtPrice
+    const restoredPrice = product.compareAtPrice && Number(product.compareAtPrice) > Number(product.price)
       ? Number(product.compareAtPrice)
       : Number(product.price);
     await prisma.product.update({
@@ -48,27 +48,31 @@ export async function updateProductDiscountAction(formData: FormData) {
       data: { price: restoredPrice, compareAtPrice: null },
     });
   } else {
-    const basePrice = Number(product.price);
+    // If the product already has a discount (compareAtPrice > price), keep that as the original base price
+    const originalPrice = product.compareAtPrice && Number(product.compareAtPrice) > Number(product.price)
+      ? Number(product.compareAtPrice)
+      : Number(product.price);
+
     if (!Number.isFinite(discountValue) || discountValue <= 0) {
       throw new Error("Discount value must be greater than zero.");
     }
     if (discountType === "percentage" && discountValue >= 100) {
       throw new Error("Percentage discount must be less than 100.");
     }
-    if (discountType === "fixed" && discountValue >= basePrice) {
+    if (discountType === "fixed" && discountValue >= originalPrice) {
       throw new Error("Fixed discount must be less than the product price.");
     }
 
     const discountedPrice =
       discountType === "fixed"
-        ? basePrice - discountValue
-        : basePrice * (1 - discountValue / 100);
+        ? originalPrice - discountValue
+        : originalPrice * (1 - discountValue / 100);
     const roundedPrice =
       Math.round((discountedPrice + Number.EPSILON) * 100) / 100;
 
     await prisma.product.update({
       where: { id: productId },
-      data: { price: roundedPrice, compareAtPrice: basePrice },
+      data: { price: roundedPrice, compareAtPrice: originalPrice },
     });
   }
 
