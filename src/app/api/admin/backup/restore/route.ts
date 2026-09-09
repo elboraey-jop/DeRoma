@@ -1,1 +1,4 @@
-export { POST, dynamic, runtime } from "@/app/admin/api/backup/restore/route";
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
+export { POST } from "@/app/admin/api/backup/restore/route";
