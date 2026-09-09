@@ -169,11 +169,11 @@ function AdminShellContent({ children }: { children: React.ReactNode }) {
       {isSidebarOpen && (
         <>
           <button
-            className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+            className="fixed inset-0 z-40 bg-black/60 lg:hidden touch-manipulation cursor-pointer"
             onClick={() => setIsSidebarOpen(false)}
             aria-label="Close admin menu"
           />
-          <div className={cn("fixed inset-y-0 z-50 lg:hidden", isRtl ? "right-0" : "left-0")}>
+          <div className={cn("fixed inset-y-0 z-50 lg:hidden pointer-events-auto", isRtl ? "right-0" : "left-0")}>
             <AdminSidebar
               pathname={pathname}
               onClose={() => setIsSidebarOpen(false)}
@@ -189,7 +189,7 @@ function AdminShellContent({ children }: { children: React.ReactNode }) {
         <div className="fixed top-0 left-0 right-0 z-30 flex h-14 items-center justify-between border-b border-[#942E3A]/10 bg-[#f7f1e8]/95 px-3 backdrop-blur-md shadow-2xs sm:px-6 lg:hidden">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="flex items-center gap-2 rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2 text-xs font-bold text-[#942E3A] shadow-xs"
+            className="flex items-center gap-2 rounded-xl border border-[#942E3A]/15 bg-white px-3 py-2 text-xs font-bold text-[#942E3A] shadow-xs touch-manipulation cursor-pointer active:scale-95 transition-transform"
             aria-label="Open admin menu"
           >
             <Menu className="h-4 w-4 text-[#D8B46A]" />
@@ -298,7 +298,7 @@ function AdminSidebar({
           {onClose ? (
             <button
               onClick={onClose}
-              className="rounded-full p-1.5 text-[#D8B46A] hover:bg-white/10 lg:hidden"
+              className="rounded-full p-1.5 text-[#D8B46A] hover:bg-white/10 lg:hidden touch-manipulation cursor-pointer"
               aria-label="Close admin menu"
             >
               <X className="h-5 w-5" />

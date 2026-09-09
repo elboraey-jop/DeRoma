@@ -107,7 +107,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
             {/* Mobile menu toggle */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center rounded-full p-1.5 text-[#FFF9EC]/90 hover:bg-white/10 hover:text-[#FFF9EC] lg:hidden transition-colors"
+              className="inline-flex items-center justify-center rounded-full p-1.5 text-[#FFF9EC]/90 hover:bg-white/10 hover:text-[#FFF9EC] lg:hidden transition-colors touch-manipulation cursor-pointer"
               aria-label="Toggle menu"
             >
               {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -266,27 +266,30 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
 
       </div>
 
-      {/* Mobile Drawer (Sidebar) - Instant open without animation */}
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            onClick={() => setIsOpen(false)}
-            className="fixed inset-0 z-[70] bg-black/60 lg:hidden"
-            aria-hidden="true"
-          />
+      {/* Mobile Drawer (Sidebar) - Instant open without animation or lag */}
+      {/* Backdrop */}
+      <div
+        onClick={() => setIsOpen(false)}
+        className={cn(
+          "fixed inset-0 z-[70] bg-black/60 lg:hidden pointer-events-auto touch-none cursor-pointer",
+          isOpen ? "block" : "hidden"
+        )}
+        aria-hidden={!isOpen}
+      />
 
-          {/* Sidebar Panel */}
-          <aside
-            className={cn(
-              "fixed inset-y-0 z-[75] flex w-full max-w-[290px] flex-col bg-[#942E3A] text-[#FFF9EB] shadow-2xl lg:hidden border-white/10 overflow-hidden",
-              dir === "rtl"
-                ? "right-0 border-l rounded-l-[1.75rem]"
-                : "left-0 border-r rounded-r-[1.75rem]"
-            )}
-            dir={dir}
-            aria-modal="true"
-          >
+      {/* Sidebar Panel */}
+      <aside
+        className={cn(
+          "fixed inset-y-0 z-[75] w-full max-w-[290px] flex-col bg-[#942E3A] text-[#FFF9EB] shadow-2xl lg:hidden border-white/10 overflow-hidden pointer-events-auto touch-manipulation overscroll-contain",
+          dir === "rtl"
+            ? "right-0 border-l rounded-l-[1.75rem]"
+            : "left-0 border-r rounded-r-[1.75rem]",
+          isOpen ? "flex" : "hidden"
+        )}
+        dir={dir}
+        aria-hidden={!isOpen}
+        aria-modal={isOpen}
+      >
         {/* Header inside drawer */}
         <div className="flex items-center justify-between px-5 pt-5 pb-1">
           <Link href="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2">
@@ -296,7 +299,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
           </Link>
           <button
             onClick={() => setIsOpen(false)}
-            className="rounded-full p-1.5 text-stone-300 hover:bg-white/10 hover:text-white transition-colors"
+            className="rounded-full p-1.5 text-stone-300 hover:bg-white/10 hover:text-white transition-colors touch-manipulation cursor-pointer"
             aria-label="Close menu"
           >
             <X className="h-4.5 w-4.5" />
@@ -455,8 +458,6 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
           )}
         </div>
       </aside>
-        </>
-      )}
     </div>
   );
 }
