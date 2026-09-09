@@ -28,15 +28,17 @@ export default function RoutePrefetcher() {
 
     const timer = setTimeout(() => {
       idleCallback(() => {
-        CRITICAL_ROUTES.forEach((route) => {
-          try {
-            router.prefetch(route);
-          } catch (_) {
-            // Ignore prefetch errors for non-existent paths
-          }
+        CRITICAL_ROUTES.forEach((route, index) => {
+          setTimeout(() => {
+            try {
+              router.prefetch(route);
+            } catch (_) {
+              // Ignore prefetch errors for non-existent paths
+            }
+          }, index * 350);
         });
       });
-    }, 200);
+    }, 3500);
 
     // 2. Instant prefetch on link hover / touch
     const handleMouseOverOrTouch = (e: MouseEvent | TouchEvent) => {

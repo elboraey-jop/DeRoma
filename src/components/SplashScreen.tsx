@@ -19,7 +19,7 @@ export default function SplashScreen() {
     const timer = setTimeout(() => {
       setShow(false);
       sessionStorage.setItem("deroma_splash_shown", "true");
-    }, 1200);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, []);
@@ -29,9 +29,9 @@ export default function SplashScreen() {
       {show && (
         <motion.div
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.35, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#FFF9EB] text-[#942E3A]"
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#FFF9EB] text-[#942E3A] pointer-events-none"
         >
           <div className="relative flex flex-col items-center gap-4">
             {/* Animated Brand Name */}
