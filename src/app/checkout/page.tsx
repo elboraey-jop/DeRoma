@@ -546,7 +546,7 @@ export default function CheckoutPage() {
 
   if (cart.length === 0) {
     return (
-      <main className="min-h-[70vh] bg-[#fffaf0] px-4 py-16 sm:py-24" dir={dir}>
+      <main className="min-h-[70vh] bg-white px-4 py-16 sm:py-24" dir={dir}>
         <div className="mx-auto max-w-md text-center">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#942e3a]/10 text-[#942e3a]">
             <ShoppingBag className="h-9 w-9" />
@@ -578,7 +578,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#fffaf0] px-3 pt-8 pb-14 sm:px-6 sm:pt-12 sm:pb-20 lg:px-8" dir={dir}>
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-white px-3 pt-8 pb-14 sm:px-6 sm:pt-12 sm:pb-20 lg:px-8" dir={dir}>
       <div className="mx-auto w-full min-w-0 max-w-6xl">
         {/* Back Link on Left */}
         <div className="mb-2 flex items-center justify-start">

@@ -8,7 +8,7 @@ export default async function WishlistPage() {
   const products = await getActiveProducts();
 
   return (
-    <main className="flex-1 bg-[#FFF9EB] min-h-screen">
+    <main className="flex-1 bg-white min-h-screen">
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-[50vh] text-[#942E3A] font-sans text-xs">
           Loading wishlist...

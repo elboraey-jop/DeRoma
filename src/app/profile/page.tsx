@@ -274,7 +274,7 @@ export default function ProfilePage() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] py-10 px-4 sm:px-6 lg:px-8" dir={dir}>
+    <div className="min-h-screen bg-white text-[#942E3A] py-10 px-4 sm:px-6 lg:px-8" dir={dir}>
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* Top Header Bar */}

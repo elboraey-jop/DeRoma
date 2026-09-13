@@ -191,7 +191,7 @@ export default function ProductCard({
       }`}
     >
       {/* Top Product Image Container */}
-      <div className="relative h-[68%] sm:h-[69%] w-full shrink-0 overflow-hidden bg-[#FFF9EB]">
+      <div className="relative h-[68%] sm:h-[69%] w-full shrink-0 overflow-hidden bg-white">
         
         {/* Badges */}
         {isTotalSoldOut ? (

@@ -76,7 +76,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative" dir={dir}>
+    <div className="min-h-screen bg-white text-[#942E3A] font-outfit flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative" dir={dir}>
       
       {/* Back button */}
       <div className="absolute top-6 left-6 rtl:left-auto rtl:right-6 z-10">

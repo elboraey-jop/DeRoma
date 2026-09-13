@@ -88,7 +88,7 @@ function SuccessContent() {
   ];
 
   return (
-    <main className="min-h-[calc(100vh-90px)] bg-[#fffaf0] px-4 py-6 text-[#481827] sm:px-6 sm:py-8 lg:px-8" dir={dir}>
+    <main className="min-h-[calc(100vh-90px)] bg-white px-4 py-6 text-[#481827] sm:px-6 sm:py-8 lg:px-8" dir={dir}>
       <div className="mx-auto max-w-lg">
         <div className="overflow-hidden rounded-2xl border border-[#eadfd6] bg-white shadow-[0_15px_40px_rgba(73,24,39,0.06)]">
           <div className="relative overflow-hidden bg-[#942e3a] px-4 py-6 text-center text-[#fffaf0] sm:px-6 sm:py-8">
@@ -155,5 +155,5 @@ function SuccessContent() {
 }
 
 export default function SuccessPage() {
-  return <Suspense fallback={<div className="flex min-h-[70vh] items-center justify-center bg-[#fffaf0]"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#942e3a] border-t-transparent" /></div>}><SuccessContent /></Suspense>;
+  return <Suspense fallback={<div className="flex min-h-[70vh] items-center justify-center bg-white"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#942e3a] border-t-transparent" /></div>}><SuccessContent /></Suspense>;
 }

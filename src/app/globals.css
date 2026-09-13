@@ -212,10 +212,10 @@
 :root {
   /* These are defaults - they will be overridden by settings CSS vars injected in layout.tsx */
   --bg-dark: #8B7CC7;
-  --bg-light: #FFF9EC;
+  --bg-light: #FFFFFF;
   --surface-dark: #8B7CC7;
-  --surface-light: #FFF9EC;
-  --text-on-dark: #FFF9EC;
+  --surface-light: #FFFFFF;
+  --text-on-dark: #FFFFFF;
   --text-on-light: #5F5598;
   --text-muted-dark: #D8B46A;
   --text-muted-light: #D8B46A;
@@ -6823,7 +6823,7 @@ html.lenis, html.lenis body {
   --brand-purple: #8B7CC7;
   --brand-purple-deep: #5F5598;
   --brand-purple-hover: #796AB5;
-  --brand-cream: #FFF9EC;
+  --brand-cream: #FFFFFF;
 }
 
 /* Primary burgundy replacements */
@@ -6934,17 +6934,24 @@ html.lenis, html.lenis body {
   stroke: var(--brand-purple) !important;
 }
 
-/* Cream replacement for the old warm-white surface and neutral white UI */
+/* White replacement for the old warm-white surface and neutral white UI */
 [class~="bg-[#FFF9EB]"],
 [class~="bg-[#fff9eb]"],
+[class*="bg-[#FFF9EC]"],
+[class*="bg-[#fff9ec]"],
+[class*="bg-[#fffaf0]"],
 [class~="ring-offset-[#FFF9EB]"],
 [class~="ring-offset-[#fff9eb]"],
+[class*="ring-offset-[#FFF9EC]"],
+[class*="ring-offset-[#fff9ec]"],
 [class~="bg-white"] {
   background-color: var(--brand-cream) !important;
 }
 
 [class~="text-[#FFF9EB]"],
 [class~="text-[#fff9eb]"],
+[class*="text-[#FFF9EC]"],
+[class*="text-[#fff9ec]"],
 [class~="text-white"] {
   color: var(--brand-cream) !important;
 }

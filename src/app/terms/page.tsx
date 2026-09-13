@@ -163,7 +163,7 @@ export default function TermsPage() {
   }, [shippingSearch]);
 
   return (
-    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit py-3 sm:py-10 px-2.5 sm:px-6 lg:px-8" dir={dir}>
+    <div className="min-h-screen bg-white text-[#942E3A] font-outfit py-3 sm:py-10 px-2.5 sm:px-6 lg:px-8" dir={dir}>
       <div className="max-w-[900px] mx-auto space-y-3 sm:space-y-8">
         
         {/* Navigation & Header */}

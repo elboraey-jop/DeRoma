@@ -151,7 +151,7 @@ export default async function TrackOrderPage({ searchParams }: PageProps) {
   const hasError = Boolean(query && !order);
 
   return (
-    <div className="min-h-screen bg-[#FFF9EB] px-3 py-5 text-[#942E3A] sm:px-6 sm:py-12 lg:px-8">
+    <div className="min-h-screen bg-white px-3 py-5 text-[#942E3A] sm:px-6 sm:py-12 lg:px-8">
       <div className="mx-auto max-w-[1120px] space-y-4 sm:space-y-8">
         <Link href="/" className="inline-flex items-center gap-1 text-xs font-bold text-[#942E3A] transition-colors hover:text-[#6B1F2A]">
           <ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" />

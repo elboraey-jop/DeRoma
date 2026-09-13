@@ -96,7 +96,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   };
 
   return (
-    <main className="flex-1 bg-[#FFF9EB] min-h-screen">
+    <main className="flex-1 bg-white min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}

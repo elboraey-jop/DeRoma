@@ -113,7 +113,7 @@ export default function RootLayout({
         />
       </head>
 
-      <body className={`${montserrat.variable} ${comfortaa.variable} ${playfair.variable} ${cairo.variable} font-montserrat antialiased`}>
+      <body className={`${montserrat.variable} ${comfortaa.variable} ${playfair.variable} ${cairo.variable} font-montserrat antialiased bg-white text-[#5F5598]`}>
         <ToastProvider>
           <StoreI18nProvider>
             <RoutePrefetcher />

@@ -64,7 +64,7 @@ export default async function HomePage() {
   }));
 
   return (
-    <main className="flex-1 bg-[#FFF9EB]">
+    <main className="flex-1 bg-white">
       <HomeClient
         products={products}
         dbHomeReviews={dbHomeReviews}

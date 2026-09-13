@@ -81,7 +81,7 @@ export default function RefundPolicyPage() {
       };
 
   return (
-    <div className="min-h-screen bg-[#FFF9EB] text-[#942E3A] font-outfit py-4 sm:py-10 px-2.5 sm:px-6 lg:px-8" dir={dir}>
+    <div className="min-h-screen bg-white text-[#942E3A] font-outfit py-4 sm:py-10 px-2.5 sm:px-6 lg:px-8" dir={dir}>
       <div className="max-w-[900px] mx-auto space-y-4 sm:space-y-10">
         
         {/* Navigation & Header */}

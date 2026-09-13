@@ -12,7 +12,7 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         aurora: {
-          bg: "#FFF9EB",
+          bg: "#FFFFFF",
           card: "#FFFFFF",
           lavender: "#D8B46A",
           lavenderCard: "#D8B46A",

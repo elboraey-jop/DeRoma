@@ -26,7 +26,7 @@ export default async function ShopPage() {
   }
 
   return (
-    <main className="flex-1 bg-[#FFF9EB] min-h-screen">
+    <main className="flex-1 bg-white min-h-screen">
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-[50vh] text-stone-500 font-sans text-xs">
           Loading boutique...
