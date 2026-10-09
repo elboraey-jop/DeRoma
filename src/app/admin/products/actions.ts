@@ -79,6 +79,8 @@ export async function updateProductDiscountAction(formData: FormData) {
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath(`/shop/${productId}`);
+  revalidatePath("/");
+  revalidatePath("/shop");
 }
 
 export async function updateProductStatusAction(formData: FormData) {
@@ -98,6 +100,8 @@ export async function updateProductStatusAction(formData: FormData) {
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath(`/shop/${productId}`);
+  revalidatePath("/");
+  revalidatePath("/shop");
 }
 
 function optionalNumber(value: FormDataEntryValue | null) {
@@ -276,6 +280,8 @@ export async function createProductAction(formData: FormData) {
     },
   });
 
+  revalidatePath("/");
+  revalidatePath("/shop");
   const redirectTo = String(formData.get("redirectTo") || "").trim();
   redirect(
     redirectTo === "/admin/suppliers/invoices/new"
@@ -469,6 +475,7 @@ export async function createProductBatchAction(formData: FormData) {
   revalidatePath("/admin/financials");
   revalidatePath(`/admin/suppliers/invoices/${invoice.id}`);
   revalidatePath(`/shop/${productId}`);
+  revalidatePath("/");
   revalidatePath("/shop");
   redirect(`/admin/suppliers/invoices/${invoice.id}`);
 }

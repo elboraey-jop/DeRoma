@@ -13,6 +13,13 @@ function getDatabaseUrl() {
     // Force the serverless-safe value even if the connection string was
     // copied from a local environment with a larger pool size.
     url.searchParams.set('connection_limit', '1');
+    // Supabase's session pooler has a small per-project connection limit. Use
+    // the transaction pooler for application traffic; DIRECT_URL remains the
+    // migration connection and is not used by this runtime client.
+    if (url.hostname.endsWith('.pooler.supabase.com')) {
+      url.port = '6543';
+      url.searchParams.set('pgbouncer', 'true');
+    }
     return url.toString();
   } catch {
     return databaseUrl;
@@ -39,9 +46,7 @@ const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
 export default prisma;
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
+globalForPrisma.prisma = prisma;
 
 export async function checkDatabaseConnection(): Promise<boolean> {
   try {

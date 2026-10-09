@@ -244,6 +244,8 @@ export async function updateProductAction(formData: FormData) {
   });
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${id}`);
+  revalidatePath("/");
+  revalidatePath("/shop");
   redirect(`/admin/products/${id}`);
 }
 
@@ -258,6 +260,8 @@ export async function createVariantAction(formData: FormData) {
     data: { productId, size, stock },
   });
   revalidatePath(`/admin/products/${productId}`);
+  revalidatePath("/");
+  revalidatePath("/shop");
 }
 
 export async function deleteVariantAction(formData: FormData) {
@@ -276,6 +280,8 @@ export async function deleteVariantAction(formData: FormData) {
   await prisma.productVariant.delete({ where: { id } });
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/admin/inventory");
+  revalidatePath("/");
+  revalidatePath("/shop");
 }
 
 export async function createProductReviewAction(formData: FormData) {
@@ -318,6 +324,7 @@ export async function createProductReviewAction(formData: FormData) {
   });
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath(`/shop/${productId}`);
+  revalidatePath("/");
 }
 
 export async function deleteProductAction(formData: FormData) {
@@ -342,6 +349,8 @@ export async function deleteProductAction(formData: FormData) {
     redirect(`/admin/products/${productId}?deleteError=blocked`);
   }
   revalidatePath("/admin/products");
+  revalidatePath("/");
+  revalidatePath("/shop");
   redirect("/admin/products");
 }
 

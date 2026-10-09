@@ -2,7 +2,9 @@ import { getActiveProducts } from "@/lib/products";
 import prisma from "@/lib/prisma";
 import HomeClient from "@/components/HomeClient";
 
-export const revalidate = 60; // Cache page for 60 seconds
+// The homepage contains the live product catalog. Always read the current
+// database state so new, archived, or deleted products cannot remain stale.
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   let products: any[] = [];

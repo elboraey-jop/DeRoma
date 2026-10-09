@@ -64,6 +64,11 @@ export const FALLBACK_PRODUCTS: ProductWithVariants[] = CATALOG_PRODUCTS.map(
   toProductWithVariants,
 );
 
+// The bundled catalog is useful while developing without a database, but it
+// must never appear on the live storefront when the production database has a
+// transient connection problem.
+const canUseFallbackCatalog = process.env.NODE_ENV !== "production";
+
 export { getProductPath };
 
 export const getActiveProducts = cache(async function getActiveProducts(): Promise<ProductWithVariants[]> {
@@ -102,13 +107,10 @@ export const getActiveProducts = cache(async function getActiveProducts(): Promi
       }),
     );
   } catch (error) {
-    console.warn(
-      "Database connection issue. Using fallback products dataset:",
-      error,
-    );
+    console.warn("Database connection issue while loading products:", error);
   }
 
-  return FALLBACK_PRODUCTS;
+  return canUseFallbackCatalog ? FALLBACK_PRODUCTS : [];
 });
 
 export const getProductById = cache(async function getProductById(
@@ -193,5 +195,5 @@ export const getProductById = cache(async function getProductById(
     console.warn("Database error during slug product lookup:", error);
   }
 
-  return fallbackProduct || null;
+  return canUseFallbackCatalog ? fallbackProduct || null : null;
 });
