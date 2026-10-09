@@ -282,7 +282,7 @@ export default function ProductCard({
                 title={isOutOfStock ? soldOutLabel : undefined}
                 whileHover={!mobileOptimized && !isOutOfStock ? { scale: 1.1 } : undefined}
                 whileTap={!mobileOptimized && !isOutOfStock ? { scale: 0.9 } : undefined}
-                className={`product-card-badge-number group relative flex h-5 min-w-5 items-center justify-center rounded-full border px-0.5 text-[8px] font-bold leading-none text-center transition-all sm:h-6.5 sm:min-w-6.5 sm:px-1 sm:text-[10px] ${
+                className={`product-card-badge-number group relative flex h-[22px] min-w-[22px] items-center justify-center rounded-full border px-0.5 text-[8px] font-bold leading-none text-center transition-all sm:h-6.5 sm:min-w-6.5 sm:px-1 sm:text-[10px] ${
                   isOutOfStock
                     ? "border-stone-400/30 bg-stone-100/50 text-stone-400 opacity-40 cursor-not-allowed"
                     : isSelected
