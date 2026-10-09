@@ -269,7 +269,7 @@ export default function ProductCard({
         </div>
 
         {!isBag && <div className="mt-1 mb-1 flex min-h-5 flex-wrap items-center justify-center gap-1">
-          {sizesForProduct.slice(0, 5).map((variant) => {
+          {sizesForProduct.map((variant) => {
             const isSelected = selectedSize === variant.size;
             const isOutOfStock = variant.stock <= 0;
             return (

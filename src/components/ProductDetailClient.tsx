@@ -105,6 +105,8 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const [galleryZoom, setGalleryZoom] = useState(1);
   const [galleryMounted, setGalleryMounted] = useState(false);
   const galleryTouchStartX = useRef<number | null>(null);
+  const productImageTouchStartX = useRef<number | null>(null);
+  const suppressProductImageClick = useRef(false);
   const [added, setAdded] = useState(false);
   const { has, toggle } = useWishlist();
   const isWishlisted = has(product.id);
@@ -332,7 +334,33 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
               role="button"
               tabIndex={0}
               aria-label={lang === "ar" ? "فتح معرض صور المنتج" : "Open product image gallery"}
-              onClick={() => openGallery(activeImageIndex)}
+              onClick={() => {
+                if (suppressProductImageClick.current) {
+                  suppressProductImageClick.current = false;
+                  return;
+                }
+                openGallery(activeImageIndex);
+              }}
+              onTouchStart={(event) => {
+                productImageTouchStartX.current = event.touches[0]?.clientX ?? null;
+              }}
+              onTouchEnd={(event) => {
+                const startX = productImageTouchStartX.current;
+                const endX = event.changedTouches[0]?.clientX;
+                productImageTouchStartX.current = null;
+
+                if (startX === null || endX === undefined || Math.abs(endX - startX) < 45) return;
+
+                suppressProductImageClick.current = true;
+                window.setTimeout(() => {
+                  suppressProductImageClick.current = false;
+                }, 500);
+                changeGalleryImage(endX < startX ? 1 : -1);
+              }}
+              onTouchCancel={() => {
+                productImageTouchStartX.current = null;
+              }}
+              style={{ touchAction: "pan-y" }}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
@@ -341,11 +369,11 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
               }}
             >
               {isTotalSoldOut ? (
-                <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-15 rounded-full bg-red-700 px-3 py-1 text-[11px] sm:text-xs font-black text-white uppercase tracking-wider shadow-md">
+                <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-20 rounded-full bg-red-700 px-3 py-1 text-[11px] sm:text-xs font-black text-white uppercase tracking-wider shadow-md">
                   {t("productCard.soldOut")}
                 </span>
               ) : discountPercent ? (
-                <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-15 rounded-full bg-[#942E3A] px-3 py-1 text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider shadow-sm">
+                <span className="product-detail-discount-badge absolute right-3 top-3 sm:right-5 sm:top-5 z-20 rounded-full bg-[#942E3A] px-3 py-1 text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider shadow-sm">
                   {lang === "ar" ? `خصم ${discountPercent}%` : `-${discountPercent}% OFF`}
                 </span>
               ) : null}
@@ -358,7 +386,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="absolute inset-0 w-full h-full"
+                  className="absolute inset-0 z-0 w-full h-full"
                 >
                   <Image
                     src={currentColorImages[activeImageIndex] || currentColorImages[0]}
