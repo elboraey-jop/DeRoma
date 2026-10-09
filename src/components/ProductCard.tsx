@@ -229,7 +229,7 @@ export default function ProductCard({
 
       {/* Card Details */}
       <div
-        className={`relative z-10 -mt-7 flex flex-1 flex-col rounded-t-[1.15rem] px-2.5 pb-3.5 pt-2 text-[#6B1F2A] sm:-mt-9 sm:rounded-t-[1.35rem] sm:px-3 sm:pb-4 sm:pt-2.5 ${
+        className={`relative z-10 -mt-7 flex flex-1 flex-col rounded-t-[1.15rem] px-1.5 pb-3.5 pt-2 text-[#6B1F2A] sm:-mt-9 sm:rounded-t-[1.35rem] sm:px-3 sm:pb-4 sm:pt-2.5 ${
           isTotalSoldOut ? "bg-stone-700 text-stone-200" : "bg-[#EADFC8] text-[#6B1F2A]"
         }`}
         style={!isTotalSoldOut ? { backgroundColor: "#EADFC8" } : undefined}
@@ -268,7 +268,7 @@ export default function ProductCard({
           )}
         </div>
 
-        {!isBag && <div className="mt-1 mb-1 flex min-h-5 flex-wrap items-center justify-center gap-1">
+        {!isBag && <div className="mt-1 mb-1 flex min-h-5 w-full flex-nowrap items-center justify-between gap-0 sm:justify-center sm:gap-1">
           {sizesForProduct.map((variant) => {
             const isSelected = selectedSize === variant.size;
             const isOutOfStock = variant.stock <= 0;
@@ -282,7 +282,7 @@ export default function ProductCard({
                 title={isOutOfStock ? soldOutLabel : undefined}
                 whileHover={!mobileOptimized && !isOutOfStock ? { scale: 1.1 } : undefined}
                 whileTap={!mobileOptimized && !isOutOfStock ? { scale: 0.9 } : undefined}
-                className={`product-card-badge-number group relative flex h-6 min-w-6 items-center justify-center rounded-full border px-1 text-[9px] font-bold leading-none text-center transition-all sm:h-6.5 sm:min-w-6.5 sm:text-[10px] ${
+                className={`product-card-badge-number group relative flex h-5 min-w-5 items-center justify-center rounded-full border px-0.5 text-[8px] font-bold leading-none text-center transition-all sm:h-6.5 sm:min-w-6.5 sm:px-1 sm:text-[10px] ${
                   isOutOfStock
                     ? "border-stone-400/30 bg-stone-100/50 text-stone-400 opacity-40 cursor-not-allowed"
                     : isSelected
