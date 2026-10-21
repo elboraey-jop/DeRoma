@@ -573,7 +573,7 @@ export default function AdminPurchaseInvoiceForm({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
-                  {isRtl ? "إدخال المنتجات" : "Product intake"}
+                  {isRtl ? "إضافة المنتجات للمخزون" : "Product intake"}
                 </p>
                 <h2 className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
                   {addMode === "choice"
@@ -615,7 +615,7 @@ export default function AdminPurchaseInvoiceForm({
                     {isRtl ? "منتج جديد" : "New product"}
                   </h3>
                   <p className="mt-2 text-xs leading-5 text-[#6B1F2A]/65">
-                    {isRtl ? "إنشاء المنتج بالكامل والموديلات والأسعار ومعرض الصور داخل هذه النافذة." : "Create the complete product, variants, pricing and gallery in this modal."}
+                    {isRtl ? "أنشئ المنتج بكل بياناته وأنواعه وأسعاره وصوره من هذه النافذة." : "Create the complete product, variants, pricing and gallery in this modal."}
                   </p>
                   <span className="mt-5 inline-flex text-[10px] font-bold uppercase tracking-wider text-[#942E3A]">
                     {isRtl ? "فتح محرر المنتج ←" : "Open product editor →"}

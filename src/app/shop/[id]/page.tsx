@@ -4,6 +4,7 @@ import ProductDetailClient from "@/components/ProductDetailClient";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getProductPath } from "@/lib/productSlug";
+import { getAutoRelatedProducts } from "@/lib/relatedProducts";
 
 export const revalidate = 60; // Cache page for 60 seconds
 
@@ -49,28 +50,29 @@ export default async function ProductDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const allProducts = await getActiveProducts();
-  let relatedIds: string[] = [];
-  let reviews: Array<{ id: string; name: string; avatar: string; rating: number; date: string; comment: string }> = [];
-  try {
-    const [relations, productReviews] = await Promise.all([
+  const [allProducts, relatedData] = await Promise.all([
+    getActiveProducts(),
+    Promise.all([
       prisma.productRelation.findMany({ where: { productId: product.id }, select: { relatedProductId: true } }),
       prisma.review.findMany({ where: { productId: product.id, status: "approved" }, orderBy: { createdAt: "desc" }, take: 12 }),
-    ]);
-    relatedIds = relations.map((relation) => relation.relatedProductId);
-    reviews = productReviews.map((review) => ({ id: review.id, name: review.customerName, avatar: review.customerName.charAt(0).toUpperCase(), rating: review.rating, date: new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }), comment: review.body }));
-  } catch (error) {
-    console.error("Unable to load product relations/reviews:", error);
-  }
+    ]).then(([relations, productReviews]) => ({
+      relatedIds: relations.map((relation) => relation.relatedProductId),
+      reviews: productReviews.map((review) => ({ id: review.id, name: review.customerName, avatar: review.customerName.charAt(0).toUpperCase(), rating: review.rating, date: new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }), comment: review.body })),
+    })).catch((error) => {
+      console.error("Unable to load product relations/reviews:", error);
+      return {
+        relatedIds: [] as string[],
+        reviews: [] as Array<{ id: string; name: string; avatar: string; rating: number; date: string; comment: string }>,
+      };
+    }),
+  ]);
+  const { relatedIds, reviews } = relatedData;
   const manuallyRelatedProducts = allProducts.filter((p) => relatedIds.includes(p.id));
-  const fallbackProducts = allProducts
-    .filter((p) => p.id !== product.id)
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 4);
+  const fallbackProducts = getAutoRelatedProducts(product, allProducts, 6);
   const similarProducts = (manuallyRelatedProducts.length > 0
     ? manuallyRelatedProducts
     : fallbackProducts
-  ).slice(0, 4);
+  ).slice(0, 6);
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deroma.store";
   const productSchema = {

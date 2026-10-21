@@ -187,7 +187,7 @@ export function ProductDetailSkeleton() {
       <div className="mt-16 border-t border-[#D8B46A]/20 pt-10">
         <div className="h-6 w-48 bg-[#942E3A]/20 rounded mb-8 animate-pulse" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-6">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <CardSkeleton key={i} />
           ))}
         </div>

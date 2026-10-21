@@ -961,7 +961,7 @@ export default function AdminProductCreateForm({
     : [
         { label: isRtl ? "البيانات الأساسية" : "Identity", caption: isRtl ? "الاسم والقسم" : "Name & category" },
         { label: isRtl ? "المعرض" : "Gallery", caption: isRtl ? "الصور والوسائط" : "Images & media" },
-        { label: isRtl ? "المخزون" : "Inventory", caption: isRtl ? "الموديلات والمخزون" : "Variants & stock" },
+        { label: isRtl ? "المخزون" : "Inventory", caption: isRtl ? "الأنواع والمخزون" : "Variants & stock" },
         { label: isRtl ? "المنتجات المشابهة" : "Relations", caption: isRtl ? "منتجات ذات صلة" : "Similar products" },
         { label: isRtl ? "التسعير" : "Pricing", caption: isRtl ? "التكاليف والظهور" : "Costs & visibility" },
       ];
@@ -1778,7 +1778,7 @@ export default function AdminProductCreateForm({
                 {isRtl ? "الخطوة 3" : "Step 3"}
               </p>
               <h2 className="font-playfair text-xl font-bold">
-                {isEdit ? (isRtl ? "إدارة الموديلات والمخزون" : "Manage variants & stock") : (isRtl ? "الموديلات والمخزون" : "Variants & stock")}
+                {isEdit ? (isRtl ? "إدارة الأنواع والمخزون" : "Manage variants & stock") : (isRtl ? "الأنواع والمخزون" : "Variants & stock")}
               </h2>
             </div>
           </div>

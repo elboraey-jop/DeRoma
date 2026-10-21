@@ -14,9 +14,21 @@ declare global {
   }
 }
 
-const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
-const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
+function getConfiguredAnalyticsId(value?: string) {
+  const normalized = value?.trim();
+  if (!normalized) return undefined;
+
+  // Do not ship vendor scripts with the placeholders from .env.example (or
+  // accidentally send production traffic to a dummy Meta Pixel).
+  if (/^(your|replace|change|example|placeholder)[-_]/i.test(normalized)) return undefined;
+  if (/x{4,}/i.test(normalized)) return undefined;
+
+  return normalized;
+}
+
+const gaMeasurementId = getConfiguredAnalyticsId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID);
+const metaPixelId = getConfiguredAnalyticsId(process.env.NEXT_PUBLIC_META_PIXEL_ID);
+const clarityId = getConfiguredAnalyticsId(process.env.NEXT_PUBLIC_CLARITY_ID);
 
 function AnalyticsPageViews() {
   const pathname = usePathname();

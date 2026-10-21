@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, Check, Heart, Star } from "lucide-react";
+import { ShoppingBag, Check, Heart, LoaderCircle, Star } from "lucide-react";
 import { useCart } from "@/lib/cartStore";
 import { useWishlist } from "@/lib/wishlistStore";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { trackAddToWishlist, trackSelectItem, trackViewItemList } from "@/lib/analytics";
 import { useStoreI18n } from "@/providers/StoreI18nContext";
 import { sortVariantsByNumericSize } from "@/lib/utils";
@@ -74,6 +75,7 @@ export default function ProductCard({
   mobileOptimized?: boolean;
 }) {
   const { addItem } = useCart();
+  const router = useRouter();
   const { t, formatNumber, lang, dir } = useStoreI18n();
   const soldOutLabel = lang === "ar" ? "نفد المخزون" : "Sold Out";
   const [selectedSize, setSelectedSize] = useState("");
@@ -81,11 +83,13 @@ export default function ProductCard({
   const { has, toggle } = useWishlist();
   const isWishlisted = has(product.id);
   const [imageLoading, setImageLoading] = useState(true);
+  const [isOpening, setIsOpening] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const hasTrackedImpression = useRef(false);
   const isBag = product.category === "bags";
 
   const activeImage = product.images[0];
+  const productPath = getProductPath(product);
   const sizesForProduct = sortVariantsByNumericSize(product.variants);
   const availableSizes = sizesForProduct.filter((v) => v.stock > 0);
   const selectedVariant =
@@ -151,7 +155,9 @@ export default function ProductCard({
   }), [product.id, selectedVariant?.id, product.name, priceNum, product.category, product.color, selectedVariant?.size]);
 
   const analyticsItemRef = useRef(analyticsItem);
-  analyticsItemRef.current = analyticsItem;
+  useEffect(() => {
+    analyticsItemRef.current = analyticsItem;
+  }, [analyticsItem]);
 
   const handleWishlistToggle = () => {
     if (!isWishlisted) {
@@ -160,7 +166,13 @@ export default function ProductCard({
     toggle(product.id);
   };
 
+  const prefetchProduct = () => {
+    void router.prefetch(productPath);
+  };
+
   const handleProductSelect = () => {
+    setIsOpening(true);
+    prefetchProduct();
     trackSelectItem(analyticsItemRef.current, product.category || "Shop");
   };
 
@@ -185,11 +197,23 @@ export default function ProductCard({
     <motion.div
       ref={cardRef}
       dir={dir}
+      onMouseEnter={prefetchProduct}
+      onTouchStart={prefetchProduct}
       whileHover={mobileOptimized || isTotalSoldOut ? undefined : { y: -5, transition: { duration: 0.25, ease: "easeOut" } }}
       className={`product-card-shell group relative flex h-[340px] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_12px_30px_rgba(148,46,58,0.06)] hover:shadow-[0_18px_38px_rgba(148,46,58,0.13)] sm:h-[390px] sm:max-w-[230px] sm:rounded-[1.65rem] transition-all duration-300 ${
+        isOpening ? "scale-[0.985] ring-2 ring-inset ring-[#D8B46A] shadow-[0_18px_45px_rgba(216,180,106,0.3)]" : ""
+      } ${
         isTotalSoldOut ? "opacity-75 grayscale bg-stone-100" : ""
       }`}
     >
+      {isOpening && (
+        <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-white/35 backdrop-blur-[1px]">
+          <span className="inline-flex items-center gap-2 rounded-full bg-[#942E3A] px-3 py-2 text-[10px] font-bold text-white shadow-lg">
+            <LoaderCircle className="h-3.5 w-3.5 animate-spin text-[#D8B46A]" />
+            {lang === "ar" ? "جاري فتح المنتج..." : "Opening product..."}
+          </span>
+        </div>
+      )}
       {/* Top Product Image Container */}
       <div className="relative h-[68%] sm:h-[69%] w-full shrink-0 overflow-hidden bg-white">
         
@@ -210,7 +234,7 @@ export default function ProductCard({
         )}
 
         {/* Product Image Link */}
-        <Link href={getProductPath(product)} onClick={handleProductSelect} className="relative h-full w-full flex items-center justify-center">
+        <Link href={productPath} onClick={handleProductSelect} className="relative h-full w-full flex items-center justify-center">
           <Image
             src={activeImage}
             alt={product.name}
@@ -245,7 +269,7 @@ export default function ProductCard({
           )}
 
           <Link
-            href={getProductPath(product)}
+            href={productPath}
             onClick={handleProductSelect}
             className={`block text-center transition-colors group-hover:text-[#942E3A] ${
               hasRealRating ? "px-8 sm:px-9" : "px-1 sm:px-2"

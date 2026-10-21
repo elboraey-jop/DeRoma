@@ -280,7 +280,7 @@ export default function AdminNewAuditClient({
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="font-playfair text-2xl sm:text-3xl font-black text-[#942E3A]">
-                  {isRtl ? "جلسة الجرد الذكي للمخزون" : "Smart Stock Audit"}
+                  {isRtl ? "جلسة جرد المخزون" : "Smart Stock Audit"}
                 </h1>
                 {isScopedCategory && (
                   <span className="rounded-full border border-[#D8B46A]/40 bg-[#FFF9EB] px-3 py-0.5 text-xs font-bold text-[#942E3A]">

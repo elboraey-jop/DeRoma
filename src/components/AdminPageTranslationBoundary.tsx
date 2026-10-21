@@ -8,14 +8,14 @@ export default function AdminPageTranslationBoundary({ children }: { children: R
   const { lang } = useAdminI18n();
 
   useEffect(() => {
-    if (lang !== "ar" || !rootRef.current) return;
+    if (!rootRef.current) return;
     const root = rootRef.current;
     let applying = false;
     const apply = () => {
       if (applying) return;
       applying = true;
       observer.disconnect();
-      localizeLegacyAdminDom(root);
+      localizeLegacyAdminDom(root, lang);
       observer.observe(root, { childList: true, subtree: true });
       applying = false;
     };

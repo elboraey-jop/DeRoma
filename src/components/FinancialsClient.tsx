@@ -211,15 +211,15 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const CATEGORY_LABELS_AR: Record<string, string> = {
   marketing: "تسويق وإعلانات",
-  shipping_ops: "لوجستيات وشحن",
-  packaging: "أكياس وتغليف",
+  shipping_ops: "الخدمات اللوجستية والشحن",
+  packaging: "مواد التغليف",
   utilities: "خدمات ومرافق",
   salaries: "رواتب وعمولات",
   purchase_invoice: "فواتير شراء وتوريد",
   other: "مصروفات أخرى",
   capital: "رأس مال / استثمارات",
   external_profit: "أرباح خارجية",
-  supplier_refund: "استرداد ومرتجعات توريد",
+  supplier_refund: "استرداد من المورد",
   other_income: "إيرادات أخرى",
 };
 
@@ -231,7 +231,7 @@ const ACCOUNT_LABELS: Record<string, string> = {
 };
 
 const ACCOUNT_LABELS_AR: Record<string, string> = {
-  cash: "خزينة النقود (كاش)",
+  cash: "الرصيد النقدي",
   instapay_visa: "إنستا باي / فيزا",
   wallet: "المحافظ الإلكترونية",
   bank: "الحساب البنكي",
@@ -974,9 +974,9 @@ export default function FinancialsClient({
           return [
             { "المؤشر": "إجمالي المبيعات", "القيمة": summary.totalSales },
             { "المؤشر": "إجمالي السيولة", "القيمة": paymentAccounts.totalLiquidity },
-            { "المؤشر": "الرصيد الفعلي بالخزنة (بعد التسوية)", "القيمة": liveSafeBalanceAfterSettlement },
+            { "المؤشر": "الرصيد الفعلي بعد التسوية", "القيمة": liveSafeBalanceAfterSettlement },
             { "المؤشر": "صافي الربح", "القيمة": summary.netProfit },
-            { "المؤشر": "خزينة النقود (كاش)", "القيمة": paymentAccounts.cashOnHand },
+            { "المؤشر": "الرصيد النقدي", "القيمة": paymentAccounts.cashOnHand },
             { "المؤشر": "إنستا باي / فيزا", "القيمة": paymentAccounts.instapayVisa },
             { "المؤشر": "المحافظ الإلكترونية", "القيمة": paymentAccounts.wallet },
             { "المؤشر": "وحدات المخزون المتوفرة", "القيمة": inventoryStats.totalItemsInStock },
@@ -1022,8 +1022,8 @@ export default function FinancialsClient({
       case "cashflow":
         if (rtl) {
           return [
-            { "المؤشر": "تدفق نقدي داخل (المبيعات)", "المبلغ": cashInflowData.totalSales },
-            { "المؤشر": "تدفق نقدي خارج (تكلفة المنتجات + المصروفات)", "المبلغ": cashOutflowData.totalOutflow },
+            { "المؤشر": "النقدية الداخلة (المبيعات)", "المبلغ": cashInflowData.totalSales },
+            { "المؤشر": "النقدية الخارجة (تكلفة المبيعات + المصروفات)", "المبلغ": cashOutflowData.totalOutflow },
             { "المؤشر": "صافي السيولة النقدية", "المبلغ": netCashData.netCash },
             { "المؤشر": "مبيعات الكاش", "المبلغ": paymentAccounts.cashSales },
             { "المؤشر": "مبيعات إنستا باي / فيزا", "المبلغ": paymentAccounts.instapaySales },
@@ -1300,7 +1300,7 @@ export default function FinancialsClient({
     };
 
     const pdfTabTitles: Record<FinancialTab, string> = {
-      overview: isRtl ? "ملخص الخزائن والأرصدة" : exportTabTitles.overview,
+      overview: isRtl ? "نظرة عامة والأرصدة" : exportTabTitles.overview,
       pnl: isRtl ? "قائمة الأرباح والخسائر" : exportTabTitles.pnl,
       cashflow: isRtl ? "التدفق النقدي" : exportTabTitles.cashflow,
       expenses: isRtl ? "المصروفات والإيرادات" : exportTabTitles.expenses,
@@ -1422,7 +1422,7 @@ export default function FinancialsClient({
         <div>
           <div className="flex items-center gap-2">
             <span className="rounded-md bg-[#D8B46A]/20 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-[#942E3A]">
-              {isRtl ? "إدارة الخزينة والماليات" : "Treasury & Financial Intelligence"}
+              {isRtl ? "الإدارة المالية والخزينة" : "Treasury & Financial Intelligence"}
             </span>
           </div>
           <h1 className="mt-1 font-playfair text-2xl sm:text-3xl font-black text-[#942E3A]">
@@ -1472,7 +1472,7 @@ export default function FinancialsClient({
           className="admin-tab flex shrink-0 items-center gap-2 px-3.5 py-2 text-xs font-bold"
         >
           <PiggyBank className="h-4 w-4 text-[#D8B46A]" />
-          <span>{isRtl ? "ملخص الخزائن والأرصدة" : "Overview & Safes"}</span>
+          <span>{isRtl ? "نظرة عامة والأرصدة" : "Overview & Safes"}</span>
         </button>
 
         {/* Profit & Loss tab temporarily hidden; remove the false guard to restore it. */}
@@ -1544,7 +1544,7 @@ export default function FinancialsClient({
           <div>
             <div className="flex items-center justify-between mb-2.5">
               <h2 className="font-playfair text-base font-extrabold text-[#942E3A]">
-                Treasury System (The 3 Safes)
+                {isRtl ? "نظام الأرصدة والخزينة" : "Treasury System (The 3 Safes)"}
               </h2>
               <button
                 onClick={() => setIsTransferOpen(true)}
@@ -1565,7 +1565,7 @@ export default function FinancialsClient({
                       <ShoppingBag className="h-5 w-5" />
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                      {isRtl ? "خزينة المبيعات (إيرادات المبيعات)" : "Sales Treasury (Sales Revenue)"}
+                      {isRtl ? "إيرادات المبيعات" : "Sales Treasury (Sales Revenue)"}
                     </span>
                   </div>
 
@@ -1601,7 +1601,7 @@ export default function FinancialsClient({
                       <TrendingUp className="h-5 w-5" />
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
-                      {isRtl ? "خزينة صافي الربح (صافي الربح)" : "Net Profit Treasury (Net Profit)"}
+                      {isRtl ? "صافي الربح" : "Net Profit Treasury (Net Profit)"}
                     </span>
                   </div>
 
@@ -1634,7 +1634,7 @@ export default function FinancialsClient({
               <div className="rounded-2xl border border-[#942E3A]/20 bg-[#942E3A] p-4 text-[#FFF9EB] shadow-xs relative overflow-hidden">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">
-                    {isRtl ? "خزينة السيولة الإجمالية (إجمالي رأس المال)" : "Total Liquidity Treasury (Total Capital)"}
+                    {isRtl ? "إجمالي السيولة المتاحة" : "Total Liquidity Treasury (Total Capital)"}
                   </span>
                   <div className="rounded-lg bg-white/10 p-2 text-[#D8B46A]">
                     <Wallet className="h-5 w-5" />
@@ -1687,7 +1687,7 @@ export default function FinancialsClient({
             </div>
 
             <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3 shadow-xs">
-              <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "نسبة تكلفة المنتجات %" : "COGS Ratio %"}</span>
+                  <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "نسبة تكلفة البضاعة المباعة %" : "COGS Ratio %"}</span>
               <p className="mt-1 font-playfair text-base sm:text-xl font-black text-[#942E3A]">
                 {summary.totalSales > 0 ? Math.round((summary.totalCOGS / summary.totalSales) * 100) : 0}%
               </p>
@@ -1717,14 +1717,14 @@ export default function FinancialsClient({
               </div>
 
               <div className="rounded-xl border border-[#942E3A]/10 bg-[#FFF9EB]/50 p-3">
-                <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "تكلفة شراء المخزون (COGS)" : "Stock Wholesale Cost (COGS)"}</span>
+                <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "تكلفة المخزون بسعر الشراء" : "Stock Wholesale Cost (COGS)"}</span>
                 <p className="mt-1 font-playfair text-lg font-black text-[#942E3A]">
                   {formatCurrency(inventoryStats.stockWholesaleValue)}
                 </p>
               </div>
 
               <div className="rounded-xl border border-[#942E3A]/10 bg-[#FFF9EB]/50 p-3">
-                <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "قيمة المبيعات المتوقعة (التجزئة)" : "Projected Sales Value (Retail)"}</span>
+                <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "قيمة البيع المتوقعة" : "Projected Sales Value (Retail)"}</span>
                 <p className="mt-1 font-playfair text-lg font-black text-[#942E3A]">
                   {formatCurrency(inventoryStats.stockRetailValue)}
                 </p>
@@ -1813,7 +1813,7 @@ export default function FinancialsClient({
 
                 {/* Cost of Goods Sold */}
                 <tr>
-                  <td className="py-2.5 px-4 text-start text-[#6B1F2A]">{isRtl ? "مطروحًا: تكلفة المنتجات النقدية (COGS)" : "Less: Cash Product Cost (COGS)"}</td>
+                  <td className="py-2.5 px-4 text-start text-[#6B1F2A]">{isRtl ? "يُخصم: تكلفة البضاعة المباعة" : "Less: Cash Product Cost (COGS)"}</td>
                   <td className="py-2.5 text-end text-red-600">({formatCurrency(summary.totalCOGS)})</td>
                   <td className="py-2.5 text-end text-[#6B1F2A]/70">
                     {summary.totalSales > 0 ? ((summary.totalCOGS / summary.totalSales) * 100).toFixed(1) : 0}%
@@ -1868,7 +1868,7 @@ export default function FinancialsClient({
       {activeTab === "cashflow" && (
         <div className="space-y-4">
           <div>
-            <h2 className="font-playfair text-lg font-bold text-[#942E3A]">{isRtl ? "التدفق النقدي ومصادر السيولة" : "Cash Flow & Liquidity Streams"}</h2>
+            <h2 className="font-playfair text-lg font-bold text-[#942E3A]">{isRtl ? "التدفق النقدي والسيولة المتاحة" : "Cash Flow & Liquidity Streams"}</h2>
             <p className="text-xs text-[#6B1F2A]/70">{isRtl ? "تحليل التدفقات النقدية من المبيعات مقابل المصروفات." : "Analysis of cash inflows from sales vs outflow from expenses."}</p>
           </div>
 
@@ -1877,7 +1877,7 @@ export default function FinancialsClient({
             <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-xs relative overflow-visible flex flex-col justify-between">
               <div className="flex items-start justify-between gap-2">
                 <span className="text-[10px] font-bold text-[#6B1F2A]/60 block uppercase truncate">
-                  {isRtl ? "التدفق الداخل (المبيعات)" : "Cash Inflow (Sales)"}
+                  {isRtl ? "النقدية الداخلة (المبيعات)" : "Cash Inflow (Sales)"}
                 </span>
                 <AdminDailyLogDatePicker
                   currentPreset={cashInflowFilter.preset}
@@ -1903,7 +1903,7 @@ export default function FinancialsClient({
             <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-4 shadow-xs relative overflow-visible flex flex-col justify-between">
               <div className="flex items-start justify-between gap-2">
                 <span className="text-[10px] font-bold text-[#6B1F2A]/60 block uppercase truncate">
-                  {isRtl ? "التدفق الخارج (المصروفات)" : "Cash Outflow (COGS + Expenses)"}
+                  {isRtl ? "النقدية الخارجة (تكلفة المبيعات والمصروفات)" : "Cash Outflow (COGS + Expenses)"}
                 </span>
                 <AdminDailyLogDatePicker
                   currentPreset={cashOutflowFilter.preset}
@@ -1920,7 +1920,7 @@ export default function FinancialsClient({
                   {formatCurrency(cashOutflowData.totalOutflow)}
                 </p>
                 <p className="mt-1 text-[10px] text-[#6B1F2A]/60">
-                  {isRtl ? "تكلفة المنتجات + المصروفات التشغيلية" : "Product cost + operational expenses"}
+                  {isRtl ? "تكلفة المبيعات + مصروفات التشغيل" : "Product cost + operational expenses"}
                 </p>
               </div>
             </div>
@@ -1929,7 +1929,7 @@ export default function FinancialsClient({
             <div className="rounded-2xl border border-[#D8B46A]/40 bg-[#FFFDF5] p-4 shadow-xs relative overflow-visible flex flex-col justify-between">
               <div className="flex items-start justify-between gap-2">
                 <span className="text-[10px] font-bold text-[#6B1F2A]/60 block uppercase truncate">
-                  {isRtl ? "صافي المركز النقدي" : "Net Cash Position"}
+                  {isRtl ? "صافي الرصيد النقدي" : "Net Cash Position"}
                 </span>
                 <AdminDailyLogDatePicker
                   currentPreset={netCashFilter.preset}
@@ -1946,7 +1946,7 @@ export default function FinancialsClient({
                   {formatCurrency(netCashData.netCash)}
                 </p>
                 <p className="mt-1 text-[10px] text-[#6B1F2A]/60">
-                  {isRtl ? "صافي النقد المحتفظ به في خزينة المتجر" : "Net cash retained in store treasury"}
+                  {isRtl ? "صافي النقد الموجود في خزينة المتجر" : "Net cash retained in store treasury"}
                 </p>
               </div>
             </div>
@@ -1997,7 +1997,7 @@ export default function FinancialsClient({
             <div>
               <div className="flex items-center gap-2">
                 <span className="rounded-md bg-[#D8B46A]/20 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-[#942E3A]">
-                  {isRtl ? "إدارة الخزائن والسيولة" : "Treasury & Cashflow"}
+                  {isRtl ? "إدارة السيولة والمعاملات المالية" : "Treasury & Cashflow"}
                 </span>
               </div>
               <h2 className="mt-1 font-playfair text-xl sm:text-2xl font-black text-[#942E3A]">
@@ -2005,7 +2005,7 @@ export default function FinancialsClient({
               </h2>
               <p className="text-xs text-[#6B1F2A]/70">
                 {isRtl
-                  ? "تسجيل ومتابعة كافة المصروفات التشغيلية والدخلات، مع حماية المعاملات المغلقة رسمياً."
+                  ? "تسجيل ومتابعة مصروفات التشغيل والإيرادات، مع حماية المعاملات التي تم إقفالها."
                   : "Record & track operating expenses and income entries with settled-week lock protection."}
               </p>
             </div>
@@ -2022,7 +2022,7 @@ export default function FinancialsClient({
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
             <div className="rounded-2xl border border-[#942E3A]/10 bg-white p-3 shadow-xs">
               <span className="text-[10px] font-bold text-[#6B1F2A]/60 block truncate">
-                {isRtl ? "خزنة المبيعات (الطلبيات)" : "Sales Treasury (Orders)"}
+                {isRtl ? "إيرادات الطلبات" : "Sales Treasury (Orders)"}
               </span>
               <strong className="font-playfair text-base font-black text-[#942E3A] block mt-1">
                 {formatCurrency(summary.totalSales)}
@@ -2037,7 +2037,7 @@ export default function FinancialsClient({
               <strong className="font-playfair text-base font-black text-emerald-700 block mt-1">
                 +{formatCurrency(totalIncome)}
               </strong>
-              <span className="text-[9px] text-emerald-600 block mt-0.5">{isRtl ? "دخلات إضافية وتوطين" : "External income"}</span>
+              <span className="text-[9px] text-emerald-600 block mt-0.5">{isRtl ? "إيرادات إضافية وتحويلات" : "External income"}</span>
             </div>
 
             <div className="rounded-2xl border border-rose-200 bg-rose-50/40 p-3 shadow-xs">
@@ -2067,17 +2067,17 @@ export default function FinancialsClient({
               <strong className="font-playfair text-base font-black text-[#942E3A] block mt-1">
                 {formatCurrency(netOperatingProfit)}
               </strong>
-              <span className="text-[9px] text-[#6B1F2A]/60 block mt-0.5">{isRtl ? "المبيعات - COGS - الصرف" : "Sales - COGS - Expenses"}</span>
+              <span className="text-[9px] text-[#6B1F2A]/60 block mt-0.5">{isRtl ? "المبيعات - تكلفة المبيعات - المصروفات" : "Sales - COGS - Expenses"}</span>
             </div>
 
             <div className="rounded-2xl border border-[#942E3A]/20 bg-gradient-to-br from-[#FFF9EB] to-[#F5E6C8] p-3 shadow-xs">
               <span className="text-[10px] font-extrabold text-[#942E3A] block truncate">
-                {isRtl ? "خزنة السيولة الكلية" : "Total Treasury Liquidity"}
+                {isRtl ? "إجمالي السيولة" : "Total Treasury Liquidity"}
               </span>
               <strong className="font-playfair text-base font-black text-[#942E3A] block mt-1">
                 {formatCurrency(paymentAccounts.totalLiquidity + totalIncome - totalPurchaseInvoices)}
               </strong>
-              <span className="text-[9px] text-[#942E3A]/80 font-bold block mt-0.5">{isRtl ? "رصيد الخزينة الإجمالي" : "Total cash & accounts"}</span>
+              <span className="text-[9px] text-[#942E3A]/80 font-bold block mt-0.5">{isRtl ? "إجمالي أرصدة الحسابات" : "Total cash & accounts"}</span>
             </div>
 
             {/* Card 7: Live Safe Balance After Week Settlement (Without having to lock week) */}
@@ -2086,9 +2086,9 @@ export default function FinancialsClient({
               <div>
                 <div className="flex items-center justify-between gap-1">
                   <span className="text-[10px] font-black text-[#942E3A] block truncate">
-                    {isRtl ? "الخزنة (بعد تقفيل الأسبوع)" : "Vault (After Week Close)"}
+                    {isRtl ? "الرصيد بعد إقفال الأسبوع" : "Vault (After Week Close)"}
                   </span>
-                  <span className="rounded-full bg-[#942E3A]/10 px-1.5 py-0.2 text-[8px] font-extrabold text-[#942E3A] shrink-0" title={isRtl ? "الرقم المحتسب تلقائياً لحظياً لما بعد تقفيل الأسبوع دون الحاجة لإغلاقه" : "Live projected after week close without locking"}>
+                  <span className="rounded-full bg-[#942E3A]/10 px-1.5 py-0.2 text-[8px] font-extrabold text-[#942E3A] shrink-0" title={isRtl ? "الرصيد المحسوب حاليًا بعد إقفال الأسبوع، من غير إقفاله فعليًا" : "Live projected after week close without locking"}>
                     {isRtl ? "لحظياً" : "Live"}
                   </span>
                 </div>
@@ -2098,7 +2098,7 @@ export default function FinancialsClient({
               </div>
               <div className="mt-1 pt-1 border-t border-[#942E3A]/10 flex flex-col gap-0.5">
                 <span className="text-[9px] text-[#6B1F2A]/75 font-semibold block truncate">
-                  {isRtl ? "السيولة الفعلية بالخزنة" : "Net vault balance post-close"}
+                  {isRtl ? "الرصيد الفعلي بعد الإقفال" : "Net vault balance post-close"}
                 </span>
                 {unclosedWeeksSales > 0 ? (
                   <span className="text-[8px] text-amber-900 font-bold block truncate" title={isRtl ? "مبيعات محتسبة من الأسبوع الجاري قبل الإغلاق" : "Included current active week sales"}>
@@ -2106,7 +2106,7 @@ export default function FinancialsClient({
                   </span>
                 ) : (
                   <span className="text-[8px] text-[#6B1F2A]/50 block truncate">
-                    {isRtl ? "بعد خصم المصاريف والتوريد" : "After expenses & stock invoices"}
+                  {isRtl ? "بعد خصم المصروفات وفواتير الشراء" : "After expenses & stock invoices"}
                   </span>
                 )}
               </div>
@@ -2148,7 +2148,7 @@ export default function FinancialsClient({
                   onClick={() => setTypeFilter("income")}
                   className={`px-2.5 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${typeFilter === "income" ? "bg-emerald-700 text-white shadow-xs" : "text-[#6B1F2A]/70 hover:text-emerald-700"}`}
                 >
-                  {isRtl ? "الإيرادات والدخلات" : "Income"}
+                  {isRtl ? "الإيرادات" : "Income"}
                 </button>
               </div>
 
@@ -2503,7 +2503,7 @@ export default function FinancialsClient({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#942E3A]/10 pb-4">
             <div>
               <h2 className="font-playfair text-xl font-extrabold text-[#942E3A]">
-                {isRtl ? "التسوية الأسبوعية والدورية (السبت - الجمعة)" : "Weekly Settlement (Sat - Fri)"}
+                {isRtl ? "التسوية الأسبوعية (السبت - الجمعة)" : "Weekly Settlement (Sat - Fri)"}
               </h2>
               <p className="text-xs text-[#6B1F2A]/70 mt-0.5">
                 {isRtl
@@ -2562,7 +2562,7 @@ export default function FinancialsClient({
                 </div>
 
                 <div className="rounded-xl bg-white/90 p-2.5 border border-[#942E3A]/10">
-                  <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "تكلفة المنتجات" : "Product COGS"}</span>
+                  <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "تكلفة البضاعة المباعة" : "Product COGS"}</span>
                   <strong className="font-playfair text-sm sm:text-base font-extrabold text-[#6B1F2A]">
                     {formatCurrency(currentWeekPeriod.totalCOGS)}
                   </strong>
@@ -2608,7 +2608,7 @@ export default function FinancialsClient({
             <div className="flex items-center justify-between">
               <h3 className="font-playfair text-base font-bold text-[#942E3A] flex items-center gap-2">
                 <Clock className="h-4.5 w-4.5 text-amber-600" />
-                <span>{isRtl ? "أسابيع سابقة غير مغلقة (تتطلب إتمام التسوية)" : "Unclosed Past Weeks (Action Required)"}</span>
+                <span>{isRtl ? "أسابيع سابقة لم تُقفل بعد (تحتاج إلى إجراء)" : "Unclosed Past Weeks (Action Required)"}</span>
               </h3>
               <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-800">
                 {unclosedPastWeeks.length} {isRtl ? "أسابيع معلقة" : "pending"}
@@ -2659,7 +2659,7 @@ export default function FinancialsClient({
                           className="rounded-xl bg-[#942E3A] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#7A242F]"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5 text-[#D8B46A] inline ltr:mr-1 rtl:ml-1" />
-                          <span>{isRtl ? "إتمام وإغلاق التسوية" : "Complete Settlement"}</span>
+                          <span>{isRtl ? "إقفال التسوية" : "Complete Settlement"}</span>
                         </button>
                       </div>
                     </div>
@@ -2886,7 +2886,7 @@ export default function FinancialsClient({
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-[#D8B46A]" />
                 <h3 className="font-playfair text-base font-bold text-[#942E3A]">
-                  {isRtl ? "توقعات معدل المبيعات" : "Sales Run-Rate Projections"}
+                  {isRtl ? "توقعات المبيعات" : "Sales Run-Rate Projections"}
                 </h3>
               </div>
               <p className="text-xs text-[#6B1F2A]/70">
@@ -2899,7 +2899,7 @@ export default function FinancialsClient({
                   <strong>{formatCurrency(summary.totalSales)}</strong>
                 </div>
                 <div className="flex justify-between border-t border-[#D8B46A]/30 pt-2 text-[#942E3A] font-bold">
-                  <span>{isRtl ? "معدل التشغيل الشهري المتوقع:" : "Projected Monthly Run-Rate:"}</span>
+                  <span>{isRtl ? "المبيعات الشهرية المتوقعة:" : "Projected Monthly Run-Rate:"}</span>
                   <strong className="text-base">{formatCurrency(summary.totalSales * 1.25)}</strong>
                 </div>
               </div>
@@ -3105,7 +3105,7 @@ export default function FinancialsClient({
                       {modalPaymentAccount === "wallet" && <Building2 className="h-4 w-4 text-[#D8B46A]" />}
                       <span>
                         {modalPaymentAccount === "cash"
-                          ? (isRtl ? "الخزنة النقدي (Cash on Hand)" : "Cash Vault")
+                          ? (isRtl ? "الرصيد النقدي" : "Cash Vault")
                           : modalPaymentAccount === "instapay_visa"
                           ? "InstaPay / Visa"
                           : (isRtl ? "المافظ الإلكترونية (E-Wallets)" : "E-Wallets")}
@@ -3123,7 +3123,7 @@ export default function FinancialsClient({
                         className="absolute left-0 right-0 top-full mt-1.5 z-50 rounded-2xl border border-[#942E3A]/15 bg-white p-1.5 shadow-xl space-y-1 text-xs max-h-52 overflow-y-auto overscroll-contain touch-pan-y [scrollbar-width:thin] [::-webkit-scrollbar]:w-1.5 [::-webkit-scrollbar-thumb]:bg-[#D8B46A] [::-webkit-scrollbar-thumb]:rounded-full"
                       >
                         {[
-                          { id: "cash", ar: "الخزنة النقدي (Cash on Hand)", en: "Cash Vault", icon: Wallet },
+                          { id: "cash", ar: "الرصيد النقدي", en: "Cash Vault", icon: Wallet },
                           { id: "instapay_visa", ar: "InstaPay / Visa", en: "InstaPay / Visa", icon: CreditCard },
                           { id: "wallet", ar: "المحافظ الإلكترونية (E-Wallets)", en: "E-Wallets", icon: Building2 },
                         ].map((acc) => {
@@ -3352,7 +3352,7 @@ export default function FinancialsClient({
                   <strong className="font-playfair text-sm sm:text-base font-extrabold text-[#942E3A]">{formatCurrency(inspectingWeek.totalSales)}</strong>
                 </div>
                 <div className="rounded-xl bg-[#FFF9EB] p-2.5 border border-[#942E3A]/10">
-                  <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "تكلفة المنتجات" : "COGS"}</span>
+                  <span className="text-[10px] font-bold text-[#6B1F2A]/60 block">{isRtl ? "تكلفة البضاعة المباعة" : "COGS"}</span>
                   <strong className="font-playfair text-sm sm:text-base font-extrabold text-[#6B1F2A]">{formatCurrency(inspectingWeek.totalCOGS)}</strong>
                 </div>
                 <div className="rounded-xl bg-[#FFF9EB] p-2.5 border border-[#942E3A]/10">
@@ -3478,7 +3478,7 @@ export default function FinancialsClient({
                   }}
                   className="rounded-xl bg-[#942E3A] px-4 py-2 text-xs font-bold text-white hover:bg-[#7A242F]"
                 >
-                  {isRtl ? "إتمام وإغلاق التسوية لهذا الأسبوع" : "Proceed to Settle & Lock Week"}
+                  {isRtl ? "إقفال تسوية هذا الأسبوع" : "Proceed to Settle & Lock Week"}
                 </button>
               )}
             </div>
@@ -3513,7 +3513,7 @@ export default function FinancialsClient({
               {/* Detailed Week Breakdown Preview */}
               <div className="rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB]/60 p-3.5 space-y-2">
                 <div className="flex justify-between"><span>{isRtl ? "إجمالي مبيعات الأسبوع:" : "Total Week Sales:"}</span><strong className="font-bold text-[#942E3A]">{formatCurrency(settlingWeek.totalSales)}</strong></div>
-                <div className="flex justify-between"><span>{isRtl ? "تكلفة المنتجات (COGS):" : "Product COGS:"}</span><strong>{formatCurrency(settlingWeek.totalCOGS)}</strong></div>
+                <div className="flex justify-between"><span>{isRtl ? "تكلفة البضاعة المباعة:" : "Product COGS:"}</span><strong>{formatCurrency(settlingWeek.totalCOGS)}</strong></div>
                 <div className="flex justify-between"><span>{isRtl ? "إجمالي المصروفات:" : "Total Expenses:"}</span><strong className="text-red-600">{formatCurrency(settlingWeek.totalExpenses)}</strong></div>
                 <div className="flex justify-between"><span>{isRtl ? "الخصومات المطبقة:" : "Total Discounts:"}</span><strong className="text-amber-700">{formatCurrency(settlingWeek.totalDiscounts)}</strong></div>
 
@@ -3537,7 +3537,7 @@ export default function FinancialsClient({
 
               {/* Editable Transfers Inputs */}
               <div className="space-y-2.5 pt-1">
-                <h4 className="font-bold text-[#942E3A] text-xs">{isRtl ? "توزيع المحصلات المحولة الخزينة:" : "Transferred Liquidity Amounts:"}</h4>
+                <h4 className="font-bold text-[#942E3A] text-xs">{isRtl ? "توزيع المبالغ المحولة إلى الحسابات:" : "Transferred Liquidity Amounts:"}</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div>
                     <label className="block text-[10px] font-bold text-[#6B1F2A] mb-1">{isRtl ? "تحويل كاش (COD):" : "Cash (COD):"}</label>

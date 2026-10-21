@@ -14,6 +14,11 @@ function escapeXml(unsafe: string): string {
     .replace(/'/g, "&apos;");
 }
 
+function cdata(value: string): string {
+  // A product name or description containing ]]> must not break the feed XML.
+  return `<![CDATA[${value.replace(/\]\]>/g, "]]]]><![CDATA[>")}]]>`;
+}
+
 function cleanText(text?: string | null): string {
   if (!text) return "";
   // Strip any HTML tags and collapse whitespace
@@ -403,26 +408,26 @@ export async function GET(request: NextRequest) {
 
         return `    <item>
       <g:id>${escapeXml(p.id)}</g:id>
-      <g:title><![CDATA[${p.name}]]></g:title>
-      <g:description><![CDATA[${p.description}]]></g:description>
+      <g:title>${cdata(p.name)}</g:title>
+      <g:description>${cdata(p.description)}</g:description>
       <g:link>${escapeXml(productLink)}</g:link>
       <g:image_link>${escapeXml(mainImage)}</g:image_link>
-      ${additionalImagesXml ? `${additionalImagesXml}\n      ` : ""}<g:brand><![CDATA[${p.brand}]]></g:brand>
+      ${additionalImagesXml ? `${additionalImagesXml}\n      ` : ""}<g:brand>${cdata(p.brand)}</g:brand>
       <g:condition>new</g:condition>
       <g:availability>${availability}</g:availability>
       <g:price>${escapeXml(regularPrice)}</g:price>
-      ${salePrice ? `<g:sale_price>${escapeXml(salePrice)}</g:sale_price>\n      ` : ""}<g:google_product_category><![CDATA[${taxonomy.googleCategory}]]></g:google_product_category>
-      <g:fb_product_category><![CDATA[${taxonomy.fbCategory}]]></g:fb_product_category>
-      <g:product_type><![CDATA[${productType}]]></g:product_type>
+      ${salePrice ? `<g:sale_price>${escapeXml(salePrice)}</g:sale_price>\n      ` : ""}<g:google_product_category>${cdata(taxonomy.googleCategory)}</g:google_product_category>
+      <g:fb_product_category>${cdata(taxonomy.fbCategory)}</g:fb_product_category>
+      <g:product_type>${cdata(productType)}</g:product_type>
       <g:item_group_id>${escapeXml(p.id)}</g:item_group_id>
-      ${p.color ? `<g:color><![CDATA[${p.color}]]></g:color>\n      ` : ""}${p.sizes.length ? `<g:size><![CDATA[${p.sizes.join("/")}]]></g:size>\n      ` : ""}${p.material ? `<g:material><![CDATA[${p.material}]]></g:material>\n      ` : ""}<g:gender>${taxonomy.gender}</g:gender>
+      ${p.color ? `<g:color>${cdata(p.color)}</g:color>\n      ` : ""}${p.sizes.length ? `<g:size>${cdata(p.sizes.join("/"))}</g:size>\n      ` : ""}${p.material ? `<g:material>${cdata(p.material)}</g:material>\n      ` : ""}<g:gender>${taxonomy.gender}</g:gender>
       <g:age_group>${taxonomy.ageGroup}</g:age_group>
       <g:inventory>${p.totalStock}</g:inventory>
-      <g:custom_label_0><![CDATA[${customLabel0}]]></g:custom_label_0>
-      <g:custom_label_1><![CDATA[${customLabel1}]]></g:custom_label_1>
-      <g:custom_label_2><![CDATA[${customLabel2}]]></g:custom_label_2>
-      <g:custom_label_3><![CDATA[${customLabel3}]]></g:custom_label_3>
-      <g:custom_label_4><![CDATA[${customLabel4}]]></g:custom_label_4>
+      <g:custom_label_0>${cdata(customLabel0)}</g:custom_label_0>
+      <g:custom_label_1>${cdata(customLabel1)}</g:custom_label_1>
+      <g:custom_label_2>${cdata(customLabel2)}</g:custom_label_2>
+      <g:custom_label_3>${cdata(customLabel3)}</g:custom_label_3>
+      <g:custom_label_4>${cdata(customLabel4)}</g:custom_label_4>
       <g:identifier_exists>no</g:identifier_exists>
     </item>`;
       })

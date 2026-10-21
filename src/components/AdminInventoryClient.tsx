@@ -1125,7 +1125,7 @@ export default function AdminInventoryClient({
                               href={`/admin/products/${row.productId}`}
                               className="font-bold text-[#942E3A] hover:underline inline-flex items-center gap-1"
                             >
-                              <span>{row.product}</span>
+                              <span data-admin-i18n-skip>{row.product}</span>
                               <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition text-[#D8B46A]" />
                             </Link>
                             <div className="mt-0.5 text-[10px] text-[#6B1F2A]/60 font-semibold">
@@ -1292,7 +1292,7 @@ export default function AdminInventoryClient({
                               href={`/admin/products/${pRow.productId}`}
                               className="font-bold text-[#942E3A] hover:underline inline-flex items-center gap-1"
                             >
-                              <span>{pRow.product}</span>
+                              <span data-admin-i18n-skip>{pRow.product}</span>
                               <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition text-[#D8B46A]" />
                             </Link>
                             <div className="mt-0.5 text-[10px] text-[#6B1F2A]/60 font-semibold">
@@ -1452,7 +1452,7 @@ export default function AdminInventoryClient({
                         href={`/admin/products/${row.productId}`}
                         className="font-bold text-[#942E3A] hover:underline block truncate text-xs"
                       >
-                        {row.product}
+                        <span data-admin-i18n-skip>{row.product}</span>
                       </Link>
                       <div className="flex items-center gap-2">
                         <span className="font-extrabold text-[#942E3A] text-xs">
@@ -1555,7 +1555,7 @@ export default function AdminInventoryClient({
                         href={`/admin/products/${pRow.productId}`}
                         className="font-bold text-[#942E3A] hover:underline block truncate text-xs"
                       >
-                        {pRow.product}
+                        <span data-admin-i18n-skip>{pRow.product}</span>
                       </Link>
                       <span className="font-extrabold text-[#942E3A] text-xs block">
                         {formatPrice(pRow.price)}
@@ -1585,7 +1585,7 @@ export default function AdminInventoryClient({
           {filteredRows.length === 0 && (
             <div className="py-14 text-center text-xs text-[#6B1F2A]/60">
               <Search className="mx-auto h-8 w-8 text-[#D8B46A]/60" />
-              <p className="mt-2 font-bold text-[#942E3A]">No inventory variants matched your search or filters.</p>
+              <p className="mt-2 font-bold text-[#942E3A]">{isRtl ? "لا توجد متغيرات مخزون مطابقة للبحث أو الفلاتر." : "No inventory variants matched your search or filters."}</p>
             </div>
           )}
       </section>
@@ -1599,15 +1599,15 @@ export default function AdminInventoryClient({
           />
           <div className="relative z-10 w-full max-w-sm rounded-3xl border border-[#D8B46A]/30 bg-[#FFF9EB] p-6 shadow-2xl">
             <h3 className="font-playfair text-xl font-bold text-[#942E3A]">
-              Bulk Restock Variants
+              {isRtl ? "إعادة تخزين جماعية للمتغيرات" : "Bulk Restock Variants"}
             </h3>
             <p className="mt-1 text-xs text-[#6B1F2A]/70">
-              Add stock quantity to {selectedVariantIds.length} selected variants.
+              {isRtl ? `أضف كمية مخزون إلى ${selectedVariantIds.length} متغيرات محددة.` : `Add stock quantity to ${selectedVariantIds.length} selected variants.`}
             </p>
 
             <div className="mt-4 space-y-2">
               <label className="block text-[10px] font-bold uppercase text-[#D8B46A]">
-                Quantity to Add (+Qty)
+                {isRtl ? "الكمية المراد إضافتها (+كمية)" : "Quantity to Add (+Qty)"}
               </label>
               <input
                 type="number"
@@ -1624,7 +1624,7 @@ export default function AdminInventoryClient({
                 onClick={() => setIsRestockModalOpen(false)}
                 className="rounded-xl px-4 py-2 text-xs font-semibold text-[#6B1F2A]/70 hover:bg-[#942E3A]/5"
               >
-                Cancel
+                {isRtl ? "إلغاء" : "Cancel"}
               </button>
               <button
                 type="button"
@@ -1632,7 +1632,7 @@ export default function AdminInventoryClient({
                 disabled={isPending}
                 className="rounded-xl bg-[#942E3A] px-5 py-2 text-xs font-bold text-[#FFF9EB] hover:bg-[#802832]"
               >
-                Apply Restock
+                {isRtl ? "تطبيق إعادة التخزين" : "Apply Restock"}
               </button>
             </div>
           </div>

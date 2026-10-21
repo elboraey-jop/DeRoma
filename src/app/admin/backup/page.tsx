@@ -31,7 +31,7 @@ const CATEGORY_MAP: Record<string, { labelAr: string; labelEn: string; color: st
   catalog: { labelAr: "الكتالوج والمنتجات", labelEn: "Catalog & Products", color: "bg-purple-50 text-purple-700 border-purple-200" },
   orders: { labelAr: "الطلبات والعملاء", labelEn: "Orders & Customers", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   inventory: { labelAr: "المخزون والموردين", labelEn: "Inventory & Suppliers", color: "bg-amber-50 text-amber-700 border-amber-200" },
-  financials: { labelAr: "الماليات والحسابات", labelEn: "Financials & Accounting", color: "bg-rose-50 text-rose-700 border-rose-200" },
+  financials: { labelAr: "الشؤون المالية والمحاسبة", labelEn: "Financials & Accounting", color: "bg-rose-50 text-rose-700 border-rose-200" },
   content: { labelAr: "المحتوى والرسائل", labelEn: "Content & Messages", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
 };
 
@@ -284,11 +284,11 @@ export default function AdminBackupPage() {
               <p>{t("backup.emergencyStep1")}</p>
             </div>
             <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3">
-              <p className="font-bold text-[#942E3A] mb-1">{isRtl ? "الخطوة 2: استرجاع SQL فوري" : "Step 2: Instant SQL Restore"}</p>
+              <p className="font-bold text-[#942E3A] mb-1">{isRtl ? "الخطوة 2: استعادة SQL فورًا" : "Step 2: Instant SQL Restore"}</p>
               <p>{t("backup.emergencyStep2")}</p>
             </div>
             <div className="rounded-xl border border-[#942E3A]/10 bg-white p-3">
-              <p className="font-bold text-[#942E3A] mb-1">{isRtl ? "الخطوة 3: استرجاع JSON ذكي" : "Step 3: Smart JSON Restore"}</p>
+              <p className="font-bold text-[#942E3A] mb-1">{isRtl ? "الخطوة 3: استعادة JSON تلقائيًا" : "Step 3: Smart JSON Restore"}</p>
               <p>{t("backup.emergencyStep3")}</p>
             </div>
           </div>
@@ -344,7 +344,7 @@ export default function AdminBackupPage() {
               </span>
             </div>
             <h3 className="font-playfair text-lg font-bold text-[#942E3A]">
-              {isRtl ? "نسخة SQL Dump المباشرة" : "Direct SQL Dump"}
+              {isRtl ? "نسخة SQL مباشرة" : "Direct SQL Dump"}
             </h3>
             <p className="text-xs text-[#942E3A]/70">
               {isRtl
@@ -501,7 +501,7 @@ export default function AdminBackupPage() {
           {previewLoading && (
             <div className="flex items-center justify-center gap-2 py-4 text-xs font-bold text-[#942E3A]">
               <RefreshCw className="h-4 w-4 animate-spin text-[#D8B46A]" />
-              <span>{isRtl ? "جاري فحص محتويات ملف الباك اب..." : "Inspecting backup contents..."}</span>
+                  <span>{isRtl ? "جارٍ فحص محتويات النسخة الاحتياطية..." : "Inspecting backup contents..."}</span>
             </div>
           )}
 
@@ -509,7 +509,7 @@ export default function AdminBackupPage() {
             <div className="space-y-3 rounded-xl border border-emerald-200 bg-emerald-50/50 p-3 text-xs">
               <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
                 <span className="font-bold text-emerald-900">
-                  {isRtl ? "تقرير فحص ملف الباك اب" : "Backup Inspection Report"}
+                  {isRtl ? "تقرير فحص النسخة الاحتياطية" : "Backup Inspection Report"}
                 </span>
                 <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-black text-emerald-900">
                   {formatNumber(previewData.totalBackupRecords)} {isRtl ? "سجل" : "records"}

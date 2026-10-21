@@ -694,7 +694,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                 msOverflowStyle: "none"
               }}
             >
-              {similarProducts.slice(0, 4).map((p) => (
+              {similarProducts.slice(0, 6).map((p) => (
                 <div
                   key={p.id}
                   className="h-full w-[calc((94vw-20px)/2)] sm:w-[230px] shrink-0 pointer-events-auto"

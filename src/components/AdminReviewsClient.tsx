@@ -196,7 +196,7 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
                           {product.images[0] ? <img src={product.images[0]} alt="" className="h-full w-full object-cover" /> : product.name.charAt(0)}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-xs font-bold text-[#942E3A]">{product.name}</span>
+                        <span data-admin-i18n-skip className="block truncate text-xs font-bold text-[#942E3A]">{product.name}</span>
                         </span>
                         {selectedProductId === product.id && <Check className="h-4 w-4 shrink-0 text-[#942E3A]" />}
                       </button>

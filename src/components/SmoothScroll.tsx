@@ -1,17 +1,23 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Lenis from "lenis";
 
 export default function SmoothScroll() {
+  const pathname = usePathname();
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     // Native touch scrolling is already optimized by the browser. Running a
     // second animation loop on phones makes scrolling feel delayed and heavy.
+    // The admin workspace also contains dense tables, dropdowns, and product
+    // thumbnails, so it should always use native scrolling instead of Lenis.
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
-    if (prefersReducedMotion || isTouchDevice) return;
+    const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
+    if (prefersReducedMotion || isTouchDevice || isAdminRoute) return;
 
     const lenis = new Lenis({
       duration: 0.65,
@@ -31,7 +37,7 @@ export default function SmoothScroll() {
       cancelAnimationFrame(rafId);
       lenis.destroy();
     };
-  }, []);
+  }, [pathname]);
 
   return null;
 }

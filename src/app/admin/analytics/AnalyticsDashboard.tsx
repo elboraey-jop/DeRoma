@@ -1746,7 +1746,7 @@ export default function AnalyticsDashboard({
  <p className="mt-2 font-playfair text-2.5xl font-black text-purple-700">
  {unitsPerOrder.toFixed(2)} {isRtl ? "قطعة" : "items"}
  </p>
- <p className="mt-1 text-[11px] text-gray-500">{isRtl ? "مؤشر عمق السلة" : "Basket depth index"}</p>
+ <p className="mt-1 text-[11px] text-gray-500">{isRtl ? "متوسط عدد المنتجات في الطلب" : "Basket depth index"}</p>
  </div>
 
  {/* Card 6: Order Fulfillment Rate */}
@@ -1898,14 +1898,14 @@ export default function AnalyticsDashboard({
  <div className="flex items-center gap-2 mb-4">
  <BarChart3 className="h-4 w-4 text-[#D8B46A]" />
  <h3 className="font-playfair text-lg font-bold text-gray-900">
- {isRtl ? "مصفوفة مقارنة الأداء المالي والمبيعات" : "Master Sales & Financial Performance Comparative Matrix"}
+ {isRtl ? "مقارنة أداء المبيعات والنتائج المالية" : "Master Sales & Financial Performance Comparative Matrix"}
             </h3>
  </div>
  <div className="overflow-x-auto">
  <table className="w-full text-start text-xs">
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
- <th className="w-[32%] p-2.5 text-start">{isRtl ? "المؤشر المالي والبيعي" : "Financial & Sales Metric"}</th>
+ <th className="w-[32%] p-2.5 text-start">{isRtl ? "المؤشر المالي أو البيعي" : "Financial & Sales Metric"}</th>
  <th className="w-[17%] p-2.5 text-center">{isRtl ? "الفترة المحددة" : "Selected Period"}</th>
  <th className="w-[17%] p-2.5 text-center">{isRtl ? "الفترة السابقة المقارنة" : "Previous Period Baseline"}</th>
  <th className="w-[17%] p-2.5 text-center">{isRtl ? "نسبة التغير %" : "Growth Variance %"}</th>
@@ -2988,7 +2988,7 @@ export default function AnalyticsDashboard({
  </div>
  <div>
  <h3 className="font-playfair text-base font-bold text-[#6B1F2A]">
- {isRtl ? "ولاء العملاء، سلوك الشراء، والقيمة الدائمة (LTV)" : "Customer Loyalty, Cohort Behavior & Lifetime Value (LTV)"}
+ {isRtl ? "ولاء العملاء وسلوكهم وإجمالي إنفاقهم (LTV)" : "Customer Loyalty, Cohort Behavior & Lifetime Value (LTV)"}
                 </h3>
  <p className="text-xs text-gray-600 mt-0.5">
  {isRtl ? "تحليل نمو العملاء، تكرار عمليات الشراء، شريحة كبار العملاء (VIP)، ومستوى رضا التقييمات." : "Analyze customer acquisition trends, repeat purchase frequency, high-value VIP segments, and feedback sentiment."}
@@ -3060,7 +3060,7 @@ export default function AnalyticsDashboard({
  <p className="mt-2 font-playfair text-2.5xl font-black text-gray-900">
  {formatCurrency(custAnalytics.avgSpendPerCustomer)}
  </p>
- <p className="mt-1 text-[11px] text-gray-500">{isRtl ? "القيمة الدائمة لكل مشترٍ" : "Lifetime turnover per buyer"}</p>
+ <p className="mt-1 text-[11px] text-gray-500">{isRtl ? "إجمالي إنفاق كل عميل" : "Lifetime turnover per buyer"}</p>
  </div>
 
  {/* Card 4: Avg Orders Per Customer */}
@@ -3078,7 +3078,7 @@ export default function AnalyticsDashboard({
  <p className="mt-2 font-playfair text-2.5xl font-black text-purple-700">
  {custAnalytics.avgOrdersPerCustomer.toFixed(2)}
  </p>
- <p className="mt-1 text-[11px] text-gray-500">{isRtl ? "عمليات الشراء لكل عميل" : "Order transactions per buyer"}</p>
+ <p className="mt-1 text-[11px] text-gray-500">{isRtl ? "متوسط الطلبات لكل عميل" : "Order transactions per buyer"}</p>
  </div>
 
  {/* Card 5: Returning Revenue Share */}
@@ -3163,7 +3163,7 @@ export default function AnalyticsDashboard({
  <div className="flex items-center gap-2 mb-4">
  <BarChart3 className="h-4 w-4 text-[#D8B46A]" />
  <h3 className="font-playfair text-lg font-bold text-gray-900">
- {isRtl ? "مقارنة المشترين الجدد لأول مرة مقابل العملاء الدائمين" : "New First-Time Buyers vs Returning Loyal Buyers Comparison"}
+ {isRtl ? "مقارنة العملاء الجدد بالعملاء العائدين" : "New First-Time Buyers vs Returning Loyal Buyers Comparison"}
  </h3>
  </div>
  <div className="overflow-x-auto">
@@ -3171,7 +3171,7 @@ export default function AnalyticsDashboard({
  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
  <tr>
  <th className="p-2.5 text-start">{isRtl ? "مؤشر شريحة العملاء" : "Customer Segment Metric"}</th>
- <th className="p-2.5 text-center">{isRtl ? "العملاء الدائمون المتكررون" : "Repeat Returning Buyers"}</th>
+ <th className="p-2.5 text-center">{isRtl ? "العملاء العائدون" : "Repeat Returning Buyers"}</th>
  <th className="p-2.5 text-center">{isRtl ? "العملاء الجدد لأول مرة" : "New First-Time Buyers"}</th>
  <th className="p-2.5 text-end">{isRtl ? "الفارق / الأثر" : "Variance / Impact"}</th>
  </tr>
@@ -3455,7 +3455,7 @@ export default function AnalyticsDashboard({
  </div>
  <div className="flex items-center gap-3 self-end sm:self-auto">
  <div className="text-right">
- <span className="text-[10px] uppercase font-bold text-gray-400 block">{isRtl ? "مؤشر كفاءة العمليات" : "Ops Efficiency Score"}</span>
+ <span className="text-[10px] uppercase font-bold text-gray-400 block">{isRtl ? "درجة كفاءة التشغيل" : "Ops Efficiency Score"}</span>
  <span className="text-lg font-black text-emerald-700">{opsAnalytics.opsHealthScore}% {isRtl ? "كفاءة ممتازة" : "Healthy"}</span>
  </div>
  </div>
@@ -3615,7 +3615,7 @@ export default function AnalyticsDashboard({
  <div className="flex items-center gap-2 mb-3">
  <Layers className="h-4 w-4 text-[#D8B46A]" />
  <h3 className="font-playfair text-lg font-bold text-gray-900">
- {isRtl ? "مصفوفة مراحل وحالات تنفيذ الطلبات" : "Order Pipeline Stage Breakdown Matrix"}
+ {isRtl ? "تفصيل مراحل الطلبات" : "Order Pipeline Stage Breakdown Matrix"}
  </h3>
  </div>
  <div className="overflow-x-auto">
@@ -3930,7 +3930,7 @@ export default function AnalyticsDashboard({
  {/* Regional Delivery Breakdown Table */}
  <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-xs">
  <h3 className="font-playfair text-lg font-bold text-gray-900 mb-3">
- {isRtl ? "مصفوفة كفاءة تسليم وشحن المحافظات" : "Governorate Regional Delivery Performance Matrix"}
+ {isRtl ? "أداء التوصيل حسب المحافظة" : "Governorate Regional Delivery Performance Matrix"}
             </h3>
  <div className="overflow-x-auto">
  <table className="w-full text-start text-xs">

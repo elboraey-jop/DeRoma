@@ -6,6 +6,7 @@ import { getAllowedNextStatuses, getSelectableStatuses, isCashOnDelivery } from 
 import { formatCurrency, sortSizesList, sortVariantsByNumericSize } from "../../src/lib/utils";
 import { sanitizeInput } from "../../src/lib/rateLimit";
 import { CATALOG_PRODUCTS } from "../../src/lib/productCatalog";
+import { getAutoRelatedProducts } from "../../src/lib/relatedProducts";
 
 test("formats order numbers with the DeRoma prefix and padding", () => {
   assert.equal(formatOrderNumber(1), "DR-0001");
@@ -80,4 +81,18 @@ test("catalog has unique ids and usable product records", () => {
     assert.ok(product.image.trim());
     assert.ok(product.sizes.length > 0);
   }
+});
+
+test("auto-related products prioritize model, then color, then brand", () => {
+  const product = { id: "current", name: "Adidas Ad Star - Pink", category: "shoes", brand: "Adidas", color: "Pink", variants: [{ stock: 5 }] };
+  const related = getAutoRelatedProducts(product, [
+    product,
+    { id: "same-brand", name: "Adidas Samba - Blue", category: "shoes", brand: "Adidas", color: "Blue", variants: [{ stock: 4 }] },
+    { id: "same-color", name: "Nike Air Max - Pink", category: "shoes", brand: "Nike", color: "Pink", variants: [{ stock: 3 }] },
+    { id: "same-model", name: "Adidas Ad Star - Black", category: "shoes", brand: "Adidas", color: "Black", variants: [{ stock: 2 }] },
+    { id: "sold-out", name: "Adidas Ad Star - White", category: "shoes", brand: "Adidas", color: "White", variants: [{ stock: 0 }] },
+  ], 3);
+
+  assert.deepEqual(related.map((item) => item.id), ["same-model", "same-color", "same-brand"]);
+  assert.ok(!related.some((item) => item.id === "sold-out"));
 });

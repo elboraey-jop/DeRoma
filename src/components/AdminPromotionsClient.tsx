@@ -158,7 +158,7 @@ const ARABIC_LABELS: Record<string, string> = {
 
 const ARABIC_CONTENT: Record<string, string> = {
   "Welcome to DeRoma": "أهلًا بك في DeRoma",
-  "Shoes edit savings": "خصم على تشكيلة الأحذية",
+  "Shoes edit savings": "خصم على منتجات الأحذية",
   "Free delivery weekend": "شحن مجاني في عطلة نهاية الأسبوع",
   "Complimentary delivery on orders over 2,500 EGP · Shop the new DeRoma edit":
     "شحن مجاني للطلبات التي تتجاوز 2,500 EGP · تسوق أحدث تشكيلات DeRoma",

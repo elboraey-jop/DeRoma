@@ -1,0 +1,542 @@
+[
+  {
+    "id": "10fdd21c-7ca8-4536-931b-3c437419e53c",
+    "name": "New Balance 574 - Black",
+    "sku": "S0001",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Black",
+    "images": [],
+    "price": "1950"
+  },
+  {
+    "id": "840ba23b-5c94-4608-9fa7-b1ca578e1a9e",
+    "name": "New Balance 574 - Beige",
+    "sku": "S0002",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Beige",
+    "images": [],
+    "price": "1950"
+  },
+  {
+    "id": "a888cc42-7a5d-49e1-8f19-380d8d0ad9a7",
+    "name": "Adidas Spazial - Shadow Brown",
+    "sku": "S0003",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Shadow Brown",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "d70c58f6-cd4b-43a4-9ae9-7ae0a1ab1acc",
+    "name": "Adidas Spazial - Brown",
+    "sku": "S0004",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Brown",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "57eacbf5-302c-4348-8b12-94acc1404b94",
+    "name": "Adidas Spazial - Grey",
+    "sku": "S0005",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Grey",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "f6467ce9-4f9d-487e-a842-7d2e42455e3a",
+    "name": "New Balance 9060 - Pink",
+    "sku": "S0006",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Pink",
+    "images": [],
+    "price": "2200"
+  },
+  {
+    "id": "6fdedbd3-7ffb-4bf6-a1cf-4d8c01870c5d",
+    "name": "New Balance 9060 - Full White",
+    "sku": "S0007",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "White",
+    "images": [],
+    "price": "2200"
+  },
+  {
+    "id": "22204b8a-7ece-4b2d-9a23-26a58dae9623",
+    "name": "Adidas Campus - Beige",
+    "sku": "S0008",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Beige",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "47573b99-3ef5-4d8c-94ef-6a7194903412",
+    "name": "Adidas Campus - Grey",
+    "sku": "S0009",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Grey",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "d18568f4-0d1e-4381-b983-9fa7caeb9ebf",
+    "name": "Adidas Campus - Beige&Green",
+    "sku": "S0010",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Beige",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "99ebc2f6-b5fd-4cd8-9ab4-ecc60b85b5f8",
+    "name": "Adidas Campus - Black",
+    "sku": "S0011",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Black",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "8e018019-61c9-4f46-9f6f-2ef7856e6177",
+    "name": "Nike V2K - Beige",
+    "sku": "S0012",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Beige",
+    "images": [],
+    "price": "2200"
+  },
+  {
+    "id": "9e41783f-e993-4976-8ccb-46660e1437df",
+    "name": "Nike V2K - Pink",
+    "sku": "S0013",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Pink",
+    "images": [],
+    "price": "2200"
+  },
+  {
+    "id": "be82f997-4cc4-408d-9c05-8ab58bbd5517",
+    "name": "Asics Gel-Nyc - Beige",
+    "sku": "S0014",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Beige",
+    "images": [],
+    "price": "2200"
+  },
+  {
+    "id": "35510774-51fc-435a-aa8c-d8cff3502829",
+    "name": "Asics Gel-Nyc - Pink",
+    "sku": "S0015",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Pink",
+    "images": [],
+    "price": "2200"
+  },
+  {
+    "id": "87065e04-5046-487b-8374-8c74db3f51e0",
+    "name": "Nike Vomero - White&Silver",
+    "sku": "S0016",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Silver",
+    "images": [],
+    "price": "2100"
+  },
+  {
+    "id": "cd96b24c-adba-470c-bb6e-9a5ba4e586c6",
+    "name": "Nike Vomero - White&Pink",
+    "sku": "S0017",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Pink",
+    "images": [],
+    "price": "2100"
+  },
+  {
+    "id": "2f398911-60ff-4700-9588-4c3734ec78eb",
+    "name": "Nike Air Force Valentine",
+    "sku": "S0018",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Pink",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "5850c537-9c30-4419-8a36-e05850f4838c",
+    "name": "Adidas Sampa Classic",
+    "sku": "S0019",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "White",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "9af69fc2-d687-4db8-a205-d95cdc93a712",
+    "name": "Adidas Sampa - Beige&Burgundy",
+    "sku": "S0020",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Burgundy",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "cba29442-db53-4191-ad36-88c29864fe4c",
+    "name": "Adidas Sampa - Beige",
+    "sku": "S0021",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Beige",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "387ecf77-3ad3-466a-91c6-d93c3c13dc3f",
+    "name": "Adidas Sampa - Black",
+    "sku": "S0022",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Black",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "434f9b35-1f8c-4f47-818a-9472c4971ad9",
+    "name": "Adidas Sampa - Green",
+    "sku": "S0023",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Green",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "d175f601-c56c-4db7-824e-e5a99dd6cc80",
+    "name": "Adidas Sampa - Baby Blue",
+    "sku": "S0024",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Baby Blue",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "2b610818-059e-4ec6-8d56-2016021c68d4",
+    "name": "Adidas Gazelle- Black",
+    "sku": "S0025",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Black",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "dd489f27-2ccc-410d-a6b7-2699a6108a3d",
+    "name": "Adidas Gazelle- Baby Blue",
+    "sku": "S0026",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Baby Blue",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "55ae1b7e-ff14-45ff-92d8-855d95515e95",
+    "name": "Asics Gel-Nyc - Silver",
+    "sku": "S0027",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Silver",
+    "images": [],
+    "price": "2200"
+  },
+  {
+    "id": "e063cf49-97b7-480a-a1f3-cd5419bfa70e",
+    "name": "Asics Mexico 66 - White&Gold",
+    "sku": "S0028",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "White",
+    "images": [],
+    "price": "1950"
+  },
+  {
+    "id": "bbea1ce9-4f43-44b0-942b-6500647d7243",
+    "name": "Puma Suede XL - Black",
+    "sku": "S0029",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Black",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "154a0683-9072-4fa6-9024-3be27a7ce704",
+    "name": "Dior - White",
+    "sku": "S0030",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "White",
+    "images": [],
+    "price": "2850"
+  },
+  {
+    "id": "a12f2a7c-04e9-42a4-99c2-5ac197a4d6e4",
+    "name": "Dior - Black",
+    "sku": "S0031",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Black",
+    "images": [],
+    "price": "2850"
+  },
+  {
+    "id": "89bc3a38-8f1d-4358-ae2c-7650ff246be5",
+    "name": "Adidas Ad Star - Black",
+    "sku": "S0032",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Black",
+    "images": [],
+    "price": "1950"
+  },
+  {
+    "id": "0818fe95-2198-4e7b-a91e-401e160bc2dc",
+    "name": "Adidas Ad Star - Pink",
+    "sku": "S0033",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Pink",
+    "images": [],
+    "price": "1950"
+  },
+  {
+    "id": "5a74edf6-e213-401a-bcb9-61a00547b5d1",
+    "name": "Adidas Fourn - Beige",
+    "sku": "S0034",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Beige",
+    "images": [],
+    "price": "2200"
+  },
+  {
+    "id": "1d4df1c8-1d9c-42d4-83da-9185f323aa79",
+    "name": "Adidas Astir - Pink",
+    "sku": "S0035",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Pink",
+    "images": [],
+    "price": "1950"
+  },
+  {
+    "id": "94355e61-7855-448f-9277-49eb447b409c",
+    "name": "Adidas Lego - White",
+    "sku": "S0036",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "White",
+    "images": [],
+    "price": "1950"
+  },
+  {
+    "id": "bed10dd4-1820-4217-ae6a-ea289207b6d9",
+    "name": "Adidas Super Star - Baby Blue",
+    "sku": "S0037",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Baby Blue",
+    "images": [],
+    "price": "1850"
+  },
+  {
+    "id": "0e30afa0-85fe-417b-a447-4bc084894bb6",
+    "name": "Lacost Active - Grey",
+    "sku": "S0038",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Grey",
+    "images": [],
+    "price": "1950"
+  },
+  {
+    "id": "bd2a5ab9-5b9c-4a1d-af41-f55e8d78e716",
+    "name": "Nike Blazer - White",
+    "sku": "S0039",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "White",
+    "images": [],
+    "price": "1950"
+  },
+  {
+    "id": "9333c5ac-4af3-4aa7-b299-e8e9dbc7116b",
+    "name": "Nike Blazer Half - White",
+    "sku": "S0040",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "White",
+    "images": [],
+    "price": "1950"
+  },
+  {
+    "id": "ac5d25ba-acc3-4453-bf9c-83e0a59ba60d",
+    "name": "Balenciage Triple s - Grey",
+    "sku": "S0041",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Grey",
+    "images": [],
+    "price": "2200"
+  },
+  {
+    "id": "a378b249-d823-4061-af21-52b78802c5ea",
+    "name": "Nike Air Force LV - White",
+    "sku": "S0042",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "White",
+    "images": [],
+    "price": "1850"
+  },
+  {
+    "id": "33e24557-68d6-4c02-9844-39b0cf9fb4d6",
+    "name": "Nike Tekno M2K - Pink",
+    "sku": "S0043",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Pink",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "510febad-41d9-47aa-bef1-ef6dcca67922",
+    "name": "Nike Tekno M2K - White&Black",
+    "sku": "S0044",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "White",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "91ca2fec-5b1e-4103-8788-9d18a6d2da67",
+    "name": "New Balance 530 - White&Pink",
+    "sku": "S0045",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Pink",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "4bc7c292-e21a-4a23-ad17-8c0fb54251ef",
+    "name": "New Balance 530 - White&Black",
+    "sku": "S0046",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Black",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "aedab611-9648-46da-8890-fcbb9b085b06",
+    "name": "New Balance 530 - Beige",
+    "sku": "S0047",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Beige",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "ddedc178-0fc7-4ed9-bca2-2d8a9230a3c7",
+    "name": "Nike Tekno M2K - Full White",
+    "sku": "S0048",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "White",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "d9446850-c228-4173-874d-ef357cca5e81",
+    "name": "New Balance 530 - White&Navy",
+    "sku": "S0049",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Navy",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "331efb0c-b93f-44ac-8532-1919a5cde844",
+    "name": "New Balance 530 - Full White",
+    "sku": "S0050",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "White",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "a23ed64b-128d-41b0-aa56-e3f71b8c90a0",
+    "name": "New Balance 327 - White&Burgundy",
+    "sku": "S0051",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Burgundy",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "255e2907-cda1-417c-bd23-aa1b0ae4aca8",
+    "name": "New Balance 725 - White&Navy",
+    "sku": "S0052",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Navy",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "1649518a-c378-4565-9c03-197905ebf9b8",
+    "name": "New Balance 327 - Beige",
+    "sku": "S0053",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Beige",
+    "images": [],
+    "price": "2000"
+  },
+  {
+    "id": "def2b476-7e0a-4bf8-b25d-f9ee86761d4c",
+    "name": "New Balance 327 - White&Navy",
+    "sku": "S0054",
+    "category": "shoes",
+    "subcategory": null,
+    "color": "Navy",
+    "images": [],
+    "price": "2000"
+  }
+]

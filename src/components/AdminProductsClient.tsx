@@ -73,7 +73,7 @@ export default function AdminProductsClient({
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
-            {isRtl ? "إدارة الكتالوج والتشكيلة" : "Catalog management"}
+            {isRtl ? "إدارة الكتالوج والمنتجات" : "Catalog management"}
           </p>
           <h1 className="mt-1 font-playfair text-3xl font-black text-[#942E3A]">
             {t("products.title")}
@@ -221,7 +221,7 @@ export default function AdminProductsClient({
                           />
                         ) : null}
                       </div>
-                      <span className="font-bold text-[#942E3A]">
+                      <span data-admin-i18n-skip className="font-bold text-[#942E3A]">
                         {product.name}
                       </span>
                     </Link>
@@ -302,7 +302,7 @@ export default function AdminProductsClient({
                     <PackagePlus className="h-7 w-7 text-[#D8B46A]" />
                   )}
                 </div>
-                <h3 className="mt-2 line-clamp-2 min-h-8 text-[11px] font-bold leading-4 text-[#942E3A]">
+                <h3 data-admin-i18n-skip className="mt-2 line-clamp-2 min-h-8 text-[11px] font-bold leading-4 text-[#942E3A]">
                   {product.name}
                 </h3>
                 <div className="mt-1 flex items-center justify-between gap-1 text-[10px] text-[#6B1F2A]/65">

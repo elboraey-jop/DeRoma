@@ -193,7 +193,7 @@ export default function AdminAddProductModal({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#D8B46A]">
-              {isRtl ? "إدخال المخزون" : "Catalog intake"}
+              {isRtl ? "إضافة مخزون" : "Catalog intake"}
             </p>
             <h2 className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">
               {isRtl ? "إضافة مخزون للمنتج" : "Add product stock"}
@@ -225,7 +225,7 @@ export default function AdminAddProductModal({
                 {isRtl ? "منتج جديد" : "New product"}
               </h3>
               <p className="mt-2 text-xs leading-5 text-[#6B1F2A]/65">
-                {isRtl ? "إنشاء المنتج بالكامل، الموديلات، التسعير والمخزون." : "Create the complete product, variants, pricing and stock."}
+                {isRtl ? "أنشئ المنتج بكل بياناته وأنواعه وأسعاره ومخزونه." : "Create the complete product, variants, pricing and stock."}
               </p>
             </Link>
             <button

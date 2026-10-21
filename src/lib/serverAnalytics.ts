@@ -34,6 +34,14 @@ type MetaEventInput = {
 
 const DEFAULT_CURRENCY = "EGP";
 
+function isConfiguredAnalyticsValue(value?: string | null) {
+  const normalized = value?.trim();
+  if (!normalized) return false;
+  if (/^(your|replace|change|example|placeholder)[-_]/i.test(normalized)) return false;
+  if (/x{4,}/i.test(normalized)) return false;
+  return true;
+}
+
 function sha256(value?: string | null) {
   const normalized = value?.trim().toLowerCase();
   if (!normalized) return undefined;
@@ -101,7 +109,7 @@ export function getGoogleEnhancedConversionData(input: {
 export async function sendMetaServerEvent(input: MetaEventInput) {
   const pixelId = process.env.META_PIXEL_ID || process.env.NEXT_PUBLIC_META_PIXEL_ID;
   const accessToken = process.env.META_CONVERSIONS_API_ACCESS_TOKEN;
-  if (!pixelId || !accessToken) return;
+  if (!isConfiguredAnalyticsValue(pixelId) || !isConfiguredAnalyticsValue(accessToken)) return;
 
   const apiVersion = process.env.META_GRAPH_API_VERSION || "v23.0";
   const endpoint = `https://graph.facebook.com/${apiVersion}/${pixelId}/events`;

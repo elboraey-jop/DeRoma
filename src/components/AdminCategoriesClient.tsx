@@ -172,7 +172,7 @@ export default function AdminCategoriesClient({
         setPendingId(opt.id);
         try {
           await deleteCatalogOptionAction(formData);
-          toast.success(isRtl ? "Option deleted successfully!" : "Option deleted successfully!");
+          toast.success(isRtl ? "تم حذف الخيار بنجاح!" : "Option deleted successfully!");
         } catch (error: any) {
           toast.error(error?.message || "Failed to delete option");
         } finally {
@@ -483,7 +483,7 @@ export default function AdminCategoriesClient({
                   <div className="flex items-center justify-between border-b border-[#D8B46A]/15 px-3 py-3"><div className="flex items-center gap-2"><span className="rounded-lg bg-white p-1.5 text-[#D8B46A]"><TypeIcon className="h-3.5 w-3.5" /></span><span className="text-[10px] font-bold uppercase tracking-[0.13em] text-[#942E3A]">{type.label}</span></div><span className="text-[10px] font-bold text-[#6B1F2A]/50">{totalTypeOptions} values</span></div>
                   <div onWheel={(event) => event.stopPropagation()} className="hide-scrollbar max-h-72 space-y-1.5 overflow-y-auto overscroll-contain p-2.5">
                     {typeOptions.map(renderOptionCard)}
-                    {!typeOptions.length && <p className="py-8 text-center text-[10px] text-[#6B1F2A]/50">{search ? "No matching options" : "No options yet"}</p>}
+                    {!typeOptions.length && <p className="py-8 text-center text-[10px] text-[#6B1F2A]/50">{search ? (isRtl ? "لا توجد خيارات مطابقة" : "No matching options") : (isRtl ? "لا توجد خيارات بعد" : "No options yet")}</p>}
                   </div>
                 </div>
               );
@@ -503,8 +503,8 @@ export default function AdminCategoriesClient({
           <div role="dialog" aria-modal="true" aria-labelledby="option-products-title" className="flex h-[86vh] max-h-[760px] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-[#D8B46A]/35 bg-[#FFF9EB] shadow-[0_24px_80px_rgba(67,25,31,0.28)]">
             <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[#942E3A]/10 bg-white px-5 py-5 sm:px-7">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">Catalog connection</p>
-                <h2 id="option-products-title" className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">Products using {activeOption.name}</h2>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D8B46A]">{isRtl ? "ربط الكتالوج" : "Catalog connection"}</p>
+                <h2 id="option-products-title" className="mt-1 font-playfair text-2xl font-black text-[#942E3A]">{isRtl ? `المنتجات التي تستخدم ${activeOption.name}` : `Products using ${activeOption.name}`}</h2>
                 <p className="mt-1 text-xs text-[#6B1F2A]/60">{matchingProducts.length} {matchingProducts.length === 1 ? "product" : "products"} connected to this {activeOption.type} option.</p>
               </div>
               <button type="button" onClick={() => setActiveOption(null)} aria-label="Close products dialog" className="rounded-full p-2 text-[#942E3A]/60 hover:bg-[#F2DFC0] hover:text-[#942E3A]"><X className="h-4 w-4" /></button>
@@ -518,9 +518,9 @@ export default function AdminCategoriesClient({
                         {product.images[0] ? <img src={product.images[0]} alt="" className="h-full w-full object-cover" /> : <Package className="h-8 w-8 text-[#D8B46A]" />}
                       </div>
                       <div className="p-3">
-                        <p className="truncate text-xs font-bold text-[#942E3A]">{product.name}</p>
+                        <p data-admin-i18n-skip className="truncate text-xs font-bold text-[#942E3A]">{product.name}</p>
                         <div className="mt-2 flex items-center justify-between gap-2 text-[10px] text-[#6B1F2A]/60"><span className="capitalize">{product.category}</span><span className="font-bold text-[#942E3A]">{formatPrice(product.price)}</span></div>
-                        <p className="mt-2 text-[10px] text-[#6B1F2A]/65">{product.color ? `Color: ${product.color}` : "No color"} · {product.variants.length} sizes</p>
+                        <p className="mt-2 text-[10px] text-[#6B1F2A]/65">{product.color ? (isRtl ? `اللون: ${product.color}` : `Color: ${product.color}`) : (isRtl ? "بدون لون" : "No color")} · {product.variants.length} {isRtl ? "مقاسات" : "sizes"}</p>
                         <div className="mt-2 flex flex-wrap gap-1">{product.variants.slice(0, 8).map((variant) => <span key={variant.size} className="rounded-md bg-[#FFF9EB] px-1.5 py-1 text-[9px] font-bold text-[#942E3A]">{variant.size}: {variant.stock}</span>)}</div>
                       </div>
                     </Link>
