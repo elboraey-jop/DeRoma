@@ -361,13 +361,13 @@ export default function HomeClient({
                 dragMomentum={false}
                 onDragEnd={handleDragEnd}
                 whileTap={{ scale: 0.995 }}
-                className={`relative h-full w-full touch-pan-y overflow-hidden rounded-2xl border border-white sm:rounded-3xl lg:rounded-[2rem] ${currentTheme.bgColor} ${currentTheme.textColor}`}
+                className={`relative h-full w-full touch-pan-y overflow-hidden rounded-2xl border border-white/10 sm:rounded-3xl lg:rounded-[2rem] ${currentTheme.bgColor} ${currentTheme.textColor}`}
               >
                 <div className={`absolute -top-20 -right-20 h-64 w-64 rounded-full ${currentTheme.accentBlur} blur-2xl pointer-events-none z-0`} />
                 <div className={`absolute -bottom-20 -left-20 h-64 w-64 rounded-full ${currentTheme.accentBlur} blur-2xl pointer-events-none z-0`} />
 
                 {/* Responsive artwork supplied by DeRoma */}
-                <picture className="absolute inset-0 z-10 block h-full w-full">
+                <picture className="absolute inset-0 z-10 block h-full w-full bg-white">
                   {currentCard.mobileImage && (
                     <source media="(max-width: 639px)" srcSet={currentCard.mobileImage} />
                   )}
