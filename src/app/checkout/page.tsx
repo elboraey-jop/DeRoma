@@ -172,8 +172,7 @@ export default function CheckoutPage() {
   const siteSettings = useSiteSettings();
   const router = useRouter();
   const isArabic = lang === "ar";
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [phone2, setPhone2] = useState("");
   const [selectedGovEn, setSelectedGovEn] = useState("");
@@ -396,8 +395,12 @@ export default function CheckoutPage() {
 
   const egPhoneRegex = /^01[0125]\d{8}$/;
 
-  const cleanFirst = firstName.trim();
-  const cleanLast = lastName.trim();
+  const cleanFullName = fullName.trim().replace(/\s+/g, " ");
+  const fullNameParts = cleanFullName ? cleanFullName.split(" ") : [];
+  const fullNamePartRegex = /^[\p{L}\p{M}][\p{L}\p{M}'’\-]*$/u;
+  const isValidFullName = fullNameParts.length >= 2 && fullNameParts.every((part) => part.length >= 2 && fullNamePartRegex.test(part));
+  const cleanFirst = fullNameParts[0] || "";
+  const cleanLast = fullNameParts.slice(1).join(" ");
   const cleanPhone = phone.replace(/[\s\-\+]/g, "").replace(/^20/, "");
   const cleanPhone2 = phone2 ? phone2.replace(/[\s\-\+]/g, "").replace(/^20/, "") : "";
 
@@ -405,10 +408,8 @@ export default function CheckoutPage() {
   const handleBlur = (field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
     let err = "";
-    if (field === "firstName" && (!cleanFirst || cleanFirst.length < 2)) {
-      err = !cleanFirst ? (isArabic ? "الاسم الأول مطلوب." : "First name is required.") : (isArabic ? "يجب أن يتكون الاسم الأول من حرفين على الأقل." : "First name must be at least 2 characters.");
-    } else if (field === "lastName" && (!cleanLast || cleanLast.length < 2)) {
-      err = !cleanLast ? (isArabic ? "اسم العائلة مطلوب." : "Second name is required.") : (isArabic ? "يجب أن يتكون اسم العائلة من حرفين على الأقل." : "Second name must be at least 2 characters.");
+    if (field === "fullName" && !isValidFullName) {
+      err = isArabic ? "اكتب الاسم بالكامل بشكل صحيح، مكونًا من اسمين على الأقل وبدون أرقام أو رموز." : "Enter a valid full name with at least two words and no numbers or symbols.";
     } else if (field === "phone" && (!phone.trim() || !egPhoneRegex.test(cleanPhone))) {
       err = !phone.trim() ? (isArabic ? "رقم الهاتف الأساسي مطلوب." : "Primary phone is required.") : (isArabic ? "يجب إدخال رقم هاتف مصري صحيح مكون من 11 رقمًا، مثل 01012345678." : "Primary phone must be a valid 11-digit Egyptian mobile number (e.g. 01012345678).");
     } else if (field === "phone2" && phone2.trim() && !egPhoneRegex.test(cleanPhone2)) {
@@ -427,8 +428,7 @@ export default function CheckoutPage() {
   };
 
   const fieldErrors: Record<string, string> = {
-    firstName: touched.firstName ? (!cleanFirst ? (isArabic ? "الاسم الأول مطلوب." : "First name is required.") : cleanFirst.length < 2 ? (isArabic ? "يجب أن يتكون الاسم الأول من حرفين على الأقل." : "First name must be at least 2 characters.") : "") : "",
-    lastName: touched.lastName ? (!cleanLast ? (isArabic ? "اسم العائلة مطلوب." : "Second name is required.") : cleanLast.length < 2 ? (isArabic ? "يجب أن يتكون اسم العائلة من حرفين على الأقل." : "Second name must be at least 2 characters.") : "") : "",
+    fullName: touched.fullName && !isValidFullName ? (isArabic ? "اكتب الاسم بالكامل بشكل صحيح، مكونًا من اسمين على الأقل وبدون أرقام أو رموز." : "Enter a valid full name with at least two words and no numbers or symbols.") : "",
     phone: touched.phone ? (!phone.trim() ? (isArabic ? "رقم الهاتف الأساسي مطلوب." : "Primary phone is required.") : !egPhoneRegex.test(cleanPhone) ? (isArabic ? "يجب إدخال رقم هاتف مصري صحيح مكون من 11 رقمًا، مثل 01012345678." : "Primary phone must be a valid 11-digit Egyptian mobile number (e.g. 01012345678).") : "") : "",
     phone2: touched.phone2 && phone2.trim() && !egPhoneRegex.test(cleanPhone2) ? (isArabic ? "يجب إدخال رقم هاتف بديل مصري صحيح مكون من 11 رقمًا." : "Alternative phone must be a valid 11-digit Egyptian mobile number.") : "",
     governorate: touched.governorate ? (!selectedGovEn ? (isArabic ? "يرجى اختيار المحافظة." : "Please select a governorate.") : "") : "",
@@ -445,8 +445,7 @@ export default function CheckoutPage() {
     setError("");
 
     setTouched({
-      firstName: true,
-      lastName: true,
+      fullName: true,
       phone: true,
       phone2: true,
       paymentSenderPhone: paymentMethod !== "cod",
@@ -456,8 +455,7 @@ export default function CheckoutPage() {
     });
 
     if (
-      !cleanFirst || cleanFirst.length < 2 ||
-      !cleanLast || cleanLast.length < 2 ||
+      !isValidFullName ||
       !phone.trim() || !egPhoneRegex.test(cleanPhone) ||
       (phone2.trim() && !egPhoneRegex.test(cleanPhone2)) ||
       (paymentMethod !== "cod" && (!paymentSenderPhone.trim() || !egPhoneRegex.test(paymentSenderPhone.replace(/[\s\-\+]/g, "").replace(/^20/, "")))) ||
@@ -492,7 +490,7 @@ export default function CheckoutPage() {
       const result = await createOrder({
         customerFirstName: cleanFirst,
         customerLastName: cleanLast,
-        customerName: `${cleanFirst} ${cleanLast}`,
+        customerName: cleanFullName,
         customerPhone: cleanPhone,
         customerPhone2: cleanPhone2 || undefined,
         paymentMethod,
@@ -521,7 +519,7 @@ export default function CheckoutPage() {
         });
         toast.success(isArabic ? `تم تأكيد الطلب ${result.orderNumber} بنجاح!` : `Order ${result.orderNumber} placed successfully!`, isArabic ? "تم تأكيد الطلب" : "ORDER CONFIRMED");
         clearCart();
-        const fullCustomerName = `${firstName.trim()} ${lastName.trim()}`;
+        const fullCustomerName = cleanFullName;
         router.push(
           `/checkout/success?orderNumber=${result.orderNumber}&name=${encodeURIComponent(fullCustomerName)}&total=${result.totalPrice}&shipping=${result.shippingCost}&gov=${encodeURIComponent(selectedGovEn)}&paymentMethod=${paymentMethod}`
         );
@@ -620,29 +618,18 @@ export default function CheckoutPage() {
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
-                <div>
-                  <FieldLabel icon={UserRound}>{t("checkout.firstName")} *</FieldLabel>
+                <div className="sm:col-span-2">
+                  <FieldLabel icon={UserRound}>{t("login.fullNameLabel")} *</FieldLabel>
                   <input
                     required
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    onBlur={() => handleBlur("firstName")}
-                    placeholder={t("checkout.firstName")}
-                    className={getFieldClass(fieldErrors.firstName)}
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    onBlur={() => handleBlur("fullName")}
+                    placeholder={t("login.fullNameLabel")}
+                    autoComplete="name"
+                    className={getFieldClass(fieldErrors.fullName)}
                   />
-                  {fieldErrors.firstName && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.firstName}</p>}
-                </div>
-                <div>
-                  <FieldLabel icon={UserRound}>{t("checkout.lastName")} *</FieldLabel>
-                  <input
-                    required
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    onBlur={() => handleBlur("lastName")}
-                    placeholder={t("checkout.lastName")}
-                    className={getFieldClass(fieldErrors.lastName)}
-                  />
-                  {fieldErrors.lastName && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.lastName}</p>}
+                  {fieldErrors.fullName && <p className="mt-1.5 text-xs font-bold text-rose-600">{fieldErrors.fullName}</p>}
                 </div>
                 <div>
                   <FieldLabel icon={Phone}>{t("checkout.phone")} *</FieldLabel>
@@ -709,11 +696,11 @@ export default function CheckoutPage() {
                           />
                         </div>
                       </div>
-                      {!govSearch && <button type="button" role="option" aria-selected={!selectedGovEn} onClick={() => { setSelectedGovEn(""); setCity(""); setIsGovMenuOpen(false); setGovSearch(""); handleBlur("governorate"); }} className={`w-full rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${!selectedGovEn ? "bg-[#942e3a] text-white" : "text-[#806e73] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}>{t("checkout.selectGovernorate")}</button>}
+                      {!govSearch && <button type="button" role="option" aria-selected={!selectedGovEn} onClick={() => { setSelectedGovEn(""); setCity(""); setIsGovMenuOpen(false); setGovSearch(""); }} className={`w-full rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${!selectedGovEn ? "bg-[#942e3a] text-white" : "text-[#806e73] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}>{t("checkout.selectGovernorate")}</button>}
                       {filteredGovernorates.map((gov) => {
                         const isSelected = gov.en === selectedGovEn;
                         const displayName = gov.en;
-                        return <button key={gov.en} type="button" role="option" aria-selected={isSelected} onClick={() => { setSelectedGovEn(gov.en); setCity(""); setCenterSearch(""); setIsGovMenuOpen(false); setGovSearch(""); handleBlur("governorate"); }} className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${isSelected ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}><span>{displayName}</span><span className={`shrink-0 text-xs ${isSelected ? (isFreeShippingUnlocked ? "text-emerald-200 font-bold" : "text-[#fffaf0]/80") : (isFreeShippingUnlocked ? "text-emerald-600 font-bold" : "text-[#b8934a]")}`}>{isFreeShippingUnlocked ? t("checkout.free") : formatPrice(gov.fee)}</span></button>;
+                        return <button key={gov.en} type="button" role="option" aria-selected={isSelected} onClick={() => { setSelectedGovEn(gov.en); setCity(""); setCenterSearch(""); setIsGovMenuOpen(false); setGovSearch(""); }} className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${isSelected ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}><span>{displayName}</span><span className={`shrink-0 text-xs ${isSelected ? (isFreeShippingUnlocked ? "text-emerald-200 font-bold" : "text-[#fffaf0]/80") : (isFreeShippingUnlocked ? "text-emerald-600 font-bold" : "text-[#b8934a]")}`}>{isFreeShippingUnlocked ? t("checkout.free") : formatPrice(gov.fee)}</span></button>;
                       })}
                     </div>
                   )}
@@ -751,7 +738,7 @@ export default function CheckoutPage() {
                           <input type="search" value={centerSearch} onChange={(event) => setCenterSearch(event.target.value)} onClick={(event) => event.stopPropagation()} placeholder={t("nav.searchAction")} aria-label={isArabic ? "البحث عن المدن والمراكز" : "Search cities and centers"} className="h-11 w-full rounded-xl border border-[#eadfd6] bg-[#fffaf0] pl-9 pr-3 rtl:pl-3 rtl:pr-9 text-sm text-[#481827] outline-none placeholder:text-[#a99ca0] focus:border-[#942e3a] focus:ring-2 focus:ring-[#942e3a]/10" />
                         </div>
                       </div>
-                      {filteredCenters.map((c) => <button key={c} type="button" role="option" aria-selected={c === city} onClick={() => { setCity(c); setIsCenterMenuOpen(false); setCenterSearch(""); handleBlur("city"); }} className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${c === city ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}><span>{c}</span><span className={`shrink-0 text-xs ${c === city ? "text-[#fffaf0]/80" : "text-[#b8934a]"}`}>{isFreeShippingUnlocked ? t("checkout.free") : formatPrice(cityShippingFee(c))}</span></button>)}
+                      {filteredCenters.map((c) => <button key={c} type="button" role="option" aria-selected={c === city} onClick={() => { setCity(c); setIsCenterMenuOpen(false); setCenterSearch(""); }} className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left rtl:text-right text-sm transition ${c === city ? "bg-[#942e3a] font-bold text-white" : "text-[#481827] hover:bg-[#fff5e8] hover:text-[#942e3a]"}`}><span>{c}</span><span className={`shrink-0 text-xs ${c === city ? "text-[#fffaf0]/80" : "text-[#b8934a]"}`}>{isFreeShippingUnlocked ? t("checkout.free") : formatPrice(cityShippingFee(c))}</span></button>)}
                     </div>
                   )}
                 </div>

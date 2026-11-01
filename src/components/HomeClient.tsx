@@ -329,7 +329,7 @@ export default function HomeClient({
 
 
   return (
-    <div className="w-full flex flex-col space-y-8 pb-16 bg-[#FFF9EB] text-[#942E3A]" dir={dir}>
+    <div className="w-full flex flex-col space-y-8 pb-16 bg-white text-[#942E3A]" dir={dir}>
       {/* Eagerly preload all hero banner images */}
       <div className="hidden" aria-hidden="true">
         {heroCards.map((card) => (
@@ -341,8 +341,8 @@ export default function HomeClient({
       </div>
       
       {/* 1. HERO CAROUSEL - Sleek, Compact & Refined */}
-      <section className="px-2 sm:px-4 lg:px-6 pt-0">
-        <div className="mx-auto max-w-[94vw] lg:max-w-[1320px] relative select-none">
+      <section className="bg-white px-2 pt-0 sm:px-4 lg:px-6">
+        <div className="relative mx-auto max-w-[94vw] select-none bg-white lg:max-w-[1320px]">
           
           <div className="relative aspect-[1209/1300] overflow-hidden rounded-2xl shadow-lg sm:aspect-[2120/742] sm:rounded-3xl lg:rounded-[2rem] cursor-grab active:cursor-grabbing">
             
@@ -361,7 +361,7 @@ export default function HomeClient({
                 dragMomentum={false}
                 onDragEnd={handleDragEnd}
                 whileTap={{ scale: 0.995 }}
-                className={`relative h-full w-full touch-pan-y overflow-hidden rounded-2xl border border-white/10 sm:rounded-3xl lg:rounded-[2rem] ${currentTheme.bgColor} ${currentTheme.textColor}`}
+                className={`relative h-full w-full touch-pan-y overflow-hidden rounded-2xl border border-white sm:rounded-3xl lg:rounded-[2rem] ${currentTheme.bgColor} ${currentTheme.textColor}`}
               >
                 <div className={`absolute -top-20 -right-20 h-64 w-64 rounded-full ${currentTheme.accentBlur} blur-2xl pointer-events-none z-0`} />
                 <div className={`absolute -bottom-20 -left-20 h-64 w-64 rounded-full ${currentTheme.accentBlur} blur-2xl pointer-events-none z-0`} />

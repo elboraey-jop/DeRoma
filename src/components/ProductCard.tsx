@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, Check, Heart, LoaderCircle, Star } from "lucide-react";
+import { ShoppingBag, Check, Heart, Star } from "lucide-react";
 import { useCart } from "@/lib/cartStore";
 import { useWishlist } from "@/lib/wishlistStore";
 import { motion } from "framer-motion";
@@ -207,12 +207,7 @@ export default function ProductCard({
       }`}
     >
       {isOpening && (
-        <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-white/35 backdrop-blur-[1px]">
-          <span className="inline-flex items-center gap-2 rounded-full bg-[#942E3A] px-3 py-2 text-[10px] font-bold text-white shadow-lg">
-            <LoaderCircle className="h-3.5 w-3.5 animate-spin text-[#D8B46A]" />
-            {lang === "ar" ? "جاري فتح المنتج..." : "Opening product..."}
-          </span>
-        </div>
+        <div className="pointer-events-none absolute inset-0 z-50 bg-white/35 backdrop-blur-[1px]" />
       )}
       {/* Top Product Image Container */}
       <div className="relative h-[68%] sm:h-[69%] w-full shrink-0 overflow-hidden bg-white">
