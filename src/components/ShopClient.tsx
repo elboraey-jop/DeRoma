@@ -527,7 +527,7 @@ export default function ShopClient({ initialProducts = [], catalogColors = [] }:
                 {/* Brands */}
                 <div className="space-y-3">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-[#D8B46A]">{copy.brands}</h3>
-                  <div className="flex flex-col gap-y-1">
+                  <div className="grid grid-cols-2 gap-2">
                     {brands.map((brand) => {
                       const isActive = selectedBrands.includes(brand);
                       return (

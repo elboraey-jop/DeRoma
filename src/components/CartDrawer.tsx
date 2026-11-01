@@ -255,12 +255,13 @@ export default function CartDrawer() {
                     <span>{t("cart.checkoutButton")}</span>
                     {dir === "rtl" ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
                   </Link>
-                  <button
+                  <Link
+                    href="/shop"
                     onClick={() => setCartOpen(false)}
                     className="order-1 flex flex-[1.2] items-center justify-center whitespace-nowrap rounded-full border border-[#D8B46A] py-3 text-[10px] font-semibold text-[#D8B46A] hover:border-[#942E3A] hover:text-[#942E3A] transition-colors sm:text-xs"
                   >
                     {t("nav.shop")}
-                  </button>
+                  </Link>
                 </div>
               </div>
             )}

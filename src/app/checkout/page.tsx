@@ -341,6 +341,7 @@ export default function CheckoutPage() {
       })
     : 0;
   const grandTotal = Math.max(0, cartTotal - appliedDiscount) + shippingCost;
+  const hasShippingSelection = Boolean(selectedGovEn && city);
   const paymentAccount = paymentMethod === "instapay" ? siteSettings.instapayAccount : siteSettings.walletNumber;
   const paymentAccountLabel = paymentMethod === "instapay" ? "InstaPay" : siteSettings.walletProvider;
   const paymentAccountDigits = paymentAccount.replace(/[^0-9]/g, "");
@@ -568,7 +569,7 @@ export default function CheckoutPage() {
     return (
       <div className={`rounded-2xl border p-4 ${paymentMethod === "instapay" ? "border-purple-200 bg-purple-50/70" : "border-emerald-200 bg-emerald-50/70"}`}>
         <div className="flex items-center justify-between gap-3"><h3 className={`font-playfair text-lg font-bold ${paymentMethod === "instapay" ? "text-purple-800" : "text-emerald-800"}`}>{paymentMethod === "instapay" ? "InstaPay Transfer Details" : "E-Wallet Transfer Details"}</h3><span className="rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-bold text-[#942e3a]">PAYMENT PENDING</span></div>
-        <p className="mt-2 text-xs leading-5 text-[#416866]">{isArabic ? `حوّل إجمالي ${formatPrice(grandTotal)} إلى الرقم التالي، ثم أرسل صورة التحويل على واتساب.` : `Transfer ${formatPrice(grandTotal)} to the account below, then send the transfer screenshot on WhatsApp.`}</p>
+        <p className="mt-2 text-xs leading-5 text-[#416866]">{isArabic ? `حوّل إجمالي ${hasShippingSelection ? formatPrice(grandTotal) : "—"} إلى الرقم التالي، ثم أرسل صورة التحويل على واتساب.` : `Transfer ${hasShippingSelection ? formatPrice(grandTotal) : "—"} to the account below, then send the transfer screenshot on WhatsApp.`}</p>
         <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-white bg-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-wider text-[#9a8586]">{paymentAccountLabel}</p><p className="mt-1 text-xl font-black tracking-[0.12em] text-[#164d49]">{paymentAccount || (isArabic ? "غير متاح" : "Not configured")}</p></div><button type="button" onClick={() => { navigator.clipboard?.writeText(paymentAccount); setCopiedPayment(true); }} className="rounded-lg border border-[#eadfd6] px-3 py-2 text-xs font-bold text-[#942e3a]">{copiedPayment ? (isArabic ? "تم النسخ" : "Copied") : (isArabic ? "نسخ" : "Copy")}</button></div>
         <div className="mt-3 rounded-xl border border-[#eadfd6] bg-white p-3"><label className="text-xs font-bold text-[#164d49]">{isArabic ? "رقم الهاتف المحول منه" : "Transfer-from phone number"}</label><input type="tel" value={paymentSenderPhone} onChange={(event) => setPaymentSenderPhone(event.target.value)} placeholder="01012345678" className={`${inputClass} mt-2 h-11`} />{touched.paymentSenderPhone && (!paymentSenderPhone.trim() || !egPhoneRegex.test(paymentSenderPhone.replace(/[\s\-\+]/g, "").replace(/^20/, ""))) && <p className="mt-1 text-[11px] text-rose-600">{isArabic ? "اكتب رقم الهاتف الذي تم التحويل منه بشكل صحيح." : "Enter the valid phone number used for the transfer."}</p>}</div>
         <a href={whatsappPaymentHref} target="_blank" rel="noreferrer" className="mt-3 flex h-11 items-center justify-center gap-2 rounded-full bg-[#25D366] px-4 text-xs font-bold text-white transition hover:bg-[#1da851]"><MessageSquare className="h-4 w-4" /> {isArabic ? `إرسال صورة التحويل على واتساب ${paymentAccountLabel}` : `Send proof on WhatsApp to ${paymentAccountLabel}`}</a>
@@ -677,7 +678,6 @@ export default function CheckoutPage() {
                     onClick={() => {
                       setIsGovMenuOpen((open) => !open);
                       setGovSearch("");
-                      handleBlur("governorate");
                     }}
                     className={`${getFieldClass(fieldErrors.governorate)} flex min-w-0 items-center justify-between overflow-hidden text-left rtl:text-right ${selectedGovEn ? "text-[#481827]" : "text-[#a99ca0]"}`}
                   >
@@ -728,7 +728,6 @@ export default function CheckoutPage() {
                     onClick={() => {
                       setIsCenterMenuOpen((open) => !open);
                       setCenterSearch("");
-                      handleBlur("city");
                     }}
                     className={`${getFieldClass(fieldErrors.city)} flex min-w-0 items-center justify-between overflow-hidden text-left rtl:text-right ${city ? "text-[#481827]" : "text-[#a99ca0]"} disabled:cursor-not-allowed disabled:bg-[#f8f3ed] disabled:opacity-70`}
                   >
@@ -812,7 +811,7 @@ export default function CheckoutPage() {
                     {isArabic ? "المبلغ الإجمالي للدفع" : "Total to pay"}
                   </p>
                   <p className="mt-1 font-playfair text-3xl font-bold text-[#481827]">
-                    {formatPrice(grandTotal)}
+                    {hasShippingSelection ? formatPrice(grandTotal) : "—"}
                   </p>
                 </div>
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-1.5 text-xs font-medium text-emerald-700">
@@ -875,7 +874,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex items-end justify-between border-t border-white/15 pt-4">
                   <span className="font-bold">{t("checkout.total")}</span>
-                  <span className="font-playfair text-2xl font-semibold">{formatPrice(grandTotal)}</span>
+                  <span className="font-playfair text-2xl font-semibold">{hasShippingSelection ? formatPrice(grandTotal) : "—"}</span>
                 </div>
               </div>
               <button
