@@ -4,6 +4,9 @@ import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+/* The Meta Pixel must initialize before hydration so browser diagnostics can detect it. */
+/* eslint-disable @next/next/no-before-interactive-script-outside-document */
+
 declare global {
   interface Window {
     dataLayer?: unknown[];
@@ -94,7 +97,7 @@ export default function AnalyticsScripts() {
 
       {metaPixelId ? (
         <>
-          <Script id="meta-pixel" strategy="afterInteractive">
+          <Script id="meta-pixel" strategy="beforeInteractive">
             {`
             (function(w, d) {
               var n = w.fbq;
