@@ -104,11 +104,15 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryZoom, setGalleryZoom] = useState(1);
   const [galleryPanX, setGalleryPanX] = useState(0);
+  const [galleryPanY, setGalleryPanY] = useState(0);
   const [galleryMounted, setGalleryMounted] = useState(false);
-  const galleryTouchStartX = useRef<number | null>(null);
-  const galleryPanStartX = useRef<number | null>(null);
-  const galleryPanOriginX = useRef(0);
   const galleryViewportRef = useRef<HTMLDivElement>(null);
+  const galleryGesture = useRef<
+    | { type: "swipe"; startX: number }
+    | { type: "pan"; startX: number; startY: number; originX: number; originY: number }
+    | { type: "pinch"; startDistance: number; startZoom: number; startCenterX: number; startCenterY: number; originX: number; originY: number }
+    | null
+  >(null);
   const productImageTouchStartX = useRef<number | null>(null);
   const suppressProductImageClick = useRef(false);
   const [added, setAdded] = useState(false);
@@ -134,16 +138,20 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
       if (event.key === "Escape") {
         setIsGalleryOpen(false);
         setGalleryZoom(1);
+        setGalleryPanX(0);
+        setGalleryPanY(0);
       }
       if (event.key === "ArrowLeft") {
         setActiveImageIndex((index) => (index - 1 + currentColorImages.length) % currentColorImages.length);
         setGalleryZoom(1);
         setGalleryPanX(0);
+        setGalleryPanY(0);
       }
       if (event.key === "ArrowRight") {
         setActiveImageIndex((index) => (index + 1) % currentColorImages.length);
         setGalleryZoom(1);
         setGalleryPanX(0);
+        setGalleryPanY(0);
       }
     };
 
@@ -158,6 +166,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
     setActiveImageIndex(index);
     setGalleryZoom(1);
     setGalleryPanX(0);
+    setGalleryPanY(0);
     setIsGalleryOpen(true);
   };
 
@@ -165,6 +174,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
     setIsGalleryOpen(false);
     setGalleryZoom(1);
     setGalleryPanX(0);
+    setGalleryPanY(0);
   };
 
   const changeGalleryImage = (direction: -1 | 1) => {
@@ -172,12 +182,25 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
     setActiveImageIndex((index) => (index + direction + currentColorImages.length) % currentColorImages.length);
     setGalleryZoom(1);
     setGalleryPanX(0);
+    setGalleryPanY(0);
+  };
+
+  const constrainGalleryPan = (x: number, y: number, zoom: number) => {
+    const viewport = galleryViewportRef.current;
+    const maxX = Math.max(0, ((viewport?.clientWidth || 1) * (zoom - 1)) / 2);
+    const maxY = Math.max(0, ((viewport?.clientHeight || 1) * (zoom - 1)) / 2);
+    return {
+      x: Math.max(-maxX, Math.min(maxX, x)),
+      y: Math.max(-maxY, Math.min(maxY, y)),
+    };
   };
 
   const adjustGalleryZoom = (amount: number) => {
     setGalleryZoom((zoom) => {
       const nextZoom = Math.min(3, Math.max(1, Number((zoom + amount).toFixed(2))));
-      if (nextZoom === 1) setGalleryPanX(0);
+      const nextPan = constrainGalleryPan(galleryPanX, galleryPanY, nextZoom);
+      setGalleryPanX(nextZoom === 1 ? 0 : nextPan.x);
+      setGalleryPanY(nextZoom === 1 ? 0 : nextPan.y);
       return nextZoom;
     });
   };
@@ -795,46 +818,94 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                 <div
                   ref={galleryViewportRef}
                   className="relative flex min-h-[22rem] flex-1 items-center justify-center overflow-hidden rounded-[1.1rem] bg-black/20 sm:min-h-[30rem]"
-                  style={{ touchAction: "pan-y" }}
+                  style={{ touchAction: "none" }}
                   onWheel={(event) => {
                     event.preventDefault();
                     adjustGalleryZoom(event.deltaY < 0 ? 0.25 : -0.25);
                   }}
                   onTouchStart={(event) => {
-                    const startX = event.touches[0]?.clientX ?? null;
-                    galleryTouchStartX.current = startX;
-                    if (galleryZoom > 1 && startX !== null) {
-                      galleryPanStartX.current = startX;
-                      galleryPanOriginX.current = galleryPanX;
+                    const firstTouch = event.touches[0];
+                    const secondTouch = event.touches[1];
+                    if (firstTouch && secondTouch) {
+                      const centerX = (firstTouch.clientX + secondTouch.clientX) / 2;
+                      const centerY = (firstTouch.clientY + secondTouch.clientY) / 2;
+                      galleryGesture.current = {
+                        type: "pinch",
+                        startDistance: Math.hypot(secondTouch.clientX - firstTouch.clientX, secondTouch.clientY - firstTouch.clientY),
+                        startZoom: galleryZoom,
+                        startCenterX: centerX,
+                        startCenterY: centerY,
+                        originX: galleryPanX,
+                        originY: galleryPanY,
+                      };
+                      return;
+                    }
+
+                    if (!firstTouch) return;
+                    if (galleryZoom > 1) {
+                      galleryGesture.current = {
+                        type: "pan",
+                        startX: firstTouch.clientX,
+                        startY: firstTouch.clientY,
+                        originX: galleryPanX,
+                        originY: galleryPanY,
+                      };
+                    } else {
+                      galleryGesture.current = { type: "swipe", startX: firstTouch.clientX };
                     }
                   }}
                   onTouchMove={(event) => {
-                    const currentX = event.touches[0]?.clientX;
-                    const startX = galleryPanStartX.current;
-                    if (galleryZoom <= 1 || startX === null || currentX === undefined) return;
+                    const gesture = galleryGesture.current;
+                    if (!gesture) return;
+                    event.preventDefault();
 
-                    const viewportWidth = galleryViewportRef.current?.clientWidth || 1;
-                    const maxPan = Math.max(0, (viewportWidth * (galleryZoom - 1)) / 2);
-                    const nextPan = galleryPanOriginX.current + currentX - startX;
-                    setGalleryPanX(Math.max(-maxPan, Math.min(maxPan, nextPan)));
+                    const firstTouch = event.touches[0];
+                    const secondTouch = event.touches[1];
+                    if (gesture.type === "pinch" && firstTouch && secondTouch) {
+                      const distance = Math.hypot(secondTouch.clientX - firstTouch.clientX, secondTouch.clientY - firstTouch.clientY);
+                      const centerX = (firstTouch.clientX + secondTouch.clientX) / 2;
+                      const centerY = (firstTouch.clientY + secondTouch.clientY) / 2;
+                      const nextZoom = Math.min(3, Math.max(1, Number((gesture.startZoom * (distance / gesture.startDistance)).toFixed(2))));
+                      const nextPan = constrainGalleryPan(
+                        gesture.originX + centerX - gesture.startCenterX,
+                        gesture.originY + centerY - gesture.startCenterY,
+                        nextZoom,
+                      );
+                      setGalleryZoom(nextZoom);
+                      setGalleryPanX(nextZoom === 1 ? 0 : nextPan.x);
+                      setGalleryPanY(nextZoom === 1 ? 0 : nextPan.y);
+                      return;
+                    }
+
+                    if (gesture.type === "pan" && firstTouch && galleryZoom > 1) {
+                      const nextPan = constrainGalleryPan(
+                        gesture.originX + firstTouch.clientX - gesture.startX,
+                        gesture.originY + firstTouch.clientY - gesture.startY,
+                        galleryZoom,
+                      );
+                      setGalleryPanX(nextPan.x);
+                      setGalleryPanY(nextPan.y);
+                    }
                   }}
                   onTouchEnd={(event) => {
-                    const startX = galleryTouchStartX.current;
+                    if (event.touches.length > 0) return;
+                    const gesture = galleryGesture.current;
+                    galleryGesture.current = null;
+                    if (gesture?.type !== "swipe") return;
                     const endX = event.changedTouches[0]?.clientX;
-                    galleryTouchStartX.current = null;
-                    galleryPanStartX.current = null;
-                    if (galleryZoom > 1) return;
-                    if (startX === null || endX === undefined || Math.abs(endX - startX) < 45) return;
-                    changeGalleryImage(endX < startX ? 1 : -1);
+                    if (endX === undefined || Math.abs(endX - gesture.startX) < 45) return;
+                    changeGalleryImage(endX < gesture.startX ? 1 : -1);
                   }}
                   onTouchCancel={() => {
-                    galleryTouchStartX.current = null;
-                    galleryPanStartX.current = null;
+                    galleryGesture.current = null;
                   }}
                   onDoubleClick={() => {
                     setGalleryZoom((zoom) => {
                       const nextZoom = zoom === 1 ? 2 : 1;
-                      if (nextZoom === 1) setGalleryPanX(0);
+                      if (nextZoom === 1) {
+                        setGalleryPanX(0);
+                        setGalleryPanY(0);
+                      }
                       return nextZoom;
                     });
                   }}
@@ -844,8 +915,8 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                     alt={product.name}
                     fill
                     sizes="(max-width: 640px) 100vw, 90vw"
-                    className="select-none object-contain p-2 transition-transform duration-200 sm:p-6"
-                    style={{ transform: `translate3d(${galleryPanX}px, 0, 0) scale(${galleryZoom})`, touchAction: "none" }}
+                    className="select-none object-contain p-2 sm:p-6"
+                    style={{ transform: `translate3d(${galleryPanX}px, ${galleryPanY}px, 0) scale(${galleryZoom})`, touchAction: "none" }}
                     draggable={false}
                   />
 
@@ -885,6 +956,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                           setActiveImageIndex(index);
                           setGalleryZoom(1);
                           setGalleryPanX(0);
+                          setGalleryPanY(0);
                         }}
                         aria-label={lang === "ar" ? `عرض الصورة ${index + 1}` : `View image ${index + 1}`}
                         aria-current={index === activeImageIndex ? "true" : undefined}
