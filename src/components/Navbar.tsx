@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import { useWishlist } from "@/lib/wishlistStore";
 import { logoutCustomerAction } from "@/app/auth-actions";
 import { useStoreI18n } from "@/providers/StoreI18nContext";
 import StoreLangToggle from "@/components/StoreLangToggle";
+import ProductSearchSuggestions from "@/components/ProductSearchSuggestions";
 
 export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: boolean }) {
   const router = useRouter();
@@ -22,7 +23,9 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
   }, []);
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [showSidebarSearchSuggestions, setShowSidebarSearchSuggestions] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const headerRef = useRef<HTMLElement>(null);
   const { count } = useWishlist();
   const isWishlisted = count > 0;
   const pathname = usePathname();
@@ -55,7 +58,23 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
   useEffect(() => {
     setIsOpen(false);
     setShowMobileSearch(false);
+    setShowSidebarSearchSuggestions(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const closeSearchOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      if (target?.closest("[data-product-search-suggestions]")) return;
+      if (headerRef.current && target && !headerRef.current.contains(target)) {
+        setShowMobileSearch(false);
+        setShowSearchInput(false);
+        setShowSidebarSearchSuggestions(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", closeSearchOnOutsidePointer);
+    return () => document.removeEventListener("pointerdown", closeSearchOnOutsidePointer);
+  }, []);
 
   useEffect(() => {
     setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
@@ -95,7 +114,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
       <div className="mx-auto flex w-full max-w-[1320px] items-center justify-between gap-2 sm:gap-3">
         
         {/* ELEMENT 1: Main Compact Floating Pill Card */}
-        <header className="relative pointer-events-auto flex min-w-0 flex-1 h-12 sm:h-12 items-center justify-between rounded-[1.35rem] sm:rounded-full bg-[#942E3A]/95 text-white backdrop-blur-xl px-3 sm:px-5 shadow-xl border border-white/20">
+        <header ref={headerRef} className="relative pointer-events-auto flex min-w-0 flex-1 h-12 sm:h-12 items-center justify-between rounded-[1.35rem] sm:rounded-full bg-[#942E3A]/95 text-white backdrop-blur-xl px-3 sm:px-5 shadow-xl border border-white/20">
           
           {/* Left Side (or Right in RTL): Mobile Menu + Search on mobile; Brand Logo on desktop */}
           <div className="flex items-center gap-1 z-10">
@@ -156,16 +175,23 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
           {/* Right Side: Desktop Search, Sign In, AND Language Toggle */}
           <div className="hidden lg:flex items-center shrink-0 gap-1.5 border-l border-white/20 rtl:border-l-0 rtl:border-r rtl:pl-0 rtl:pr-2 pl-2 z-10">
             {showSearchInput && (
-              <form onSubmit={handleSearchSubmit}>
-                <input
-                  type="text"
-                  placeholder={t("nav.searchPlaceholder")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="mr-1.5 rtl:mr-0 rtl:ml-1.5 text-[11px] bg-white/10 border border-white/20 rounded-full px-2.5 py-0.5 text-white placeholder-stone-300 focus:outline-none focus:ring-1 focus:ring-[#942E3A] transition-all duration-150 w-36"
-                  autoFocus
+              <div className="relative">
+                <form onSubmit={handleSearchSubmit}>
+                  <input
+                    type="text"
+                    placeholder={t("nav.searchPlaceholder")}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="mr-1.5 rtl:mr-0 rtl:ml-1.5 text-[11px] bg-white/10 border border-white/20 rounded-full px-2.5 py-0.5 text-white placeholder-stone-300 focus:outline-none focus:ring-1 focus:ring-[#942E3A] transition-all duration-150 w-36"
+                    autoFocus
+                  />
+                </form>
+                <ProductSearchSuggestions
+                  query={searchQuery}
+                  open={showSearchInput}
+                  onClose={() => setShowSearchInput(false)}
                 />
-              </form>
+              </div>
             )}
 
             <button
@@ -230,6 +256,14 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
+          <ProductSearchSuggestions
+            query={searchQuery}
+            open={showMobileSearch}
+            onClose={() => {
+              setSearchQuery("");
+              setShowMobileSearch(false);
+            }}
+          />
         </header>
 
         {/* ELEMENT 2: Independent Wishlist Circle Button */}
@@ -304,7 +338,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
         </div>
 
         {/* Search Box in drawer */}
-        <div className="px-5 pt-1 pb-2">
+        <div className="relative px-5 pt-1 pb-2">
           <form onSubmit={(e) => {
             e.preventDefault();
             if (searchQuery.trim()) {
@@ -318,6 +352,8 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
               placeholder={t("nav.searchFootwear")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setShowSidebarSearchSuggestions(true)}
+              onBlur={() => window.setTimeout(() => setShowSidebarSearchSuggestions(false), 120)}
               className="w-full text-[11px] bg-transparent focus:outline-none text-white placeholder-stone-300 border-0 p-0"
             />
             {searchQuery && (
@@ -330,6 +366,15 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
               </button>
             )}
           </form>
+          <ProductSearchSuggestions
+            query={searchQuery}
+            open={isOpen && showSidebarSearchSuggestions}
+            onClose={() => {
+              setSearchQuery("");
+              setShowSidebarSearchSuggestions(false);
+              setIsOpen(false);
+            }}
+          />
         </div>
 
         {/* Navigation Links */}

@@ -103,8 +103,12 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryZoom, setGalleryZoom] = useState(1);
+  const [galleryPanX, setGalleryPanX] = useState(0);
   const [galleryMounted, setGalleryMounted] = useState(false);
   const galleryTouchStartX = useRef<number | null>(null);
+  const galleryPanStartX = useRef<number | null>(null);
+  const galleryPanOriginX = useRef(0);
+  const galleryViewportRef = useRef<HTMLDivElement>(null);
   const productImageTouchStartX = useRef<number | null>(null);
   const suppressProductImageClick = useRef(false);
   const [added, setAdded] = useState(false);
@@ -134,10 +138,12 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
       if (event.key === "ArrowLeft") {
         setActiveImageIndex((index) => (index - 1 + currentColorImages.length) % currentColorImages.length);
         setGalleryZoom(1);
+        setGalleryPanX(0);
       }
       if (event.key === "ArrowRight") {
         setActiveImageIndex((index) => (index + 1) % currentColorImages.length);
         setGalleryZoom(1);
+        setGalleryPanX(0);
       }
     };
 
@@ -151,22 +157,29 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const openGallery = (index: number) => {
     setActiveImageIndex(index);
     setGalleryZoom(1);
+    setGalleryPanX(0);
     setIsGalleryOpen(true);
   };
 
   const closeGallery = () => {
     setIsGalleryOpen(false);
     setGalleryZoom(1);
+    setGalleryPanX(0);
   };
 
   const changeGalleryImage = (direction: -1 | 1) => {
     if (currentColorImages.length < 2) return;
     setActiveImageIndex((index) => (index + direction + currentColorImages.length) % currentColorImages.length);
     setGalleryZoom(1);
+    setGalleryPanX(0);
   };
 
   const adjustGalleryZoom = (amount: number) => {
-    setGalleryZoom((zoom) => Math.min(3, Math.max(1, Number((zoom + amount).toFixed(2)))));
+    setGalleryZoom((zoom) => {
+      const nextZoom = Math.min(3, Math.max(1, Number((zoom + amount).toFixed(2))));
+      if (nextZoom === 1) setGalleryPanX(0);
+      return nextZoom;
+    });
   };
   const stockRemainingLabel = lang === "ar" ? "المتبقي" : "Remaining";
   const stockLeftLabel = lang === "ar" ? "متبقي" : "left";
@@ -780,22 +793,51 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                 </div>
 
                 <div
+                  ref={galleryViewportRef}
                   className="relative flex min-h-[22rem] flex-1 items-center justify-center overflow-hidden rounded-[1.1rem] bg-black/20 sm:min-h-[30rem]"
+                  style={{ touchAction: "pan-y" }}
                   onWheel={(event) => {
                     event.preventDefault();
                     adjustGalleryZoom(event.deltaY < 0 ? 0.25 : -0.25);
                   }}
                   onTouchStart={(event) => {
-                    galleryTouchStartX.current = event.touches[0]?.clientX ?? null;
+                    const startX = event.touches[0]?.clientX ?? null;
+                    galleryTouchStartX.current = startX;
+                    if (galleryZoom > 1 && startX !== null) {
+                      galleryPanStartX.current = startX;
+                      galleryPanOriginX.current = galleryPanX;
+                    }
+                  }}
+                  onTouchMove={(event) => {
+                    const currentX = event.touches[0]?.clientX;
+                    const startX = galleryPanStartX.current;
+                    if (galleryZoom <= 1 || startX === null || currentX === undefined) return;
+
+                    const viewportWidth = galleryViewportRef.current?.clientWidth || 1;
+                    const maxPan = Math.max(0, (viewportWidth * (galleryZoom - 1)) / 2);
+                    const nextPan = galleryPanOriginX.current + currentX - startX;
+                    setGalleryPanX(Math.max(-maxPan, Math.min(maxPan, nextPan)));
                   }}
                   onTouchEnd={(event) => {
                     const startX = galleryTouchStartX.current;
                     const endX = event.changedTouches[0]?.clientX;
                     galleryTouchStartX.current = null;
+                    galleryPanStartX.current = null;
+                    if (galleryZoom > 1) return;
                     if (startX === null || endX === undefined || Math.abs(endX - startX) < 45) return;
                     changeGalleryImage(endX < startX ? 1 : -1);
                   }}
-                  onDoubleClick={() => setGalleryZoom((zoom) => zoom === 1 ? 2 : 1)}
+                  onTouchCancel={() => {
+                    galleryTouchStartX.current = null;
+                    galleryPanStartX.current = null;
+                  }}
+                  onDoubleClick={() => {
+                    setGalleryZoom((zoom) => {
+                      const nextZoom = zoom === 1 ? 2 : 1;
+                      if (nextZoom === 1) setGalleryPanX(0);
+                      return nextZoom;
+                    });
+                  }}
                 >
                   <Image
                     src={currentColorImages[activeImageIndex] || currentColorImages[0]}
@@ -803,7 +845,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                     fill
                     sizes="(max-width: 640px) 100vw, 90vw"
                     className="select-none object-contain p-2 transition-transform duration-200 sm:p-6"
-                    style={{ transform: `scale(${galleryZoom})` }}
+                    style={{ transform: `translate3d(${galleryPanX}px, 0, 0) scale(${galleryZoom})`, touchAction: "none" }}
                     draggable={false}
                   />
 
@@ -842,6 +884,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                         onClick={() => {
                           setActiveImageIndex(index);
                           setGalleryZoom(1);
+                          setGalleryPanX(0);
                         }}
                         aria-label={lang === "ar" ? `عرض الصورة ${index + 1}` : `View image ${index + 1}`}
                         aria-current={index === activeImageIndex ? "true" : undefined}
