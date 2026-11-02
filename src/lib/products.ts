@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import prisma from "@/lib/prisma";
 import { ProductWithVariants } from "@/components/ProductCard";
 import {
@@ -60,6 +61,104 @@ function enrichCatalogProduct(
   };
 }
 
+const PRODUCT_CACHE_SECONDS = 60;
+const PRODUCT_VARIANT_SELECT = {
+  id: true,
+  productId: true,
+  size: true,
+  stock: true,
+  price: true,
+  compareAtPrice: true,
+  wholesalePrice: true,
+  additionalCost: true,
+} as const;
+
+const PRODUCT_SELECT = {
+  id: true,
+  slug: true,
+  name: true,
+  description: true,
+  sku: true,
+  price: true,
+  compareAtPrice: true,
+  category: true,
+  subcategory: true,
+  brand: true,
+  color: true,
+  images: true,
+  rating: true,
+  reviewsCount: true,
+  variants: { select: PRODUCT_VARIANT_SELECT },
+} as const;
+
+type SelectedProduct = Awaited<ReturnType<typeof fetchActiveProducts>>[number];
+
+async function fetchActiveProducts() {
+  return prisma.product.findMany({
+    where: { status: "active" },
+    select: PRODUCT_SELECT,
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+function serializeProduct(product: SelectedProduct): ProductWithVariants {
+  return enrichCatalogProduct({
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    description: product.description,
+    sku: product.sku,
+    price: Number(product.price),
+    compareAtPrice: product.compareAtPrice == null ? null : Number(product.compareAtPrice),
+    category: product.category,
+    subcategory: product.subcategory,
+    images: product.images,
+    brand: product.brand || undefined,
+    color: product.color,
+    rating: Number(product.rating),
+    reviewsCount: product.reviewsCount,
+    variants: product.variants.map((variant) => ({
+      id: variant.id,
+      productId: variant.productId,
+      size: variant.size,
+      stock: Number(variant.stock),
+      price: variant.price == null ? null : Number(variant.price),
+      compareAtPrice: variant.compareAtPrice == null ? null : Number(variant.compareAtPrice),
+      wholesalePrice: variant.wholesalePrice == null ? null : Number(variant.wholesalePrice),
+      additionalCost: variant.additionalCost == null ? null : Number(variant.additionalCost),
+    })),
+  });
+}
+
+const getCachedActiveProducts = unstable_cache(
+  async () => (await fetchActiveProducts()).map(serializeProduct),
+  ["deroma-active-products-v2"],
+  { revalidate: PRODUCT_CACHE_SECONDS, tags: ["products"] },
+);
+
+const getCachedProductIndex = unstable_cache(
+  async () => prisma.product.findMany({
+    where: { status: "active" },
+    select: { id: true, slug: true, name: true },
+  }),
+  ["deroma-active-product-index-v2"],
+  { revalidate: PRODUCT_CACHE_SECONDS, tags: ["products"] },
+);
+
+function getCachedProductById(id: string) {
+  return unstable_cache(
+    async () => {
+      const product = await prisma.product.findUnique({
+        where: { id },
+        select: PRODUCT_SELECT,
+      });
+      return product ? serializeProduct(product) : null;
+    },
+    ["deroma-product-by-id-v2", id],
+    { revalidate: PRODUCT_CACHE_SECONDS, tags: ["products", `product:${id}`] },
+  )();
+}
+
 export const FALLBACK_PRODUCTS: ProductWithVariants[] = CATALOG_PRODUCTS.map(
   toProductWithVariants,
 );
@@ -73,44 +172,36 @@ export { getProductPath };
 
 export const getActiveProducts = cache(async function getActiveProducts(): Promise<ProductWithVariants[]> {
   try {
-    const dbProducts = await prisma.product.findMany({
-      where: { status: "active" },
-      include: { variants: true },
-      orderBy: { createdAt: "desc" },
-    });
-
-    return dbProducts.map((p) =>
-      enrichCatalogProduct({
-        id: p.id,
-        name: p.name,
-        description: p.description,
-        sku: p.sku,
-        price: Number(p.price),
-        compareAtPrice: p.compareAtPrice == null ? null : Number(p.compareAtPrice),
-        category: p.category,
-        subcategory: p.subcategory,
-        images: p.images,
-        brand: p.brand || undefined,
-        color: p.color,
-        rating: Number(p.rating),
-        reviewsCount: p.reviewsCount,
-        variants: p.variants.map((v) => ({
-          id: v.id,
-          productId: v.productId,
-          size: v.size,
-          stock: Number(v.stock),
-          price: v.price == null ? null : Number(v.price),
-          compareAtPrice: v.compareAtPrice == null ? null : Number(v.compareAtPrice),
-          wholesalePrice: v.wholesalePrice == null ? null : Number(v.wholesalePrice),
-          additionalCost: v.additionalCost == null ? null : Number(v.additionalCost),
-        })),
-      }),
-    );
+    return await getCachedActiveProducts();
   } catch (error) {
     console.warn("Database connection issue while loading products:", error);
   }
 
   return canUseFallbackCatalog ? FALLBACK_PRODUCTS : [];
+});
+
+export const getProductsByIds = cache(async function getProductsByIds(ids: string[]): Promise<ProductWithVariants[]> {
+  const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
+  if (!uniqueIds.length) return [];
+
+  try {
+    const getCachedRelatedProducts = unstable_cache(
+      async () => (await prisma.product.findMany({
+        where: { id: { in: uniqueIds }, status: "active" },
+        select: PRODUCT_SELECT,
+      })).map(serializeProduct),
+      ["deroma-related-products-v2", ...uniqueIds.slice().sort()],
+      { revalidate: PRODUCT_CACHE_SECONDS, tags: ["products"] },
+    );
+    const products = await getCachedRelatedProducts();
+    return uniqueIds.flatMap((id) => {
+      const product = products.find((candidate) => candidate.id === id);
+      return product ? [product] : [];
+    });
+  } catch (error) {
+    console.warn("Database connection issue while loading related products:", error);
+    return [];
+  }
 });
 
 export const getProductById = cache(async function getProductById(
@@ -119,77 +210,22 @@ export const getProductById = cache(async function getProductById(
   const fallbackProduct = FALLBACK_PRODUCTS.find((p) => p.id === id);
 
   try {
-    const product = await prisma.product.findUnique({
-      where: { id },
-      include: { variants: true },
-    });
+    const product = await getCachedProductById(id);
 
     if (product) {
-      return enrichCatalogProduct({
-        id: product.id,
-        slug: product.slug,
-        name: product.name,
-        description: product.description,
-        sku: product.sku,
-        price: Number(product.price),
-        compareAtPrice: product.compareAtPrice == null ? null : Number(product.compareAtPrice),
-        category: product.category,
-        subcategory: product.subcategory,
-        images: product.images,
-        brand: product.brand || undefined,
-        color: product.color,
-        rating: Number(product.rating),
-        reviewsCount: product.reviewsCount,
-        variants: product.variants.map((v) => ({
-          id: v.id,
-          productId: v.productId,
-          size: v.size,
-          stock: Number(v.stock),
-          price: v.price == null ? null : Number(v.price),
-          compareAtPrice: v.compareAtPrice == null ? null : Number(v.compareAtPrice),
-          wholesalePrice: v.wholesalePrice == null ? null : Number(v.wholesalePrice),
-          additionalCost: v.additionalCost == null ? null : Number(v.additionalCost),
-        })),
-      });
+      return product;
     }
   } catch (error) {
     console.warn("Database error during getProductById:", error);
   }
 
   try {
-    const products = await prisma.product.findMany({
-      where: { status: "active" },
-      include: { variants: true },
-    });
+    const products = await getCachedProductIndex();
     const matchedProduct = products.find(
       (product) => slugifyProductName(product.name) === id,
     );
     if (matchedProduct) {
-      return enrichCatalogProduct({
-        id: matchedProduct.id,
-        name: matchedProduct.name,
-        description: matchedProduct.description,
-        sku: matchedProduct.sku,
-        price: Number(matchedProduct.price),
-        compareAtPrice: matchedProduct.compareAtPrice == null ? null : Number(matchedProduct.compareAtPrice),
-        category: matchedProduct.category,
-        subcategory: matchedProduct.subcategory,
-        images: matchedProduct.images,
-        brand: matchedProduct.brand || undefined,
-        color: matchedProduct.color,
-        rating: Number(matchedProduct.rating),
-        reviewsCount: matchedProduct.reviewsCount,
-        variants: matchedProduct.variants.map((variant) => ({
-          id: variant.id,
-          productId: variant.productId,
-          size: variant.size,
-          stock: Number(variant.stock),
-          price: variant.price == null ? null : Number(variant.price),
-          compareAtPrice: variant.compareAtPrice == null ? null : Number(variant.compareAtPrice),
-          wholesalePrice: variant.wholesalePrice == null ? null : Number(variant.wholesalePrice),
-          additionalCost: variant.additionalCost == null ? null : Number(variant.additionalCost),
-        })),
-      });
+      return await getCachedProductById(matchedProduct.id);
     }
   } catch (error) {
     console.warn("Database error during slug product lookup:", error);

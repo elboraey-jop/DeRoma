@@ -3,7 +3,9 @@ import { getActiveProducts } from "@/lib/products";
 import ShopClient from "@/components/ShopClient";
 import prisma from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
+// Keep the catalog route cacheable so navigation and prefetching do not wait
+// for a fresh database round-trip on every visit.
+export const revalidate = 60;
 
 export default async function ShopPage() {
   let products: any[] = [];
