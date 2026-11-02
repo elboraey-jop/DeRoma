@@ -16,44 +16,116 @@ interface ShopClientProps {
   catalogColors?: Array<{ name: string; value: string | null }>;
 }
 
+const COLOR_HEX: Record<string, string> = {
+  "أبيض": "#FFFFFF",
+  white: "#FFFFFF",
+  "full-white": "#FFFFFF",
+  "بيج": "#E8D9C5",
+  beige: "#E8D9C5",
+  "أسود": "#111111",
+  black: "#111111",
+  "أحمر": "#942E3A",
+  red: "#A61F24",
+  burgundy: "#6F1F2D",
+  cream: "#E7DDC7",
+  "cream-burgundy": "#E7DDC7",
+  grey: "#8E8E86",
+  gray: "#8E8E86",
+  navy: "#1F365D",
+  "navy-blue": "#1F365D",
+  blue: "#3D91C9",
+  "baby-blue": "#5EAAD9",
+  "pastel-pink": "#F0B8B8",
+  silver: "#C4C8CE",
+  "ذهبي": "#D4AF37",
+  gold: "#D4AF37",
+  "بني": "#5C4033",
+  brown: "#5C4033",
+  "shadow-brown": "#5C4033",
+  "وردي": "#E8A7A1",
+  pink: "#E8A7A1",
+  green: "#215E34",
+  purple: "#8B6CC7",
+  orange: "#D87932",
+  yellow: "#E5C35B",
+};
+
 function getColorHex(colorName: string): string {
-  switch (colorName) {
-    case "أبيض":
-    case "White":
-      return "#FFFFFF";
-    case "بيج":
-    case "Beige":
-      return "#E8D9C5";
-    case "أسود":
-    case "Black":
-      return "#111111";
-    case "أحمر":
-    case "Red":
-      return "#942E3A";
-    case "Burgundy":
-      return "#6F1F2D";
-    case "Cream Burgundy":
-      return "#E7DDC7";
-    case "Grey":
-      return "#8E8E86";
-    case "Navy":
-      return "#1F365D";
-    case "Pastel Pink":
-      return "#F0B8B8";
-    case "Silver":
-      return "#C4C8CE";
-    case "ذهبي":
-    case "Gold":
-      return "#D4AF37";
-    case "بني":
-    case "Brown":
-      return "#5C4033";
-    case "وردي":
-    case "Pink":
-      return "#E8A7A1";
-    default:
-      return "#CCCCCC";
+  const normalized = colorName.trim().toLowerCase().replace(/[–—]/g, "-").replace(/\s+/g, "-");
+  const exact = COLOR_HEX[normalized];
+  if (exact) return exact;
+
+  const colorKeys = Object.keys(COLOR_HEX).sort((a, b) => b.length - a.length);
+  const colors: string[] = [];
+  let remaining = normalized;
+  while (remaining) {
+    const key = colorKeys.find((candidate) =>
+      remaining === candidate || remaining.startsWith(`${candidate}-`),
+    );
+    if (key) {
+      colors.push(COLOR_HEX[key]);
+      remaining = remaining.slice(key.length).replace(/^[-/&,\s]+/, "");
+      continue;
+    }
+    remaining = remaining.replace(/^[^-\/&,\s]+[-\/&,\s]*/, "");
   }
+
+  if (colors.length === 1) return colors[0];
+  if (colors.length > 1) {
+    const step = 100 / colors.length;
+    const stops = colors.flatMap((color, index) => {
+      const start = `${index * step}%`;
+      const end = `${(index + 1) * step}%`;
+      return [`${color} ${start}`, `${color} ${end}`];
+    });
+    return `linear-gradient(135deg, ${stops.join(", ")})`;
+  }
+
+  return "#CCCCCC";
+}
+
+const PRIMARY_COLOR_OVERRIDES: Record<string, string> = {
+  "beige-grey": "Grey",
+  "full-white": "White",
+  "navy-blue": "Navy",
+  "shadow-brown": "Brown",
+};
+
+const BASE_COLOR_NAMES: Record<string, string> = {
+  white: "White",
+  beige: "Beige",
+  black: "Black",
+  red: "Red",
+  burgundy: "Burgundy",
+  cream: "Cream",
+  grey: "Grey",
+  gray: "Grey",
+  navy: "Navy",
+  blue: "Blue",
+  "baby-blue": "Baby-Blue",
+  silver: "Silver",
+  gold: "Gold",
+  brown: "Brown",
+  pink: "Pink",
+  green: "Green",
+  purple: "Purple",
+  orange: "Orange",
+  yellow: "Yellow",
+  "pastel-pink": "Pastel-Pink",
+};
+
+function getPrimaryFilterColor(colorName: string): string {
+  const normalized = colorName.trim().toLowerCase().replace(/[–—]/g, "-").replace(/\s+/g, "-");
+  if (!normalized) return colorName;
+
+  const override = PRIMARY_COLOR_OVERRIDES[normalized];
+  if (override) return override;
+
+  const exactBaseColor = BASE_COLOR_NAMES[normalized];
+  if (exactBaseColor) return exactBaseColor;
+
+  const firstPart = normalized.split(/[-/&]+/).find(Boolean) || normalized;
+  return BASE_COLOR_NAMES[firstPart] || colorName.trim();
 }
 
 export default function ShopClient({ initialProducts = [], catalogColors = [] }: ShopClientProps) {
@@ -159,17 +231,31 @@ export default function ShopClient({ initialProducts = [], catalogColors = [] }:
 
   const allColors = useMemo(() => {
     const colors = new Set<string>();
-    catalogColors.forEach((color) => { if (color.name.trim()) colors.add(color.name.trim()); });
-    initialProducts.forEach((p) => { if (p.color) colors.add(p.color); });
+    catalogColors.forEach((color) => {
+      if (color.name.trim()) colors.add(getPrimaryFilterColor(color.name));
+    });
+    initialProducts.forEach((p) => {
+      if (p.color) colors.add(getPrimaryFilterColor(p.color));
+    });
     return Array.from(colors);
   }, [catalogColors, initialProducts]);
 
   const catalogColorHex = useMemo(
-    () => new Map(catalogColors.filter((color) => color.value).map((color) => [color.name.toLowerCase(), color.value as string])),
+    () => new Map(
+      catalogColors
+        .filter((color) => {
+          const normalizedName = color.name.trim().toLowerCase().replace(/\s+/g, "-");
+          return color.value && getPrimaryFilterColor(color.name).toLowerCase() === normalizedName;
+        })
+        .map((color) => [getPrimaryFilterColor(color.name).toLowerCase(), color.value as string]),
+    ),
     [catalogColors],
   );
 
-  const getFilterColorHex = (color: string) => catalogColorHex.get(color.toLowerCase()) || getColorHex(color);
+  const getFilterColorHex = (color: string) => {
+    const isComposite = /[-/&]/.test(color.trim());
+    return isComposite ? getColorHex(color) : catalogColorHex.get(color.toLowerCase()) || getColorHex(color);
+  };
 
   const filteredProducts = useMemo(() => {
     let result = [...initialProducts];
@@ -201,7 +287,7 @@ export default function ShopClient({ initialProducts = [], catalogColors = [] }:
 
     if (selectedColors.length > 0) {
       result = result.filter((p) =>
-        p.color ? selectedColors.includes(p.color) : false
+        p.color ? selectedColors.includes(getPrimaryFilterColor(p.color)) : false
       );
     }
 
@@ -415,7 +501,7 @@ export default function ShopClient({ initialProducts = [], catalogColors = [] }:
                     className={`h-8 w-8 rounded-full border-2 transition-all flex items-center justify-center ${
                       isSelected ? "scale-110 border-[#D8B46A] ring-2 ring-[#D8B46A] ring-offset-2" : "border-stone-200"
                     }`}
-                    style={{ backgroundColor: hex }}
+                    style={{ background: hex }}
                     title={color}
                   >
                     {isSelected && <Check className={`h-3.5 w-3.5 ${color === "أبيض" || color === "White" ? "text-[#942E3A]" : "text-white"}`} />}
@@ -584,7 +670,7 @@ export default function ShopClient({ initialProducts = [], catalogColors = [] }:
                           className={`h-9 w-9 rounded-full border-2 transition-all flex items-center justify-center ${
                             isSelected ? "scale-110 border-[#D8B46A] ring-2 ring-[#D8B46A] ring-offset-2" : "border-stone-200"
                           }`}
-                          style={{ backgroundColor: hex }}
+                          style={{ background: hex }}
                           title={color}
                         >
                           {isSelected && <Check className={`h-4 w-4 ${color === "أبيض" || color === "White" ? "text-[#942E3A]" : "text-white"}`} />}

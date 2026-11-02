@@ -44,6 +44,7 @@ const COLOR_ALIASES: Record<string, string> = {
   beige: "Beige",
   baige: "Beige",
   biege: "Beige",
+  biage: "Beige",
   cream: "Cream",
   grey: "Grey",
   gray: "Grey",
@@ -193,6 +194,14 @@ function normalizeProduct(product: { name: string; brand: string | null; color: 
 
 function normalizeModel(value: string) {
   return value
+    .replace(/\bAd\s+Star\b/gi, "Adistar")
+    .replace(/\bAd\s+Zero\b/gi, "Adizero")
+    .replace(/\bSampa\b/gi, "Samba")
+    .replace(/\bSuper\s+Star\b/gi, "Superstar")
+    .replace(/\bMUI\s+MUI\b/gi, "Miu Miu")
+    .replace(/\bCloud\s+Tilt\b/gi, "Cloudtilt")
+    .replace(/\bKnu\s+School\b/gi, "Knu Skool")
+    .replace(/\bTekno\s+M2K\b/gi, "M2K Tekno")
     .replace(/\bNika\b/gi, "Nike")
     .replace(/\bSpazial\b/gi, "Spezial")
     .replace(/\bFourm\b/gi, "Forum")
@@ -203,7 +212,7 @@ function normalizeModel(value: string) {
     .replace(/\bv2k\b/gi, "V2K")
     .replace(/\bp600\b/gi, "P600")
     .replace(/\bsb\b/gi, "SB")
-    .replace(/\bsp\b/gi, "SP")
+    .replace(/\bsp\b/gi, "SB")
     .replace(/\s+/g, " ")
     .trim();
 }
