@@ -73,88 +73,9 @@ export const DEFAULT_HERO_BANNERS: HeroBanner[] = [
   },
 ];
 
-export const DEFAULT_HOME_REVIEWS: HomeReview[] = [
-  {
-    id: "1",
-    brand: "NEW BALANCE",
-    initials: "NB",
-    model: "530 Beige",
-    rating: 5,
-    quote: "The fit is perfect and the quality feels even better in person. DeRoma made choosing my everyday pair effortless.",
-    name: "Mariam A.",
-    detail: "Verified DeRoma customer",
-  },
-  {
-    id: "2",
-    brand: "ADIDAS",
-    initials: "AD",
-    model: "Handball Spezial",
-    rating: 4,
-    quote: "Exactly the pair I was looking for. The delivery was quick, the packaging was beautiful, and the shoes are so comfortable.",
-    name: "Youssef M.",
-    detail: "Verified DeRoma customer",
-  },
-  {
-    id: "3",
-    brand: "ASICS",
-    initials: "AS",
-    model: "Gel-Kayano 14",
-    rating: 5,
-    quote: "Finally found a stylish running shoe that feels light all day. The sizing guide was spot on.",
-    name: "Nour K.",
-    detail: "Verified DeRoma customer",
-  },
-  {
-    id: "4",
-    brand: "NIKE",
-    initials: "NK",
-    model: "V2K Run",
-    rating: 4,
-    quote: "The whole experience feels premium—from browsing the collection to wearing my new favourite sneakers.",
-    name: "Omar H.",
-    detail: "Verified DeRoma customer",
-  },
-  {
-    id: "5",
-    brand: "PUMA",
-    initials: "PM",
-    model: "Palermo Vintage",
-    rating: 3,
-    quote: "A beautiful everyday sneaker with a really easy-to-style colourway. I have been wearing it nonstop.",
-    name: "Salma R.",
-    detail: "Verified DeRoma customer",
-  },
-  {
-    id: "6",
-    brand: "ADIDAS",
-    initials: "AD",
-    model: "Campus 00s",
-    rating: 5,
-    quote: "The sizing advice helped me choose confidently, and the pair arrived exactly as pictured.",
-    name: "Jana E.",
-    detail: "Verified DeRoma customer",
-  },
-  {
-    id: "7",
-    brand: "NEW BALANCE",
-    initials: "NB",
-    model: "327 Burgundy",
-    rating: 4,
-    quote: "Super light, very comfortable, and the burgundy detail makes the whole outfit feel more special.",
-    name: "Farah S.",
-    detail: "Verified DeRoma customer",
-  },
-  {
-    id: "8",
-    brand: "NIKE",
-    initials: "NK",
-    model: "Court Vision Low",
-    rating: 3,
-    quote: "Clean design and a comfortable sole for daily wear. The delivery experience was smooth from start to finish.",
-    name: "Lina M.",
-    detail: "Verified DeRoma customer",
-  },
-];
+// Reviews are sourced from approved database records only. There is no demo
+// or hard-coded review fallback when the database has no reviews.
+export const DEFAULT_HOME_REVIEWS: HomeReview[] = [];
 
 export const DEFAULT_SITE_SETTINGS: SiteSettingsData = {
   phone: "+20 102 345 6789",
@@ -240,7 +161,7 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
       aboutParagraph2: sanitizeStoreCopy(record.aboutParagraph2 || DEFAULT_SITE_SETTINGS.aboutParagraph2),
       aboutImage: record.aboutImage || DEFAULT_SITE_SETTINGS.aboutImage,
       heroBanners: sanitizedHeroBanners.length > 0 ? sanitizedHeroBanners : DEFAULT_HERO_BANNERS,
-      homeReviews: sanitizedHomeReviews.length > 0 ? sanitizedHomeReviews : DEFAULT_HOME_REVIEWS,
+      homeReviews: sanitizedHomeReviews,
       forYouProductIds: record.forYouProductIds || [],
       bestSellerProductIds: record.bestSellerProductIds || [],
     };

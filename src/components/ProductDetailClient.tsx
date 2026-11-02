@@ -360,13 +360,12 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
     router.push("/checkout");
   };
 
-  const ratingBreakdown = [
-    { stars: 5, percentage: 82 },
-    { stars: 4, percentage: 12 },
-    { stars: 3, percentage: 4 },
-    { stars: 2, percentage: 1 },
-    { stars: 1, percentage: 1 },
-  ];
+  const ratingBreakdown = [5, 4, 3, 2, 1].map((stars) => ({
+    stars,
+    percentage: reviews.length
+      ? Math.round((reviews.filter((review) => review.rating === stars).length / reviews.length) * 100)
+      : 0,
+  }));
 
   return (
     <div className="pdp-page w-full flex flex-col pb-16 sm:pb-24 bg-[#FFF9EB] text-[#942E3A]" dir={dir}>
@@ -1142,18 +1141,18 @@ function ReviewsSection({
         </div>
 
         {/* Rating Summary - Horizontal on mobile */}
-        <div className="flex flex-col sm:flex-row sm:items-stretch gap-4 sm:gap-6">
+        {actualReviewsCount > 0 && <div className="flex flex-col sm:flex-row sm:items-stretch gap-4 sm:gap-6">
           {/* Overall Rating */}
           <div className="flex items-center gap-4 sm:flex-col sm:items-center sm:justify-center p-4 sm:p-6 rounded-2xl bg-[#F2E7D5]/50 border border-[#D8B46A]/30 sm:min-w-[180px]">
             <span className="text-5xl sm:text-6xl font-extrabold text-[#942E3A] font-playfair leading-none">
-              {product.rating ? product.rating.toFixed(1) : "4.8"}
+              {product.rating && Number(product.rating) > 0 ? Number(product.rating).toFixed(1) : "—"}
             </span>
             <div>
               <div className="flex text-amber-400">
-                {[...Array(Math.round(product.rating || 4.8))].map((_, i) => (
+                {[...Array(Math.round(Number(product.rating) || 0))].map((_, i) => (
                   <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 fill-amber-400 text-amber-400" />
                 ))}
-                {[...Array(5 - Math.round(product.rating || 4.8))].map((_, i) => (
+                {[...Array(5 - Math.round(Number(product.rating) || 0))].map((_, i) => (
                   <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 text-amber-200" />
                 ))}
               </div>
@@ -1181,7 +1180,7 @@ function ReviewsSection({
               </div>
             ))}
           </div>
-        </div>
+        </div>}
 
         {/* Horizontal Swipeable Reviews Carousel */}
         {reviews.length === 0 ? (
@@ -1238,7 +1237,7 @@ function ReviewsSection({
                     </div>
                   </div>
 
-                  <p className="text-xs text-[#942E3A]/80 leading-relaxed mt-3 line-clamp-4">
+                  <p dir="auto" className="font-cairo text-xs text-[#942E3A]/80 leading-6 text-start [unicode-bidi:plaintext] mt-3 line-clamp-4">
                     {review.comment}
                   </p>
                 </div>

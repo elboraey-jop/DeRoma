@@ -19,7 +19,6 @@ import ProductCard, { ProductWithVariants } from "./ProductCard";
 
 import { useSiteSettings } from "@/providers/SiteSettingsProvider";
 import { useStoreI18n } from "@/providers/StoreI18nContext";
-import { DEFAULT_HOME_REVIEWS } from "@/lib/siteSettings";
 import { useIsMobile } from "@/lib/useIsMobile";
 
 export type HomeReviewItem = {
@@ -499,7 +498,7 @@ export default function HomeClient({
                                 <Quote className="h-5 w-5 rotate-180 text-[#942E3A]/20" />
                               </div>
 
-                              <p className="font-playfair text-sm leading-snug">
+                              <p dir="auto" className="font-cairo text-sm leading-7 text-start [unicode-bidi:plaintext]">
                                 “{localizedReviewQuotes[activeReviewData.id || ""] || activeReviewData.quote}”
                               </p>
 
@@ -573,7 +572,7 @@ export default function HomeClient({
                                 </div>
                                 <Quote className="h-6 w-6 rotate-180 text-[#942E3A]/20" />
                               </div>
-                              <p className="max-w-[540px] font-playfair text-base leading-snug sm:text-lg">“{localizedReviewQuotes[review.id || ""] || review.quote}”</p>
+                              <p dir="auto" className="max-w-[540px] font-cairo text-base leading-7 text-start [unicode-bidi:plaintext] sm:text-lg">“{localizedReviewQuotes[review.id || ""] || review.quote}”</p>
                               <div className="flex items-center justify-between gap-3 text-[10px]">
                                 <span className="font-bold tracking-[0.14em] text-[#D8B46A]">{review.brand}</span>
                                 <span className="text-[#942E3A]/55">{lang === "ar" ? (review.detail.toLowerCase().includes("verified") ? reviewSectionCopy.verifiedCustomer : reviewSectionCopy.customer) : review.detail}</span>

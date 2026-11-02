@@ -54,12 +54,6 @@ const DEMO_ORDERS = [
   { orderNumber: "DR-0001", customerName: "Laila Omar", customerPhone: "01122223333", governorate: "Cairo", city: "Heliopolis", address: "Baghdad Street, Korba", status: "delivered", shippingCost: 60, discountAmount: 0, daysAgo: 28, productIndexes: [11, 12] },
 ];
 
-const REVIEW_LINES = [
-  ["Comfortable from the first wear", "The fit is beautiful and the cushioning made a full day of walking easy."],
-  ["Exactly like the photos", "The color is elegant, delivery was quick, and the packaging felt very thoughtful."],
-  ["My new everyday pair", "Lightweight, easy to style, and the sizing guide was accurate."],
-];
-
 async function main() {
   if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
     const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 12);
@@ -123,8 +117,8 @@ async function main() {
         badge: product.compareAtPrice ? "Sale" : product.rating >= 4.8 ? "Best seller" : "New arrival",
         featured: product.rating >= 4.8,
         bestSeller: product.rating >= 4.7,
-        rating: product.rating,
-        reviewsCount: 3,
+        rating: 0,
+        reviewsCount: 0,
         lowStockLimit: 2,
         images: [product.image],
         color: product.color,
@@ -146,8 +140,6 @@ async function main() {
         badge: product.compareAtPrice ? "Sale" : product.rating >= 4.8 ? "Best seller" : "New arrival",
         featured: product.rating >= 4.8,
         bestSeller: product.rating >= 4.7,
-        rating: product.rating,
-        reviewsCount: 3,
         lowStockLimit: 2,
         images: [product.image],
         color: product.color,
@@ -194,17 +186,6 @@ async function main() {
   const variantsByProduct = new Map<string, (typeof variants)[number]>();
   for (const variant of variants) {
     if (!variantsByProduct.has(variant.productId) && variant.stock > 0) variantsByProduct.set(variant.productId, variant);
-  }
-
-  for (const product of CATALOG_PRODUCTS) {
-    for (let index = 0; index < REVIEW_LINES.length; index += 1) {
-      const [title, body] = REVIEW_LINES[index];
-      await prisma.review.upsert({
-        where: { id: `${product.id}-review-${index + 1}` },
-        create: { id: `${product.id}-review-${index + 1}`, productId: product.id, customerName: ["Yasmin Khaled", "Sara Ahmed", "Nour Mohamed"][index], customerPhone: ["01012345678", "01123456780", "01234567890"][index], rating: index === 2 ? 4 : 5, title, body, status: "approved", verifiedPurchase: true },
-        update: { customerName: ["Yasmin Khaled", "Sara Ahmed", "Nour Mohamed"][index], rating: index === 2 ? 4 : 5, title, body, status: "approved", verifiedPurchase: true },
-      });
-    }
   }
 
   for (const orderSeed of DEMO_ORDERS) {

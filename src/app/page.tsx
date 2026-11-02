@@ -44,6 +44,7 @@ export default async function HomePage() {
             select: {
               name: true,
               category: true,
+              brand: true,
             },
           },
         },
@@ -56,7 +57,7 @@ export default async function HomePage() {
 
   const dbHomeReviews = rawHomeReviews.map((r) => ({
     id: r.id,
-    brand: r.product.category ? r.product.category.toUpperCase() : "DE ROMA",
+    brand: r.product.brand || (r.product.category ? r.product.category.toUpperCase() : "DE ROMA"),
     initials: r.customerName.slice(0, 2).toUpperCase(),
     model: r.product.name,
     rating: r.rating,

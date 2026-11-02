@@ -19,6 +19,7 @@
     "db:normalize-orders": "tsx scripts/normalize-orders.ts",
     "db:configure-shipping": "tsx scripts/configure-shipping.ts",
     "db:normalize-product-catalog": "tsx scripts/normalize-product-catalog.ts",
+    "db:replace-feedback": "tsx scripts/replace-customer-feedback.ts",
     "worker": "tsx src/worker.ts"
   },
   "dependencies": {
