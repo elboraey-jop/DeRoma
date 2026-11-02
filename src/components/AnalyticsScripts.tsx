@@ -10,6 +10,8 @@ declare global {
     gtag?: (...args: unknown[]) => void;
     fbq?: (...args: unknown[]) => void;
     _fbq?: unknown;
+    __deromaMetaPixelScriptLoaded?: boolean;
+    __deromaMetaPixelInitialized?: boolean;
     clarity?: (...args: unknown[]) => void;
   }
 }
@@ -27,7 +29,7 @@ function getConfiguredAnalyticsId(value?: string) {
 }
 
 const gaMeasurementId = getConfiguredAnalyticsId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID);
-const metaPixelId = getConfiguredAnalyticsId(process.env.NEXT_PUBLIC_META_PIXEL_ID);
+const metaPixelId = getConfiguredAnalyticsId(process.env.NEXT_PUBLIC_META_PIXEL_ID) ?? "2046371669400378";
 const clarityId = getConfiguredAnalyticsId(process.env.NEXT_PUBLIC_CLARITY_ID);
 
 function AnalyticsPageViews() {
@@ -91,20 +93,48 @@ export default function AnalyticsScripts() {
       ) : null}
 
       {metaPixelId ? (
-        <Script id="meta-pixel" strategy="afterInteractive">
-          {`
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${metaPixelId}');
-            fbq('track', 'PageView');
-          `}
-        </Script>
+        <>
+          <Script id="meta-pixel" strategy="afterInteractive">
+            {`
+            (function(w, d) {
+              var n = w.fbq;
+              if (!n) {
+                n = w.fbq = function() {
+                  n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+                };
+                n.push = n;
+                n.loaded = true;
+                n.version = '2.0';
+                n.queue = [];
+              }
+
+              if (!w.__deromaMetaPixelScriptLoaded && !d.querySelector('script[src*="connect.facebook.net/en_US/fbevents.js"]')) {
+                var t = d.createElement('script');
+                t.async = true;
+                t.src = 'https://connect.facebook.net/en_US/fbevents.js';
+                var s = d.getElementsByTagName('script')[0];
+                s.parentNode.insertBefore(t, s);
+                w.__deromaMetaPixelScriptLoaded = true;
+              }
+
+              if (!w.__deromaMetaPixelInitialized) {
+                n('init', '${metaPixelId}');
+                n('track', 'PageView');
+                w.__deromaMetaPixelInitialized = true;
+              }
+            })(window, document);
+            `}
+          </Script>
+          <noscript>
+            <img
+              height="1"
+              width="1"
+              style={{ display: "none" }}
+              src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
+              alt=""
+            />
+          </noscript>
+        </>
       ) : null}
 
       <AnalyticsPageViews />

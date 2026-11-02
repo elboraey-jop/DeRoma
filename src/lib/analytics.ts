@@ -33,6 +33,19 @@ declare global {
 }
 
 const DEFAULT_CURRENCY = "EGP";
+const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim() || "2046371669400378";
+
+function ensureMetaPixelQueue() {
+  if (typeof window === "undefined" || !metaPixelId) return undefined;
+  if (window.fbq) return window.fbq;
+
+  const queuedFbq = ((...args: unknown[]) => {
+    queuedFbq.queue?.push(args);
+  }) as ((...args: unknown[]) => void) & { queue?: unknown[][] };
+  queuedFbq.queue = [];
+  window.fbq = queuedFbq;
+  return queuedFbq;
+}
 
 function toGaItems(items: AnalyticsCartItem[] = []) {
   return items.map((item) => ({
@@ -75,12 +88,13 @@ function trackGaEvent(name: string, payload: Record<string, unknown>) {
 }
 
 function trackMetaEvent(name: string, payload: Record<string, unknown>, eventId?: string) {
-  if (typeof window === "undefined" || !window.fbq) return;
+  const fbq = ensureMetaPixelQueue();
+  if (!fbq) return;
 
   if (eventId) {
-    window.fbq("track", name, payload, { eventID: eventId });
+    fbq("track", name, payload, { eventID: eventId });
   } else {
-    window.fbq("track", name, payload);
+    fbq("track", name, payload);
   }
 }
 
