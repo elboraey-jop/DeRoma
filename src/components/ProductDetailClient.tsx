@@ -107,6 +107,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const [galleryPanY, setGalleryPanY] = useState(0);
   const [galleryMounted, setGalleryMounted] = useState(false);
   const galleryViewportRef = useRef<HTMLDivElement>(null);
+  const relatedProductsScrollRef = useRef<HTMLDivElement>(null);
   const galleryGesture = useRef<
     | { type: "swipe"; startX: number }
     | { type: "pan"; startX: number; startY: number; originX: number; originY: number }
@@ -123,6 +124,39 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
   const isBag = product.category === "bags";
   const sizesForColor = sortVariantsByNumericSize(product.variants);
   const currentColorImages = product.images;
+
+  const handleRelatedProductsMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    const container = relatedProductsScrollRef.current;
+    if (!container || event.button !== 0) return;
+    const startX = event.pageX;
+    const initialScrollLeft = container.scrollLeft;
+    let hasMoved = false;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const distance = moveEvent.pageX - startX;
+      if (Math.abs(distance) > 4) hasMoved = true;
+      container.scrollLeft = initialScrollLeft - distance * 1.25;
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      if (hasMoved) container.dataset.dragged = "true";
+      window.setTimeout(() => {
+        delete container.dataset.dragged;
+      }, 0);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleRelatedProductsWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    const container = relatedProductsScrollRef.current;
+    if (!container || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+    event.preventDefault();
+    container.scrollLeft += event.deltaY;
+  };
 
   useEffect(() => {
     setGalleryMounted(true);
@@ -720,10 +754,14 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
       {/* Similar Products */}
       {similarProducts.length > 0 && (
         <ScrollReveal>
-          <section className="mx-auto w-full max-w-[1400px] px-4 lg:px-6 border-t border-[#D8B46A]/30 pt-8 sm:pt-12 mt-10 sm:mt-14">
+          <section className="mx-auto w-full max-w-[1400px] overflow-hidden px-4 lg:px-6 border-t border-[#D8B46A]/30 pt-8 sm:pt-12 mt-10 sm:mt-14">
             <h2 className="text-lg sm:text-xl font-extrabold text-[#942E3A] font-playfair mb-4 sm:mb-6 text-center">{t("productDetail.relatedProducts")}</h2>
             <div 
-              className="flex overflow-x-auto flex-nowrap gap-3 sm:gap-6 py-4 px-1 no-scrollbar justify-start md:justify-center"
+              ref={relatedProductsScrollRef}
+              data-lenis-prevent="true"
+              onMouseDown={handleRelatedProductsMouseDown}
+              onWheel={handleRelatedProductsWheel}
+              className="flex min-w-0 touch-pan-x cursor-grab select-none overflow-x-auto overscroll-x-contain flex-nowrap gap-3 sm:gap-6 py-4 px-1 no-scrollbar justify-start active:cursor-grabbing"
               style={{ 
                 WebkitOverflowScrolling: "touch",
                 scrollbarWidth: "none",

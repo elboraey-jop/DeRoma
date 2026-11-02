@@ -190,6 +190,7 @@ export default function Navbar({ hasAnnouncement = false }: { hasAnnouncement?: 
                   query={searchQuery}
                   open={showSearchInput}
                   onClose={() => setShowSearchInput(false)}
+                  className="lg:left-1/2 lg:right-auto lg:w-[30rem] lg:max-w-[calc(100vw-2rem)] lg:-translate-x-1/2"
                 />
               </div>
             )}
