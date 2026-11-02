@@ -54,3 +54,4 @@ Thumbs.db
 /public/uploads
 /backups
 *.sql
+!prisma/migrations/20261102190000_performance_indexes/migration.sql

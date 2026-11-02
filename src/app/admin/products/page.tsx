@@ -10,7 +10,29 @@ export default async function AdminProductsPage() {
   try {
     const [products, suppliers] = await Promise.all([
       prisma.product.findMany({
-        include: { variants: true },
+        select: {
+          id: true,
+          name: true,
+          category: true,
+          price: true,
+          wholesalePrice: true,
+          supplierId: true,
+          compareAtPrice: true,
+          status: true,
+          lowStockLimit: true,
+          images: true,
+          color: true,
+          sku: true,
+          variants: {
+            select: {
+              id: true,
+              size: true,
+              stock: true,
+              price: true,
+              wholesalePrice: true,
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
       }),
       prisma.supplier.findMany({

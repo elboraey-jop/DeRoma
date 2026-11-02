@@ -52,6 +52,9 @@ model Product {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   orderItems     OrderItem[]
+
+  @@index([status, createdAt])
+  @@index([category, status, createdAt])
 }
 
 model Supplier {
@@ -105,6 +108,7 @@ model ProductRelation {
   relatedProduct   Product @relation("ProductRelationsTo", fields: [relatedProductId], references: [id], onDelete: Cascade)
 
   @@id([productId, relatedProductId])
+  @@index([relatedProductId])
 }
 
 model ShippingZone {
@@ -185,6 +189,8 @@ model ProductVariant {
   invoiceItems PurchaseInvoiceItem[]
   inventoryLots InventoryLot[]
   auditItems StockAuditItem[]
+
+  @@index([productId, stock])
 }
 
 model Order {
@@ -215,6 +221,11 @@ model Order {
   userId         String?
   user           User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   items          OrderItem[]
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([customerPhone, createdAt])
+  @@index([userId, createdAt])
 }
 
 model PurchaseInvoice {
@@ -284,6 +295,9 @@ model OrderItem {
   quantity    Int
   price       Decimal
   unitCost    Decimal        @default(0)
+
+  @@index([productId])
+  @@index([variantId])
 }
 
 model Review {
@@ -302,6 +316,7 @@ model Review {
   updatedAt        DateTime @updatedAt
 
   @@index([productId, status])
+  @@index([status, showOnHome, createdAt])
 }
 
 model StockAudit {

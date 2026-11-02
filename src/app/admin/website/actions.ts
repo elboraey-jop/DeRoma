@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import { SiteSettingsData } from "@/lib/siteSettings";
@@ -61,4 +61,5 @@ export async function updateSiteSettingsAction(data: SiteSettingsData) {
   revalidatePath("/terms");
   revalidatePath("/refund-policy");
   revalidatePath("/admin/website");
+  revalidateTag("site-settings", "max");
 }

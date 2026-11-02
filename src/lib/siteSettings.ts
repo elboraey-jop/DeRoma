@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { unstable_cache } from "next/cache";
 
 export interface HeroBanner {
   id: string;
@@ -120,11 +121,15 @@ function sanitizeStoreCopy(value: string): string {
     .replace(/صُنع/g, "تم اختيار");
 }
 
+const getCachedSiteSettings = unstable_cache(
+  async () => prisma.siteSettings.findUnique({ where: { id: "default" } }),
+  ["deroma-site-settings-v1"],
+  { revalidate: 60, tags: ["site-settings"] },
+);
+
 export async function getSiteSettings(): Promise<SiteSettingsData> {
   try {
-    const record = await prisma.siteSettings.findUnique({
-      where: { id: "default" },
-    });
+    const record = await getCachedSiteSettings();
 
     if (!record) {
       return DEFAULT_SITE_SETTINGS;

@@ -229,7 +229,7 @@ export default function ProductCard({
         )}
 
         {/* Product Image Link */}
-        <Link prefetch={true} href={productPath} onClick={handleProductSelect} className="relative h-full w-full flex items-center justify-center">
+        <Link prefetch={false} href={productPath} onClick={handleProductSelect} className="relative h-full w-full flex items-center justify-center">
           <Image
             src={activeImage}
             alt={product.name}
@@ -264,7 +264,7 @@ export default function ProductCard({
           )}
 
           <Link
-            prefetch={true}
+            prefetch={false}
             href={productPath}
             onClick={handleProductSelect}
             className={`block text-center transition-colors group-hover:text-[#942E3A] ${

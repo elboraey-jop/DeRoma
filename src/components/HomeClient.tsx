@@ -34,10 +34,16 @@ export type HomeReviewItem = {
 
 export default function HomeClient({
   products,
+  totalProductCount = products.length,
+  homeForYouProductIds,
+  homeBestSellerProductIds,
   dbHomeReviews = [],
   showReviewsSection = true,
 }: {
   products: ProductWithVariants[];
+  totalProductCount?: number;
+  homeForYouProductIds?: string[];
+  homeBestSellerProductIds?: string[];
   dbHomeReviews?: HomeReviewItem[];
   showReviewsSection?: boolean;
 }) {
@@ -57,20 +63,22 @@ export default function HomeClient({
   const MAX_HOME_SHELF_PRODUCTS = 12;
 
   const forYouProducts = useMemo(() => {
-    return settings.forYouProductIds.length > 0
-      ? settings.forYouProductIds
+    const configuredIds = homeForYouProductIds ?? settings.forYouProductIds;
+    return configuredIds.length > 0
+      ? configuredIds
           .map((id) => products.find((p) => p.id === id))
           .filter((p): p is ProductWithVariants => Boolean(p))
       : products;
-  }, [settings.forYouProductIds, products]);
+  }, [homeForYouProductIds, settings.forYouProductIds, products]);
 
   const bestsellerProducts = useMemo(() => {
-    return settings.bestSellerProductIds.length > 0
-      ? settings.bestSellerProductIds
+    const configuredIds = homeBestSellerProductIds ?? settings.bestSellerProductIds;
+    return configuredIds.length > 0
+      ? configuredIds
           .map((id) => products.find((p) => p.id === id))
           .filter((p): p is ProductWithVariants => Boolean(p))
       : products;
-  }, [settings.bestSellerProductIds, products]);
+  }, [homeBestSellerProductIds, settings.bestSellerProductIds, products]);
 
   const displayForYouProducts = useMemo(() => {
     const list = forYouProducts.length > 0 ? forYouProducts : products;
@@ -752,7 +760,7 @@ export default function HomeClient({
                     </div>
                   ))}
 
-                  {products.length > MAX_HOME_SHELF_PRODUCTS && (
+                  {totalProductCount > MAX_HOME_SHELF_PRODUCTS && (
                     <div className="h-full w-[130px] sm:w-[170px] shrink-0 pointer-events-auto flex items-center">
                       <Link
                         href="/shop"
@@ -765,7 +773,7 @@ export default function HomeClient({
                           {lang === "ar" ? "عرض الكل" : "View All"}
                         </span>
                         <span className="text-[10px] text-[#D8B46A]">
-                          +{formatNumber(products.length - MAX_HOME_SHELF_PRODUCTS)} {lang === "ar" ? "منتج" : "more"}
+                          +{formatNumber(totalProductCount - MAX_HOME_SHELF_PRODUCTS)} {lang === "ar" ? "منتج" : "more"}
                         </span>
                       </Link>
                     </div>
@@ -807,7 +815,7 @@ export default function HomeClient({
                 </div>
               ))}
 
-              {products.length > MAX_HOME_SHELF_PRODUCTS && (
+              {totalProductCount > MAX_HOME_SHELF_PRODUCTS && (
                 <div className="h-full w-[130px] sm:w-[170px] shrink-0 pointer-events-auto flex items-center">
                   <Link
                     href="/shop"
@@ -820,7 +828,7 @@ export default function HomeClient({
                       {lang === "ar" ? "عرض الكل" : "View All"}
                     </span>
                     <span className="text-[10px] text-[#D8B46A]">
-                      +{formatNumber(products.length - MAX_HOME_SHELF_PRODUCTS)} {lang === "ar" ? "منتج" : "more"}
+                      +{formatNumber(totalProductCount - MAX_HOME_SHELF_PRODUCTS)} {lang === "ar" ? "منتج" : "more"}
                     </span>
                   </Link>
                 </div>

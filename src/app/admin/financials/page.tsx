@@ -24,7 +24,7 @@ function computeDateRange(params: {
 
   const preset =
     (params.preset as DatePreset) ||
-    (params.startDate || params.endDate || params.date ? "custom" : "this_month");
+    (params.startDate || params.endDate || params.date ? "custom" : "all");
 
   if (params.startDate && params.endDate) {
     return { preset: "custom", startDate: params.startDate, endDate: params.endDate };
@@ -126,6 +126,7 @@ export default async function FinancialsPage({
   await requireAdmin();
   const params = await searchParams;
   const timeRange = computeDateRange(params);
+  const isAllTime = timeRange.preset === "all";
 
   const startFilter = new Date(`${timeRange.startDate}T00:00:00.000`);
   const endFilter = new Date(`${timeRange.endDate}T23:59:59.999`);
@@ -144,9 +145,11 @@ export default async function FinancialsPage({
     orderBy: { createdAt: "desc" },
   });
 
-  const orders = allOrders.filter(
-    (order) => order.createdAt >= startFilter && order.createdAt <= endFilter,
-  );
+  const orders = isAllTime
+    ? allOrders
+    : allOrders.filter(
+        (order) => order.createdAt >= startFilter && order.createdAt <= endFilter,
+      );
 
   // Financial sales are recognized only after delivery. Cancelled and returned
   // orders, as well as unconfirmed online payments, therefore never enter the
@@ -200,9 +203,11 @@ export default async function FinancialsPage({
   } catch (e) {
     console.error("Expenses query error:", e);
   }
-  const expensesInRange = expensesRaw.filter(
-    (expense) => expense.date >= startFilter && expense.date <= endFilter,
-  );
+  const expensesInRange = isAllTime
+    ? expensesRaw
+    : expensesRaw.filter(
+        (expense) => expense.date >= startFilter && expense.date <= endFilter,
+      );
 
   const totalExpenses = expensesInRange
     .filter((exp) => (exp.type || "expense") !== "income")

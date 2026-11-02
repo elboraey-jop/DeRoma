@@ -165,11 +165,17 @@ export async function createOrder(input: CreateOrderInput) {
       material: string | null;
     }> = [];
 
-    for (const item of input.items) {
-      const variant = await prisma.productVariant.findUnique({
-        where: { id: item.variantId },
-        include: { product: true },
-      });
+    const resolvedItems = await Promise.all(
+      input.items.map(async (item) => ({
+        item,
+        variant: await prisma.productVariant.findUnique({
+          where: { id: item.variantId },
+          include: { product: true },
+        }),
+      })),
+    );
+
+    for (const { item, variant } of resolvedItems) {
 
       if (!variant) {
         return { success: false, error: "أحد المنتجات غير موجود في النظام." };
@@ -380,30 +386,6 @@ export async function createOrder(input: CreateOrderInput) {
       return { ...newOrder, orderNumber: formatOrderNumber(newOrder.orderSequence) };
     });
 
-    // Send exactly one order email to the owner; email failure must not undo the order.
-    await sendOrderOwnerEmail({
-      orderNumber: order.orderNumber,
-      customerName: order.customerName,
-      customerPhone: order.customerPhone,
-      customerPhone2: order.customerPhone2,
-      governorate: order.governorate,
-      city: order.city,
-      address: order.address,
-      notes: order.notes,
-      subtotalPrice: subtotal,
-      shippingCost,
-      totalPrice,
-      paymentMethod,
-      paymentSenderPhone: paymentMethod === "cod" ? null : cleanPaymentSenderPhone,
-      paymentProofStatus: paymentMethod === "cod" ? "not_required" : "awaiting_whatsapp",
-      items: dbItemsToCreate.map(({ productName, color, size, quantity, price }) => ({
-        productName,
-        color,
-        size,
-        quantity,
-        price,
-      })),
-    });
     const eventId = order.orderNumber;
     const enhancedConversionData = getGoogleEnhancedConversionData({
       email: customerSession?.email,
@@ -415,32 +397,60 @@ export async function createOrder(input: CreateOrderInput) {
       country: "EG",
     });
 
-    await sendMetaServerEvent({
-      eventName: "Purchase",
-      eventId,
-      eventSourceUrl: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://deroma.store"}/checkout/success`,
-      value: totalPrice,
-      orderNumber: order.orderNumber,
-      items: dbItemsToCreate.map((item) => ({
-        productId: item.productId,
-        productName: item.productName,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      customer: {
-        email: customerSession?.email,
-        phone: cleanPhone,
-        firstName: cleanFirstName,
-        lastName: cleanLastName,
-        city: input.city,
-        state: input.governorate,
-        country: "eg",
-        clientIpAddress,
-        clientUserAgent,
-        fbp: requestCookies.get("_fbp")?.value,
-        fbc: requestCookies.get("_fbc")?.value,
-      },
-    });
+    // Notifications and analytics are independent of the order transaction.
+    // Run them together so checkout returns as soon as both integrations finish.
+    await Promise.all([
+      // Send exactly one order email to the owner; email failure must not undo the order.
+      sendOrderOwnerEmail({
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        customerPhone2: order.customerPhone2,
+        governorate: order.governorate,
+        city: order.city,
+        address: order.address,
+        notes: order.notes,
+        subtotalPrice: subtotal,
+        shippingCost,
+        totalPrice,
+        paymentMethod,
+        paymentSenderPhone: paymentMethod === "cod" ? null : cleanPaymentSenderPhone,
+        paymentProofStatus: paymentMethod === "cod" ? "not_required" : "awaiting_whatsapp",
+        items: dbItemsToCreate.map(({ productName, color, size, quantity, price }) => ({
+          productName,
+          color,
+          size,
+          quantity,
+          price,
+        })),
+      }),
+      sendMetaServerEvent({
+        eventName: "Purchase",
+        eventId,
+        eventSourceUrl: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://deroma.store"}/checkout/success`,
+        value: totalPrice,
+        orderNumber: order.orderNumber,
+        items: dbItemsToCreate.map((item) => ({
+          productId: item.productId,
+          productName: item.productName,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        customer: {
+          email: customerSession?.email,
+          phone: cleanPhone,
+          firstName: cleanFirstName,
+          lastName: cleanLastName,
+          city: input.city,
+          state: input.governorate,
+          country: "eg",
+          clientIpAddress,
+          clientUserAgent,
+          fbp: requestCookies.get("_fbp")?.value,
+          fbc: requestCookies.get("_fbc")?.value,
+        },
+      }),
+    ]);
 
     return {
       success: true,

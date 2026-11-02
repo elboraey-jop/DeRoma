@@ -8,8 +8,39 @@ export default async function CustomersPage() {
   await requireAdmin();
   try {
     const [profiles, orders] = await Promise.all([
-      prisma.customer.findMany({ orderBy: { createdAt: "desc" } }),
-      prisma.order.findMany({ where: { status: { not: "cancelled" } }, orderBy: { createdAt: "desc" } }),
+      prisma.customer.findMany({
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          name: true,
+          email: true,
+          phone: true,
+          phone2: true,
+          governorate: true,
+          city: true,
+          address: true,
+          notes: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.order.findMany({
+        where: { status: { not: "cancelled" } },
+        select: {
+          customerFirstName: true,
+          customerLastName: true,
+          customerName: true,
+          customerPhone: true,
+          governorate: true,
+          city: true,
+          address: true,
+          totalPrice: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
     ]);
     const map = new Map(profiles.map((customer) => [customer.phone, { ...customer, orders: 0, spent: 0, lastOrder: null as Date | null }]));
     for (const order of orders) {

@@ -11,7 +11,27 @@ export default async function InventoryPage() {
 
   try {
     const products = await prisma.product.findMany({
-      include: { variants: true },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        category: true,
+        subcategory: true,
+        brand: true,
+        sku: true,
+        color: true,
+        images: true,
+        price: true,
+        lowStockLimit: true,
+        variants: {
+          select: {
+            id: true,
+            size: true,
+            stock: true,
+            price: true,
+          },
+        },
+      },
       orderBy: { name: "asc" },
     });
 

@@ -21,9 +21,31 @@ export default async function AnalyticsPage() {
 
   try {
     ordersRaw = await prisma.order.findMany({
-      include: {
+      select: {
+        id: true,
+        orderNumber: true,
+        customerName: true,
+        customerFirstName: true,
+        customerLastName: true,
+        customerPhone: true,
+        governorate: true,
+        city: true,
+        paymentMethod: true,
+        totalPrice: true,
+        subtotalPrice: true,
+        discountAmount: true,
+        shippingCost: true,
+        status: true,
+        createdAt: true,
         items: {
-          include: {
+          select: {
+            productId: true,
+            productName: true,
+            size: true,
+            color: true,
+            quantity: true,
+            price: true,
+            unitCost: true,
             product: {
               select: {
                 category: true,
@@ -36,21 +58,61 @@ export default async function AnalyticsPage() {
     });
 
     productsRaw = await prisma.product.findMany({
-      include: {
-        variants: true,
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        compareAtPrice: true,
+        category: true,
+        status: true,
+        rating: true,
+        reviewsCount: true,
+        createdAt: true,
+        variants: {
+          select: {
+            id: true,
+            stock: true,
+            size: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
 
     customersRaw = await prisma.customer.findMany({
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        name: true,
+        phone: true,
+        governorate: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: "desc" },
     });
 
     promotionsRaw = await prisma.promotion.findMany({
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        type: true,
+        value: true,
+        usedCount: true,
+        active: true,
+      },
       orderBy: { createdAt: "desc" },
     });
 
     reviewsRaw = await prisma.review.findMany({
+      select: {
+        id: true,
+        productId: true,
+        rating: true,
+        status: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: "desc" },
     });
   } catch (error) {

@@ -180,6 +180,68 @@ export const getActiveProducts = cache(async function getActiveProducts(): Promi
   return canUseFallbackCatalog ? FALLBACK_PRODUCTS : [];
 });
 
+const HOME_SHELF_LIMIT = 12;
+
+async function fetchHomeShelfProducts(configuredIds: string[]) {
+  if (configuredIds.length > 0) {
+    const limitedIds = configuredIds.slice(0, HOME_SHELF_LIMIT);
+    const configuredProducts = await prisma.product.findMany({
+      where: { id: { in: limitedIds }, status: "active" },
+      select: PRODUCT_SELECT,
+    });
+
+    if (configuredProducts.length > 0) {
+      const productsById = new Map(configuredProducts.map((product) => [product.id, product]));
+      return limitedIds
+        .map((id) => productsById.get(id))
+        .filter((product): product is (typeof configuredProducts)[number] => Boolean(product));
+    }
+  }
+
+  return prisma.product.findMany({
+    where: { status: "active" },
+    select: PRODUCT_SELECT,
+    orderBy: { createdAt: "desc" },
+    take: HOME_SHELF_LIMIT,
+  });
+}
+
+/**
+ * The homepage only renders two shelves of twelve products. Keep the full
+ * catalog query for the shop/search/sitemap flows, but avoid sending every
+ * active product and every variant to the homepage as the catalog grows.
+ */
+export async function getHomeProducts(input: {
+  forYouProductIds?: string[];
+  bestSellerProductIds?: string[];
+}): Promise<{ products: ProductWithVariants[]; totalProductCount: number }> {
+  try {
+    const forYouIds = Array.from(new Set((input.forYouProductIds || []).filter(Boolean)));
+    const bestSellerIds = Array.from(new Set((input.bestSellerProductIds || []).filter(Boolean)));
+
+    const [forYou, bestSellers, totalProductCount] = await Promise.all([
+      fetchHomeShelfProducts(forYouIds),
+      fetchHomeShelfProducts(bestSellerIds),
+      prisma.product.count({ where: { status: "active" } }),
+    ]);
+
+    const productsById = new Map(
+      [...forYou, ...bestSellers].map((product) => [product.id, serializeProduct(product)]),
+    );
+
+    return {
+      products: Array.from(productsById.values()),
+      totalProductCount,
+    };
+  } catch (error) {
+    console.warn("Database connection issue while loading homepage products:", error);
+    return {
+      products: canUseFallbackCatalog ? FALLBACK_PRODUCTS.slice(0, HOME_SHELF_LIMIT) : [],
+      totalProductCount: canUseFallbackCatalog ? FALLBACK_PRODUCTS.length : 0,
+    };
+  }
+}
+
 export const getProductsByIds = cache(async function getProductsByIds(ids: string[]): Promise<ProductWithVariants[]> {
   const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
   if (!uniqueIds.length) return [];
