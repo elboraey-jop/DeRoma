@@ -455,10 +455,9 @@ export default function AdminNewAuditClient({
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <h4 className="truncate text-sm font-bold text-[#942E3A]">{item.productName}</h4>
+                    <h4 data-admin-i18n-skip className="truncate text-sm font-bold text-[#942E3A]">{item.productName}</h4>
                     <p className="mt-0.5 text-xs text-[#6B1F2A]/70">
-                      {item.category.toLowerCase() !== "perfumes" && item.color ? `${item.color} · ` : ""}
-                      <span className="font-bold">{item.size}</span>
+                      <span data-admin-i18n-skip>{item.category.toLowerCase() !== "perfumes" && item.color ? `${item.color} · ` : ""}<span className="font-bold">{item.size}</span></span>
                     </p>
                     <p className="font-mono text-[10px] text-[#6B1F2A]/50">SKU: {item.sku || (isRtl ? "بدون كود" : "N/A")}</p>
                   </div>

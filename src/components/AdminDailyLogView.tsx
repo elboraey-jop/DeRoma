@@ -194,10 +194,10 @@ export default function AdminDailyLogView({
                           href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`}
                           className="font-bold text-[#6B1F2A] hover:text-[#942E3A] hover:underline"
                         >
-                          {order.customerName}
+                          <span data-admin-i18n-skip>{order.customerName}</span>
                         </Link>
                       ) : (
-                        order.customerName
+                        <span data-admin-i18n-skip>{order.customerName}</span>
                       )}
                     </td>
                     <td className="py-3.5">
@@ -246,10 +246,10 @@ export default function AdminDailyLogView({
                         href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`}
                         className="hover:underline"
                       >
-                        {order.customerName}
+                          <span data-admin-i18n-skip>{order.customerName}</span>
                       </Link>
                     ) : (
-                      order.customerName
+                        <span data-admin-i18n-skip>{order.customerName}</span>
                     )}
                   </span>
                   <span dir="ltr">

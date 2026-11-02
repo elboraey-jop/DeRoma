@@ -36,6 +36,7 @@ import {
 } from "@/app/admin/inventory/actions";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 import { sortSizesList } from "@/lib/utils";
+import { toast } from "@/lib/toast";
 
 export interface InventoryRow {
   variantId: string;
@@ -324,7 +325,16 @@ export default function AdminInventoryClient({
     setLocalStatusMap((prev) => ({ ...prev, [productId]: nextStatus }));
 
     startTransition(async () => {
-      await bulkUpdateProductsStatusAction([productId], nextStatus);
+      try {
+        const result = await bulkUpdateProductsStatusAction([productId], nextStatus);
+        if (!result.success) {
+          setLocalStatusMap((prev) => ({ ...prev, [productId]: currentStatus as "active" | "archived" }));
+          toast.error(result.error || "Failed to update product status.");
+        }
+      } catch (error) {
+        setLocalStatusMap((prev) => ({ ...prev, [productId]: currentStatus as "active" | "archived" }));
+        toast.error(error instanceof Error ? error.message : "Failed to update product status.");
+      }
     });
   };
 
@@ -574,6 +584,8 @@ export default function AdminInventoryClient({
           return next;
         });
         setSelectedVariantIds([]);
+      } else {
+        toast.error(res.error || "Failed to update product statuses.");
       }
     });
   };
@@ -593,6 +605,8 @@ export default function AdminInventoryClient({
         });
         setSelectedVariantIds([]);
         setIsRestockModalOpen(false);
+      } else {
+        toast.error(res.error || "Failed to update selected variants stock.");
       }
     });
   };
@@ -1142,8 +1156,7 @@ export default function AdminInventoryClient({
 
                       {/* Variant */}
                       <td className="py-3.5 px-3 font-medium text-[#6B1F2A]">
-                        {row.category.toLowerCase() !== "perfumes" && row.color ? `${row.color} · ` : ""}
-                        <span className="font-bold">{row.size}</span>
+                        <span data-admin-i18n-skip>{row.category.toLowerCase() !== "perfumes" && row.color ? `${row.color} · ` : ""}<span className="font-bold">{row.size}</span></span>
                         {row.subcategory && row.subcategory !== "General" && (
                           <span className={`${isRtl ? "mr-1.5" : "ml-1.5"} text-[10px] text-[#6B1F2A]/50`}>
                             ({row.subcategory})
@@ -1463,8 +1476,7 @@ export default function AdminInventoryClient({
                         </span>
                       </div>
                       <p className="text-[11px] text-[#6B1F2A]/80 font-medium">
-                        {isRtl ? "المتغير: " : "Variant: "}{row.category.toLowerCase() !== "perfumes" && row.color ? `${row.color} · ` : ""}
-                        <span className="font-bold">{row.size}</span>
+                        {isRtl ? "المتغير: " : "Variant: "}<span data-admin-i18n-skip>{row.category.toLowerCase() !== "perfumes" && row.color ? `${row.color} · ` : ""}<span className="font-bold">{row.size}</span></span>
                         {row.subcategory && row.subcategory !== "General" && ` (${row.subcategory})`}
                       </p>
                     </div>
@@ -1562,7 +1574,7 @@ export default function AdminInventoryClient({
                       </span>
                       <p className="text-[10px] text-[#6B1F2A]/70 truncate">
                         <span className="font-bold">{formatNumber(pRow.variantsCount)} {isRtl ? "متغيرات" : "variants"}</span>
-                        {pRow.sizesList.length > 0 && ` (${pRow.sizesList.join("، ")})`}
+                            {pRow.sizesList.length > 0 && <span data-admin-i18n-skip>{` (${pRow.sizesList.join("، ")})`}</span>}
                       </p>
                     </div>
                   </div>

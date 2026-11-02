@@ -505,9 +505,7 @@ export default function HomeClient({
 
                               <div className="flex items-center justify-between gap-2 text-[9px]">
                                 <span className="font-bold tracking-[0.12em] text-[#D8B46A]">
-                                  {lang === "ar" && activeReviewData.brand.toLowerCase() === "shoes"
-                                    ? reviewSectionCopy.shoes
-                                    : activeReviewData.brand}
+                                  {activeReviewData.brand}
                                 </span>
                                 <span className="text-[#942E3A]/55">
                                   {lang === "ar"
@@ -577,7 +575,7 @@ export default function HomeClient({
                               </div>
                               <p className="max-w-[540px] font-playfair text-base leading-snug sm:text-lg">“{localizedReviewQuotes[review.id || ""] || review.quote}”</p>
                               <div className="flex items-center justify-between gap-3 text-[10px]">
-                                <span className="font-bold tracking-[0.14em] text-[#D8B46A]">{lang === "ar" && review.brand.toLowerCase() === "shoes" ? reviewSectionCopy.shoes : review.brand}</span>
+                                <span className="font-bold tracking-[0.14em] text-[#D8B46A]">{review.brand}</span>
                                 <span className="text-[#942E3A]/55">{lang === "ar" ? (review.detail.toLowerCase().includes("verified") ? reviewSectionCopy.verifiedCustomer : reviewSectionCopy.customer) : review.detail}</span>
                               </div>
                             </div>

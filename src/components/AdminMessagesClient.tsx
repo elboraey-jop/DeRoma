@@ -18,6 +18,7 @@ import {
   deleteMessageAction,
   updateMessageStatusAction,
 } from "@/app/admin/messages/actions";
+import { toast } from "@/lib/toast";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 export type ContactMessageItem = {
@@ -66,16 +67,28 @@ export default function AdminMessagesClient({
   const handleToggleStatus = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === "unread" ? "read" : "unread";
     setLoadingId(id);
-    await updateMessageStatusAction(id, newStatus);
-    setLoadingId(null);
+    try {
+      const result = await updateMessageStatusAction(id, newStatus);
+      if (!result.success) toast.error(result.error || (isRtl ? "تعذر تحديث حالة الرسالة." : "Failed to update message."));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : (isRtl ? "تعذر تحديث حالة الرسالة." : "Failed to update message."));
+    } finally {
+      setLoadingId(null);
+    }
   };
 
   // Delete message
   const handleDelete = async (id: string) => {
     if (!confirm(isRtl ? "هل أنت متأكد من حذف هذه الرسالة؟" : "Are you sure you want to delete this message?")) return;
     setLoadingId(id);
-    await deleteMessageAction(id);
-    setLoadingId(null);
+    try {
+      const result = await deleteMessageAction(id);
+      if (!result.success) toast.error(result.error || (isRtl ? "تعذر حذف الرسالة." : "Failed to delete message."));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : (isRtl ? "تعذر حذف الرسالة." : "Failed to delete message."));
+    } finally {
+      setLoadingId(null);
+    }
   };
 
   // Filter messages
@@ -214,7 +227,7 @@ export default function AdminMessagesClient({
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-[#942E3A]" />
-                      <h3 className="font-bold text-sm text-[#942E3A]">{msg.name}</h3>
+                      <h3 data-admin-i18n-skip className="font-bold text-sm text-[#942E3A]">{msg.name}</h3>
                       {isUnread && (
                         <span className="rounded-full bg-[#942E3A] px-2 py-0.5 text-[9px] font-black text-[#FFF9EB]">
                           {t("messages.statusUnread")}

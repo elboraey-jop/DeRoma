@@ -7,6 +7,7 @@ import { CENTERS_BY_GOVERNORATE } from "@/lib/locations";
 import AdminShippingExceptionsPicker from "@/components/AdminShippingExceptionsPicker";
 import AdminShippingGovernoratesPicker from "@/components/AdminShippingGovernoratesPicker";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
+import { useToast } from "@/providers/ToastProvider";
 
 export default function AdminShippingZoneForm({
   excludedGovernorates,
@@ -15,6 +16,7 @@ export default function AdminShippingZoneForm({
 }) {
   const { lang } = useAdminI18n();
   const isRtl = lang === "ar";
+  const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [formKey, setFormKey] = useState(0);
   const [governorates, setGovernorates] = useState<string[]>([]);
@@ -28,6 +30,10 @@ export default function AdminShippingZoneForm({
     setGovernorates([]);
     setFormKey((value) => value + 1);
   }, [state.success]);
+
+  useEffect(() => {
+    if (state.error) toast.error(state.error, isRtl ? "تعذر حفظ المنطقة" : "ZONE NOT SAVED");
+  }, [isRtl, state.error, toast]);
 
   const allowedCities = useMemo(
     () =>

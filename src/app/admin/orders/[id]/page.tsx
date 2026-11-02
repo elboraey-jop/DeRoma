@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   MapPin,
   MessageCircle,
+  Pencil,
   Phone,
   ShoppingBag,
 } from "lucide-react";
@@ -14,6 +15,7 @@ import AdminStatusSelect from "@/components/AdminStatusSelect";
 import AdminBackButton from "@/components/AdminBackButton";
 import AdminCopyButton from "@/components/AdminCopyButton";
 import AdminInvoiceButton from "@/components/AdminInvoiceButton";
+import SafeActionForm from "@/components/SafeActionForm";
 import { confirmOrderPaymentAction } from "@/app/admin/orders/actions";
 
 const statusMessages: Record<string, string> = {
@@ -84,6 +86,12 @@ export default async function AdminOrderDetailsPage({
         </div>
         <div className="flex flex-wrap items-center gap-2 print:hidden">
           <AdminInvoiceButton order={order} />
+          <Link
+            href={`/admin/orders/${order.id}/edit`}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#8B7CC7] px-3 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#7566b5]"
+          >
+            <Pencil className="h-4 w-4" /> تعديل الطلب
+          </Link>
           <a
             href={whatsappHref}
             target="_blank"
@@ -104,7 +112,7 @@ export default async function AdminOrderDetailsPage({
               <Link href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`} className="mt-1 block font-playfair text-2xl font-bold hover:underline">{order.customerName}</Link>
               <span className="mt-1 inline-flex items-center gap-1.5"><a href={`tel:${order.customerPhone}`} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#942E3A]"><Phone className="h-3.5 w-3.5 text-[#D8B46A]" />{order.customerPhone}</a><AdminCopyButton value={order.customerPhone} /></span>
             </div>
-            <div className="flex flex-wrap items-center gap-2 print:hidden"><span className="text-[10px] font-bold uppercase tracking-wide text-[#6B1F2A]/55">Status</span><AdminStatusSelect orderId={order.id} status={order.status} paymentMethod={order.paymentMethod} />{order.status === "pending_payment" && order.paymentMethod !== "cod" && <form action={confirmOrderPaymentAction}><input type="hidden" name="orderId" value={order.id} /><button type="submit" className="rounded-xl bg-emerald-600 px-3 py-2 text-[11px] font-bold text-white shadow-sm transition hover:bg-emerald-700">Confirm payment</button></form>}</div>
+            <div className="flex flex-wrap items-center gap-2 print:hidden"><span className="text-[10px] font-bold uppercase tracking-wide text-[#6B1F2A]/55">Status</span><AdminStatusSelect orderId={order.id} status={order.status} paymentMethod={order.paymentMethod} />{order.status === "pending_payment" && order.paymentMethod !== "cod" && <SafeActionForm action={confirmOrderPaymentAction}><input type="hidden" name="orderId" value={order.id} /><button type="submit" className="rounded-xl bg-emerald-600 px-3 py-2 text-[11px] font-bold text-white shadow-sm transition hover:bg-emerald-700">Confirm payment</button></SafeActionForm>}</div>
           </div>
           <div className="mt-5 grid gap-3 text-xs sm:grid-cols-2">
             <div className="rounded-2xl bg-[#FFF9EB] p-3">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, UserPlus, X } from "lucide-react";
 import { createTeamMemberAction } from "@/app/admin/team/actions";
+import SafeActionForm from "@/components/SafeActionForm";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 export default function AdminCreateTeamMemberModal() {
@@ -60,7 +61,7 @@ export default function AdminCreateTeamMemberModal() {
               </button>
             </div>
 
-            <form action={createTeamMemberAction} className="mt-6 space-y-3">
+            <SafeActionForm action={createTeamMemberAction} className="mt-6 space-y-3">
               <label className="block">
                 <span className="field-label">{t("team.name")}</span>
                 <input
@@ -120,7 +121,7 @@ export default function AdminCreateTeamMemberModal() {
                   {t("common.save")}
                 </button>
               </div>
-            </form>
+            </SafeActionForm>
           </div>
         </div>
       )}

@@ -3,6 +3,7 @@
 import { ChevronDown, Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { updateOrderStatusAction } from "@/app/admin/orders/actions";
+import SafeActionForm from "@/components/SafeActionForm";
 import { getSelectableStatuses, getStatusLabel } from "@/lib/orderStatus";
 import { useToast } from "@/providers/ToastProvider";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
@@ -68,18 +69,25 @@ export default function AdminStatusSelect({
     if (statusInput instanceof HTMLInputElement) statusInput.value = nextStatus;
     setIsOpen(false);
     if (nextStatus !== status) {
-      toast.success(
-        lang === "ar"
-          ? `تم تحديث حالة الطلب إلى "${getStatusLabel(nextStatus, lang)}"`
-          : `Order status updated to "${getStatusLabel(nextStatus, lang)}"`,
-        lang === "ar" ? "تم تحديث الطلب" : "ORDER UPDATED"
-      );
       formRef.current?.requestSubmit();
     }
   };
 
   return (
-    <form ref={formRef} action={updateOrderStatusAction} className="relative">
+    <SafeActionForm
+      ref={formRef}
+      action={updateOrderStatusAction}
+      onSuccess={(formData) => {
+        const nextStatus = String(formData.get("status") || status);
+        toast.success(
+          lang === "ar"
+            ? `تم تحديث حالة الطلب إلى "${getStatusLabel(nextStatus, lang)}"`
+            : `Order status updated to "${getStatusLabel(nextStatus, lang)}"`,
+          lang === "ar" ? "تم تحديث الطلب" : "ORDER UPDATED",
+        );
+      }}
+      className="relative"
+    >
       <input type="hidden" name="orderId" value={orderId} />
       <input type="hidden" name="status" value={status} />
       <button
@@ -122,6 +130,6 @@ export default function AdminStatusSelect({
           </div>
         </div>
       )}
-    </form>
+    </SafeActionForm>
   );
 }

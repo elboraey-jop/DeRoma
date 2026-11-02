@@ -153,7 +153,7 @@ export default function AdminInvoiceDocument({
               <span className="w-24 shrink-0 font-bold text-[#8277A8]">
                 {isAr ? "الاسم:" : "Name:"}
               </span>
-              <span className="font-bold text-[#2D264B] text-sm">{order.customerName}</span>
+              <span data-admin-i18n-skip className="font-bold text-[#2D264B] text-sm">{order.customerName}</span>
             </div>
 
             <div className="flex items-baseline gap-2">
@@ -248,15 +248,15 @@ export default function AdminInvoiceDocument({
                       </div>
                     </td>
                     <td className={`py-3.5 ${isAr ? "pl-4 text-right" : "pr-4 text-left"}`}>
-                      <p className="font-bold text-[#2D264B] text-sm">{item.productName}</p>
+                      <p data-admin-i18n-skip className="font-bold text-[#2D264B] text-sm">{item.productName}</p>
                       <p className="mt-0.5 text-[11px] text-[#8277A8] font-medium">
                         {isAr ? (
                           <>
-                            اللون: {item.color} &nbsp;·&nbsp; المقاس: {item.size}
+                            اللون: <span data-admin-i18n-skip>{item.color}</span> &nbsp;·&nbsp; المقاس: <span data-admin-i18n-skip>{item.size}</span>
                           </>
                         ) : (
                           <>
-                            Color: {item.color} &nbsp;·&nbsp; Size: {item.size}
+                            Color: <span data-admin-i18n-skip>{item.color}</span> &nbsp;·&nbsp; Size: <span data-admin-i18n-skip>{item.size}</span>
                           </>
                         )}
                       </p>

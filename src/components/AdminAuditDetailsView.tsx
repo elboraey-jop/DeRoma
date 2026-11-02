@@ -160,14 +160,13 @@ export default function AdminAuditDetailsView({ audit }: AuditDetailProps) {
                 return (
                   <tr key={item.id} className="hover:bg-[#FFF9EB]/50 transition">
                     <td className="py-3 text-start font-bold text-[#942E3A]">
-                      {item.productName}
+                      <span data-admin-i18n-skip>{item.productName}</span>
                     </td>
                     <td className="py-3 text-start font-mono text-[10px] text-[#6B1F2A]/60">
-                      {item.sku || (isRtl ? "بدون كود" : "N/A")}
+                      <span data-admin-i18n-skip>{item.sku || (isRtl ? "بدون كود" : "N/A")}</span>
                     </td>
                     <td className="py-3 text-start text-[#6B1F2A]">
-                      {item.color ? `${item.color} · ` : ""}
-                      <span className="font-bold">{item.size}</span>
+                      <span data-admin-i18n-skip>{item.color ? `${item.color} · ` : ""}<span className="font-bold">{item.size}</span></span>
                     </td>
                     <td className="py-3 text-center font-semibold text-[#6B1F2A]">
                       {formatNumber(item.expectedStock)}

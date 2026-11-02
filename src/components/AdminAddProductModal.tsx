@@ -15,6 +15,7 @@ import {
   AdminCatalogProductPicker,
   AdminSupplierPicker,
 } from "@/components/AdminProcurementPickers";
+import SafeActionForm from "@/components/SafeActionForm";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 type ProductVariant = {
@@ -245,9 +246,10 @@ export default function AdminAddProductModal({
             </button>
           </div>
         ) : (
-          <form
+          <SafeActionForm
             action={createProductBatchAction}
             onSubmit={submit}
+            onError={() => setSubmitting(false)}
             className="mt-6 space-y-5"
           >
             <input type="hidden" name="productId" value={productId} />
@@ -504,7 +506,7 @@ export default function AdminAddProductModal({
                 {submitting ? (isRtl ? "جاري الحفظ..." : "Saving…") : (isRtl ? "استلام الدفعة" : "Receive batch")}
               </button>
             </div>
-          </form>
+          </SafeActionForm>
         )}
       </div>
     </div>

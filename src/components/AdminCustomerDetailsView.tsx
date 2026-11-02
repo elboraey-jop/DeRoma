@@ -54,7 +54,7 @@ export default function AdminCustomerDetailsView({
               {isRtl ? "بيانات العميل" : "Customer intelligence"}
             </p>
             <h1 className="mt-0.5 font-playfair text-2xl font-black sm:mt-1 sm:text-3xl">
-              {customer.name}
+              <span data-admin-i18n-skip>{customer.name}</span>
             </h1>
             <p className="mt-1 hidden text-xs text-[#6B1F2A]/65 sm:block">
               {isRtl ? "الملف التعريفي للعميل وسجل الطلبات الكامل." : "Customer profile and complete order history."}
@@ -78,7 +78,7 @@ export default function AdminCustomerDetailsView({
                 {isRtl ? "العميل الرئيسي" : "Primary customer"}
               </p>
               <h2 className="mt-0.5 font-playfair text-xl font-black sm:text-3xl">
-                {customer.name}
+                <span data-admin-i18n-skip>{customer.name}</span>
               </h2>
               <div className="mt-1 flex flex-wrap items-center gap-3 sm:mt-2">
                 <span className="inline-flex items-center gap-1">

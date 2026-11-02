@@ -7,6 +7,7 @@ import AdminChangeTeamPasswordModal from "@/components/AdminChangeTeamPasswordMo
 import { removeTeamMemberAction } from "@/app/admin/team/actions";
 import AdminBackButton from "@/components/AdminBackButton";
 import AdminPageTranslationBoundary from "@/components/AdminPageTranslationBoundary";
+import SafeActionForm from "@/components/SafeActionForm";
 
 export const dynamic = "force-dynamic";
 
@@ -70,12 +71,12 @@ export default async function TeamMemberPage({ params }: { params: Promise<{ id:
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-600">Danger zone</p>
           <h2 className="mt-1 font-playfair text-xl font-bold text-red-800">Revoke admin access</h2>
           <p className="mt-1 text-xs text-red-700/80">Revoking access will remove admin privileges from this account.</p>
-          <form action={removeTeamMemberAction} className="mt-4">
+          <SafeActionForm action={removeTeamMemberAction} className="mt-4">
             <input type="hidden" name="id" value={member.id} />
             <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2.5 text-xs font-bold text-white hover:bg-red-800 transition">
               <UserMinus className="h-4 w-4" /> Revoke admin access
             </button>
-          </form>
+          </SafeActionForm>
         </section>
       )}
     </div>

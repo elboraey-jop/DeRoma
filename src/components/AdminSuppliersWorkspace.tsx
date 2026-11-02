@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Building2, FileText, Mail, MapPin, Phone, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { createSupplierAction, deleteSupplierAction } from "@/app/admin/suppliers/actions";
+import SafeActionForm from "@/components/SafeActionForm";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 export type SupplierCard = { id: string; name: string; phone: string | null; email: string | null; address: string | null; notes: string | null; productCount: number; invoiceCount: number; invoiceTotal: number };
@@ -94,7 +95,7 @@ export default function AdminSuppliersWorkspace({ suppliers, invoices }: { suppl
               </button>
             </div>
 
-            <form action={createSupplierAction} className="mt-6 grid gap-3 sm:grid-cols-2">
+            <SafeActionForm action={createSupplierAction} className="mt-6 grid gap-3 sm:grid-cols-2">
               <label className="sm:col-span-2">
                 <span className="field-label">{t("suppliers.supplierName")} *</span>
                 <input required name="name" className="admin-input text-start" placeholder={isRtl ? "اسم المورد أو الشركة" : "Supplier or company name"} />
@@ -136,7 +137,7 @@ export default function AdminSuppliersWorkspace({ suppliers, invoices }: { suppl
                   {t("common.save")}
                 </button>
               </div>
-            </form>
+            </SafeActionForm>
           </div>
         </div>
       )}
@@ -160,7 +161,7 @@ function SupplierGrid({ suppliers }: { suppliers: SupplierCard[] }) {
               <Building2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
 
-            <form action={deleteSupplierAction} className="pointer-events-auto">
+            <SafeActionForm action={deleteSupplierAction} className="pointer-events-auto">
               <input type="hidden" name="id" value={supplier.id} />
               <button
                 type="submit"
@@ -170,7 +171,7 @@ function SupplierGrid({ suppliers }: { suppliers: SupplierCard[] }) {
               >
                 <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
-            </form>
+            </SafeActionForm>
           </div>
 
           <h2 className="relative mt-3 font-playfair text-base font-bold text-[#942E3A] truncate sm:mt-5 sm:text-xl">

@@ -16,6 +16,8 @@
     "db:backup": "tsx scripts/backup-db.ts",
     "db:restore": "tsx scripts/restore-db.ts",
     "db:wipe": "tsx scripts/wipe-dummy-data.ts",
+    "db:normalize-orders": "tsx scripts/normalize-orders.ts",
+    "db:configure-shipping": "tsx scripts/configure-shipping.ts",
     "worker": "tsx src/worker.ts"
   },
   "dependencies": {

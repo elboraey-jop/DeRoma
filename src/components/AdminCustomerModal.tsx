@@ -7,6 +7,7 @@ import {
   updateCustomerAction,
 } from "@/app/admin/customers/actions";
 import { CENTERS_BY_GOVERNORATE, GOVERNORATES } from "@/lib/locations";
+import SafeActionForm from "@/components/SafeActionForm";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 export type CustomerFormValue = {
@@ -222,7 +223,7 @@ export default function AdminCustomerModal({
               </button>
             </div>
 
-            <form
+            <SafeActionForm
               action={editing ? updateCustomerAction : createCustomerAction}
               className="mt-5 space-y-3"
             >
@@ -331,7 +332,7 @@ export default function AdminCustomerModal({
                   {editing ? t("common.save") : (isRtl ? "إضافة العميل" : "Save customer")}
                 </button>
               </div>
-            </form>
+            </SafeActionForm>
           </div>
         </div>
       )}

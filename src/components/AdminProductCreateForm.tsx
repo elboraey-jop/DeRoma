@@ -24,6 +24,7 @@ import { createSupplierWithResultAction } from "@/app/admin/suppliers/actions";
 import { nextSkuFromValues } from "@/lib/sku";
 import AdminImageGalleryField from "@/components/AdminImageGalleryField";
 import { AdminCatalogProductPicker } from "@/components/AdminProcurementPickers";
+import SafeActionForm from "@/components/SafeActionForm";
 import { useToast } from "@/providers/ToastProvider";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 
@@ -65,7 +66,7 @@ type SupplierState = {
   id: string;
   name: string;
 };
-type EditProduct = {
+export type EditProduct = {
   id: string;
   name: string;
   sku: string | null;
@@ -95,6 +96,7 @@ type EditProduct = {
     additionalCost: number | null;
   }>;
   relatedIds: string[];
+  skuAuto?: boolean;
   reviews: Array<{
     id?: string;
     customerName: string;
@@ -788,7 +790,7 @@ function SupplierDropdown({
               }}
               className={`flex w-full rounded-xl px-3 py-2.5 ${isRtl ? "text-right" : "text-left"} text-xs transition ${supplier.id === value ? "bg-[#942E3A] font-bold text-[#FFF9EB]" : "text-[#942E3A] hover:bg-[#F2DFC0]"}`}
             >
-              {supplier.name}
+              <span data-admin-i18n-skip>{supplier.name}</span>
             </button>
           ))}
         </div>
@@ -984,7 +986,7 @@ export default function AdminProductCreateForm({
   const [productSku, setProductSku] = useState(
     () => initialProduct?.sku || nextSku("shoes", products, reservedSkus),
   );
-  const [skuEdited, setSkuEdited] = useState(false);
+  const [skuEdited, setSkuEdited] = useState(initialProduct?.skuAuto === false);
   const [shoeSizes, setShoeSizes] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(
       SHOE_SIZES.map((size) => [
@@ -1160,20 +1162,22 @@ export default function AdminProductCreateForm({
     );
 
   return (
-    <form
+    <SafeActionForm
       action={embedded ? undefined : isEdit ? updateProductAction : createProductAction}
-      onSubmit={(event) => {
-        if (embedded) {
-          event.preventDefault();
-          onEmbeddedSubmit?.(new FormData(event.currentTarget));
-          return;
-        }
+      onSuccess={() => {
+        if (embedded) return;
         toast.success(
           isEdit
             ? (isRtl ? "تم حفظ تعديلات المنتج!" : "Product changes saved!")
             : (isRtl ? "تم نشر المنتج الجديد بنجاح!" : "New product published!"),
           isRtl ? "الكتالوج" : "CATALOG",
         );
+      }}
+      onSubmit={(event) => {
+        if (embedded) {
+          event.preventDefault();
+          onEmbeddedSubmit?.(new FormData(event.currentTarget));
+        }
       }}
       className="space-y-5"
     >
@@ -2130,7 +2134,7 @@ export default function AdminProductCreateForm({
                   {index + 1}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-xs font-bold text-[#942E3A]">
-                  {product.name}
+                  <span data-admin-i18n-skip>{product.name}</span>
                 </span>
                 <span className="text-[9px] capitalize text-[#6B1F2A]/50">
                   {product.category}
@@ -2456,6 +2460,6 @@ export default function AdminProductCreateForm({
           )}
         </div>
       </div>
-    </form>
+    </SafeActionForm>
   );
 }

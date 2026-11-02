@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import {
   Banknote, Check, ChevronDown, CircleDollarSign, ClipboardCheck, Instagram,
   MapPin, MessageCircle, PackagePlus, Phone, Plus, ReceiptText, Search, ShoppingBag,
@@ -8,17 +8,39 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { CENTERS_BY_GOVERNORATE, GOVERNORATES } from "@/lib/locations";
-import { createManualOrderAction } from "@/app/admin/orders/actions";
+import { createManualOrderAction, updateOrderAction, type ManualOrderActionState } from "@/app/admin/orders/actions";
 import {
   calculateShippingFee,
   ShippingSettingsData,
   ShippingZoneData,
 } from "@/lib/shippingHelper";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
+import { useToast } from "@/providers/ToastProvider";
 
 interface Product { id: string; name: string; category: string; images: string[]; price: number; color: string | null; variants: Array<{ id: string; size: string; stock: number }>; }
 interface Customer { id: string; name: string; phone: string; phone2: string | null; email: string | null; governorate: string; city: string; address: string; }
-interface Line { variantId: string; quantity: number; }
+interface Line { variantId: string; quantity: number; price?: number; }
+export interface EditableOrderData {
+  id: string;
+  status: string;
+  customerFirstName: string | null;
+  customerLastName: string | null;
+  customerName: string;
+  customerPhone: string;
+  customerPhone2: string | null;
+  customerEmail?: string | null;
+  governorate: string;
+  city: string;
+  address: string;
+  notes: string | null;
+  subtotalPrice: number;
+  discountAmount: number;
+  shippingCost: number;
+  paymentMethod: string;
+  paymentSenderPhone: string | null;
+  source: string;
+  items: Array<{ variantId: string; quantity: number; price: number }>;
+}
 
 const sourceOptions = [
   { value: "whatsapp", label: "WhatsApp", icon: MessageCircle }, { value: "inreel", label: "Inreel", icon: UserRound },
@@ -34,28 +56,41 @@ export default function AdminManualOrderForm({
   customers,
   shippingZones = [],
   shippingSettings = null,
+  initialOrder,
 }: {
   products: Product[];
   customers: Customer[];
   shippingZones?: ShippingZoneData[];
   shippingSettings?: ShippingSettingsData;
+  initialOrder?: EditableOrderData;
 }) {
   const { lang, t, formatPrice, formatNumber } = useAdminI18n();
+  const { toast } = useToast();
   const isRtl = lang === "ar";
+  const submitAction = initialOrder ? updateOrderAction : createManualOrderAction;
+  const [actionState, formAction, isPending] = useActionState<ManualOrderActionState, FormData>(submitAction, {});
 
-  const [lines, setLines] = useState<Line[]>([]);
+  const [lines, setLines] = useState<Line[]>(() => initialOrder?.items.map((item) => ({ variantId: item.variantId, quantity: item.quantity, price: item.price })) || []);
   const [selectedVariant, setSelectedVariant] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
-  const [governorate, setGovernorate] = useState("");
-  const [city, setCity] = useState("");
+  const [governorate, setGovernorate] = useState(initialOrder?.governorate || "");
+  const [city, setCity] = useState(initialOrder?.city || "");
   const [customerMode, setCustomerMode] = useState<"new" | "existing">("new");
   const [selectedCustomer, setSelectedCustomer] = useState("");
-  const [discount, setDiscount] = useState(0);
-  const [shipping, setShipping] = useState(0);
-  const [payment, setPayment] = useState("cod");
-  const [source, setSource] = useState("whatsapp");
+  const [discount, setDiscount] = useState(initialOrder?.discountAmount || 0);
+  const [shipping, setShipping] = useState(initialOrder?.shippingCost || 0);
+  const [payment, setPayment] = useState(initialOrder?.paymentMethod || "cod");
+  const [paymentSenderPhone, setPaymentSenderPhone] = useState(initialOrder?.paymentSenderPhone || "");
+  const [source, setSource] = useState(initialOrder?.source || "whatsapp");
   const [step, setStep] = useState(1);
   const [customerKey, setCustomerKey] = useState(0);
+  const skipInitialShippingCalculation = useRef(Boolean(initialOrder));
+
+  useEffect(() => {
+    if (actionState.error) {
+      toast.error(actionState.error, isRtl ? "تعذر إتمام الطلب" : "ORDER NOT CREATED");
+    }
+  }, [actionState.error, isRtl, toast]);
 
   const orderSteps: Array<{ number: number; label: string; icon: LucideIcon }> = [
     { number: 1, label: isRtl ? "العميل والتوصيل" : "Customer", icon: UserRound },
@@ -68,11 +103,20 @@ export default function AdminManualOrderForm({
     const variant = product?.variants.find((item) => item.id === line.variantId);
     return { ...line, product, variant };
   }), [lines, products]);
-  const subtotal = selectedLines.reduce((sum, line) => sum + (line.product?.price || 0) * line.quantity, 0);
+  const isInitialOrderInventoryReserved = Boolean(initialOrder && !["cancelled", "returned"].includes(initialOrder.status));
+  const reservedQuantityFor = (variantId: string) => isInitialOrderInventoryReserved
+    ? initialOrder?.items.find((item) => item.variantId === variantId)?.quantity || 0
+    : 0;
+  const maxQuantityFor = (variantId: string, stock: number) => stock + reservedQuantityFor(variantId);
+  const subtotal = selectedLines.reduce((sum, line) => sum + (line.price ?? line.product?.price ?? 0) * line.quantity, 0);
   const total = Math.max(0, subtotal - Math.min(discount, subtotal) + shipping);
 
   useEffect(() => {
     if (!governorate) return;
+    if (skipInitialShippingCalculation.current) {
+      skipInitialShippingCalculation.current = false;
+      return;
+    }
     const fee = calculateShippingFee({
       governorate,
       city,
@@ -83,16 +127,28 @@ export default function AdminManualOrderForm({
     setShipping(fee);
   }, [governorate, city, subtotal, shippingZones, shippingSettings]);
 
-  const productChoices = products.filter((product) => product.variants.some((variant) => variant.stock > 0)).map((product) => ({ id: product.id, name: product.name, category: product.category, image: product.images[0] || "", variants: product.variants.filter((variant) => variant.stock > 0) }));
+  const productChoices = products
+    .filter((product) => product.variants.some((variant) => variant.stock > 0 || lines.some((line) => line.variantId === variant.id)))
+    .map((product) => ({
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      image: product.images[0] || "",
+      variants: product.variants.filter((variant) => variant.stock > 0 || lines.some((line) => line.variantId === variant.id)),
+    }));
 
   const addVariantToOrder = (variantId: string) => {
     if (!variantId) return;
+    const product = products.find((item) => item.variants.some((variant) => variant.id === variantId));
+    const variant = product?.variants.find((item) => item.id === variantId);
+    if (!variant) return;
     setLines((current) => {
       const existing = current.find((item) => item.variantId === variantId);
       if (existing) {
+        if (existing.quantity >= maxQuantityFor(variantId, variant.stock)) return current;
         return current.map((item) => item.variantId === variantId ? { ...item, quantity: item.quantity + 1 } : item);
       }
-      return [...current, { variantId, quantity: 1 }];
+      return [...current, { variantId, quantity: 1, price: variant ? product?.price : undefined }];
     });
   };
 
@@ -106,8 +162,39 @@ export default function AdminManualOrderForm({
   };
   const activeCustomer = customers.find((item) => item.id === selectedCustomer);
 
+  const validateBeforeSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const formData = new FormData(event.currentTarget);
+    const missing: string[] = [];
+    const firstName = String(formData.get("customerFirstName") || "").trim();
+    const lastName = String(formData.get("customerLastName") || "").trim();
+    const phone = String(formData.get("customerPhone") || "").replace(/[\s\-+]/g, "");
+    const address = String(formData.get("address") || "").trim();
+    const phoneRegex = /^01[0125]\d{8}$/;
+
+    if (customerMode === "existing" && !selectedCustomer) missing.push(isRtl ? "اختيار العميل المسجل" : "saved customer");
+    if (!firstName) missing.push(isRtl ? "الاسم الأول" : "first name");
+    if (!lastName) missing.push(isRtl ? "اسم العائلة" : "last name");
+    if (!phone) missing.push(isRtl ? "رقم الهاتف الأساسي" : "primary phone");
+    else if (!phoneRegex.test(phone.replace(/^20/, ""))) missing.push(isRtl ? "رقم هاتف مصري صحيح" : "a valid Egyptian phone number");
+    if (!governorate) missing.push(isRtl ? "المحافظة" : "governorate");
+    if (!city) missing.push(isRtl ? "المدينة" : "city");
+    if (!address) missing.push(isRtl ? "العنوان بالتفصيل" : "detailed address");
+    else if (address.length < 5) missing.push(isRtl ? "عنوان لا يقل عن 5 أحرف" : "an address of at least 5 characters");
+    if (!lines.length) missing.push(isRtl ? "منتج واحد على الأقل" : "at least one product");
+
+    if (missing.length > 0) {
+      event.preventDefault();
+      setStep(!firstName || !lastName || !phone || !governorate || !city || !address ? 1 : 2);
+      const message = isRtl
+        ? `من فضلك أكمل: ${missing.join("، ")}.`
+        : `Please complete: ${missing.join(", ")}.`;
+      toast.error(message, isRtl ? "بيانات ناقصة" : "MISSING DETAILS");
+    }
+  };
+
   return (
-    <form action={createManualOrderAction} className="pb-24 lg:pb-8 text-right" noValidate>
+    <form action={formAction} onSubmit={validateBeforeSubmit} className="pb-24 lg:pb-8 text-right" noValidate>
+      {initialOrder && <input type="hidden" name="orderId" value={initialOrder.id} />}
       <input type="hidden" name="itemsJson" value={JSON.stringify(lines)} />
       <input type="hidden" name="paymentMethod" value={payment} />
       <input type="hidden" name="orderSource" value={source} />
@@ -155,13 +242,15 @@ export default function AdminManualOrderForm({
             </div>
             {customerMode === "existing" && <Field label={isRtl ? "اختر عميلاً مسجلاً" : "Choose a saved customer"} icon={UserRound}><CustomerPicker value={selectedCustomer} customers={customers} onChange={selectCustomer} /></Field>}
             <div key={customerKey} className="grid gap-3 sm:grid-cols-2">
-              <Field label={isRtl ? "الاسم الأول *" : "First name"} icon={UserRound}><input required name="customerFirstName" defaultValue={activeCustomer?.name?.split(" ")[0] || ""} placeholder={isRtl ? "الاسم الأول" : "Customer first name"} className="manual-order-input text-right" /></Field>
-              <Field label={isRtl ? "اسم العائلة *" : "Second name"} icon={UserRound}><input required name="customerLastName" defaultValue={activeCustomer?.name?.split(" ").slice(1).join(" ") || ""} placeholder={isRtl ? "اسم العائلة" : "Customer second name"} className="manual-order-input text-right" /></Field>
-              <Field label={isRtl ? "رقم الهاتف الأساسي *" : "Primary phone"} icon={Phone}><input required name="customerPhone" type="tel" defaultValue={activeCustomer?.phone} placeholder="01012345678" className="manual-order-input text-right" /></Field>
-              <Field label={isRtl ? "رقم هاتف إضافي" : "Alternative phone"} optional icon={Phone}><input name="customerPhone2" type="tel" defaultValue={activeCustomer?.phone2 || ""} placeholder="01112345678" className="manual-order-input text-right" /></Field>
+              <Field label={isRtl ? "الاسم الأول *" : "First name"} icon={UserRound}><input required name="customerFirstName" defaultValue={initialOrder?.customerFirstName || activeCustomer?.name?.split(" ")[0] || initialOrder?.customerName.split(" ")[0] || ""} placeholder={isRtl ? "الاسم الأول" : "Customer first name"} className="manual-order-input text-right" /></Field>
+              <Field label={isRtl ? "اسم العائلة *" : "Second name"} icon={UserRound}><input required name="customerLastName" defaultValue={initialOrder?.customerLastName || activeCustomer?.name?.split(" ").slice(1).join(" ") || initialOrder?.customerName.split(" ").slice(1).join(" ") || ""} placeholder={isRtl ? "اسم العائلة" : "Customer second name"} className="manual-order-input text-right" /></Field>
+              <Field label={isRtl ? "رقم الهاتف الأساسي *" : "Primary phone"} icon={Phone}><input required name="customerPhone" type="tel" defaultValue={initialOrder?.customerPhone || activeCustomer?.phone || ""} placeholder="01012345678" className="manual-order-input text-right" /></Field>
+              <Field label={isRtl ? "رقم هاتف إضافي" : "Alternative phone"} optional icon={Phone}><input name="customerPhone2" type="tel" defaultValue={initialOrder?.customerPhone2 || activeCustomer?.phone2 || ""} placeholder="01112345678" className="manual-order-input text-right" /></Field>
+              <Field label={isRtl ? "البريد الإلكتروني" : "Email"} optional icon={UserRound}><input name="customerEmail" type="email" defaultValue={initialOrder?.customerEmail || activeCustomer?.email || ""} placeholder="customer@example.com" className="manual-order-input text-right" /></Field>
               <Field label={isRtl ? "المحافظة *" : "Governorate"} icon={MapPin}><LocationPicker name="governorate" value={governorate} options={[...GOVERNORATES]} placeholder={isRtl ? "اختر المحافظة" : "Select governorate"} onChange={(value) => { setGovernorate(value); setCity(""); }} /></Field>
               <Field label={isRtl ? "المدينة / المركز *" : "City / area"} icon={MapPin}><LocationPicker name="city" value={city} options={CENTERS_BY_GOVERNORATE[governorate] || []} placeholder={governorate ? (isRtl ? "اختر المدينة" : "Select city or area") : (isRtl ? "اختر المحافظة أولاً" : "Choose governorate first")} disabled={!governorate} onChange={setCity} /></Field>
-              <div className="sm:col-span-2"><Field label={isRtl ? "العنوان بالتفصيل *" : "Detailed address"} icon={MapPin}><textarea required name="address" rows={2} defaultValue={activeCustomer?.address} placeholder={isRtl ? "الشارع، رقم العمارة، رقم الشقة، علامة مميزة..." : "Building, street, landmark, floor…"} className="manual-order-input min-h-[76px] resize-y text-right" /></Field></div>
+              <div className="sm:col-span-2"><Field label={isRtl ? "العنوان بالتفصيل *" : "Detailed address"} icon={MapPin}><textarea required name="address" rows={2} defaultValue={initialOrder?.address || activeCustomer?.address || ""} placeholder={isRtl ? "الشارع، رقم العمارة، رقم الشقة، علامة مميزة..." : "Building, street, landmark, floor…"} className="manual-order-input min-h-[76px] resize-y text-right" /></Field></div>
+              <div className="sm:col-span-2"><Field label={isRtl ? "ملاحظات الطلب" : "Order notes"} optional icon={ReceiptText}><textarea name="notes" rows={2} defaultValue={initialOrder?.notes || ""} placeholder={isRtl ? "ملاحظات العميل أو التوصيل..." : "Customer or delivery notes..."} className="manual-order-input min-h-[70px] resize-y text-right" /></Field></div>
             </div>
           </section>
 
@@ -169,24 +258,30 @@ export default function AdminManualOrderForm({
             <SectionHeading step="02" title={isRtl ? "منتجات الطلب" : "Order items"} icon={PackagePlus} subtitle={isRtl ? "اختر المنتجات وتحديد المقاس واللون لإضافتها للطلب." : "Choose products and pick their variant to add them to the order."} />
             <ProductPicker options={productChoices} onAddVariant={addVariantToOrder} />
             <div className="mt-4 space-y-2">
-              {selectedLines.length ? selectedLines.map(({ variantId, quantity, product, variant }) => (
+              {selectedLines.length ? selectedLines.map(({ variantId, quantity, price, product, variant }) => (
                 <article key={variantId} className="flex items-center gap-3 rounded-2xl border border-[#942E3A]/10 bg-[#FFF9EB]/45 p-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#942E3A] text-[#D8B46A]">
                     <ShoppingBag className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-bold text-[#6B1F2A]">{product?.name}</p>
+                    <p data-admin-i18n-skip className="truncate text-xs font-bold text-[#6B1F2A]">{product?.name}</p>
                     <p className="mt-0.5 text-[10px] text-[#6B1F2A]/55">
-                      {product?.color || "قياسي"} · مقاس {variant?.size} · المتبقي {formatNumber(variant?.stock || 0)}
+                      {product?.color || "قياسي"} · مقاس {variant?.size} · المتاح للتعديل {formatNumber(maxQuantityFor(variantId, variant?.stock || 0))}
                     </p>
                     <p className="mt-1 text-xs font-bold text-[#942E3A]">
-                      {formatPrice((product?.price || 0) * quantity)}
+                      {formatPrice((price ?? product?.price ?? 0) * quantity)}
                     </p>
                   </div>
+                  {initialOrder && (
+                    <label className="w-24 shrink-0">
+                      <span className="mb-1 block text-[9px] font-bold text-[#6B1F2A]/60">{isRtl ? "سعر القطعة" : "Unit price"}</span>
+                      <input type="number" min="0" step="0.01" value={price ?? product?.price ?? ""} onChange={(event) => setLines((current) => current.map((item) => item.variantId === variantId ? { ...item, price: Number(event.target.value) || 0 } : item))} className="manual-order-input h-8 px-2 text-right text-[11px]" />
+                    </label>
+                  )}
                   <div className="flex shrink-0 items-center rounded-xl border border-[#942E3A]/12 bg-white p-0.5">
                     <button type="button" onClick={() => setLines((current) => current.map((item) => item.variantId === variantId ? { ...item, quantity: Math.max(1, item.quantity - 1) } : item))} className="h-7 w-7 rounded-lg text-sm font-bold text-[#942E3A]">−</button>
                     <span className="w-6 text-center text-xs font-bold text-[#6B1F2A]">{formatNumber(quantity)}</span>
-                    <button type="button" disabled={quantity >= (variant?.stock || 0)} onClick={() => setLines((current) => current.map((item) => item.variantId === variantId ? { ...item, quantity: item.quantity + 1 } : item))} className="h-7 w-7 rounded-lg bg-[#FFF9EB] text-sm font-bold text-[#942E3A] disabled:opacity-30">+</button>
+                    <button type="button" disabled={quantity >= maxQuantityFor(variantId, variant?.stock || 0)} onClick={() => setLines((current) => current.map((item) => item.variantId === variantId ? { ...item, quantity: item.quantity + 1 } : item))} className="h-7 w-7 rounded-lg bg-[#FFF9EB] text-sm font-bold text-[#942E3A] disabled:opacity-30">+</button>
                   </div>
                   <button type="button" onClick={() => setLines((current) => current.filter((item) => item.variantId !== variantId))} aria-label={`Remove ${product?.name}`} className="rounded-lg p-2 text-[#942E3A]/45 transition hover:bg-red-50 hover:text-red-600">
                     <Trash2 className="h-4 w-4" />
@@ -220,7 +315,7 @@ export default function AdminManualOrderForm({
           </div>
           <section className="mb-5 manual-order-card">
             <SectionHeading step="03" title={isRtl ? "تفاصيل الدفع" : "Payment details"} icon={ReceiptText} compact />
-            <OrderDetails payment={payment} setPayment={setPayment} source={source} setSource={setSource} />
+            <OrderDetails payment={payment} setPayment={setPayment} paymentSenderPhone={paymentSenderPhone} setPaymentSenderPhone={setPaymentSenderPhone} source={source} setSource={setSource} />
           </section>
           <section className="mb-5 manual-order-card">
             <p className="field-label">{isRtl ? "تعديل المبالغ" : "Order totals"}</p>
@@ -233,9 +328,9 @@ export default function AdminManualOrderForm({
               </Field>
             </div>
           </section>
-          <button type="submit" disabled={!lines.length} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#942E3A] px-4 py-3.5 text-xs font-bold text-[#FFF9EB] shadow-xs transition hover:bg-[#7c2430] disabled:cursor-not-allowed disabled:opacity-40">
+          <button type="submit" disabled={isPending} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#942E3A] px-4 py-3.5 text-xs font-bold text-[#FFF9EB] shadow-xs transition hover:bg-[#7c2430] disabled:cursor-not-allowed disabled:opacity-40">
             <Check className="h-4 w-4 text-[#D8B46A]" />
-            <span>{isRtl ? "تأكيد وإنشاء الطلب اليدوي" : "Create manual order"}</span>
+            <span>{isPending ? (isRtl ? "جاري الحفظ..." : "Saving order...") : (initialOrder ? (isRtl ? "حفظ تعديلات الطلب" : "Save order changes") : (isRtl ? "تأكيد وإنشاء الطلب اليدوي" : "Create manual order"))}</span>
           </button>
         </aside>
       </div>
@@ -303,7 +398,7 @@ function ProductPicker({ options, onAddVariant }: { options: Array<{ id: string;
     setExpandedProductId(null);
   };
 
-  return <div ref={pickerRef} className="relative">
+  return <div ref={pickerRef} data-admin-i18n-skip className="relative">
     <button type="button" aria-haspopup="listbox" aria-expanded={open} onClick={() => { setOpen((current) => !current); setSearch(""); }} className="manual-order-select flex items-center justify-between text-right">
       <span className="text-[#6B1F2A]/55">{isRtl ? "اختر منتجاً لإضافته للطلب..." : "Choose a product…"}</span><ChevronDown className={`h-4 w-4 text-[#942E3A]/50 transition-transform ${open ? "rotate-180" : ""}`} />
     </button>
@@ -399,7 +494,7 @@ function CustomerPicker({ value, customers, onChange }: { value: string; custome
   );
 }
 
-function OrderDetails({ payment, setPayment, source, setSource }: { payment: string; setPayment: (p: string) => void; source: string; setSource: (s: string) => void }) {
+function OrderDetails({ payment, setPayment, paymentSenderPhone, setPaymentSenderPhone, source, setSource }: { payment: string; setPayment: (p: string) => void; paymentSenderPhone: string; setPaymentSenderPhone: (value: string) => void; source: string; setSource: (s: string) => void }) {
   const { lang } = useAdminI18n();
   const isRtl = lang === "ar";
 
@@ -416,6 +511,11 @@ function OrderDetails({ payment, setPayment, source, setSource }: { payment: str
           ))}
         </div>
       </div>
+      {payment !== "cod" && (
+        <Field label={isRtl ? "رقم التحويل" : "Transfer phone"} optional icon={Phone}>
+          <input name="paymentSenderPhone" value={paymentSenderPhone} onChange={(event) => setPaymentSenderPhone(event.target.value)} placeholder="01012345678" className="manual-order-input text-right" />
+        </Field>
+      )}
       <div>
         <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/60">{isRtl ? "مصدر الطلب" : "Order source"}</label>
         <div className="grid grid-cols-2 gap-1.5">

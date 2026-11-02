@@ -120,9 +120,9 @@ export default function ProductSearchSuggestions({
                 )}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-xs font-bold text-[#942E3A]">{product.name}</span>
+                <span data-admin-i18n-skip className="block truncate text-xs font-bold text-[#942E3A]">{product.name}</span>
                 <span className="mt-0.5 block truncate text-[10px] text-[#806e73]">
-                  {[product.brand, formatPrice(product.price)].filter(Boolean).join(" · ")}
+                  <span data-admin-i18n-skip>{product.brand}</span>{product.brand ? " · " : ""}{formatPrice(product.price)}
                 </span>
               </span>
               <ArrowRight className="h-3.5 w-3.5 shrink-0 text-[#D8B46A] rtl:rotate-180" />

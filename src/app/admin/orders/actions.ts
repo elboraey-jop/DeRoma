@@ -11,7 +11,8 @@ import { formatOrderNumber } from "@/lib/orderNumber";
 import { sendOrderOwnerEmail } from "@/lib/orderEmail";
 import { sendMetaServerEvent } from "@/lib/serverAnalytics";
 
-type ManualOrderItem = { variantId: string; quantity: number };
+type ManualOrderItem = { variantId: string; quantity: number; price?: number };
+export type ManualOrderActionState = { error?: string };
 
 function parseItems(value: FormDataEntryValue | null): ManualOrderItem[] {
   try {
@@ -20,6 +21,25 @@ function parseItems(value: FormDataEntryValue | null): ManualOrderItem[] {
     return items as ManualOrderItem[];
   } catch {
     throw new Error("Invalid order items.");
+  }
+}
+
+async function restoreInventoryLots(tx: Parameters<typeof consumeInventoryLots>[0], variantId: string, quantity: number) {
+  let remainingToRestore = quantity;
+  const lots = await tx.inventoryLot.findMany({
+    where: { variantId },
+    orderBy: { receivedAt: "asc" },
+  });
+  for (const lot of lots) {
+    if (remainingToRestore <= 0) break;
+    const capacity = Math.max(0, lot.quantity - lot.remaining);
+    const restored = Math.min(capacity, remainingToRestore);
+    if (!restored) continue;
+    await tx.inventoryLot.update({
+      where: { id: lot.id },
+      data: { remaining: { increment: restored } },
+    });
+    remainingToRestore -= restored;
   }
 }
 
@@ -124,7 +144,7 @@ export async function updateOrderStatusAction(formData: FormData) {
   }
 }
 
-export async function createManualOrderAction(formData: FormData) {
+export async function createManualOrderAction(_previousState: ManualOrderActionState, formData: FormData): Promise<ManualOrderActionState> {
   await requireAdmin();
   const customerFirstName = String(formData.get("customerFirstName") || "").trim();
   const customerLastName = String(formData.get("customerLastName") || "").trim();
@@ -145,17 +165,22 @@ export async function createManualOrderAction(formData: FormData) {
   const paymentSenderPhone = String(formData.get("paymentSenderPhone") || "").trim() || null;
   const orderSource = String(formData.get("orderSource") || "").trim();
   const notesInput = String(formData.get("notes") || "").trim();
-  const itemsInput = parseItems(formData.get("itemsJson"));
+  let itemsInput: ManualOrderItem[];
+  try {
+    itemsInput = parseItems(formData.get("itemsJson"));
+  } catch {
+    return { error: "أضف منتجًا صحيحًا واحدًا على الأقل إلى الطلب." };
+  }
 
   if ((!firstName && !customerName) || !customerPhone || !governorate || !city || !address)
-    throw new Error("Customer and order details are required.");
+    return { error: "أكمل اسم العميل ورقم الهاتف والمحافظة والمدينة والعنوان بالتفصيل." };
   if (
     !Number.isFinite(shippingCost) ||
     shippingCost < 0 ||
     !Number.isFinite(requestedDiscount) ||
     requestedDiscount < 0
   )
-    throw new Error("Shipping and discount must be valid positive numbers.");
+    return { error: "مصاريف الشحن والخصم يجب أن تكون أرقامًا صحيحة غير سالبة." };
   if (
     !itemsInput.length ||
     itemsInput.some(
@@ -165,31 +190,33 @@ export async function createManualOrderAction(formData: FormData) {
         Number(item.quantity) < 1,
     )
   )
-    throw new Error("Add at least one valid product to the manual order.");
+    return { error: "أضف منتجًا واحدًا صالحًا على الأقل إلى الطلب." };
   if (
     new Set(itemsInput.map((item) => item.variantId)).size !== itemsInput.length
   )
-    throw new Error("Duplicate product variants are not allowed.");
+    return { error: "لا يمكن إضافة نفس المقاس أو المنتج مرتين. عدّل الكمية بدلًا من ذلك." };
   if (!['cod', 'instapay', 'wallet', 'card'].includes(paymentMethod))
-    throw new Error("Invalid payment method.");
+    return { error: "اختر طريقة دفع صحيحة." };
 
-  const variants = await prisma.productVariant.findMany({
+  let createdOrderId = "";
+  try {
+    const variants = await prisma.productVariant.findMany({
     where: { id: { in: itemsInput.map((item) => item.variantId) } },
     include: { product: true },
   });
-  if (variants.length !== itemsInput.length)
-    throw new Error("One or more selected products no longer exist.");
+    if (variants.length !== itemsInput.length)
+      return { error: "أحد المنتجات المختارة لم يعد موجودًا. حدّث الصفحة وحاول مرة أخرى." };
 
-  const subtotalPrice = itemsInput.reduce((sum, item) => {
+    const subtotalPrice = itemsInput.reduce((sum, item) => {
     const variant = variants.find(
       (candidate) => candidate.id === item.variantId,
     )!;
-    return sum + Number(variant.product.price) * Number(item.quantity);
-  }, 0);
-  const discountAmount = Math.min(requestedDiscount, subtotalPrice);
-  const totalPrice = subtotalPrice - discountAmount + shippingCost;
+    return sum + Number(item.price ?? variant.product.price) * Number(item.quantity);
+    }, 0);
+    const discountAmount = Math.min(requestedDiscount, subtotalPrice);
+    const totalPrice = subtotalPrice - discountAmount + shippingCost;
 
-  const order = await prisma.$transaction(async (tx) => {
+    const order = await prisma.$transaction(async (tx) => {
     for (const item of itemsInput) {
       const reserved = await tx.productVariant.updateMany({
         where: { id: item.variantId, stock: { gte: Number(item.quantity) } },
@@ -245,7 +272,7 @@ export async function createManualOrderAction(formData: FormData) {
               size: variant.size,
               color: variant.product.color || "",
               quantity: Number(item.quantity),
-              price: variant.product.price,
+              price: item.price ?? variant.product.price,
               unitCost:
                 Number(variant.product.wholesalePrice || 0) +
                 Number(variant.product.additionalCost || 0),
@@ -259,9 +286,10 @@ export async function createManualOrderAction(formData: FormData) {
       data: { orderNumber: formatOrderNumber(createdOrder.orderSequence) },
       include: { items: true },
     });
-  });
+    });
+    createdOrderId = order.id;
 
-  await sendOrderOwnerEmail({
+    await sendOrderOwnerEmail({
     orderNumber: order.orderNumber,
     customerName: order.customerName,
     customerPhone: order.customerPhone,
@@ -283,14 +311,168 @@ export async function createManualOrderAction(formData: FormData) {
       quantity: item.quantity,
       price: Number(item.price),
     })),
-  });
+    });
+
+  } catch (error) {
+    console.error("Failed to create manual order:", error);
+    return {
+      error: error instanceof Error ? error.message : "تعذر إنشاء الطلب. راجع البيانات وحاول مرة أخرى.",
+    };
+  }
 
   revalidatePath("/admin");
   revalidatePath("/admin/orders");
   revalidatePath("/admin/financials");
   revalidatePath("/admin/inventory");
   revalidatePath("/shop");
-  redirect(`/admin/orders/${order.id}`);
+  redirect(`/admin/orders/${createdOrderId}`);
+}
+
+export async function updateOrderAction(_previousState: ManualOrderActionState, formData: FormData): Promise<ManualOrderActionState> {
+  await requireAdmin();
+  const id = String(formData.get("orderId") || "").trim();
+  const customerFirstName = String(formData.get("customerFirstName") || "").trim();
+  const customerLastName = String(formData.get("customerLastName") || "").trim();
+  const customerNameInput = String(formData.get("customerName") || "").trim();
+  const firstName = customerFirstName || customerNameInput.split(" ")[0] || "";
+  const lastName = customerLastName || customerNameInput.split(" ").slice(1).join(" ") || "";
+  const customerName = `${firstName} ${lastName}`.trim() || customerNameInput;
+  const customerPhone = String(formData.get("customerPhone") || "").trim();
+  const customerPhone2 = String(formData.get("customerPhone2") || "").trim() || null;
+  const customerEmail = String(formData.get("customerEmail") || "").trim().toLowerCase() || null;
+  const governorate = String(formData.get("governorate") || "").trim();
+  const city = String(formData.get("city") || "").trim();
+  const address = String(formData.get("address") || "").trim();
+  const shippingCost = Number(formData.get("shippingCost") || 0);
+  const requestedDiscount = Number(formData.get("discount") || 0);
+  const paymentMethod = String(formData.get("paymentMethod") || "cod").trim();
+  const paymentSenderPhone = String(formData.get("paymentSenderPhone") || "").trim() || null;
+  const orderSource = String(formData.get("orderSource") || "").trim();
+  const notesInput = String(formData.get("notes") || "").trim();
+  let itemsInput: ManualOrderItem[];
+
+  try {
+    if (!id) return { error: "الطلب المطلوب تعديله غير موجود." };
+    itemsInput = parseItems(formData.get("itemsJson"));
+  } catch {
+    return { error: "أضف منتجًا صحيحًا واحدًا على الأقل إلى الطلب." };
+  }
+
+  if (!customerName || !customerPhone || !governorate || !city || !address)
+    return { error: "أكمل اسم العميل ورقم الهاتف والمحافظة والمدينة والعنوان بالتفصيل." };
+  if (!Number.isFinite(shippingCost) || shippingCost < 0 || !Number.isFinite(requestedDiscount) || requestedDiscount < 0)
+    return { error: "مصاريف الشحن والخصم يجب أن تكون أرقامًا صحيحة غير سالبة." };
+  if (!itemsInput.length || itemsInput.some((item) => !item.variantId || !Number.isInteger(Number(item.quantity)) || Number(item.quantity) < 1 || (item.price !== undefined && (!Number.isFinite(Number(item.price)) || Number(item.price) < 0))))
+    return { error: "أضف منتجًا واحدًا صالحًا على الأقل إلى الطلب." };
+  if (new Set(itemsInput.map((item) => item.variantId)).size !== itemsInput.length)
+    return { error: "لا يمكن إضافة نفس المقاس أو المنتج مرتين. عدّل الكمية بدلًا من ذلك." };
+  if (!['cod', 'instapay', 'wallet', 'card'].includes(paymentMethod))
+    return { error: "اختر طريقة دفع صحيحة." };
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const existingOrder = await tx.order.findUnique({ where: { id }, include: { items: true } });
+      if (!existingOrder) throw new Error("الطلب غير موجود أو تم حذفه بالفعل.");
+      const variants = await tx.productVariant.findMany({
+        where: { id: { in: itemsInput.map((item) => item.variantId) } },
+        include: { product: true },
+      });
+      if (variants.length !== itemsInput.length) throw new Error("أحد المنتجات المختارة لم يعد موجودًا. حدّث الصفحة وحاول مرة أخرى.");
+
+      const oldQuantities = new Map<string, number>();
+      existingOrder.items.forEach((item) => oldQuantities.set(item.variantId, (oldQuantities.get(item.variantId) || 0) + item.quantity));
+      const newQuantities = new Map<string, number>();
+      itemsInput.forEach((item) => newQuantities.set(item.variantId, item.quantity));
+      const isInventoryReserved = !["cancelled", "returned"].includes(existingOrder.status);
+
+      if (isInventoryReserved) {
+        const variantIds = new Set([...oldQuantities.keys(), ...newQuantities.keys()]);
+        for (const variantId of variantIds) {
+          const delta = (newQuantities.get(variantId) || 0) - (oldQuantities.get(variantId) || 0);
+          if (delta > 0) {
+            const reserved = await tx.productVariant.updateMany({ where: { id: variantId, stock: { gte: delta } }, data: { stock: { decrement: delta } } });
+            if (reserved.count !== 1) {
+              const variant = variants.find((item) => item.id === variantId);
+              throw new Error(`Not enough stock for ${variant?.product.name || "the selected product"}.`);
+            }
+            await consumeInventoryLots(tx, variantId, delta);
+          } else if (delta < 0) {
+            await tx.productVariant.update({ where: { id: variantId }, data: { stock: { increment: Math.abs(delta) } } });
+            await restoreInventoryLots(tx, variantId, Math.abs(delta));
+          }
+        }
+      }
+
+      const subtotalPrice = itemsInput.reduce((sum, item) => {
+        const variant = variants.find((candidate) => candidate.id === item.variantId)!;
+        return sum + Number(item.price ?? variant.product.price) * item.quantity;
+      }, 0);
+      const discountAmount = Math.min(requestedDiscount, subtotalPrice);
+      const totalPrice = subtotalPrice - discountAmount + shippingCost;
+      const notes = [orderSource && `Source: ${orderSource}`, notesInput].filter(Boolean).join("\n") || null;
+      const nextPaymentProofStatus = paymentMethod === "cod"
+        ? "not_required"
+        : existingOrder.paymentProofStatus === "not_required"
+          ? "awaiting_whatsapp"
+          : existingOrder.paymentProofStatus;
+
+      await tx.customer.upsert({
+        where: { phone: customerPhone },
+        create: { firstName, lastName, name: customerName, phone: customerPhone, phone2: customerPhone2, email: customerEmail, governorate, city, address },
+        update: { firstName, lastName, name: customerName, phone2: customerPhone2, email: customerEmail, governorate, city, address },
+      });
+      await tx.orderItem.deleteMany({ where: { orderId: id } });
+      await tx.order.update({
+        where: { id },
+        data: {
+          customerFirstName: firstName,
+          customerLastName: lastName,
+          customerName,
+          customerPhone,
+          customerPhone2,
+          governorate,
+          city,
+          address,
+          notes,
+          subtotalPrice,
+          discountAmount,
+          shippingCost,
+          totalPrice,
+          paymentMethod,
+          paymentSenderPhone: paymentMethod === "cod" ? null : paymentSenderPhone,
+          paymentProofStatus: nextPaymentProofStatus,
+          items: {
+            create: itemsInput.map((item) => {
+              const variant = variants.find((candidate) => candidate.id === item.variantId)!;
+              const price = Number(item.price ?? variant.product.price);
+              return {
+                productId: variant.productId,
+                variantId: variant.id,
+                productName: variant.product.name,
+                size: variant.size,
+                color: variant.product.color || "",
+                quantity: item.quantity,
+                price,
+                unitCost: Number(variant.product.wholesalePrice || 0) + Number(variant.product.additionalCost || 0),
+              };
+            }),
+          },
+        },
+      });
+    });
+  } catch (error) {
+    console.error("Failed to update order:", error);
+    return { error: error instanceof Error ? error.message : "تعذر تحديث الطلب. راجع البيانات وحاول مرة أخرى." };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/orders");
+  revalidatePath(`/admin/orders/${id}`);
+  revalidatePath(`/admin/orders/${id}/edit`);
+  revalidatePath("/admin/financials");
+  revalidatePath("/admin/inventory");
+  revalidatePath("/shop");
+  redirect(`/admin/orders/${id}`);
 }
 
 export async function confirmOrderPaymentAction(formData: FormData) {

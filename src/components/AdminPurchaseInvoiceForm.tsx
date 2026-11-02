@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Boxes, Check, CheckCircle2, ChevronDown, FilePlus2, FileText, LoaderCircle, PackagePlus, Plus, Receipt, Trash2, Wallet, X } from "lucide-react";
+import { ArrowLeft, Boxes, Check, CheckCircle2, ChevronDown, FilePlus2, FileText, LoaderCircle, PackagePlus, Pencil, Plus, Receipt, Trash2, Wallet, X } from "lucide-react";
 import { useActionState, useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
 import { createPurchaseInvoiceAction, createSupplierWithResultAction } from "@/app/admin/suppliers/actions";
 import { AdminCatalogProductPicker, AdminSupplierPicker, type ProcurementProduct } from "@/components/AdminProcurementPickers";
-import AdminProductCreateForm, { type CatalogOption, type RelatedProduct, type Supplier } from "@/components/AdminProductCreateForm";
+import AdminProductCreateForm, { type CatalogOption, type EditProduct, type RelatedProduct, type Supplier } from "@/components/AdminProductCreateForm";
 import { nextSkuFromValues } from "@/lib/sku";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 
@@ -117,6 +117,8 @@ export default function AdminPurchaseInvoiceForm({
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addMode, setAddMode] = useState<"choice" | "batch" | "new">("choice");
   const [pendingProducts, setPendingProducts] = useState<PendingProductDraft[]>([]);
+  const [editingPendingProductIndex, setEditingPendingProductIndex] = useState<number | null>(null);
+  const [editingBatchId, setEditingBatchId] = useState<string | null>(null);
   const [invoiceState, invoiceAction, invoicePending] = useActionState<InvoiceState, FormData>(
     async (_previous, formData) => {
       try {
@@ -173,6 +175,47 @@ export default function AdminPurchaseInvoiceForm({
     return Array.from(groups.values());
   }, [lines]);
 
+  const pendingProductToEdit = editingPendingProductIndex === null
+    ? undefined
+    : pendingProducts[editingPendingProductIndex];
+
+  const pendingProductInitialValues = useMemo<EditProduct | undefined>(() => {
+    if (!pendingProductToEdit) return undefined;
+    return {
+      id: `pending-product-${editingPendingProductIndex}`,
+      name: pendingProductToEdit.name,
+      sku: pendingProductToEdit.sku,
+      skuAuto: pendingProductToEdit.skuAuto,
+      category: pendingProductToEdit.category,
+      status: pendingProductToEdit.status,
+      description: pendingProductToEdit.description,
+      brand: pendingProductToEdit.brand,
+      color: pendingProductToEdit.color,
+      subcategory: pendingProductToEdit.subcategory,
+      material: pendingProductToEdit.material,
+      images: pendingProductToEdit.images,
+      price: Number(pendingProductToEdit.price) || 0,
+      compareAtPrice: Number(pendingProductToEdit.compareAtPrice) || null,
+      wholesalePrice: Number(pendingProductToEdit.wholesalePrice) || null,
+      additionalCost: Number(pendingProductToEdit.additionalCost) || null,
+      supplierId: pendingProductToEdit.supplierId || null,
+      lowStockLimit: Number(pendingProductToEdit.lowStockLimit) || 0,
+      featured: pendingProductToEdit.featured,
+      bestSeller: pendingProductToEdit.bestSeller,
+      variants: pendingProductToEdit.variants.map((variant, index) => ({
+        id: `pending-variant-${index}`,
+        size: variant.size,
+        stock: Number(variant.stock) || 0,
+        price: Number(variant.price) || null,
+        compareAtPrice: Number(variant.compareAtPrice) || null,
+        wholesalePrice: Number(variant.wholesalePrice) || null,
+        additionalCost: Number(variant.additionalCost) || null,
+      })),
+      relatedIds: pendingProductToEdit.relatedProductIds,
+      reviews: pendingProductToEdit.reviews as EditProduct["reviews"],
+    };
+  }, [editingPendingProductIndex, pendingProductToEdit]);
+
   const handleEmbeddedProductSubmit = (formData: FormData) => {
     const read = (name: string) => String(formData.get(name) || "").trim();
     let productVariants: PendingProductDraft["variants"] = [];
@@ -209,7 +252,11 @@ export default function AdminPurchaseInvoiceForm({
       reviews,
       relatedProductIds: formData.getAll("relatedProductIds").map(String).filter(Boolean),
     };
-    setPendingProducts((current) => [...current, draft]);
+    setPendingProducts((current) => {
+      if (editingPendingProductIndex === null) return [...current, draft];
+      return current.map((product, index) => index === editingPendingProductIndex ? draft : product);
+    });
+    setEditingPendingProductIndex(null);
     setAddModalOpen(false);
     setAddMode("choice");
   };
@@ -236,7 +283,7 @@ export default function AdminPurchaseInvoiceForm({
   const addBatch = () => {
     if (!selectedProductVariants.length) return;
     setIsAddingBatch(true);
-    const batchId = `batch-${Date.now()}`;
+    const batchId = editingBatchId || `batch-${Date.now()}`;
     const batchLines = selectedProductVariants
       .map((variant) => {
         const draft = batchDrafts[variant.id];
@@ -244,9 +291,16 @@ export default function AdminPurchaseInvoiceForm({
         return quantity > 0 && draft?.enabled !== false ? { ...variant, quantity, wholesalePrice: Number(wholesaleMode === "new" ? newWholesalePrice : draft?.wholesalePrice || variant.wholesalePrice), retailPrice: Number(retailMode === "new" ? newRetailPrice : draft?.retailPrice || variant.retailPrice), notes: "", batchId } : null;
       })
       .filter(Boolean) as InvoiceLine[];
-    const newBatchLines = batchLines.filter((line) => !lines.some((current) => current.id === line.id));
-    if (!newBatchLines.length) return;
-    setLines((current) => [...current, ...newBatchLines]);
+    const remainingLines = editingBatchId
+      ? lines.filter((line) => line.batchId !== editingBatchId)
+      : lines;
+    const newBatchLines = batchLines.filter((line) => !remainingLines.some((current) => current.id === line.id));
+    if (!newBatchLines.length) {
+      setIsAddingBatch(false);
+      return;
+    }
+    setLines([...remainingLines, ...newBatchLines]);
+    setEditingBatchId(null);
     setSelectedProductId("");
     setBatchDrafts({});
     setAddModalOpen(false);
@@ -255,13 +309,47 @@ export default function AdminPurchaseInvoiceForm({
   };
 
   const openAddModal = () => {
+    setEditingPendingProductIndex(null);
+    setEditingBatchId(null);
     setAddMode("choice");
+    setAddModalOpen(true);
+  };
+
+  const openPendingProductEditor = (index: number) => {
+    setEditingBatchId(null);
+    setEditingPendingProductIndex(index);
+    setAddMode("new");
+    setAddModalOpen(true);
+  };
+
+  const openBatchEditor = (group: InvoiceLine[]) => {
+    const batchId = group[0]?.batchId;
+    if (!batchId) return;
+    setEditingPendingProductIndex(null);
+    setEditingBatchId(batchId);
+    setSelectedProductId(group[0].productId);
+    setRetailMode("old");
+    setWholesaleMode("old");
+    setNewRetailPrice(String(group[0].retailPrice));
+    setNewWholesalePrice(String(group[0].wholesalePrice));
+    setBatchDrafts(Object.fromEntries(group.map((line) => [
+      line.id,
+      {
+        quantity: String(line.quantity),
+        retailPrice: String(line.retailPrice),
+        wholesalePrice: String(line.wholesalePrice),
+        enabled: true,
+      },
+    ])));
+    setAddMode("batch");
     setAddModalOpen(true);
   };
 
   const closeAddModal = () => {
     setAddModalOpen(false);
     setAddMode("choice");
+    setEditingPendingProductIndex(null);
+    setEditingBatchId(null);
   };
 
   const closeSupplierModal = () => {
@@ -420,12 +508,17 @@ export default function AdminPurchaseInvoiceForm({
               <div className="flex items-start justify-between gap-3">
                 <button type="button" onClick={() => toggleProduct(pendingProductId)} className={`min-w-0 flex-1 ${isRtl ? "text-right" : "text-left"}`}>
                   <span className="mb-1 inline-flex rounded-full bg-[#942E3A] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#D8B46A]">{isRtl ? "منتج جديد" : "New product"}</span>
-                  <span className="flex items-center gap-2"><span className="font-playfair text-lg font-bold text-[#942E3A]">{pendingProduct.name}</span><ChevronDown className={`h-4 w-4 shrink-0 text-[#D8B46A] transition-transform ${collapsedProductIds.has(pendingProductId) ? "" : "rotate-180"}`} /></span>
+                  <span className="flex items-center gap-2"><span data-admin-i18n-skip className="font-playfair text-lg font-bold text-[#942E3A]">{pendingProduct.name}</span><ChevronDown className={`h-4 w-4 shrink-0 text-[#D8B46A] transition-transform ${collapsedProductIds.has(pendingProductId) ? "" : "rotate-180"}`} /></span>
                   <p className="mt-0.5 text-[10px] text-[#6B1F2A]/60">{pendingProduct.sku} · {isRtl ? "منتج جديد سيتم إنشاؤه مع هذه الفاتورة" : "New product to be created with this invoice"}</p>
                 </button>
-                <button type="button" onClick={() => setPendingProducts((current) => resequencePendingProductSkus(current.filter((_, index) => index !== pendingProductIndex)))} className="text-red-600 p-1" aria-label={isRtl ? "إزالة المنتج الجديد" : "Remove new product"}>
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button type="button" onClick={() => openPendingProductEditor(pendingProductIndex)} className="rounded-lg p-1 text-[#942E3A] hover:bg-white" aria-label={isRtl ? "تعديل المنتج الجديد" : "Edit new product"}>
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button type="button" onClick={() => setPendingProducts((current) => resequencePendingProductSkus(current.filter((_, index) => index !== pendingProductIndex)))} className="rounded-lg p-1 text-red-600 hover:bg-white" aria-label={isRtl ? "إزالة المنتج الجديد" : "Remove new product"}>
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
               {!collapsedProductIds.has(pendingProductId) && <>
               <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -483,10 +576,13 @@ export default function AdminPurchaseInvoiceForm({
               <div className="flex items-start justify-between gap-3">
                 <button type="button" onClick={() => toggleProduct(group[0].batchId || group[0].productId)} className={`min-w-0 flex-1 ${isRtl ? "text-right" : "text-left"}`}>
                   <span className="mb-1 inline-flex rounded-full bg-[#D8B46A] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#942E3A]">{isRtl ? "دفعة جديدة" : "New batch"}</span>
-                  <span className="flex items-center gap-2"><span className="font-playfair text-lg font-bold text-[#942E3A]">{group[0].productName}</span><ChevronDown className={`h-4 w-4 shrink-0 text-[#D8B46A] transition-transform ${collapsedProductIds.has(group[0].batchId || group[0].productId) ? "" : "rotate-180"}`} /></span>
+                  <span className="flex items-center gap-2"><span data-admin-i18n-skip className="font-playfair text-lg font-bold text-[#942E3A]">{group[0].productName}</span><ChevronDown className={`h-4 w-4 shrink-0 text-[#D8B46A] transition-transform ${collapsedProductIds.has(group[0].batchId || group[0].productId) ? "" : "rotate-180"}`} /></span>
                   <p className="mt-0.5 text-[10px] text-[#6B1F2A]/60">{isRtl ? "استلام مخزون جديد" : "New stock receipt"} · {formatNumber(group.length)} {isRtl ? "مقاسات / أحجام" : "sizes / volumes"}</p>
                 </button>
-                <button type="button" onClick={() => setLines((current) => current.filter((line) => line.batchId !== group[0].batchId))} className="p-1 text-red-600" aria-label={isRtl ? "إزالة الدفعة" : "Remove batch"}><Trash2 className="h-4 w-4" /></button>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button type="button" onClick={() => openBatchEditor(group)} className="rounded-lg p-1 text-[#942E3A] hover:bg-[#FFF9EB]" aria-label={isRtl ? "تعديل الدفعة" : "Edit batch"}><Pencil className="h-4 w-4" /></button>
+                  <button type="button" onClick={() => setLines((current) => current.filter((line) => line.batchId !== group[0].batchId))} className="rounded-lg p-1 text-red-600 hover:bg-[#FFF9EB]" aria-label={isRtl ? "إزالة الدفعة" : "Remove batch"}><Trash2 className="h-4 w-4" /></button>
+                </div>
               </div>
               {!collapsedProductIds.has(group[0].batchId || group[0].productId) && <div className="mt-3 overflow-x-auto rounded-xl border border-[#942E3A]/10">
                 <div className="min-w-[560px]">
@@ -509,7 +605,7 @@ export default function AdminPurchaseInvoiceForm({
             <div key={line.id} className={`rounded-2xl bg-[#FFF9EB]/70 p-3.5 sm:p-4 ${isRtl ? "text-right" : "text-left"}`}>
               <div className="flex items-start justify-between gap-3">
                 <button type="button" onClick={() => toggleProduct(line.id)} className={`min-w-0 flex-1 ${isRtl ? "text-right" : "text-left"}`}>
-                  <span className="flex items-center gap-2"><span className="font-bold text-[#942E3A] text-xs sm:text-sm">{line.productName}</span><ChevronDown className={`h-4 w-4 shrink-0 text-[#D8B46A] transition-transform ${collapsedProductIds.has(line.id) ? "" : "rotate-180"}`} /></span>
+                  <span className="flex items-center gap-2"><span data-admin-i18n-skip className="font-bold text-[#942E3A] text-xs sm:text-sm">{line.productName}</span><ChevronDown className={`h-4 w-4 shrink-0 text-[#D8B46A] transition-transform ${collapsedProductIds.has(line.id) ? "" : "rotate-180"}`} /></span>
                   <p className="mt-0.5 text-[10px] text-[#6B1F2A]/60">{line.label}</p>
                 </button>
                 <button type="button" onClick={() => setLines((current) => current.filter((item) => item.id !== line.id))} className="text-red-600 p-1" aria-label={isRtl ? "إزالة المنتج" : "Remove product"}>
@@ -579,15 +675,15 @@ export default function AdminPurchaseInvoiceForm({
                   {addMode === "choice"
                     ? (isRtl ? "إضافة إلى هذه الفاتورة" : "Add to this invoice")
                     : addMode === "batch"
-                      ? (isRtl ? "إضافة دفعة من الكتالوج" : "Add an existing batch")
-                      : (isRtl ? "إنشاء منتج جديد" : "Create a new product")}
+                      ? (editingBatchId ? (isRtl ? "تعديل دفعة الفاتورة" : "Edit invoice batch") : (isRtl ? "إضافة دفعة من الكتالوج" : "Add an existing batch"))
+                      : (editingPendingProductIndex === null ? (isRtl ? "إنشاء منتج جديد" : "Create a new product") : (isRtl ? "تعديل المنتج الجديد" : "Edit new product"))}
                 </h2>
                 <p className="mt-1 text-xs text-[#6B1F2A]/60">
                   {addMode === "choice"
                     ? (isRtl ? "اختر كيف تريد بناء سطر المخزون التالي." : "Choose how you want to build the next stock line.")
                     : addMode === "batch"
-                      ? (isRtl ? "اختر صنفاً من الكتالوج ثم حدد التكلفة والكمية." : "Pick a catalog variant, then add its cost and quantity below.")
-                      : (isRtl ? "أكمل تجهيز المنتج بالكامل دون مغادرة الفاتورة." : "Complete the product setup without leaving the invoice.")}
+                      ? (editingBatchId ? (isRtl ? "عدّل كل البيانات ثم احفظها لتحديث الدفعة داخل الفاتورة." : "Update the batch details, then save them back to the invoice.") : (isRtl ? "اختر صنفاً من الكتالوج ثم حدد التكلفة والكمية." : "Pick a catalog variant, then add its cost and quantity below."))
+                      : (editingPendingProductIndex === null ? (isRtl ? "أكمل تجهيز المنتج بالكامل دون مغادرة الفاتورة." : "Complete the product setup without leaving the invoice.") : (isRtl ? "عدّل بيانات المنتج بالكامل ثم احفظها داخل الفاتورة." : "Update the complete product details, then save them back to the invoice."))}
                 </p>
               </div>
               <button
@@ -662,7 +758,7 @@ export default function AdminPurchaseInvoiceForm({
                     <div className="mt-4 space-y-4 rounded-2xl border border-[#942E3A]/10 bg-white p-4">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <p className="font-playfair text-lg font-bold text-[#942E3A]">{selectedBatchProduct.productName}</p>
+                          <p data-admin-i18n-skip className="font-playfair text-lg font-bold text-[#942E3A]">{selectedBatchProduct.productName}</p>
                           <p className="text-[10px] text-[#6B1F2A]/60">{isRtl ? "حدد الكميات لكل مقاس / حجم." : "Select quantities for each size / volume."}</p>
                         </div>
                         <div className="flex gap-2 text-[10px] font-bold">
@@ -686,6 +782,12 @@ export default function AdminPurchaseInvoiceForm({
                             <label className="mt-2 block"><span className="mb-1 block text-[9px] uppercase tracking-wide text-[#6B1F2A]/55">{isRtl ? "الكمية المستلمة" : "Receive quantity"}</span>
                             <input type="number" min="0" value={batchDrafts[variant.id]?.quantity || ""} onChange={(event) => updateBatchDraft(variant.id, "quantity", event.target.value)} className="admin-input h-9 px-2 text-right" placeholder="0" />
                             </label>
+                            <label className="mt-2 block"><span className="mb-1 block text-[9px] uppercase tracking-wide text-[#6B1F2A]/55">{isRtl ? "سعر البيع / القطعة" : "Selling / unit"}</span>
+                            <input type="number" min="0" step="0.01" value={batchDrafts[variant.id]?.retailPrice || ""} onChange={(event) => updateBatchDraft(variant.id, "retailPrice", event.target.value)} className="admin-input h-9 px-2 text-right" />
+                            </label>
+                            <label className="mt-2 block"><span className="mb-1 block text-[9px] uppercase tracking-wide text-[#6B1F2A]/55">{isRtl ? "سعر الشراء / القطعة" : "Wholesale / unit"}</span>
+                            <input type="number" min="0" step="0.01" value={batchDrafts[variant.id]?.wholesalePrice || ""} onChange={(event) => updateBatchDraft(variant.id, "wholesalePrice", event.target.value)} className="admin-input h-9 px-2 text-right" />
+                            </label>
                             <button type="button" onClick={() => updateBatchDraft(variant.id, "enabled", batchDrafts[variant.id]?.enabled === false)} className={`mt-2 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[10px] font-bold ${batchDrafts[variant.id]?.enabled !== false ? "bg-[#942E3A] text-white" : "border border-[#D8B46A] text-[#942E3A]"}`}><Check className="h-3.5 w-3.5" /> {batchDrafts[variant.id]?.enabled !== false ? (isRtl ? "مضمن" : "Included") : (isRtl ? "مستبعد" : "Excluded")}</button>
                           </div>
                         ))}
@@ -700,7 +802,7 @@ export default function AdminPurchaseInvoiceForm({
                     disabled={isAddingBatch || !selectedProductId || !selectedProductVariants.some((variant) => Number(batchDrafts[variant.id]?.quantity || 0) > 0) || (retailMode === "new" && !newRetailPrice) || (wholesaleMode === "new" && !newWholesalePrice)}
                     className="inline-flex items-center gap-2 rounded-xl bg-[#942E3A] px-5 py-3 text-xs font-bold text-[#FFF9EB] disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {isAddingBatch ? <LoaderCircle className="h-4 w-4 animate-spin text-[#D8B46A]" /> : <PackagePlus className="h-4 w-4 text-[#D8B46A]" />} {isAddingBatch ? (isRtl ? "جاري الإضافة..." : "Adding…") : (isRtl ? "إضافة للفاتورة" : "Add to invoice")}
+                    {isAddingBatch ? <LoaderCircle className="h-4 w-4 animate-spin text-[#D8B46A]" /> : <PackagePlus className="h-4 w-4 text-[#D8B46A]" />} {isAddingBatch ? (isRtl ? "جاري الحفظ..." : "Saving…") : (editingBatchId ? (isRtl ? "حفظ تعديل الدفعة" : "Save batch changes") : (isRtl ? "إضافة للفاتورة" : "Add to invoice"))}
                   </button>
                 </div>
               </div>
@@ -709,10 +811,12 @@ export default function AdminPurchaseInvoiceForm({
             {addMode === "new" && (
               <div className="mt-6">
                 <AdminProductCreateForm
+                  key={editingPendingProductIndex === null ? "new-product" : `edit-pending-${editingPendingProductIndex}`}
                   options={productOptions}
                   suppliers={suppliers}
                   products={catalogProducts}
-                  reservedSkus={pendingProducts.map((product) => product.sku)}
+                  initialProduct={pendingProductInitialValues}
+                  reservedSkus={pendingProducts.filter((_, index) => index !== editingPendingProductIndex).map((product) => product.sku)}
                   embedded
                   onCancel={closeAddModal}
                   onEmbeddedSubmit={handleEmbeddedProductSubmit}

@@ -1,5 +1,6 @@
 import { COLOR_TRANSLATIONS } from "@/components/ProductCard";
 import prisma from "@/lib/prisma";
+import { getSiteSettings } from "@/lib/siteSettings";
 import { formatCurrency } from "@/lib/utils";
 import {
   AlertCircle,
@@ -63,6 +64,13 @@ function getGovernorateName(value: string) {
   }
 
   return GOV_AR_TO_EN[repaired] || repaired;
+}
+
+function whatsappDigits(value: string) {
+  const digits = value.replace(/\D/g, "");
+  if (digits.startsWith("0") && digits.length === 11) return `20${digits.slice(1)}`;
+  if (digits.startsWith("20")) return digits;
+  return digits;
 }
 
 type LocalizedText = { en: string; ar: string };
@@ -129,6 +137,8 @@ function getStepState(status: string, stepKey: string) {
 export default async function TrackOrderPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const query = (params.q || params.order || "").trim();
+  const siteSettings = await getSiteSettings();
+  const supportWhatsApp = whatsappDigits(siteSettings.whatsapp) || "201023456789";
 
   const order = query
     ? await prisma.order.findFirst({
@@ -300,7 +310,7 @@ export default async function TrackOrderPage({ searchParams }: PageProps) {
                     <Localized en="If you wish to cancel or modify your order, please contact our support team directly on WhatsApp with your order reference." ar="إذا كنت ترغب في إلغاء أو تعديل طلبك، تواصل مع فريق الدعم مباشرة عبر واتساب مع ذكر رقم الطلب." />
                   </p>
                   <a
-                    href={`https://wa.me/201023456789?text=${encodeURIComponent(`Hello DeRoma support, I would like to inquire about/cancel order: ${order.orderNumber}`)}`}
+                    href={`https://wa.me/${supportWhatsApp}?text=${encodeURIComponent(`Hello DeRoma support, I would like to inquire about/cancel order: ${order.orderNumber}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#D8B46A] px-5 py-2.5 text-xs font-bold text-[#942E3A] shadow-sm transition hover:bg-[#c4a159]"

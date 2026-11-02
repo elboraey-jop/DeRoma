@@ -271,7 +271,7 @@ export default function ProductCard({
             }`}
           >
             <h3 className="product-card-name text-[10px] font-normal leading-[1.2] tracking-tight text-[#6B1F2A] line-clamp-2 sm:text-[11px]">
-              {product.name}
+              <span data-admin-i18n-skip>{product.name}</span>
             </h3>
           </Link>
         </div>

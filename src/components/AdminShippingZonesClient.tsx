@@ -12,6 +12,7 @@ import AdminShippingExceptionsPicker, {
 import { CENTERS_BY_GOVERNORATE } from "@/lib/locations";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 import { toast } from "@/lib/toast";
+import SafeActionForm from "@/components/SafeActionForm";
 
 type Zone = {
   id: string;
@@ -212,9 +213,9 @@ export default function AdminShippingZonesClient({ zones }: { zones: Zone[] }) {
                     <Edit3 className="h-3.5 w-3.5" />
                     {t("common.edit")}
                   </button>
-                  <form
+                  <SafeActionForm
                     action={deleteShippingZoneAction}
-                    onSubmit={() => {
+                    onSuccess={() => {
                       toast.success(isRtl ? `تم حذف منطقة "${zone.name}" بنجاح!` : `Zone "${zone.name}" deleted successfully!`);
                     }}
                   >
@@ -226,7 +227,7 @@ export default function AdminShippingZonesClient({ zones }: { zones: Zone[] }) {
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
-                  </form>
+                  </SafeActionForm>
                 </div>
               </div>
             </div>
@@ -271,7 +272,7 @@ export default function AdminShippingZonesClient({ zones }: { zones: Zone[] }) {
               </button>
             </div>
 
-            <form action={updateShippingZoneAction} className="mt-5 grid gap-3">
+            <SafeActionForm action={updateShippingZoneAction} className="mt-5 grid gap-3">
               <input type="hidden" name="id" value={editing.id} />
 
               <label>
@@ -321,7 +322,7 @@ export default function AdminShippingZonesClient({ zones }: { zones: Zone[] }) {
               >
                 {isRtl ? "حفظ التغييرات" : "Save changes"}
               </button>
-            </form>
+            </SafeActionForm>
           </div>
         </div>
       )}

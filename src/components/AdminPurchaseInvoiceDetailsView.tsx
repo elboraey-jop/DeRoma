@@ -68,7 +68,7 @@ export default function AdminPurchaseInvoiceDetailsView({
             href={`/admin/suppliers/${invoice.supplier.id}`}
             className="rounded-xl border border-[#942E3A]/15 bg-[#FFF9EB] px-3 py-1.5 text-[10px] font-bold text-[#942E3A] transition hover:bg-[#F2DFC0]"
           >
-            {invoice.supplier.name}
+            <span data-admin-i18n-skip>{invoice.supplier.name}</span>
           </Link>
         </div>
 
@@ -99,7 +99,7 @@ export default function AdminPurchaseInvoiceDetailsView({
                           <span className="h-11 w-11 shrink-0 rounded-xl bg-[#F2DFC0]" />
                         )}
                         <span>
-                          <span className="block">{product.name}</span>
+                          <span data-admin-i18n-skip className="block">{product.name}</span>
                           <span className="mt-1 block text-[10px] font-normal text-[#6B1F2A]/60">
                             {product.color || (isRtl ? "بدون لون" : "No color")} · {product.sku || (isRtl ? "بدون كود" : "No SKU")}
                           </span>
@@ -162,7 +162,7 @@ export default function AdminPurchaseInvoiceDetailsView({
                     )}
                     <div className="min-w-0">
                       <Link href={`/admin/products/${product.id}`} className="block truncate font-bold text-[#942E3A] hover:underline">
-                        {product.name}
+                        <span data-admin-i18n-skip>{product.name}</span>
                       </Link>
                       <p className="mt-0.5 text-[10px] text-[#6B1F2A]/60">
                         {product.color || (isRtl ? "بدون لون" : "No color")} · {product.sku || (isRtl ? "بدون كود" : "No SKU")}

@@ -64,35 +64,40 @@ export async function updateFreeShippingSettingsAction(
 }
 
 export async function createShippingZoneAction(
-  _previousState: { success: boolean },
+  _previousState: { success: boolean; error?: string },
   formData: FormData,
 ) {
   await requireAdmin();
-  const name = String(formData.get("name") || "").trim();
-  const governorates = String(formData.get("governorates") || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-  const fee = Number(formData.get("fee"));
-  const estimatedDays = null;
-  const freeShippingThreshold = null;
-  const exceptions = parseExceptions(formData);
-  if (!name || governorates.length === 0 || !Number.isFinite(fee) || fee < 0)
-    throw new Error("Zone name, governorates, and a valid fee are required.");
-  await prisma.shippingZone.create({
-    data: {
-      name,
-      governorates: [...new Set(governorates)],
-      fee,
-      estimatedDays,
-      freeShippingThreshold,
-      exceptions: { create: exceptions },
-    },
-  });
-  revalidatePath("/admin/shipping");
-  revalidatePath("/api/shipping");
-  revalidatePath("/checkout");
-  return { success: true };
+  try {
+    const name = String(formData.get("name") || "").trim();
+    const governorates = String(formData.get("governorates") || "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+    const fee = Number(formData.get("fee"));
+    const estimatedDays = null;
+    const freeShippingThreshold = null;
+    const exceptions = parseExceptions(formData);
+    if (!name || governorates.length === 0 || !Number.isFinite(fee) || fee < 0)
+      return { success: false, error: "Zone name, governorates, and a valid fee are required." };
+    await prisma.shippingZone.create({
+      data: {
+        name,
+        governorates: [...new Set(governorates)],
+        fee,
+        estimatedDays,
+        freeShippingThreshold,
+        exceptions: { create: exceptions },
+      },
+    });
+    revalidatePath("/admin/shipping");
+    revalidatePath("/api/shipping");
+    revalidatePath("/checkout");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to create shipping zone:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Failed to create shipping zone." };
+  }
 }
 
 function parseExceptions(formData: FormData) {

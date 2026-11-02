@@ -350,7 +350,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             </li>
             <ChevronRight className={`h-3 w-3 text-[#D8B46A] shrink-0 ${dir === "rtl" ? "rotate-180" : ""}`} />
             <li className="text-[#942E3A] truncate">
-              {product.name}
+              <span data-admin-i18n-skip>{product.name}</span>
             </li>
           </ol>
         </nav>
@@ -477,7 +477,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
             {/* Title */}
             <div className="w-full">
               <h1 className="text-[22px] sm:text-3xl lg:text-4xl font-normal text-[#942E3A] font-product tracking-tight leading-snug text-center">
-                {product.name}
+                <span data-admin-i18n-skip>{product.name}</span>
               </h1>
 
               {/* Star rating */}
@@ -535,7 +535,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
                     style={{ backgroundColor: getColorHex(product.color) }}
                     aria-hidden="true"
                   />
-                  {product.color}
+                  <span data-admin-i18n-skip>{product.color}</span>
                 </span>
               </div>
             )}
@@ -767,7 +767,7 @@ export default function ProductDetailClient({ product, similarProducts, reviews 
               >
                 <div className="flex items-center justify-between gap-3 px-1 pb-3 sm:px-2 sm:pb-4">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold sm:text-base">{product.name}</p>
+                    <p data-admin-i18n-skip className="truncate text-sm font-bold sm:text-base">{product.name}</p>
                     <p className="mt-0.5 text-[10px] font-medium text-white/55 sm:text-xs">
                       {activeImageIndex + 1} / {currentColorImages.length}
                     </p>

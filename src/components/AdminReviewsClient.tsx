@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, CheckCircle2, ChevronDown, Home, MessageSquareQuote, Pencil, Plus, Search, Star, Trash2, X } from "lucide-react";
 import { createReviewAction, deleteReviewAction, updateReviewAction, updateReviewStatusAction, toggleShowOnHomeAction } from "@/app/admin/reviews/actions";
+import SafeActionForm from "@/components/SafeActionForm";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 
 type Product = { id: string; name: string; images: string[]; category: string };
@@ -144,7 +145,7 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
           </button>
         </div>
 
-        <form action={action} className="mt-6 space-y-4" onSubmit={onClose}>
+        <SafeActionForm action={action} className="mt-6 space-y-4" onSuccess={onClose}>
           {review && <input type="hidden" name="id" value={review.id} />}
 
           <div>
@@ -268,7 +269,7 @@ function ReviewForm({ review, products, onClose }: { review?: Review; products: 
               {review ? t("common.save") : (isRtl ? "إضافة التقييم" : "Add review")}
             </button>
           </div>
-        </form>
+        </SafeActionForm>
       </div>
     </div>
   );
@@ -408,12 +409,12 @@ export default function AdminReviewsClient({ reviews, products, isHomeReviewsSec
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                    <h3 className="font-playfair text-sm font-bold text-[#942E3A] sm:text-base truncate">{review.customerName}</h3>
+                    <h3 data-admin-i18n-skip className="font-playfair text-sm font-bold text-[#942E3A] sm:text-base truncate">{review.customerName}</h3>
                     <span className="text-[#D8B46A]">·</span>
                     <Stars rating={review.rating} isRtl={isRtl} />
                   </div>
                   <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-[#6B1F2A]/55 sm:mt-1 sm:gap-2">
-                    <span className="truncate font-semibold text-[#942E3A]/75">{review.product.name}</span>
+                    <span data-admin-i18n-skip className="truncate font-semibold text-[#942E3A]/75">{review.product.name}</span>
                     <span>·</span>
                     <span>{new Date(review.createdAt).toLocaleDateString(reviewDateLocale, { month: "short", day: "numeric" })}</span>
                     {review.verifiedPurchase && <span className="inline-flex items-center gap-0.5 font-bold text-[#27663d]"><Check className="h-3 w-3" /> {isRtl ? "مؤكد" : "Verified"}</span>}
@@ -426,11 +427,11 @@ export default function AdminReviewsClient({ reviews, products, isHomeReviewsSec
               <p className="mt-2.5 text-xs leading-5 text-[#6B1F2A]/75 sm:mt-3 sm:leading-6 break-words">{review.body}</p>
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[#942E3A]/8 pt-2.5 sm:mt-4 sm:pt-3 min-w-0">
                 <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
-                  <form action={updateReviewStatusAction} className="flex items-center gap-2 shrink-0">
+                  <SafeActionForm action={updateReviewStatusAction} className="flex items-center gap-2 shrink-0">
                     <input type="hidden" name="id" value={review.id} />
                     <StatusPicker value={review.status} />
-                  </form>
-                  <form action={toggleShowOnHomeAction} className="flex items-center shrink-0">
+                  </SafeActionForm>
+                  <SafeActionForm action={toggleShowOnHomeAction} className="flex items-center shrink-0">
                     <input type="hidden" name="id" value={review.id} />
                     <input type="hidden" name="showOnHome" value={String(!review.showOnHome)} />
                     <button type="submit" className={`inline-flex items-center gap-1 rounded-xl border px-2 py-1.5 text-[10px] font-bold transition sm:px-2.5 ${review.showOnHome ? "border-[#942E3A] bg-[#942E3A] text-white shadow-xs" : "border-[#942E3A]/20 bg-white text-[#942E3A]/70 hover:border-[#942E3A]"}`} title={isRtl ? "تبديل العرض في الصفحة الرئيسية" : "Toggle show on Home Page"}>
@@ -438,14 +439,14 @@ export default function AdminReviewsClient({ reviews, products, isHomeReviewsSec
                       <span>{isRtl ? "الرئيسية" : "Home"}</span>
                       <span className={`h-2 w-2 rounded-full ${review.showOnHome ? "bg-[#D8B46A]" : "bg-stone-300"}`} />
                     </button>
-                  </form>
+                  </SafeActionForm>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <button onClick={() => setEditing(review)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-bold text-[#942E3A]/70 hover:bg-[#942E3A]/8 hover:text-[#942E3A]"><Pencil className="h-3 w-3" /> {t("common.edit")}</button>
-                  <form action={deleteReviewAction}>
+                  <SafeActionForm action={deleteReviewAction}>
                     <input type="hidden" name="id" value={review.id} />
                     <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-bold text-[#a33b43]/70 hover:bg-[#fae9e8] hover:text-[#a33b43]" onClick={(event) => { if (!window.confirm(isRtl ? "هل أنت تأكد من حذف هذا التقييم نهائياً؟" : "Delete this review permanently?")) event.preventDefault(); }}><Trash2 className="h-3 w-3" /> {t("common.delete")}</button>
-                  </form>
+                  </SafeActionForm>
                 </div>
               </div>
             </article>

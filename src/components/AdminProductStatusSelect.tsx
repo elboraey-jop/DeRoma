@@ -3,6 +3,7 @@
 import { Check, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { updateProductStatusAction } from "@/app/admin/products/actions";
+import SafeActionForm from "@/components/SafeActionForm";
 import { toast } from "@/lib/toast";
 
 const options = [
@@ -75,17 +76,24 @@ export default function AdminProductStatusSelect({
     if (statusInput instanceof HTMLInputElement) statusInput.value = nextStatus;
     setIsOpen(false);
     if (nextStatus !== status) {
-      toast.success(
-        isRtl
-          ? `تم تحديث حالة المنتج إلى "${labelFor(nextStatus)}"`
-          : `Status updated to ${nextStatus}`
-      );
       formRef.current?.requestSubmit();
     }
   };
 
   return (
-    <form ref={formRef} action={updateProductStatusAction} className="relative">
+    <SafeActionForm
+      ref={formRef}
+      action={updateProductStatusAction}
+      onSuccess={(formData) => {
+        const nextStatus = String(formData.get("status") || status);
+        toast.success(
+          isRtl
+            ? `تم تحديث حالة المنتج إلى "${labelFor(nextStatus)}"`
+            : `Status updated to ${nextStatus}`,
+        );
+      }}
+      className="relative"
+    >
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="status" value={status} />
       <button
@@ -128,6 +136,6 @@ export default function AdminProductStatusSelect({
           </div>
         </div>
       )}
-    </form>
+    </SafeActionForm>
   );
 }

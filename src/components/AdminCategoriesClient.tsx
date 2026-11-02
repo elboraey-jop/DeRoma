@@ -166,7 +166,7 @@ export default function AdminCategoriesClient({
     <div key={opt.id} onClick={() => setActiveOption(opt)} className="flex cursor-pointer items-center justify-between gap-2 rounded-xl border border-[#942E3A]/10 bg-white px-2.5 py-2.5 transition hover:border-[#D8B46A]/60">
       <div className="flex min-w-0 items-center gap-2">
         {opt.type === "color" && <span className="h-4 w-4 shrink-0 rounded-full border border-black/15 shadow-xs" style={{ backgroundColor: opt.value || colorSwatches[opt.name.toLowerCase()] || "#D8B46A" }} />}
-        <span className="truncate text-xs font-bold text-[#942E3A]">{opt.name}</span>
+        <span data-admin-i18n-skip className="truncate text-xs font-bold text-[#942E3A]">{opt.name}</span>
       </div>
       <form onClick={(event) => event.stopPropagation()} action={async (formData) => {
         setPendingId(opt.id);
@@ -437,7 +437,7 @@ export default function AdminCategoriesClient({
                       style={{ backgroundColor: colorSwatches[opt.name.toLowerCase()] || "#D8B46A" }}
                     />
                   )}
-                  <span className="min-w-0"><span className="block truncate text-xs font-bold text-[#942E3A]">{opt.name}</span><span className="mt-0.5 block text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">{opt.type}</span></span>
+                  <span className="min-w-0"><span data-admin-i18n-skip className="block truncate text-xs font-bold text-[#942E3A]">{opt.name}</span><span className="mt-0.5 block text-[9px] uppercase tracking-wide text-[#6B1F2A]/50">{opt.type}</span></span>
                 </div>
 
                 <form
@@ -519,9 +519,9 @@ export default function AdminCategoriesClient({
                       </div>
                       <div className="p-3">
                         <p data-admin-i18n-skip className="truncate text-xs font-bold text-[#942E3A]">{product.name}</p>
-                        <div className="mt-2 flex items-center justify-between gap-2 text-[10px] text-[#6B1F2A]/60"><span className="capitalize">{product.category}</span><span className="font-bold text-[#942E3A]">{formatPrice(product.price)}</span></div>
-                        <p className="mt-2 text-[10px] text-[#6B1F2A]/65">{product.color ? (isRtl ? `اللون: ${product.color}` : `Color: ${product.color}`) : (isRtl ? "بدون لون" : "No color")} · {product.variants.length} {isRtl ? "مقاسات" : "sizes"}</p>
-                        <div className="mt-2 flex flex-wrap gap-1">{product.variants.slice(0, 8).map((variant) => <span key={variant.size} className="rounded-md bg-[#FFF9EB] px-1.5 py-1 text-[9px] font-bold text-[#942E3A]">{variant.size}: {variant.stock}</span>)}</div>
+                        <div className="mt-2 flex items-center justify-between gap-2 text-[10px] text-[#6B1F2A]/60"><span data-admin-i18n-skip className="capitalize">{product.category}</span><span className="font-bold text-[#942E3A]">{formatPrice(product.price)}</span></div>
+                        <p className="mt-2 text-[10px] text-[#6B1F2A]/65">{product.color ? <span data-admin-i18n-skip>{isRtl ? `اللون: ${product.color}` : `Color: ${product.color}`}</span> : (isRtl ? "بدون لون" : "No color")} · {product.variants.length} {isRtl ? "مقاسات" : "sizes"}</p>
+                        <div className="mt-2 flex flex-wrap gap-1">{product.variants.slice(0, 8).map((variant) => <span data-admin-i18n-skip key={variant.size} className="rounded-md bg-[#FFF9EB] px-1.5 py-1 text-[9px] font-bold text-[#942E3A]">{variant.size}: {variant.stock}</span>)}</div>
                       </div>
                     </Link>
                   ))}

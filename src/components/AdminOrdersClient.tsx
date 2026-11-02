@@ -199,7 +199,7 @@ export default function AdminOrdersClient({ orders }: { orders: AdminOrderRow[] 
                         href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`}
                         className="font-bold text-[#942E3A] hover:underline"
                       >
-                        {order.customerName}
+                        <span data-admin-i18n-skip>{order.customerName}</span>
                       </Link>
                     </td>
                     <td className="py-3 whitespace-nowrap">
@@ -228,9 +228,9 @@ export default function AdminOrdersClient({ orders }: { orders: AdminOrderRow[] 
                       />
                     </td>
                     <td className="w-[180px] max-w-[180px] py-3 whitespace-nowrap text-[10px] text-[#6B1F2A]/65">
-                      <span className="font-semibold text-[#6B1F2A]">{order.governorate}</span>
+                      <span data-admin-i18n-skip className="font-semibold text-[#6B1F2A]">{order.governorate}</span>
                       <span className="mx-1 text-[#D8B46A]">·</span>
-                      {order.city}
+                      <span data-admin-i18n-skip>{order.city}</span>
                     </td>
                     <td className={`w-[110px] py-3 font-bold text-[#942E3A] ${isRtl ? "text-left" : "text-right"}`}>
                       {formatPrice(order.totalPrice)}
@@ -275,7 +275,7 @@ export default function AdminOrdersClient({ orders }: { orders: AdminOrderRow[] 
                       href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`}
                       className="font-bold text-[#6B1F2A] hover:text-[#942E3A] hover:underline block truncate text-xs"
                     >
-                      {order.customerName}
+                      <span data-admin-i18n-skip>{order.customerName}</span>
                     </Link>
                     <div className="flex items-center justify-between gap-1 mt-0.5 text-[10px] text-[#6B1F2A]/70">
                       <a href={`tel:${order.customerPhone}`} className="hover:underline truncate">
@@ -286,7 +286,7 @@ export default function AdminOrdersClient({ orders }: { orders: AdminOrderRow[] 
                   </div>
 
                   <p className="text-[9px] text-[#6B1F2A]/60 truncate font-medium">
-                    {order.governorate} • {order.city}
+                    <span data-admin-i18n-skip>{order.governorate} • {order.city}</span>
                   </p>
                 </div>
 

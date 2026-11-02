@@ -29,9 +29,9 @@ const CATALOG_OPTIONS = [
 ];
 
 const SHIPPING_ZONES = [
-  { id: "zone-cairo-giza", name: "Cairo & Giza", governorates: ["Cairo", "Giza"], fee: 60, estimatedDays: "1–2 business days", freeShippingThreshold: 2500 },
-  { id: "zone-delta", name: "Delta & Alexandria", governorates: ["Alexandria", "Beheira", "Dakahlia", "Gharbia", "Kafr El Sheikh", "Monufia", "Qalyubia", "Sharqia"], fee: 85, estimatedDays: "2–4 business days", freeShippingThreshold: 3000 },
-  { id: "zone-upper-egypt", name: "Upper Egypt & Canal", governorates: ["Aswan", "Assiut", "Beni Suef", "Fayoum", "Luxor", "Minya", "Qena", "Sohag", "Ismailia", "Port Said", "Suez"], fee: 110, estimatedDays: "3–5 business days", freeShippingThreshold: 3500 },
+  { id: "zone-cairo-giza", name: "Cairo, Delta & Canal", governorates: ["Cairo", "Giza", "Alexandria", "Beheira", "Dakahlia", "Gharbia", "Kafr El Sheikh", "Monufia", "Qalyubia", "Sharqia", "Damietta", "Port Said", "Ismailia", "Suez"], fee: 90, estimatedDays: "2–4 business days", freeShippingThreshold: null },
+  { id: "zone-delta", name: "Upper Egypt, New Valley, Matrouh & Red Sea", governorates: ["Fayoum", "Beni Suef", "Minya", "Asyut", "Sohag", "Qena", "Luxor", "Aswan", "New Valley", "Matrouh", "Red Sea"], fee: 130, estimatedDays: "3–6 business days", freeShippingThreshold: null },
+  { id: "zone-upper-egypt", name: "North & South Sinai", governorates: ["North Sinai", "South Sinai"], fee: 150, estimatedDays: "4–7 business days", freeShippingThreshold: null },
 ];
 
 const PROMOTIONS = [

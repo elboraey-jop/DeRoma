@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { updateProductDiscountAction } from "@/app/admin/products/actions";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "@/lib/toast";
+import SafeActionForm from "@/components/SafeActionForm";
 
 export default function AdminProductDiscountModal({
   productId,
@@ -159,20 +160,20 @@ export default function AdminProductDiscountModal({
                 </>
               )}
             </div>
-            <form
+            <SafeActionForm
               id={`remove-discount-${productId}`}
               action={updateProductDiscountAction}
-              onSubmit={() => {
+              onSuccess={() => {
                 setIsOpen(false);
                 toast.success(isRtl ? "تمت إزالة الخصم بنجاح!" : "Discount removed successfully!");
               }}
             >
               <input type="hidden" name="productId" value={productId} />
               <input type="hidden" name="action" value="remove" />
-            </form>
-            <form
+            </SafeActionForm>
+            <SafeActionForm
               action={updateProductDiscountAction}
-              onSubmit={() => {
+              onSuccess={() => {
                 setIsOpen(false);
                 toast.success(isRtl ? "تم تطبيق الخصم بنجاح!" : "Discount applied successfully!");
               }}
@@ -221,7 +222,7 @@ export default function AdminProductDiscountModal({
                   {isRtl ? (hasDiscount ? "تحديث الخصم" : "تطبيق الخصم") : (hasDiscount ? "Update discount" : "Apply discount")}
                 </button>
               </div>
-            </form>
+            </SafeActionForm>
           </div>
         </div>
       )}

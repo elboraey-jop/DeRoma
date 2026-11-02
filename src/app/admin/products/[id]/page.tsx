@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/adminAuth";
 import AdminProductCreateForm from "@/components/AdminProductCreateForm";
 import AdminAddProductModal from "@/components/AdminAddProductModal";
 import AdminBackButton from "@/components/AdminBackButton";
+import SafeActionForm from "@/components/SafeActionForm";
 import { deleteProductAction } from "@/app/admin/products/[id]/actions";
 import { CATALOG_PRODUCTS } from "@/lib/productCatalog";
 
@@ -193,7 +194,7 @@ export default async function EditProductPage({
             This product has linked sales or inventory history and cannot be deleted safely. Set the status to <strong>Archive</strong> instead.
           </div>
         ) : null}
-        <form action={deleteProductAction} className="mt-4">
+        <SafeActionForm action={deleteProductAction} className="mt-4">
           <input type="hidden" name="productId" value={product.id} />
           <button
             type="submit"
@@ -206,7 +207,7 @@ export default async function EditProductPage({
           >
             <Trash2 className="h-4 w-4" /> Delete product
           </button>
-        </form>
+        </SafeActionForm>
       </section>
     </div>
   );

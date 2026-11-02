@@ -192,7 +192,7 @@ export default function AdminDashboardClient({
                           href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`}
                           className="hover:underline"
                         >
-                          {order.customerName}
+                          <span data-admin-i18n-skip>{order.customerName}</span>
                         </Link>
                       </td>
                       <td className="truncate py-3 text-[#6B1F2A]/65">
@@ -254,7 +254,7 @@ export default function AdminDashboardClient({
                         href={`/admin/customers/${encodeURIComponent(order.customerPhone)}`}
                         className="min-w-0 truncate text-[11px] font-semibold text-[#6B1F2A] hover:underline"
                       >
-                        {order.customerName}
+                        <span data-admin-i18n-skip>{order.customerName}</span>
                       </Link>
                       <span className="shrink-0 text-[11px] font-bold text-[#942E3A]">
                         {formatPrice(order.totalPrice)}

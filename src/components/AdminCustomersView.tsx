@@ -100,7 +100,7 @@ export default function AdminCustomersView({
                       href={`/admin/customers/${encodeURIComponent(customer.phone)}`}
                       className="inline-block max-w-[220px] truncate hover:underline"
                     >
-                      {customer.name}
+                      <span data-admin-i18n-skip>{customer.name}</span>
                     </Link>
                   </td>
                   <td className="py-3 text-start text-[#6B1F2A]">
@@ -138,7 +138,7 @@ export default function AdminCustomersView({
                     href={`/admin/customers/${encodeURIComponent(customer.phone)}`}
                     className="block font-bold text-[#942E3A] hover:underline text-xs"
                   >
-                    {customer.name}
+                      <span data-admin-i18n-skip>{customer.name}</span>
                   </Link>
                   <span className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-[#6B1F2A]/70">
                     <span dir="ltr">{customer.phone}</span>

@@ -117,7 +117,7 @@ export function AdminSupplierPicker({
               >
                 <span className="flex items-center gap-2">
                   <Store className="h-3.5 w-3.5 text-[#D8B46A]" />
-                  {supplier.name}
+                  <span data-admin-i18n-skip>{supplier.name}</span>
                 </span>
                 {supplier.id === value && (
                   <Check className="h-3.5 w-3.5 text-[#D8B46A]" />
@@ -234,7 +234,7 @@ export function AdminProductPicker({
             className={`min-w-0 truncate ${selected ? "font-semibold text-[#942E3A]" : "text-[#6B1F2A]/65"}`}
           >
             {selected
-              ? `${selected.productName} · ${selected.label}`
+              ? <span data-admin-i18n-skip>{selected.productName} · {selected.label}</span>
               : (isRtl ? "اختر موديل المنتج للإضافة" : "Choose product variant to add")}
           </span>
         </span>
@@ -301,7 +301,7 @@ export function AdminProductPicker({
                 )}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-xs font-bold">
-                    {variant.productName}
+                    <span data-admin-i18n-skip>{variant.productName}</span>
                   </span>
                   <span className="mt-0.5 block truncate text-[10px] opacity-70">
                     {variant.label}
@@ -404,7 +404,7 @@ export function AdminCatalogProductPicker({
             className={`min-w-0 truncate ${selected ? "font-semibold text-[#942E3A]" : "text-[#6B1F2A]/65"}`}
           >
             {selected
-              ? `${selected.name} · ${getCategoryLabel(selected.category, isRtl)}`
+              ? <span data-admin-i18n-skip>{selected.name} · {getCategoryLabel(selected.category, isRtl)}</span>
               : (isRtl ? "اختر منتجًا" : "Select a product")}
           </span>
         </span>
@@ -472,7 +472,7 @@ export function AdminCatalogProductPicker({
                 )}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-xs font-bold">
-                    {product.name}
+                    <span data-admin-i18n-skip>{product.name}</span>
                   </span>
                   <span className="mt-0.5 block truncate text-[10px] opacity-70">
                     {getCategoryLabel(product.category, isRtl)}

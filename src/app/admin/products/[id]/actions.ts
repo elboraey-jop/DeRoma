@@ -330,7 +330,7 @@ export async function createProductReviewAction(formData: FormData) {
 export async function deleteProductAction(formData: FormData) {
   await requireAdmin();
   const productId = String(formData.get("productId") || "");
-  if (!productId) redirect("/admin/products");
+  if (!productId) return { error: "Product id is required." };
 
   const [orderCount, invoiceItemCount, inventoryLotCount] = await Promise.all([
     prisma.orderItem.count({ where: { productId } }),
@@ -339,14 +339,14 @@ export async function deleteProductAction(formData: FormData) {
   ]);
 
   if (orderCount || invoiceItemCount || inventoryLotCount) {
-    redirect(`/admin/products/${productId}?deleteError=history`);
+    return { error: "This product has linked sales or inventory history and cannot be deleted safely. Archive it instead." };
   }
 
   try {
     await prisma.product.delete({ where: { id: productId } });
   } catch (error) {
     console.error("Unable to delete product safely:", error);
-    redirect(`/admin/products/${productId}?deleteError=blocked`);
+    return { error: "This product could not be deleted safely. Archive it instead." };
   }
   revalidatePath("/admin/products");
   revalidatePath("/");

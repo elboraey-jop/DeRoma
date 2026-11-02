@@ -183,8 +183,8 @@ function ProductRowSelector({
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs">{p.name}</p>
-                        <p className="text-[9px] text-stone-400 capitalize">{p.category} · {p.price} EGP</p>
+                        <p data-admin-i18n-skip className="truncate text-xs">{p.name}</p>
+                        <p data-admin-i18n-skip className="text-[9px] text-stone-400 capitalize">{p.category} · {p.price} EGP</p>
                       </div>
                     </button>
                   );
@@ -248,10 +248,10 @@ function ProductRowSelector({
               </div>
 
               <div className="mt-1.5 space-y-0.5">
-                <span className="text-[8px] font-bold uppercase tracking-wider text-[#D8B46A] block truncate">
+                <span data-admin-i18n-skip className="text-[8px] font-bold uppercase tracking-wider text-[#D8B46A] block truncate">
                   {p.category}
                 </span>
-                <p className="truncate text-[11px] sm:text-xs font-bold text-[#942E3A]" title={p.name}>
+                <p data-admin-i18n-skip className="truncate text-[11px] sm:text-xs font-bold text-[#942E3A]" title={p.name}>
                   {p.name}
                 </p>
                 <p className="text-[11px] sm:text-xs font-black text-[#D8B46A]">

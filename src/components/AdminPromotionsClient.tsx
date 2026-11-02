@@ -25,6 +25,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
+import SafeActionForm from "@/components/SafeActionForm";
 import { useToast } from "@/providers/ToastProvider";
 import { useAdminI18n } from "@/providers/AdminI18nContext";
 import {
@@ -1251,7 +1252,7 @@ export default function AdminPromotionsClient({
                         </div>
 
                         {/* Status Toggle Form */}
-                        <form action={togglePromotionAction} className="shrink-0">
+                        <SafeActionForm action={togglePromotionAction} className="shrink-0">
                           <input type="hidden" name="id" value={promo.id} />
                           <input type="hidden" name="active" value={String(promo.active)} />
                           <button
@@ -1281,7 +1282,7 @@ export default function AdminPromotionsClient({
                               ? isRtl ? "نشط" : "Active"
                               : isRtl ? "متوقف" : "Paused"}
                           </button>
-                        </form>
+                        </SafeActionForm>
                       </div>
 
                       {/* Promo Title & Main Value */}
@@ -1449,7 +1450,7 @@ export default function AdminPromotionsClient({
                 </div>
               </div>
 
-              <form action={createAnnouncementAction} className="mt-4 space-y-4 sm:mt-5 w-full min-w-0 max-w-full">
+              <SafeActionForm action={createAnnouncementAction} className="mt-4 space-y-4 sm:mt-5 w-full min-w-0 max-w-full">
                 {/* Announcement Message */}
                 <div className="min-w-0">
                   <label className="mb-1.5 block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#6B1F2A]/70">
@@ -1561,7 +1562,7 @@ export default function AdminPromotionsClient({
                 >
                   {isRtl ? "نشر شريط الإعلان" : "Publish Announcement Banner"}
                 </button>
-              </form>
+              </SafeActionForm>
             </div>
 
             {/* Right: Announcement History Log (5 cols) */}
@@ -1602,7 +1603,7 @@ export default function AdminPromotionsClient({
 
                       <div className="flex items-center gap-1.5 shrink-0 ml-1">
                         {/* Toggle Active Switch */}
-                        <form action={toggleAnnouncementAction}>
+                        <SafeActionForm action={toggleAnnouncementAction}>
                           <input type="hidden" name="id" value={item.id} />
                           <input type="hidden" name="active" value={String(item.active)} />
                           <button
@@ -1618,7 +1619,7 @@ export default function AdminPromotionsClient({
                               ? isRtl ? "نشط" : "Active"
                               : isRtl ? "إعادة تفعيل" : "Re-activate"}
                           </button>
-                        </form>
+                        </SafeActionForm>
 
                         <button
                           type="button"
@@ -1665,11 +1666,9 @@ export default function AdminPromotionsClient({
               </button>
             </div>
 
-            <form
-              action={async (formData) => {
-                await createPromotionAction(formData);
-                setIsCreatePromoOpen(false);
-              }}
+            <SafeActionForm
+              action={createPromotionAction}
+              onSuccess={() => setIsCreatePromoOpen(false)}
               className="mt-5 space-y-4 max-h-[75vh] overflow-y-auto pr-1"
             >
               <div className="grid grid-cols-2 gap-3">
@@ -1875,7 +1874,7 @@ export default function AdminPromotionsClient({
                   {isRtl ? "نشر كود الخصم" : "Publish Promo Code"}
                 </button>
               </div>
-            </form>
+            </SafeActionForm>
           </div>
         </div>
       )}
@@ -1903,16 +1902,15 @@ export default function AdminPromotionsClient({
               >
                 {isRtl ? "إلغاء" : "Cancel"}
               </button>
-              <form action={deletePromotionAction}>
+              <SafeActionForm action={deletePromotionAction} onSuccess={() => setDeleteConfirmId(null)}>
                 <input type="hidden" name="id" value={deleteConfirmId} />
                 <button
                   type="submit"
-                  onClick={() => setDeleteConfirmId(null)}
                   className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700"
                 >
                   {isRtl ? "تأكيد الحذف" : "Confirm Delete"}
                 </button>
-              </form>
+              </SafeActionForm>
             </div>
           </div>
         </div>
@@ -1941,16 +1939,15 @@ export default function AdminPromotionsClient({
               >
                 {isRtl ? "إلغاء" : "Cancel"}
               </button>
-              <form action={deleteAnnouncementAction}>
+              <SafeActionForm action={deleteAnnouncementAction} onSuccess={() => setDeleteAnnouncementId(null)}>
                 <input type="hidden" name="id" value={deleteAnnouncementId} />
                 <button
                   type="submit"
-                  onClick={() => setDeleteAnnouncementId(null)}
                   className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700"
                 >
                   {isRtl ? "تأكيد الحذف" : "Confirm Delete"}
                 </button>
-              </form>
+              </SafeActionForm>
             </div>
           </div>
         </div>
