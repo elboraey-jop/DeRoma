@@ -778,7 +778,25 @@ export default function HomeClient({
                       </Link>
                     </div>
                   )}
+
                 </div>
+
+                {totalProductCount > MAX_HOME_SHELF_PRODUCTS && (
+                  <Link
+                    href="/shop"
+                    className="group -mt-10 flex w-full items-center justify-center gap-2 rounded-full border border-[#942E3A]/25 bg-white/70 px-5 py-2.5 text-center transition-all duration-300 hover:border-[#942E3A] hover:bg-white hover:shadow-md sm:mx-auto sm:mt-0 sm:w-fit"
+                  >
+                    <span className="text-xs sm:text-sm font-bold text-[#942E3A]">
+                      {lang === "ar" ? "عرض الكل" : "View All"}
+                    </span>
+                    <span className="text-[10px] text-[#D8B46A]">
+                      +{formatNumber(totalProductCount - MAX_HOME_SHELF_PRODUCTS)} {lang === "ar" ? "منتج" : "more"}
+                    </span>
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#942E3A]/10 text-[#942E3A] transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
+                      <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+                    </span>
+                  </Link>
+                )}
               </>
             )}
           </div>
@@ -833,7 +851,25 @@ export default function HomeClient({
                   </Link>
                 </div>
               )}
+
             </div>
+
+            {totalProductCount > MAX_HOME_SHELF_PRODUCTS && (
+              <Link
+                href="/shop"
+                className="group -mt-10 flex w-full items-center justify-center gap-2 rounded-full border border-[#942E3A]/25 bg-white/70 px-5 py-2.5 text-center transition-all duration-300 hover:border-[#942E3A] hover:bg-white hover:shadow-md sm:mx-auto sm:mt-0 sm:w-fit"
+              >
+                <span className="text-xs sm:text-sm font-bold text-[#942E3A]">
+                  {lang === "ar" ? "عرض الكل" : "View All"}
+                </span>
+                <span className="text-[10px] text-[#D8B46A]">
+                  +{formatNumber(totalProductCount - MAX_HOME_SHELF_PRODUCTS)} {lang === "ar" ? "منتج" : "more"}
+                </span>
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#942E3A]/10 text-[#942E3A] transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
+                  <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+                </span>
+              </Link>
+            )}
           </div>
         </ScrollReveal>
       </section>
