@@ -183,7 +183,6 @@ export default function CheckoutPage() {
   const [paymentSenderPhone, setPaymentSenderPhone] = useState("");
   const [copiedPayment, setCopiedPayment] = useState(false);
   const [couponCode, setCouponCode] = useState("");
-  const [showPromoInput, setShowPromoInput] = useState(false);
   const [couponApplied, setCouponApplied] = useState(false);
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoError, setPromoError] = useState("");
@@ -847,6 +846,42 @@ export default function CheckoutPage() {
                   <span>{t("checkout.subtotal")}</span>
                   <span className="font-semibold text-white">{formatPrice(cartTotal)}</span>
                 </div>
+                <div className="mt-3 space-y-2 rounded-2xl bg-white/10 p-3">
+                    <label htmlFor="checkout-promo-code" className="block text-xs font-semibold text-white/80">
+                      {isArabic ? "كود الخصم" : "Promo code"}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        id="checkout-promo-code"
+                        type="text"
+                        value={couponCode}
+                        onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            void handleApplyCoupon();
+                          }
+                        }}
+                        placeholder={isArabic ? "اكتب الكود" : "Enter code"}
+                        className="min-w-0 flex-1 rounded-xl border border-white/20 bg-white px-3 py-2.5 text-sm font-semibold uppercase text-[#481827] outline-none placeholder:normal-case placeholder:text-[#9a8586] focus:border-[#f0c96f]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void handleApplyCoupon()}
+                        disabled={promoLoading || couponApplied || !couponCode.trim()}
+                        className="rounded-xl bg-[#d8b46a] px-3 py-2 text-xs font-bold text-[#481827] transition hover:bg-[#edcf87] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {promoLoading ? "..." : couponApplied ? (isArabic ? "تم التطبيق" : "Applied") : isArabic ? "تطبيق" : "Apply"}
+                      </button>
+                    </div>
+                    {promoError && <p className="text-xs font-semibold text-rose-200">{promoError}</p>}
+                    {couponApplied && <div className="flex items-center justify-between gap-2 text-xs font-semibold text-emerald-200">
+                      <span>{promoMessage || (isArabic ? "تم تطبيق كود الخصم" : "Promo code applied")}</span>
+                      <button type="button" onClick={handleRemoveCoupon} className="underline underline-offset-2">
+                        {isArabic ? "إزالة" : "Remove"}
+                      </button>
+                    </div>}
+                  </div>
                 {appliedDiscount > 0 && (
                   <div className="flex justify-between text-emerald-300 font-semibold">
                     <span>{isArabic ? "الخصم" : "Discount"} ({couponCode})</span>
