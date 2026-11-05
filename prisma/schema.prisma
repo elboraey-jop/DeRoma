@@ -51,6 +51,7 @@ model Product {
   invoiceItems   PurchaseInvoiceItem[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
+  shopSortOrder  Int              @default(999999)
   orderItems     OrderItem[]
 
   @@index([status, createdAt])

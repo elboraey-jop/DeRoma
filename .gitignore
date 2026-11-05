@@ -55,3 +55,4 @@ Thumbs.db
 /backups
 *.sql
 !prisma/migrations/20261102190000_performance_indexes/migration.sql
+!prisma/migrations/20261105000000_add_shop_sort_order/migration.sql

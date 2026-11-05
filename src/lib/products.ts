@@ -97,7 +97,7 @@ async function fetchActiveProducts() {
   return prisma.product.findMany({
     where: { status: "active" },
     select: PRODUCT_SELECT,
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ shopSortOrder: "asc" }, { createdAt: "desc" }],
   });
 }
 
