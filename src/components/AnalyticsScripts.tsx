@@ -33,7 +33,7 @@ function getConfiguredAnalyticsId(value?: string) {
 
 const gaMeasurementId = getConfiguredAnalyticsId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID);
 const metaPixelId = getConfiguredAnalyticsId(process.env.NEXT_PUBLIC_META_PIXEL_ID) ?? "2046371669400378";
-const clarityId = getConfiguredAnalyticsId(process.env.NEXT_PUBLIC_CLARITY_ID);
+const clarityId = getConfiguredAnalyticsId(process.env.NEXT_PUBLIC_CLARITY_ID) ?? "y0hv6rdfno";
 
 function AnalyticsPageViews() {
   const pathname = usePathname();

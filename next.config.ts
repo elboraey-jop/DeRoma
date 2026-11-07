@@ -32,7 +32,7 @@ const securityHeaders = [
   },
   {
     key: 'Content-Security-Policy',
-    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://connect.facebook.net https://www.googletagmanager.com https://www.clarity.ms; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'none';"
+    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://connect.facebook.net https://www.googletagmanager.com https://*.google-analytics.com https://www.clarity.ms https://*.clarity.ms https://scripts.clarity.ms https://c.bing.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: https://*.clarity.ms https://c.bing.com; font-src 'self' data: https:; connect-src 'self' https: https://*.clarity.ms https://c.bing.com blob:; worker-src 'self' blob: https://*.clarity.ms; child-src 'self' blob: https://*.clarity.ms; frame-ancestors 'none';"
   }
 ];
 
