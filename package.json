@@ -19,6 +19,8 @@
     "db:normalize-orders": "tsx scripts/normalize-orders.ts",
     "db:configure-shipping": "tsx scripts/configure-shipping.ts",
     "db:update-shoe-stock": "tsx scripts/update-shoe-stock.ts",
+    "db:restock-nike-41": "tsx scripts/restock-nike-valentine-41.ts",
+    "db:transfer-samba-39-to-41": "tsx scripts/transfer-samba-39-to-41.ts",
     "db:sort-for-you": "tsx scripts/sort-for-you-products.ts",
     "db:sort-shop": "tsx scripts/sort-shop-products.ts",
     "db:normalize-product-catalog": "tsx scripts/normalize-product-catalog.ts",
