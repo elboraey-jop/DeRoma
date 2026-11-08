@@ -7,7 +7,7 @@ import { getProductPath, slugifyProductName } from "@/lib/productSlug";
 import { getAutoRelatedProducts } from "@/lib/relatedProducts";
 import { unstable_cache } from "next/cache";
 
-export const revalidate = 60; // Cache page for 60 seconds
+export const revalidate = 86400; // Cache page for 24 hours (updated on-demand via admin & checkout)
 
 export async function generateStaticParams() {
   try {
@@ -70,7 +70,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       take: 6,
     }),
     ["deroma-product-relations-v2", product.id],
-    { revalidate: 60, tags: ["products", `product:${product.id}`] },
+    { revalidate: 86400, tags: ["products", `product:${product.id}`] },
   );
   const getCachedReviews = unstable_cache(
     async () => prisma.review.findMany({
@@ -80,7 +80,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       take: 12,
     }),
     ["deroma-product-reviews-v2", product.id],
-    { revalidate: 60, tags: ["products", `product:${product.id}`] },
+    { revalidate: 86400, tags: ["products", `product:${product.id}`] },
   );
 
   const relatedData = await Promise.all([

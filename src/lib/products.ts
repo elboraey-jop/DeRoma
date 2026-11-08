@@ -61,7 +61,7 @@ function enrichCatalogProduct(
   };
 }
 
-const PRODUCT_CACHE_SECONDS = 60;
+const PRODUCT_CACHE_SECONDS = 86400; // 24 hours (On-Demand revalidation is triggered by admin & checkout actions)
 const PRODUCT_VARIANT_SELECT = {
   id: true,
   productId: true,

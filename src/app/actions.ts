@@ -2,6 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
+import { revalidatePath, revalidateTag } from "next/cache";
 import prisma from "@/lib/prisma";
 import { consumeInventoryLots } from "@/lib/inventoryLots";
 import { formatOrderNumber } from "@/lib/orderNumber";
@@ -451,6 +452,21 @@ export async function createOrder(input: CreateOrderInput) {
         },
       }),
     ]);
+
+    // Revalidate catalog and ordered product pages on-demand so stock numbers reflect immediately
+    try {
+      revalidateTag("products", "max");
+      revalidatePath("/");
+      revalidatePath("/shop");
+      for (const item of input.items) {
+        if (item.productId) {
+          revalidatePath(`/shop/${item.productId}`);
+          revalidateTag(`product:${item.productId}`, "max");
+        }
+      }
+    } catch (revalidateErr) {
+      console.warn("Error revalidating paths after order checkout:", revalidateErr);
+    }
 
     return {
       success: true,

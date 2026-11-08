@@ -3,10 +3,9 @@ import prisma from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/siteSettings";
 import HomeClient from "@/components/HomeClient";
 
-// Product and settings changes are revalidated by the admin actions. A short
-// ISR window keeps the homepage fast during traffic spikes while still making
-// catalog changes visible quickly.
-export const revalidate = 60;
+// Product and settings changes are revalidated on-demand by admin actions.
+// Long cache prevents unnecessary ISR writes and CPU usage.
+export const revalidate = 86400;
 
 export default async function HomePage() {
   let products: any[] = [];

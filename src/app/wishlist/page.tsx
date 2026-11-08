@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { getActiveProducts } from "@/lib/products";
 import WishlistClient from "@/components/WishlistClient";
 
-export const revalidate = 10; // Frequently revalidate cache
+export const revalidate = 86400; // 24 hours (client handles dynamic user items)
 
 export default async function WishlistPage() {
   const products = await getActiveProducts();

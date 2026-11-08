@@ -124,7 +124,7 @@ function sanitizeStoreCopy(value: string): string {
 const getCachedSiteSettings = unstable_cache(
   async () => prisma.siteSettings.findUnique({ where: { id: "default" } }),
   ["deroma-site-settings-v1"],
-  { revalidate: 60, tags: ["site-settings"] },
+  { revalidate: 86400, tags: ["site-settings"] },
 );
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {

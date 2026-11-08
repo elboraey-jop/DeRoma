@@ -3,9 +3,9 @@ import { getActiveProducts } from "@/lib/products";
 import ShopClient from "@/components/ShopClient";
 import prisma from "@/lib/prisma";
 
-// Keep the catalog route cacheable so navigation and prefetching do not wait
-// for a fresh database round-trip on every visit.
-export const revalidate = 60;
+// Keep the catalog route cacheable with a long ISR lifetime.
+// On-demand revalidation triggers instantly when products or inventory change.
+export const revalidate = 86400;
 
 export default async function ShopPage() {
   let products: any[] = [];
